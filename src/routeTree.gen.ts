@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OffresRouteImport } from './routes/offres'
+import { Route as MentionsRouteImport } from './routes/mentions'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AProposRouteImport } from './routes/a-propos'
@@ -18,6 +19,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const OffresRoute = OffresRouteImport.update({
   id: '/offres',
   path: '/offres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentionsRoute = MentionsRouteImport.update({
+  id: '/mentions',
+  path: '/mentions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/a-propos': typeof AProposRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/mentions': typeof MentionsRoute
   '/offres': typeof OffresRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/a-propos': typeof AProposRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/mentions': typeof MentionsRoute
   '/offres': typeof OffresRoute
 }
 export interface FileRoutesById {
@@ -61,14 +69,22 @@ export interface FileRoutesById {
   '/a-propos': typeof AProposRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/mentions': typeof MentionsRoute
   '/offres': typeof OffresRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/a-propos' | '/contact' | '/faq' | '/offres'
+  fullPaths: '/' | '/a-propos' | '/contact' | '/faq' | '/mentions' | '/offres'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/a-propos' | '/contact' | '/faq' | '/offres'
-  id: '__root__' | '/' | '/a-propos' | '/contact' | '/faq' | '/offres'
+  to: '/' | '/a-propos' | '/contact' | '/faq' | '/mentions' | '/offres'
+  id:
+    | '__root__'
+    | '/'
+    | '/a-propos'
+    | '/contact'
+    | '/faq'
+    | '/mentions'
+    | '/offres'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +92,7 @@ export interface RootRouteChildren {
   AProposRoute: typeof AProposRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
+  MentionsRoute: typeof MentionsRoute
   OffresRoute: typeof OffresRoute
 }
 
@@ -86,6 +103,13 @@ declare module '@tanstack/react-router' {
       path: '/offres'
       fullPath: '/offres'
       preLoaderRoute: typeof OffresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentions': {
+      id: '/mentions'
+      path: '/mentions'
+      fullPath: '/mentions'
+      preLoaderRoute: typeof MentionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -124,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   AProposRoute: AProposRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
+  MentionsRoute: MentionsRoute,
   OffresRoute: OffresRoute,
 }
 export const routeTree = rootRouteImport
