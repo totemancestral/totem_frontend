@@ -433,7 +433,6 @@ export function Offres() {
 }
 
 /* ---------- LA MAISON ---------- */
-import { Link } from "@tanstack/react-router";
 
 export function Maison() {
   return (
