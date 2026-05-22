@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as IndexRouteImport } from './routes/index'
 
 const FaqRoute = FaqRouteImport.update({
@@ -23,6 +24,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AProposRoute = AProposRouteImport.update({
+  id: '/a-propos',
+  path: '/a-propos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,30 +37,34 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/a-propos': typeof AProposRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/a-propos': typeof AProposRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/a-propos': typeof AProposRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/contact' | '/faq'
+  fullPaths: '/' | '/a-propos' | '/contact' | '/faq'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/contact' | '/faq'
-  id: '__root__' | '/' | '/contact' | '/faq'
+  to: '/' | '/a-propos' | '/contact' | '/faq'
+  id: '__root__' | '/' | '/a-propos' | '/contact' | '/faq'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AProposRoute: typeof AProposRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
 }
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/a-propos': {
+      id: '/a-propos'
+      path: '/a-propos'
+      fullPath: '/a-propos'
+      preLoaderRoute: typeof AProposRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AProposRoute: AProposRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
 }
