@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Link } from "@tanstack/react-router";
 import { Mic, Sparkles, Send, FileText, Image as ImageIcon, AudioLines, Check, ArrowRight } from "lucide-react";
 import { MaskLogo } from "./MaskLogo";
 import { GoldParticles } from "./GoldParticles";
