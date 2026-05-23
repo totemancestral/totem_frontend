@@ -1,9 +1,9 @@
 import { motion } from "motion/react";
 import { Link } from "@tanstack/react-router";
 import { Mic, Sparkles, Send, FileText, Image as ImageIcon, AudioLines, Check, ArrowRight } from "lucide-react";
-import { MaskLogo } from "./MaskLogo";
 import { GoldParticles } from "./GoldParticles";
 import { Reveal, SectionDivider, Ornament } from "./Reveal";
+import totemLogo from "@/assets/totem-logo.png";
 
 /* ---------- HERO ---------- */
 export function Hero() {
@@ -15,13 +15,14 @@ export function Hero() {
       <GoldParticles count={28} />
 
       <div className="relative max-w-4xl mx-auto text-center flex flex-col items-center gap-10">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.92 }}
+        <motion.img
+          src={totemLogo}
+          alt="Totem Ancestral — L'âme des origines"
+          initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.4, ease: "easeOut" }}
-        >
-          <MaskLogo size={120} />
-        </motion.div>
+          transition={{ duration: 1.6, ease: "easeOut" }}
+          className="w-[280px] sm:w-[360px] md:w-[440px] h-auto drop-shadow-[0_20px_60px_rgba(201,168,76,0.18)]"
+        />
 
         <Ornament />
 
@@ -29,7 +30,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
-          className="h-display text-[44px] sm:text-6xl md:text-7xl lg:text-[80px]"
+          className="h-display text-[36px] sm:text-5xl md:text-6xl lg:text-[68px]"
           style={{ color: "var(--ivoire)" }}
         >
           Le portrait imaginaire
@@ -536,7 +537,7 @@ export function CtaFinal() {
       <GoldParticles count={14} />
       <div className="max-w-3xl mx-auto text-center relative flex flex-col items-center gap-8">
         <Reveal>
-          <MaskLogo size={72} />
+          <img src={totemLogo} alt="Totem Ancestral" className="w-[200px] md:w-[260px] h-auto" />
         </Reveal>
         <Ornament />
         <Reveal delay={0.1}>
