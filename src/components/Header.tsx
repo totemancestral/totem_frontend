@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
-import { MaskLogo } from "./MaskLogo";
+import totemLogo from "@/assets/totem-logo.png";
 
 const nav = [
   { to: "/", hash: "#experience", label: "L'expérience" },
@@ -33,7 +33,7 @@ export function Header() {
     >
       <div className="max-w-[1280px] mx-auto px-5 md:px-10 py-4 flex items-center justify-between gap-6">
         <Link to="/" className="flex items-center gap-3 shrink-0">
-          <MaskLogo size={28} />
+          <img src={totemLogo} alt="Totem Ancestral" className="h-9 w-auto" />
           <span className="logo-wordmark text-[11px] md:text-[13px] hidden sm:inline">
             Totem Ancestral
           </span>
