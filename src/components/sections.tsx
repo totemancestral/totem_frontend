@@ -537,7 +537,7 @@ export function CtaFinal() {
       <GoldParticles count={14} />
       <div className="max-w-3xl mx-auto text-center relative flex flex-col items-center gap-8">
         <Reveal>
-          <MaskLogo size={72} />
+          <img src={totemLogo} alt="Totem Ancestral" className="w-[200px] md:w-[260px] h-auto" />
         </Reveal>
         <Ornament />
         <Reveal delay={0.1}>
