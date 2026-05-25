@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ParcoursRouteImport } from './routes/parcours'
 import { Route as OffresRouteImport } from './routes/offres'
 import { Route as MentionsRouteImport } from './routes/mentions'
 import { Route as FaqRouteImport } from './routes/faq'
@@ -22,6 +23,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParcoursRoute = ParcoursRouteImport.update({
+  id: '/parcours',
+  path: '/parcours',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OffresRoute = OffresRouteImport.update({
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/mentions': typeof MentionsRoute
   '/offres': typeof OffresRoute
+  '/parcours': typeof ParcoursRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/mentions': typeof MentionsRoute
   '/offres': typeof OffresRoute
+  '/parcours': typeof ParcoursRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRoutesById {
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/mentions': typeof MentionsRoute
   '/offres': typeof OffresRoute
+  '/parcours': typeof ParcoursRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/mentions'
     | '/offres'
+    | '/parcours'
     | '/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/mentions'
     | '/offres'
+    | '/parcours'
     | '/sitemap.xml'
   id:
     | '__root__'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/mentions'
     | '/offres'
+    | '/parcours'
     | '/sitemap.xml'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   MentionsRoute: typeof MentionsRoute
   OffresRoute: typeof OffresRoute
+  ParcoursRoute: typeof ParcoursRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parcours': {
+      id: '/parcours'
+      path: '/parcours'
+      fullPath: '/parcours'
+      preLoaderRoute: typeof ParcoursRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/offres': {
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   MentionsRoute: MentionsRoute,
   OffresRoute: OffresRoute,
+  ParcoursRoute: ParcoursRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
