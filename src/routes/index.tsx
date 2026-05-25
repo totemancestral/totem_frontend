@@ -11,6 +11,7 @@ import {
   CtaFinal,
 } from "@/components/sections";
 import { IntroExperience } from "@/components/IntroExperience";
+import { AmbientAudio } from "@/components/AmbientAudio";
 
 export const Route = createFileRoute("/")({
   component: Index,
