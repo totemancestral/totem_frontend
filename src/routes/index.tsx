@@ -22,6 +22,7 @@ function Index() {
   return (
     <>
       {!introDone && <IntroExperience onFinished={() => setIntroDone(true)} />}
+      <AmbientAudio active={introDone} />
       <Hero />
       <LeGeste />
       <Experience />
