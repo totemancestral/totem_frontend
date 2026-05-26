@@ -926,7 +926,7 @@ function WaitingScreen() {
       <div className="max-w-[560px] flex flex-col items-center gap-8">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear" as const }}
           style={{
             width: 80,
             height: 80,
