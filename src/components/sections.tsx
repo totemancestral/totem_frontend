@@ -66,10 +66,10 @@ export function Hero() {
           transition={{ duration: 1, delay: 1.4 }}
           className="flex flex-col sm:flex-row items-center gap-6 mt-2"
         >
-          <a href="#offres" className="btn-primary animate-pulse-glow">
+          <Link to="/parcours" className="btn-primary animate-pulse-glow">
             Composer mon œuvre
             <ArrowRight size={16} strokeWidth={1.5} />
-          </a>
+          </Link>
           <a href="#experience" className="link-gold text-sm tracking-[0.14em] uppercase">
             Découvrir l'expérience
           </a>
