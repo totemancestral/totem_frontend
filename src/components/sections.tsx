@@ -414,9 +414,12 @@ export function Offres() {
                 </ul>
 
                 <div className="mt-auto">
-                  <button className={o.featured ? "btn-primary w-full" : "btn-secondary w-full"}>
+                  <Link
+                    to="/parcours"
+                    className={`${o.featured ? "btn-primary" : "btn-secondary"} w-full text-center justify-center`}
+                  >
                     {o.cta}
-                  </button>
+                  </Link>
                 </div>
               </article>
             </Reveal>
