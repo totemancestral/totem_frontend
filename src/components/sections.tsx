@@ -556,10 +556,10 @@ export function CtaFinal() {
           </p>
         </Reveal>
         <Reveal delay={0.3}>
-          <a href="#offres" className="btn-primary animate-pulse-glow !px-14 !py-5">
+          <Link to="/parcours" className="btn-primary animate-pulse-glow !px-14 !py-5">
             Composer mon œuvre
             <ArrowRight size={16} strokeWidth={1.5} />
-          </a>
+          </Link>
         </Reveal>
         <Reveal delay={0.4}>
           <p className="caption mt-2">
