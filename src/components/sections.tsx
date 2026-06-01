@@ -66,10 +66,10 @@ export function Hero() {
           transition={{ duration: 1, delay: 1.4 }}
           className="flex flex-col sm:flex-row items-center gap-6 mt-2"
         >
-          <a href="#offres" className="btn-primary animate-pulse-glow">
+          <Link to="/parcours" className="btn-primary animate-pulse-glow">
             Composer mon œuvre
             <ArrowRight size={16} strokeWidth={1.5} />
-          </a>
+          </Link>
           <a href="#experience" className="link-gold text-sm tracking-[0.14em] uppercase">
             Découvrir l'expérience
           </a>
@@ -414,9 +414,12 @@ export function Offres() {
                 </ul>
 
                 <div className="mt-auto">
-                  <button className={o.featured ? "btn-primary w-full" : "btn-secondary w-full"}>
+                  <Link
+                    to="/parcours"
+                    className={`${o.featured ? "btn-primary" : "btn-secondary"} w-full text-center justify-center`}
+                  >
                     {o.cta}
-                  </button>
+                  </Link>
                 </div>
               </article>
             </Reveal>
@@ -553,10 +556,10 @@ export function CtaFinal() {
           </p>
         </Reveal>
         <Reveal delay={0.3}>
-          <a href="#offres" className="btn-primary animate-pulse-glow !px-14 !py-5">
+          <Link to="/parcours" className="btn-primary animate-pulse-glow !px-14 !py-5">
             Composer mon œuvre
             <ArrowRight size={16} strokeWidth={1.5} />
-          </a>
+          </Link>
         </Reveal>
         <Reveal delay={0.4}>
           <p className="caption mt-2">
