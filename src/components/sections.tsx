@@ -190,25 +190,14 @@ export function Experience() {
 /* ---------- L'ŒUVRE ---------- */
 const pieces = [
   {
-    icon: FileText,
+    image: oeuvreParchemin,
     title: "Le Parchemin",
     subtitle: "Cinq mouvements. Une chronique.",
-    text: "Une fable narrative composée pour vous, en cinq mouvements : l'ouverture, le portrait, l'épreuve, la transmission, le passage. Mille huit cents caractères de prose ciselée, sur fond noir et or. Format PDF haute définition, prêt à imprimer.",
-    badge: "PDF",
   },
   {
-    icon: ImageIcon,
-    title: "L'Œuvre Visuelle",
-    subtitle: "Une peinture numérique unique.",
-    text: "Une œuvre d'art numérique composée pour vous seul. Esthétique de musée, palette ancestrale. Format PNG très haute résolution, encadrable, imprimable jusqu'au format A2.",
-    badge: "PNG",
-  },
-  {
-    icon: AudioLines,
-    title: "La Voix de l'Ancêtre",
-    subtitle: "Quatre-vingt-dix secondes. Une parole.",
-    text: "Un message audio prononcé par la voix d'un acteur africain. Une parole posée, intime, qui s'adresse à vous par votre prénom. Format MP3, à écouter au casque, le soir, en silence.",
-    badge: "MP3",
+    image: oeuvreVisuelle,
+    title: "L'Œuvre visuelle et la voix de l'ancêtre",
+    subtitle: "Une peinture numérique. Une parole intime.",
   },
 ];
 
@@ -219,49 +208,45 @@ export function Oeuvre() {
         <Reveal>
           <div className="text-center max-w-2xl mx-auto">
             <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-              Trois pièces. Une œuvre.
+              Une œuvre. Plusieurs pièces.
             </h2>
             <p className="mt-6 text-base md:text-lg leading-relaxed" style={{ color: "var(--ivoire)" }}>
-              Chaque coffret TOTEM ANCESTRAL est composé de trois éléments artistiques, conçus pour dialoguer entre eux.
+              Chaque coffret TOTEM ANCESTRAL réunit des pièces artistiques composées pour vous seul.
             </p>
           </div>
         </Reveal>
 
-        <div className="mt-20 grid md:grid-cols-3 gap-6">
+        <div className="mt-20 grid md:grid-cols-2 gap-8">
           {pieces.map((p, i) => (
             <Reveal key={p.title} delay={i * 0.12}>
               <article
-                className="card-totem h-full flex flex-col gap-6 relative overflow-hidden"
-                style={{ minHeight: 460 }}
+                className="card-totem h-full flex flex-col overflow-hidden"
+                style={{ padding: 0 }}
               >
                 <div
-                  className="absolute -top-24 -right-24 w-56 h-56 rounded-full"
-                  style={{
-                    background:
-                      "radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%)",
-                  }}
-                />
-                <div className="flex items-start justify-between relative">
-                  <p.icon size={32} strokeWidth={1.2} color="var(--or-ancestral)" />
-                  <span
-                    className="text-[10px] tracking-[0.24em] px-3 py-1.5 border"
+                  className="relative w-full overflow-hidden"
+                  style={{ aspectRatio: "4/3" }}
+                >
+                  <img
+                    src={p.image}
+                    alt={p.title}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <div
+                    className="absolute inset-0"
                     style={{
-                      color: "var(--or-ancestral)",
-                      borderColor: "rgba(201,168,76,0.4)",
+                      background:
+                        "linear-gradient(180deg, transparent 50%, var(--nuit-profonde) 100%)",
                     }}
-                  >
-                    {p.badge}
-                  </span>
+                  />
                 </div>
-                <div className="relative">
-                  <h3 className="h-display text-3xl" style={{ color: "var(--ivoire)" }}>
+                <div className="px-8 py-8 flex flex-col gap-3 flex-1">
+                  <h3 className="h-display text-2xl md:text-3xl" style={{ color: "var(--ivoire)" }}>
                     {p.title}
                   </h3>
-                  <p className="quote-italic text-lg mt-2">{p.subtitle}</p>
+                  <p className="quote-italic text-lg">{p.subtitle}</p>
                 </div>
-                <p className="text-[15px] leading-[1.75] relative" style={{ color: "rgba(254,252,240,0.8)" }}>
-                  {p.text}
-                </p>
               </article>
             </Reveal>
           ))}
