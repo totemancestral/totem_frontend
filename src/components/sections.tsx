@@ -104,8 +104,6 @@ export function LeGeste() {
             </p>
           </div>
         </Reveal>
-          </div>
-        </Reveal>
 
         <Reveal delay={0.2}>
           <div className="mt-20">
@@ -128,19 +126,19 @@ const steps = [
     n: "01",
     icon: Mic,
     title: "Le griot vous interroge",
-    text: "Un griot virtuel vous pose dix questions intimes. Un parcours rythmé, posé, qui prend son temps. Vos réponses sont la matière première de l'œuvre.",
+    text: "Vos réponses reflètent qui vous êtes.",
   },
   {
     n: "02",
     icon: Sparkles,
     title: "La maison compose",
-    text: "Vos réponses sont confiées à la maison TOTEM ANCESTRAL. Nos directions artistiques et nos systèmes d'intelligence artificielle composent ensemble votre œuvre.",
+    text: "Votre œuvre est en cours de construction, brique après brique.",
   },
   {
     n: "03",
     icon: Send,
-    title: "L'œuvre vous est livrée",
-    text: "Quinze minutes plus tard, votre coffret arrive par email. Numéroté, signé, accompagné de son certificat d'authenticité. Il est unique au monde.",
+    title: "Votre TOTEM vous est livré",
+    text: "15 min plus tard, votre coffret secret arrivera par email. Numéroté, signé, accompagné de son certificat d'authenticité. Il est unique au monde.",
   },
 ];
 
