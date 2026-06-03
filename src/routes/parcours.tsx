@@ -417,9 +417,13 @@ const fadeSlide = {
 function IntroScreen({ onStart }: { onStart: () => void }) {
   const lines = [
     { delay: 0.3, render: () => (
-      <p style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "var(--ivoire)" }}>
+      <motion.p
+        animate={{ scale: [1, 1.12, 1] }}
+        transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
+        style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--ivoire)", letterSpacing: "0.08em", display: "inline-block", transformOrigin: "center" }}
+      >
         Le Griot parle.
-      </p>
+      </motion.p>
     )},
     { delay: 0.6, render: () => (
       <p className="quote-italic" style={{ fontSize: 18 }}>
@@ -510,9 +514,11 @@ function QuestionScreen({
         {q.note && (
           <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "#888" }}>{q.note}</p>
         )}
-        <p className="quote-italic" style={{ fontSize: 18 }}>
-          ✦ {q.griot}
-        </p>
+        {q.griot && (
+          <p className="quote-italic" style={{ fontSize: 18 }}>
+            ✦ {q.griot}
+          </p>
+        )}
         <div className="section-divider" style={{ marginBottom: 0 }} />
         <h1 className="h-display" style={{ fontSize: 34, color: "var(--ivoire)" }}>
           {q.question}
