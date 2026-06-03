@@ -65,7 +65,7 @@ const QUESTIONS: Question[] = [
   {
     n: 2,
     progress: 20,
-    griot: "Je veux savoir où tu te trouves — vraiment. Pas ce que tu fais, mais où tu vis.",
+    griot: "",
     question: "Dans quel moment te sens-tu le plus vivant(e) ?",
     choices: [
       { letter: "A", text: "Quand je protège quelqu'un — quand je me bats pour ce qui est juste — quand je suis au cœur de l'action." },
@@ -462,7 +462,6 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           <button className="btn-primary" onClick={onStart}>
             Je commence mon voyage
           </button>
-          <p className="caption">Les 3 premières questions sont libres.</p>
         </motion.div>
       </div>
     </motion.section>
@@ -754,7 +753,7 @@ function Paywall({ onPaid }: { onPaid: () => void }) {
     >
       <div className="max-w-6xl mx-auto text-center flex flex-col items-center gap-4 mb-16">
         <h2 className="h-display" style={{ fontSize: 42, color: "var(--or-ancestral)" }}>
-          Choisis ton œuvre pour continuer.
+          Choisis ton offre pour continuer.
         </h2>
         <p className="quote-italic" style={{ fontSize: 20 }}>
           Ton coffret te sera livré sous 15 minutes après le paiement.
@@ -952,9 +951,8 @@ function WaitingScreen() {
           </motion.p>
         </AnimatePresence>
         <p style={{ fontFamily: "var(--font-sans)", fontSize: 15, color: "rgba(254,252,240,0.7)", lineHeight: 1.7 }}>
-          Tu recevras ton œuvre complète par email dans quelques minutes. Tu peux fermer cette fenêtre.
+          Tu peux fermer cette fenêtre. Les ancêtres terminent leur travail.
         </p>
-        <p className="caption">Un email de confirmation t'a déjà été envoyé.</p>
       </div>
     </motion.section>
   );
