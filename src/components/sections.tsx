@@ -1,9 +1,11 @@
 import { motion } from "motion/react";
 import { Link } from "@tanstack/react-router";
-import { Mic, Sparkles, Send, FileText, Image as ImageIcon, AudioLines, Check, ArrowRight } from "lucide-react";
+import { Mic, Sparkles, Send, Check, ArrowRight } from "lucide-react";
 import { GoldParticles } from "./GoldParticles";
 import { Reveal, SectionDivider, Ornament } from "./Reveal";
 import totemLogo from "@/assets/totem-logo.png";
+import oeuvreParchemin from "@/assets/oeuvre-parchemin.jpg";
+import oeuvreVisuelle from "@/assets/oeuvre-visuelle-voix.jpg";
 
 /* ---------- HERO ---------- */
 export function Hero() {
@@ -66,23 +68,11 @@ export function Hero() {
           transition={{ duration: 1, delay: 1.4 }}
           className="flex flex-col sm:flex-row items-center gap-6 mt-2"
         >
-          <Link to="/parcours" className="btn-primary animate-pulse-glow">
-            Composer mon œuvre
-            <ArrowRight size={16} strokeWidth={1.5} />
-          </Link>
-          <a href="#experience" className="link-gold text-sm tracking-[0.14em] uppercase">
+          <a href="#experience" className="link-gold text-sm tracking-[0.14em] uppercase inline-flex items-center gap-2">
             Découvrir l'expérience
+            <ArrowRight size={14} strokeWidth={1.5} />
           </a>
         </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.7 }}
-          className="caption italic mt-4"
-        >
-          Pas un test ADN. Une fable artistique.
-        </motion.p>
       </div>
     </section>
   );
@@ -112,13 +102,8 @@ export function LeGeste() {
               TOTEM ANCESTRAL imagine, pour chacun d'entre nous, l'aïeul qui n'est jamais parti.
               Celui que nous aurions pu être si l'histoire avait choisi un autre chemin.
             </p>
-            <p style={{ color: "rgba(254,252,240,0.75)" }}>
-              Ce n'est ni un test, ni une science, ni une vérité.
-              <br />
-              <em style={{ fontFamily: "var(--font-display)", color: "var(--or-pale)" }}>
-                C'est une fable. Personnelle. Élégante.
-              </em>
-            </p>
+          </div>
+        </Reveal>
           </div>
         </Reveal>
 
