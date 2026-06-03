@@ -23,8 +23,8 @@ export function AmbientAudio({ active }: { active: boolean }) {
         // fade in
         const start = performance.now();
         const fade = (t: number) => {
-          const k = Math.min(1, (t - start) / 1800);
-          a.volume = 0.55 * k;
+          const k = Math.min(1, Math.max(0, (t - start) / 1800));
+          a.volume = Math.min(1, Math.max(0, 0.55 * k));
           if (k < 1 && !a.paused) requestAnimationFrame(fade);
         };
         requestAnimationFrame(fade);
@@ -59,8 +59,8 @@ export function AmbientAudio({ active }: { active: boolean }) {
     const startVol = a.volume;
     const start = performance.now();
     const fade = (t: number) => {
-      const k = Math.min(1, (t - start) / 900);
-      a.volume = startVol * (1 - k);
+      const k = Math.min(1, Math.max(0, (t - start) / 900));
+      a.volume = Math.min(1, Math.max(0, startVol * (1 - k)));
       if (k < 1) requestAnimationFrame(fade);
       else {
         a.pause();
