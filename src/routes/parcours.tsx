@@ -65,7 +65,7 @@ const QUESTIONS: Question[] = [
   {
     n: 2,
     progress: 20,
-    griot: "Je veux savoir où tu te trouves — vraiment. Pas ce que tu fais, mais où tu vis.",
+    griot: "",
     question: "Dans quel moment te sens-tu le plus vivant(e) ?",
     choices: [
       { letter: "A", text: "Quand je protège quelqu'un — quand je me bats pour ce qui est juste — quand je suis au cœur de l'action." },
@@ -417,9 +417,13 @@ const fadeSlide = {
 function IntroScreen({ onStart }: { onStart: () => void }) {
   const lines = [
     { delay: 0.3, render: () => (
-      <p style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "var(--ivoire)" }}>
+      <motion.p
+        animate={{ scale: [1, 1.12, 1] }}
+        transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
+        style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--ivoire)", letterSpacing: "0.08em", display: "inline-block", transformOrigin: "center" }}
+      >
         Le Griot parle.
-      </p>
+      </motion.p>
     )},
     { delay: 0.6, render: () => (
       <p className="quote-italic" style={{ fontSize: 18 }}>
@@ -462,7 +466,6 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           <button className="btn-primary" onClick={onStart}>
             Je commence mon voyage
           </button>
-          <p className="caption">Les 3 premières questions sont libres.</p>
         </motion.div>
       </div>
     </motion.section>
@@ -511,9 +514,11 @@ function QuestionScreen({
         {q.note && (
           <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "#888" }}>{q.note}</p>
         )}
-        <p className="quote-italic" style={{ fontSize: 18 }}>
-          ✦ {q.griot}
-        </p>
+        {q.griot && (
+          <p className="quote-italic" style={{ fontSize: 18 }}>
+            ✦ {q.griot}
+          </p>
+        )}
         <div className="section-divider" style={{ marginBottom: 0 }} />
         <h1 className="h-display" style={{ fontSize: 34, color: "var(--ivoire)" }}>
           {q.question}
@@ -754,7 +759,7 @@ function Paywall({ onPaid }: { onPaid: () => void }) {
     >
       <div className="max-w-6xl mx-auto text-center flex flex-col items-center gap-4 mb-16">
         <h2 className="h-display" style={{ fontSize: 42, color: "var(--or-ancestral)" }}>
-          Choisis ton œuvre pour continuer.
+          Choisis ton offre pour continuer.
         </h2>
         <p className="quote-italic" style={{ fontSize: 20 }}>
           Ton coffret te sera livré sous 15 minutes après le paiement.
@@ -952,9 +957,8 @@ function WaitingScreen() {
           </motion.p>
         </AnimatePresence>
         <p style={{ fontFamily: "var(--font-sans)", fontSize: 15, color: "rgba(254,252,240,0.7)", lineHeight: 1.7 }}>
-          Tu recevras ton œuvre complète par email dans quelques minutes. Tu peux fermer cette fenêtre.
+          Tu peux fermer cette fenêtre. Les ancêtres terminent leur travail.
         </p>
-        <p className="caption">Un email de confirmation t'a déjà été envoyé.</p>
       </div>
     </motion.section>
   );
