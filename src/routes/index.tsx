@@ -5,11 +5,10 @@ import {
   LeGeste,
   Experience,
   Oeuvre,
-  Offres,
-  Maison,
   Avis,
   CtaFinal,
 } from "@/components/sections";
+import { ExperienceConsignes } from "@/components/ExperienceConsignes";
 import { IntroExperience } from "@/components/IntroExperience";
 import { AmbientAudio } from "@/components/AmbientAudio";
 
@@ -25,11 +24,10 @@ function Index() {
       <AmbientAudio active={introDone} />
       <Hero />
       <LeGeste />
-      <Experience />
       <Oeuvre />
-      <Offres />
-      <Maison />
+      <Experience />
       <Avis />
+      <ExperienceConsignes />
       <CtaFinal />
     </>
   );

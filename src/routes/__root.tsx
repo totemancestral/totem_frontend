@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MaskLogo } from "@/components/MaskLogo";
+import { AuthGate } from "@/components/AuthGate";
 
 function NotFoundComponent() {
   return (
@@ -118,13 +119,15 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div style={{ background: "var(--nuit-profonde)", minHeight: "100vh" }}>
-        <Header />
-        <main>
-          <Outlet />
-        </main>
-        <Footer />
-      </div>
+      <AuthGate>
+        <div style={{ background: "var(--nuit-profonde)", minHeight: "100vh" }}>
+          <Header />
+          <main>
+            <Outlet />
+          </main>
+          <Footer />
+        </div>
+      </AuthGate>
     </QueryClientProvider>
   );
 }

@@ -1,20 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import introVideo from "@/assets/totem-intro.mp4";
+import totemLogo from "@/assets/totem-logo.png";
 
-/**
- * Cinematic intro:
- *  1. Black "Entrer" gate (unlocks autoplay WITH sound)
- *  2. Fullscreen video, no controls, blends with --nuit-profonde
- *  3. On end → fades out, reveals the site
- */
+type Phase = "welcome" | "playing" | "done";
+
 export function IntroExperience({ onFinished }: { onFinished: () => void }) {
-  const [phase, setPhase] = useState<"gate" | "playing" | "done">("gate");
+  const [phase, setPhase] = useState<Phase>("welcome");
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const enter = async () => {
     setPhase("playing");
-    // Try to play with sound; if the browser still refuses, fall back to muted.
     const v = videoRef.current;
     if (!v) return;
     try {
@@ -33,11 +29,9 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
 
   const finish = () => {
     setPhase("done");
-    // small delay so the fade-out can play
     setTimeout(onFinished, 900);
   };
 
-  // Safety: if video errors, skip
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -57,14 +51,13 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
           className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
           style={{ background: "var(--nuit-profonde)" }}
         >
-          {/* Video — always mounted so it can preload */}
+          {/* Always-mounted video */}
           <video
             ref={videoRef}
             src={introVideo}
             playsInline
             preload="auto"
             onEnded={finish}
-            // Hide all native UI: no controls attr, disable PiP & download
             controls={false}
             disablePictureInPicture
             controlsList="nodownload noplaybackrate nofullscreen"
@@ -76,7 +69,6 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
             }}
           />
 
-          {/* Soft vignette so video edges melt into the site bg */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -85,44 +77,86 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
             }}
           />
 
-          {/* Gate */}
           <AnimatePresence>
-            {phase === "gate" && (
-              <motion.button
-                key="gate"
-                onClick={enter}
+            {phase === "welcome" && (
+              <motion.div
+                key="welcome"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.8 }}
-                className="relative z-10 flex flex-col items-center gap-6 group cursor-pointer"
-                aria-label="Entrer dans l'expérience"
+                className="relative z-10 max-w-[640px] w-full px-6 flex flex-col items-center gap-8 text-center"
               >
-                <span
-                  className="h-display text-2xl md:text-3xl tracking-[0.3em] uppercase"
+                <motion.img
+                  src={totemLogo}
+                  alt="Totem Ancestral"
+                  initial={{ opacity: 0, scale: 0.94 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1.4, ease: "easeOut" }}
+                  className="w-[180px] md:w-[220px] h-auto drop-shadow-[0_10px_40px_rgba(201,168,76,0.25)]"
+                />
+
+                <motion.h1
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1.2, delay: 0.4 }}
+                  className="h-display text-3xl md:text-5xl"
                   style={{ color: "var(--or-ancestral)" }}
                 >
-                  Totem Ancestral
-                </span>
-                <span
-                  className="h-px w-24 transition-all duration-700 group-hover:w-40"
-                  style={{ background: "var(--or-ancestral)" }}
-                />
-                <span
-                  className="text-[11px] md:text-xs tracking-[0.4em] uppercase animate-pulse"
-                  style={{ color: "rgba(254,252,240,0.85)" }}
+                  Bienvenu sur
+                  <br />
+                  TOTEM ANCESTRAL
+                </motion.h1>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1.2, delay: 0.9 }}
+                  className="flex flex-col gap-3"
+                  style={{ color: "var(--ivoire)" }}
                 >
-                  Entrer dans l'expérience
-                </span>
-                <span
-                  className="caption italic mt-2"
-                  style={{ color: "rgba(254,252,240,0.45)" }}
+                  <p className="quote-italic text-lg md:text-xl">
+                    Apprêtez-vous à entrer dans une expérience sacrée.
+                  </p>
+                  <p className="quote-italic text-lg md:text-xl">
+                    L'ancêtre vous parlera.
+                  </p>
+                  <p className="quote-italic text-lg md:text-xl">
+                    Écoutez sa voix et laissez-le vous conduire.
+                  </p>
+                </motion.div>
+
+                <motion.button
+                  onClick={enter}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, delay: 1.4 }}
+                  className="btn-primary mt-4 animate-pulse-glow"
+                  style={{ animation: "pulseBlink 1.4s ease-in-out infinite" }}
+                  aria-label="J'entre dans l'expérience ancestrale"
+                >
+                  J'entre dans l'expérience ancestrale
+                </motion.button>
+
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1, delay: 1.7 }}
+                  className="caption italic mt-1"
+                  style={{ color: "rgba(254,252,240,0.5)" }}
                 >
                   (avec le son)
-                </span>
-              </motion.button>
+                </motion.span>
+              </motion.div>
             )}
           </AnimatePresence>
+
+          <style>{`
+            @keyframes pulseBlink {
+              0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.6), 0 0 24px rgba(201,168,76,0.35); opacity: 1; }
+              50% { box-shadow: 0 0 0 12px rgba(201,168,76,0), 0 0 40px rgba(201,168,76,0.55); opacity: 0.85; }
+            }
+          `}</style>
         </motion.div>
       )}
     </AnimatePresence>
