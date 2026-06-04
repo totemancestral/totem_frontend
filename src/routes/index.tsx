@@ -7,6 +7,7 @@ import {
   Oeuvre,
   Avis,
   CtaFinal,
+  Manifeste,
 } from "@/components/sections";
 import { ExperienceConsignes } from "@/components/ExperienceConsignes";
 import { IntroExperience } from "@/components/IntroExperience";
@@ -24,6 +25,7 @@ function Index() {
       <AmbientAudio active={introDone} />
       <Hero />
       <LeGeste />
+      <Manifeste />
       <Oeuvre />
       <Experience />
       <Avis />
