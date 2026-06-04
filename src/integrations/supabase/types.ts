@@ -14,16 +14,222 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      commandes: {
+        Row: {
+          created_at: string
+          devise: string
+          id: string
+          langue: string
+          montant_cents: number
+          offre: Database["public"]["Enums"]["offre_type"]
+          reponses_id: string | null
+          statut: Database["public"]["Enums"]["commande_statut"]
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          devise?: string
+          id?: string
+          langue?: string
+          montant_cents: number
+          offre: Database["public"]["Enums"]["offre_type"]
+          reponses_id?: string | null
+          statut?: Database["public"]["Enums"]["commande_statut"]
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          devise?: string
+          id?: string
+          langue?: string
+          montant_cents?: number
+          offre?: Database["public"]["Enums"]["offre_type"]
+          reponses_id?: string | null
+          statut?: Database["public"]["Enums"]["commande_statut"]
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commandes_reponses_id_fkey"
+            columns: ["reponses_id"]
+            isOneToOne: false
+            referencedRelation: "reponses_parcours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oeuvres: {
+        Row: {
+          audio_url: string | null
+          commande_id: string
+          created_at: string
+          id: string
+          image_url: string | null
+          metadata: Json
+          nom_totem: string | null
+          numero_serie: string | null
+          pdf_url: string | null
+          recit: string | null
+          statut: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audio_url?: string | null
+          commande_id: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          metadata?: Json
+          nom_totem?: string | null
+          numero_serie?: string | null
+          pdf_url?: string | null
+          recit?: string | null
+          statut?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audio_url?: string | null
+          commande_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          metadata?: Json
+          nom_totem?: string | null
+          numero_serie?: string | null
+          pdf_url?: string | null
+          recit?: string | null
+          statut?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oeuvres_commande_id_fkey"
+            columns: ["commande_id"]
+            isOneToOne: false
+            referencedRelation: "commandes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          langue: string
+          pays: string | null
+          prenom: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          langue?: string
+          pays?: string | null
+          prenom?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          langue?: string
+          pays?: string | null
+          prenom?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reponses_parcours: {
+        Row: {
+          created_at: string
+          id: string
+          langue: string
+          reponses: Json
+          session_id: string
+          termine: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          langue?: string
+          reponses?: Json
+          session_id: string
+          termine?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          langue?: string
+          reponses?: Json
+          session_id?: string
+          termine?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      commande_statut:
+        | "en_attente_paiement"
+        | "paye"
+        | "en_generation"
+        | "livree"
+        | "erreur"
+        | "remboursee"
+      offre_type: "essentiel" | "signature" | "heritage"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +356,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      commande_statut: [
+        "en_attente_paiement",
+        "paye",
+        "en_generation",
+        "livree",
+        "erreur",
+        "remboursee",
+      ],
+      offre_type: ["essentiel", "signature", "heritage"],
+    },
   },
 } as const
