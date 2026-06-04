@@ -3,31 +3,26 @@ import { AnimatePresence, motion } from "motion/react";
 import introVideo from "@/assets/totem-intro.mp4";
 import totemLogo from "@/assets/totem-logo.png";
 
-type Phase = "welcome" | "playing" | "done";
+type Phase = "loading" | "welcome" | "done";
 
 export function IntroExperience({ onFinished }: { onFinished: () => void }) {
-  const [phase, setPhase] = useState<Phase>("welcome");
+  const [phase, setPhase] = useState<Phase>("loading");
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const enter = async () => {
-    setPhase("playing");
+  // Autoplay the video as a loading screen (muted to satisfy autoplay policies)
+  useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    try {
-      v.muted = false;
-      v.volume = 1;
-      await v.play();
-    } catch {
-      try {
-        v.muted = true;
-        await v.play();
-      } catch {
-        finish();
-      }
-    }
-  };
+    v.muted = true;
+    v.play().catch(() => {
+      // If even muted autoplay fails, skip to welcome
+      setPhase("welcome");
+    });
+  }, []);
 
-  const finish = () => {
+  const goToWelcome = () => setPhase("welcome");
+
+  const enter = () => {
     setPhase("done");
     setTimeout(onFinished, 900);
   };
@@ -35,7 +30,7 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    const onErr = () => finish();
+    const onErr = () => setPhase("welcome");
     v.addEventListener("error", onErr);
     return () => v.removeEventListener("error", onErr);
   }, []);
@@ -51,21 +46,22 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
           className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
           style={{ background: "var(--nuit-profonde)" }}
         >
-          {/* Always-mounted video */}
+          {/* Loading video — autoplays muted, then reveals the welcome screen */}
           <video
             ref={videoRef}
             src={introVideo}
             playsInline
+            muted
             preload="auto"
-            onEnded={finish}
+            onEnded={goToWelcome}
             controls={false}
             disablePictureInPicture
             controlsList="nodownload noplaybackrate nofullscreen"
             className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
             style={{
               background: "var(--nuit-profonde)",
-              opacity: phase === "playing" ? 1 : 0,
-              transition: "opacity 700ms ease",
+              opacity: phase === "loading" ? 1 : 0,
+              transition: "opacity 900ms ease",
             }}
           />
 
@@ -77,6 +73,17 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
             }}
           />
 
+          {/* Skip the loading video */}
+          {phase === "loading" && (
+            <button
+              onClick={goToWelcome}
+              className="absolute bottom-6 right-6 z-20 text-[11px] tracking-[0.18em] uppercase opacity-70 hover:opacity-100 transition-opacity"
+              style={{ color: "var(--or-ancestral)" }}
+            >
+              Passer →
+            </button>
+          )}
+
           <AnimatePresence>
             {phase === "welcome" && (
               <motion.div
@@ -84,7 +91,7 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.8 }}
+                transition={{ duration: 1.2 }}
                 className="relative z-10 max-w-[640px] w-full px-6 flex flex-col items-center gap-8 text-center"
               >
                 <motion.img
