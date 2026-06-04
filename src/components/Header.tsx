@@ -70,9 +70,16 @@ export function Header() {
               EN
             </button>
           </div>
-          <a href="#offres" className="hidden md:inline-flex btn-primary !py-3 !px-6 !text-[11px]">
+          <Link
+            to="/mon-compte"
+            className="hidden md:inline-flex text-[11px] tracking-[0.18em] uppercase transition-colors"
+            style={{ color: "var(--or-ancestral)" }}
+          >
+            Mon espace
+          </Link>
+          <Link to="/parcours" className="hidden md:inline-flex btn-primary !py-3 !px-6 !text-[11px]">
             Composer
-          </a>
+          </Link>
           <button
             className="lg:hidden"
             onClick={() => setOpen((v) => !v)}
