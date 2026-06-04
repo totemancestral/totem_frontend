@@ -252,6 +252,38 @@ function ParcoursPage() {
   const [nudge, setNudge] = useState<string | null>(null);
   const filledRef = useRef<Set<number>>(new Set());
 
+  // Restore progress from localStorage on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem("totem_parcours_v1");
+      if (!raw) return;
+      const saved = JSON.parse(raw) as {
+        answers?: Record<number, Answer>;
+        index?: number;
+        phase?: Phase;
+      };
+      if (saved.answers) setAnswers(saved.answers);
+      if (typeof saved.index === "number") setIndex(saved.index);
+      if (saved.phase && saved.phase !== "waiting") setPhase(saved.phase);
+    } catch {
+      /* ignore corrupted storage */
+    }
+  }, []);
+
+  // Persist progress to localStorage on every change
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(
+        "totem_parcours_v1",
+        JSON.stringify({ answers, index, phase })
+      );
+    } catch {
+      /* quota — ignore */
+    }
+  }, [answers, index, phase]);
+
   const current = QUESTIONS[index];
   const progress =
     phase === "intro"

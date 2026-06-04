@@ -120,6 +120,78 @@ export function LeGeste() {
   );
 }
 
+/* ---------- LE MANIFESTE (enriched landing block) ---------- */
+const manifesteLines = [
+  {
+    title: "Une œuvre, pas un test",
+    body:
+      "TOTEM ANCESTRAL n'est pas un quiz de personnalité. C'est une composition — narrative, visuelle, sonore — modelée sur ce que vous confiez au griot.",
+  },
+  {
+    title: "Le geste, pas le hasard",
+    body:
+      "Chaque pièce est numérotée, signée, et ne sera jamais re-créée à l'identique. Votre exemplaire est unique dans la collection en cours.",
+  },
+  {
+    title: "L'imaginaire, pas la généalogie",
+    body:
+      "Nous ne reconstituons pas un arbre. Nous imaginons l'aïeul que l'histoire aurait pu vous laisser — celui qui n'est jamais parti.",
+  },
+];
+
+export function Manifeste() {
+  return (
+    <section
+      className="py-32 px-5 md:px-10"
+      style={{ background: "var(--nuit-profonde)" }}
+    >
+      <div className="max-w-5xl mx-auto">
+        <Reveal>
+          <div className="text-center max-w-2xl mx-auto">
+            <Ornament />
+            <h2
+              className="h-display text-3xl md:text-5xl mt-6"
+              style={{ color: "var(--or-ancestral)" }}
+            >
+              Un manifeste en trois temps.
+            </h2>
+            <p className="quote-italic mt-6 text-lg md:text-xl">
+              Pourquoi cette maison existe — et ce qu'elle refuse d'être.
+            </p>
+          </div>
+        </Reveal>
+
+        <div className="mt-16 grid md:grid-cols-3 gap-6">
+          {manifesteLines.map((m, i) => (
+            <Reveal key={m.title} delay={i * 0.1}>
+              <article className="card-totem h-full flex flex-col gap-4">
+                <span
+                  className="h-display text-5xl"
+                  style={{ color: "rgba(201,168,76,0.3)" }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3
+                  className="h-display text-2xl"
+                  style={{ color: "var(--or-pale)" }}
+                >
+                  {m.title}
+                </h3>
+                <p
+                  className="text-[15px] leading-[1.75]"
+                  style={{ color: "rgba(254,252,240,0.85)" }}
+                >
+                  {m.body}
+                </p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- L'EXPÉRIENCE ---------- */
 const steps = [
   {
