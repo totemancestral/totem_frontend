@@ -1,51 +1,35 @@
+import { useTranslations } from "next-intl";
 import { Reveal, Ornament } from "./Reveal";
-import posture from "@/assets/consigne-1-posture.jpg";
-import volume from "@/assets/consigne-2-volume.jpg";
-import coeur from "@/assets/consigne-3-coeur.jpg";
-import heritage from "@/assets/consigne-4-heritage.jpg";
 
-const consignes = [
-  {
-    n: "01",
-    img: posture,
-    text: "Devant votre écran, adoptez une posture de profonde connexion avec vous-même.",
-  },
-  {
-    n: "02",
-    img: volume,
-    text: "Assurez-vous de mettre votre volume pour écouter l'ancêtre imaginaire.",
-  },
-  {
-    n: "03",
-    img: coeur,
-    text: "Donnez des réponses qui viennent de votre cœur et qui reflètent qui vous êtes à l'intérieur.",
-  },
-  {
-    n: "04",
-    img: heritage,
-    text: "Gardez votre œuvre TOTEM tel un héritage à conserver et garder jalousement.",
-  },
-];
+const posture = "/assets/consigne-1-posture.jpg";
+const volume = "/assets/consigne-2-volume.jpg";
+const coeur = "/assets/consigne-3-coeur.jpg";
+const heritage = "/assets/consigne-4-heritage.jpg";
+
+const consigneImages = [posture, volume, coeur, heritage];
+
+type Consigne = {
+  text: string;
+};
 
 export function ExperienceConsignes() {
+  const t = useTranslations("home.instructions");
+  const consignes = (t.raw("items") as Consigne[]).map((item, index) => ({
+    ...item,
+    n: String(index + 1).padStart(2, "0"),
+    img: consigneImages[index] ?? posture,
+  }));
+
   return (
-    <section
-      className="py-32 px-5 md:px-10"
-      style={{ background: "var(--nuit-profonde)" }}
-    >
+    <section className="py-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-6">
             <Ornament />
-            <h2
-              className="h-display text-3xl md:text-5xl"
-              style={{ color: "var(--or-ancestral)" }}
-            >
-              Comment vivre l'expérience TOTEM.
+            <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
+              {t("title")}
             </h2>
-            <p className="quote-italic mt-2 text-lg md:text-xl">
-              Quatre gestes simples pour accueillir l'œuvre.
-            </p>
+            <p className="quote-italic mt-2 text-lg md:text-xl">{t("subtitle")}</p>
           </div>
         </Reveal>
 
@@ -56,10 +40,7 @@ export function ExperienceConsignes() {
                 className="card-totem h-full flex flex-col gap-5 overflow-hidden"
                 style={{ padding: 0 }}
               >
-                <div
-                  className="relative w-full overflow-hidden"
-                  style={{ aspectRatio: "4/3" }}
-                >
+                <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4/3" }}>
                   <img
                     src={c.img}
                     alt={c.text}
@@ -75,10 +56,7 @@ export function ExperienceConsignes() {
                   />
                 </div>
                 <div className="px-6 pb-6 flex flex-col gap-4 flex-1">
-                  <span
-                    className="h-display text-3xl"
-                    style={{ color: "var(--or-ancestral)" }}
-                  >
+                  <span className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
                     {c.n}
                   </span>
                   <p

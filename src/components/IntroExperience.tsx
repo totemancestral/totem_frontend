@@ -1,27 +1,42 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import introVideo from "@/assets/totem-intro.mp4";
-import totemLogo from "@/assets/totem-logo.png";
+import { useTranslations } from "next-intl";
 
-type Phase = "loading" | "welcome" | "done";
+const introVideoWebm = "/assets/totem-intro.webm";
+const totemLogo = "/assets/totem-logo.png";
+
+type Phase = "ready" | "loading" | "welcome" | "done";
 
 export function IntroExperience({ onFinished }: { onFinished: () => void }) {
-  const [phase, setPhase] = useState<Phase>("loading");
+  const t = useTranslations("intro");
+  const brand = useTranslations("brand");
+  const [phase, setPhase] = useState<Phase>("ready");
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Autoplay the video with sound. If blocked by browser policy, fallback to muted.
   useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    const originalOverscroll = document.body.style.overscrollBehavior;
+    document.body.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.overscrollBehavior = originalOverscroll;
+    };
+  }, []);
+
+  const startVideo = () => {
     const v = videoRef.current;
     if (!v) return;
+
     v.muted = false;
+    v.volume = 1;
+    v.currentTime = 0;
+    setPhase("loading");
+
     v.play().catch(() => {
-      // If unmuted autoplay is blocked, try muted
-      v.muted = true;
-      v.play().catch(() => {
-        setPhase("welcome");
-      });
+      setPhase("welcome");
     });
-  }, []);
+  };
 
   const goToWelcome = () => setPhase("welcome");
 
@@ -47,14 +62,13 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.9, ease: "easeInOut" }}
           className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
-          style={{ background: "var(--nuit-profonde)" }}
+          style={{ background: "var(--nuit-profonde)", height: "100svh" }}
         >
           {/* Loading video — autoplays muted, then reveals the welcome screen */}
           <video
             ref={videoRef}
-            src={introVideo}
             playsInline
-            preload="auto"
+            preload="metadata"
             onEnded={goToWelcome}
             controls={false}
             disablePictureInPicture
@@ -65,7 +79,9 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
               opacity: phase === "loading" ? 1 : 0,
               transition: "opacity 900ms ease",
             }}
-          />
+          >
+            <source src={introVideoWebm} type="video/webm" />
+          </video>
 
           <div
             className="absolute inset-0 pointer-events-none"
@@ -87,6 +103,49 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
           )}
 
           <AnimatePresence>
+            {phase === "ready" && (
+              <motion.div
+                key="ready"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="relative z-10 flex h-full w-full max-w-[560px] flex-col items-center justify-center gap-7 px-6 text-center"
+              >
+                <motion.img
+                  src={totemLogo}
+                  alt={brand("name")}
+                  initial={{ opacity: 0, scale: 0.94 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1.1, ease: "easeOut" }}
+                  className="h-auto w-[170px] drop-shadow-[0_10px_40px_rgba(201,168,76,0.25)] md:w-[210px]"
+                />
+
+                <motion.button
+                  onClick={startVideo}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.25 }}
+                  className="btn-primary animate-pulse-glow"
+                  style={{ animation: "pulseBlink 1.4s ease-in-out infinite" }}
+                  aria-label={t("startAria")}
+                >
+                  {t("start")}
+                </motion.button>
+
+                <motion.button
+                  onClick={goToWelcome}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.72 }}
+                  transition={{ duration: 0.8, delay: 0.45 }}
+                  className="caption uppercase tracking-[0.18em] transition-opacity hover:opacity-100"
+                  style={{ color: "var(--or-ancestral)" }}
+                >
+                  {t("skip")}
+                </motion.button>
+              </motion.div>
+            )}
+
             {phase === "welcome" && (
               <motion.div
                 key="welcome"
@@ -94,11 +153,11 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1.2 }}
-                className="relative z-10 max-w-[640px] w-full px-6 flex flex-col items-center gap-8 text-center"
+                className="relative z-10 flex h-full w-full max-w-[640px] flex-col items-center justify-center gap-8 px-6 text-center"
               >
                 <motion.img
                   src={totemLogo}
-                  alt="Totem Ancestral"
+                  alt={brand("name")}
                   initial={{ opacity: 0, scale: 0.94 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 1.4, ease: "easeOut" }}
@@ -112,9 +171,9 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
                   className="h-display text-3xl md:text-5xl"
                   style={{ color: "var(--or-ancestral)" }}
                 >
-                  Bienvenu sur
+                  {t("welcomePrefix")}
                   <br />
-                  TOTEM ANCESTRAL
+                  {brand("name")}
                 </motion.h1>
 
                 <motion.div
@@ -124,15 +183,9 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
                   className="flex flex-col gap-3"
                   style={{ color: "var(--ivoire)" }}
                 >
-                  <p className="quote-italic text-lg md:text-xl">
-                    Apprêtez-vous à entrer dans une expérience sacrée.
-                  </p>
-                  <p className="quote-italic text-lg md:text-xl">
-                    L'ancêtre vous parlera.
-                  </p>
-                  <p className="quote-italic text-lg md:text-xl">
-                    Écoutez sa voix et laissez-le vous conduire.
-                  </p>
+                  <p className="quote-italic text-lg md:text-xl">{t("line1")}</p>
+                  <p className="quote-italic text-lg md:text-xl">{t("line2")}</p>
+                  <p className="quote-italic text-lg md:text-xl">{t("line3")}</p>
                 </motion.div>
 
                 <motion.button
@@ -142,9 +195,9 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
                   transition={{ duration: 1, delay: 1.4 }}
                   className="btn-primary mt-4 animate-pulse-glow"
                   style={{ animation: "pulseBlink 1.4s ease-in-out infinite" }}
-                  aria-label="J'entre dans l'expérience ancestrale"
+                  aria-label={t("enterAria")}
                 >
-                  J'entre dans l'expérience ancestrale
+                  {t("enter")}
                 </motion.button>
 
                 <motion.span
@@ -154,7 +207,7 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
                   className="caption italic mt-1"
                   style={{ color: "rgba(254,252,240,0.5)" }}
                 >
-                  (avec le son)
+                  {t("withSound")}
                 </motion.span>
               </motion.div>
             )}

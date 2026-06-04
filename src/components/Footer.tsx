@@ -1,7 +1,13 @@
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { MaskLogo } from "./MaskLogo";
 
-export function Footer() {
+type Locale = "fr" | "en";
+
+export function Footer({ locale }: { locale: Locale }) {
+  const brand = useTranslations("brand");
+  const t = useTranslations("footer");
+
   return (
     <footer
       className="pt-24 pb-12 px-5 md:px-10"
@@ -10,23 +16,37 @@ export function Footer() {
       <div className="max-w-[1280px] mx-auto">
         <div className="flex flex-col items-center text-center gap-6">
           <MaskLogo size={44} />
-          <div className="logo-wordmark text-sm md:text-base">Totem Ancestral</div>
-          <p className="quote-italic text-base md:text-lg max-w-xl">
-            Le portrait imaginaire de l'Africain que vous auriez pu être.
-          </p>
+          <div className="logo-wordmark text-sm md:text-base">{brand("name")}</div>
+          <p className="quote-italic text-base md:text-lg max-w-xl">{t("tagline")}</p>
 
-          <nav className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-6 text-[12px] tracking-[0.16em] uppercase">
-            <a href="/#experience" style={{ color: "var(--ivoire)" }}>L'expérience</a>
-            <a href="/#offres" style={{ color: "var(--ivoire)" }}>Les offres</a>
-            <Link to="/a-propos" style={{ color: "var(--ivoire)" }}>À propos</Link>
-            <Link to="/faq" style={{ color: "var(--ivoire)" }}>FAQ</Link>
-            <Link to="/contact" style={{ color: "var(--ivoire)" }}>Contact</Link>
+          <nav className="subtext flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-6 text-[12px] tracking-[0.16em] uppercase">
+            <Link href={`/${locale}/#experience`} style={{ color: "var(--ivoire)" }}>
+              {t("nav.experience")}
+            </Link>
+            <Link href={`/${locale}/#offres`} style={{ color: "var(--ivoire)" }}>
+              {t("nav.offers")}
+            </Link>
+            <Link href={`/${locale}/a-propos`} style={{ color: "var(--ivoire)" }}>
+              {t("nav.about")}
+            </Link>
+            <Link href={`/${locale}/faq`} style={{ color: "var(--ivoire)" }}>
+              FAQ
+            </Link>
+            <Link href={`/${locale}/contact`} style={{ color: "var(--ivoire)" }}>
+              Contact
+            </Link>
           </nav>
 
-          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-2 text-[12px]">
-            <Link to="/cgv" style={{ color: "#888" }}>CGV</Link>
-            <Link to="/confidentialite" style={{ color: "#888" }}>Politique de confidentialité</Link>
-            <Link to="/mentions" style={{ color: "#888" }}>Mentions légales</Link>
+          <nav className="subtext flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-2 text-[12px]">
+            <Link href={`/${locale}/cgv`} style={{ color: "#888" }}>
+              CGV
+            </Link>
+            <Link href={`/${locale}/confidentialite`} style={{ color: "#888" }}>
+              {t("legal.privacy")}
+            </Link>
+            <Link href={`/${locale}/mentions`} style={{ color: "#888" }}>
+              {t("legal.mentions")}
+            </Link>
           </nav>
 
           <div
@@ -38,9 +58,9 @@ export function Footer() {
           </div>
 
           <p className="caption max-w-2xl leading-relaxed mt-2">
-            SENYCE PARTNERS © 2026 — Tous droits réservés.
+            {t("copyright")}
             <br />
-            Une maison de création artistique. Une œuvre assistée par intelligence artificielle.
+            {t("studioLine")}
           </p>
         </div>
       </div>

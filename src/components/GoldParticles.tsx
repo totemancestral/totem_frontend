@@ -1,16 +1,25 @@
 import { useMemo } from "react";
 
+function seededRandom(seed: number) {
+  const value = Math.sin(seed) * 10000;
+  return value - Math.floor(value);
+}
+
+function particleValue(index: number, count: number, offset: number) {
+  return seededRandom((index + 1) * 97 + count * 31 + offset * 17);
+}
+
 export function GoldParticles({ count = 26 }: { count?: number }) {
   const particles = useMemo(
     () =>
       Array.from({ length: count }).map((_, i) => ({
         id: i,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        size: 2 + Math.random() * 2.5,
-        delay: Math.random() * 18,
-        duration: 14 + Math.random() * 12,
-        opacity: 0.3 + Math.random() * 0.4,
+        left: particleValue(i, count, 1) * 100,
+        top: particleValue(i, count, 2) * 100,
+        size: 2 + particleValue(i, count, 3) * 2.5,
+        delay: particleValue(i, count, 4) * 18,
+        duration: 14 + particleValue(i, count, 5) * 12,
+        opacity: 0.3 + particleValue(i, count, 6) * 0.4,
       })),
     [count],
   );

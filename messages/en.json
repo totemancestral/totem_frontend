@@ -1,0 +1,262 @@
+{
+  "brand": {
+    "name": "Totem Ancestral"
+  },
+  "header": {
+    "menu": "Menu",
+    "compose": "Compose",
+    "composeWork": "Compose my artwork",
+    "nav": {
+      "experience": "The experience",
+      "offers": "Offers",
+      "house": "The house",
+      "faq": "FAQ"
+    }
+  },
+  "intro": {
+    "start": "Start the experience",
+    "startAria": "Start the introduction with sound",
+    "skip": "Skip",
+    "welcomePrefix": "Welcome to",
+    "line1": "Prepare to enter a sacred experience.",
+    "line2": "The ancestor will speak to you.",
+    "line3": "Listen to the voice and let it guide you.",
+    "enter": "Enter the ancestral experience",
+    "enterAria": "Enter the ancestral experience",
+    "withSound": "(with sound)"
+  },
+  "footer": {
+    "tagline": "The imaginary portrait of the African you could have been.",
+    "nav": {
+      "experience": "The experience",
+      "offers": "Offers",
+      "about": "About"
+    },
+    "legal": {
+      "privacy": "Privacy policy",
+      "mentions": "Legal notice"
+    },
+    "copyright": "SENYCE PARTNERS © 2026 - All rights reserved.",
+    "studioLine": "An artistic creation house. An artwork assisted by artificial intelligence."
+  },
+  "home": {
+    "hero": {
+      "logoAlt": "{brand} - The soul of origins",
+      "titleLine1": "The imaginary portrait",
+      "titleLine2": "of the African",
+      "titleHighlight": "you could have been.",
+      "question": "What if one of your ancestors had never left Africa?",
+      "description": "A unique digital artwork, assisted by artificial intelligence and inspired by African cosmogonies. Composed for you, or for someone you choose to honor.",
+      "discover": "Discover the experience"
+    },
+    "proofBand": {
+      "items": [
+        {
+          "value": "15 min",
+          "label": "Target delivery"
+        },
+        {
+          "value": "FR / EN",
+          "label": "Bilingual experience"
+        },
+        {
+          "value": "4 pieces",
+          "label": "Image, voice, parchment, certificate"
+        },
+        {
+          "value": "Unique",
+          "label": "Numbered and signed"
+        }
+      ]
+    },
+    "gesture": {
+      "titleLine1": "Before becoming who you are,",
+      "titleLine2": "you came from somewhere.",
+      "body1": "Sixty thousand years ago, your ancestors left Africa. Some stayed. They were born under other skies, spoke other languages, and carved other masks.",
+      "body2": "TOTEM ANCESTRAL imagines, for each of us, the ancestor who never left. The person we could have been if history had chosen another path.",
+      "quoteLine1": "A gift to offer. A journey to receive.",
+      "quoteLine2": "A mirror held up to your imagination."
+    },
+    "manifest": {
+      "title": "A manifesto in three movements.",
+      "subtitle": "Why this house exists - and what it refuses to be.",
+      "items": [
+        {
+          "title": "An artwork, not a test",
+          "body": "TOTEM ANCESTRAL is not a personality quiz. It is a narrative, visual and sonic composition, shaped by what you entrust to the griot."
+        },
+        {
+          "title": "A gesture, not chance",
+          "body": "Each piece is numbered, signed, and will never be recreated identically. Your edition is unique within the current collection."
+        },
+        {
+          "title": "Imagination, not genealogy",
+          "body": "We do not rebuild a family tree. We imagine the ancestor history might have left you, the one who never departed."
+        }
+      ]
+    },
+    "experience": {
+      "title": "A passage in three movements.",
+      "subtitleLine1": "Fifteen minutes. No haste.",
+      "subtitleLine2": "The fable is composed while you breathe.",
+      "steps": [
+        {
+          "title": "The griot questions you",
+          "text": "Your answers reflect who you are."
+        },
+        {
+          "title": "The house composes",
+          "text": "Your artwork is built step by step, piece by piece."
+        },
+        {
+          "title": "Your TOTEM is delivered",
+          "text": "15 minutes later, your secret box arrives by email. Numbered, signed, and accompanied by its certificate of authenticity. It is unique in the world."
+        }
+      ]
+    },
+    "assurances": {
+      "eyebrow": "What you receive",
+      "title": "A complete artistic experience, held end to end.",
+      "subtitle": "Each order is designed as a premium digital box: readable, intimate, durable and accessible everywhere.",
+      "items": [
+        {
+          "title": "Clear timing",
+          "text": "The pipeline is designed to deliver the full box in under fifteen minutes after confirmed payment."
+        },
+        {
+          "title": "Confidentiality",
+          "text": "Your answers are used only to compose the artwork. Prompts and secrets remain on the server side."
+        },
+        {
+          "title": "Lasting box",
+          "text": "The files are prepared to be downloaded, archived and preserved as a personal piece."
+        },
+        {
+          "title": "International reach",
+          "text": "The platform is structured to work in French and English, with global payment and delivery."
+        }
+      ]
+    },
+    "artwork": {
+      "title": "One artwork. Several pieces.",
+      "description": "Each TOTEM ANCESTRAL box gathers artistic pieces composed for you alone.",
+      "pieces": [
+        {
+          "title": "The Parchment",
+          "subtitle": "Five movements. One chronicle.",
+          "alt": "Totem Ancestral narrative parchment"
+        },
+        {
+          "title": "The visual artwork and the ancestor's voice",
+          "subtitle": "A digital painting. An intimate word.",
+          "alt": "Totem Ancestral visual artwork and ancestor voice"
+        }
+      ],
+      "certificate": "And always: the certificate of authenticity - numbered, signed, unique."
+    },
+    "offers": {
+      "title": "Three ways to receive the artwork.",
+      "subtitle": "For yourself. To offer. To share with family.",
+      "footnote": "Free gift card with every order - International payments - GDPR",
+      "items": [
+        {
+          "name": "Totem Origin",
+          "price": "49",
+          "subtitle": "The essential experience.",
+          "features": [
+            "The narrative parchment (PDF)",
+            "The visual artwork (high-resolution PNG)",
+            "The numbered certificate of authenticity",
+            "Delivery within 15 minutes by email"
+          ],
+          "cta": "Choose Origin",
+          "featured": false
+        },
+        {
+          "name": "Totem Ancestral",
+          "price": "89",
+          "subtitle": "The complete experience.",
+          "features": [
+            "The narrative parchment (PDF)",
+            "The visual artwork (high-resolution PNG)",
+            "The imaginary ancestor's voice (MP3, 90s)",
+            "The numbered certificate of authenticity",
+            "Delivery within 15 minutes by email"
+          ],
+          "cta": "Choose Ancestral",
+          "featured": true,
+          "badge": "The heart of the collection"
+        },
+        {
+          "name": "Totem Family",
+          "price": "199",
+          "subtitle": "The experience to share.",
+          "features": [
+            "Three complete TOTEM ANCESTRAL artworks",
+            "Three chosen recipients",
+            "Three distinct certificates of authenticity",
+            "A refined presentation for gifting",
+            "Delivery within 30 minutes"
+          ],
+          "cta": "Choose Family",
+          "featured": false
+        }
+      ]
+    },
+    "house": {
+      "title": "A house of creation.",
+      "paragraphs": [
+        "TOTEM ANCESTRAL is an artistic creation house founded in Paris.",
+        "We compose unique digital artworks, personal fables inspired by African cosmogonies and assisted by artificial intelligence.",
+        "We do not do science, genealogy or divination. We make artworks. To celebrate someone close. To offer oneself an inner journey. To nourish imagination.",
+        "Each artwork carries a number, a signature and a certificate. It will never be reproduced, reissued or resold. It is your edition in the current collection."
+      ],
+      "link": "Read the full manifesto"
+    },
+    "testimonials": {
+      "title": "What they say.",
+      "items": [
+        {
+          "q": "I expected a personality test. I received an artwork. I read the parchment three times. I listened to the voice alone, at night. Something settled.",
+          "a": "Kofi A., Paris",
+          "n": "Artwork n°12 - Lion"
+        },
+        {
+          "q": "I offered it to my mother for her birthday. She cried. Not from sadness, from something deeper.",
+          "a": "Amelie D., Lyon",
+          "n": "Artwork n°47 - Eagle"
+        },
+        {
+          "q": "I'm not African. I was curious. The parchment is a small literary work. I framed the image; it hangs above my desk.",
+          "a": "James T., London",
+          "n": "Artwork n°83 - Elephant"
+        }
+      ]
+    },
+    "instructions": {
+      "title": "How to live the TOTEM experience.",
+      "subtitle": "Four simple gestures to welcome the artwork.",
+      "items": [
+        {
+          "text": "In front of your screen, adopt a posture of deep connection with yourself."
+        },
+        {
+          "text": "Make sure your volume is on to hear the imaginary ancestor."
+        },
+        {
+          "text": "Give answers that come from the heart and reflect who you are within."
+        },
+        {
+          "text": "Keep your TOTEM artwork like a legacy to preserve and guard closely."
+        }
+      ]
+    },
+    "ctaFinal": {
+      "title": "The artwork is waiting.",
+      "subtitleLine1": "Fifteen minutes to compose it.",
+      "subtitleLine2": "A lifetime to keep it.",
+      "button": "Compose my artwork",
+      "caption": "Unique digital artwork - Delivered within 15 minutes - Certificate of authenticity included"
+    }
+  }
+}

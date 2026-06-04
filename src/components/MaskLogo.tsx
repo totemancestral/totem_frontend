@@ -33,15 +33,35 @@ export function MaskLogo({ size = 80, className = "" }: { size?: number; classNa
       {/* Vertical bridge */}
       <line x1="40" y1="32" x2="40" y2="78" stroke="url(#maskGold)" strokeWidth="0.8" />
       {/* Eye slits */}
-      <path d="M26 44 Q31 41 36 44" stroke="url(#maskGold)" strokeWidth="1.1" fill="none" strokeLinecap="round" />
-      <path d="M44 44 Q49 41 54 44" stroke="url(#maskGold)" strokeWidth="1.1" fill="none" strokeLinecap="round" />
+      <path
+        d="M26 44 Q31 41 36 44"
+        stroke="url(#maskGold)"
+        strokeWidth="1.1"
+        fill="none"
+        strokeLinecap="round"
+      />
+      <path
+        d="M44 44 Q49 41 54 44"
+        stroke="url(#maskGold)"
+        strokeWidth="1.1"
+        fill="none"
+        strokeLinecap="round"
+      />
       {/* Cheek scarification */}
       <path d="M22 58 L30 62" stroke="url(#maskGold)" strokeWidth="0.7" />
       <path d="M22 64 L29 67" stroke="url(#maskGold)" strokeWidth="0.7" />
       <path d="M58 58 L50 62" stroke="url(#maskGold)" strokeWidth="0.7" />
       <path d="M58 64 L51 67" stroke="url(#maskGold)" strokeWidth="0.7" />
       {/* Mouth */}
-      <ellipse cx="40" cy="82" rx="5" ry="2.5" stroke="url(#maskGold)" strokeWidth="0.9" fill="none" />
+      <ellipse
+        cx="40"
+        cy="82"
+        rx="5"
+        ry="2.5"
+        stroke="url(#maskGold)"
+        strokeWidth="0.9"
+        fill="none"
+      />
       {/* Chin notch */}
       <path d="M36 96 L40 100 L44 96" stroke="url(#maskGold)" strokeWidth="0.8" fill="none" />
     </svg>

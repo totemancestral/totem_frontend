@@ -11,7 +11,10 @@ export function PageHero({
   children?: ReactNode;
 }) {
   return (
-    <section className="pt-40 pb-16 px-5 md:px-10 text-center" style={{ background: "var(--nuit-profonde)" }}>
+    <section
+      className="pt-40 pb-16 px-5 md:px-10 text-center"
+      style={{ background: "var(--nuit-profonde)" }}
+    >
       <div className="max-w-3xl mx-auto flex flex-col items-center gap-6">
         <Ornament />
         <h1 className="h-display text-4xl md:text-6xl" style={{ color: "var(--or-ancestral)" }}>

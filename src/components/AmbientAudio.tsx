@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
-import music from "@/assets/totem-music.mp3";
+
+const music = "/assets/totem-music.mp3";
 
 /**
  * Ambient background music — seamless loop via two crossfading <audio> elements.
@@ -45,10 +46,7 @@ export function AmbientAudio({ active }: { active: boolean }) {
       if (cur && nxt && cur.duration && !cur.paused) {
         const remaining = cur.duration - cur.currentTime;
         const now = performance.now();
-        if (
-          remaining <= CROSSFADE_S &&
-          now - swappedAtRef.current > 1000
-        ) {
+        if (remaining <= CROSSFADE_S && now - swappedAtRef.current > 1000) {
           swappedAtRef.current = now;
           try {
             nxt.currentTime = 0;
@@ -81,9 +79,7 @@ export function AmbientAudio({ active }: { active: boolean }) {
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      const el = target.closest(
-        ".btn-primary, .btn-secondary, [data-stop-ambient]"
-      );
+      const el = target.closest(".btn-primary, .btn-secondary, [data-stop-ambient]");
       if (el) fadeOutAndStop();
     };
     document.addEventListener("click", onClick, true);
@@ -106,7 +102,7 @@ export function AmbientAudio({ active }: { active: boolean }) {
         }
         remaining -= 1;
         if (remaining <= 0) setStopped(true);
-      })
+      }),
     );
   };
 
@@ -140,12 +136,7 @@ export function AmbientAudio({ active }: { active: boolean }) {
   );
 }
 
-function fadeTo(
-  el: HTMLAudioElement,
-  target: number,
-  durationMs: number,
-  onDone?: () => void
-) {
+function fadeTo(el: HTMLAudioElement, target: number, durationMs: number, onDone?: () => void) {
   const start = performance.now();
   const startVol = el.volume;
   const step = (t: number) => {

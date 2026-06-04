@@ -1,78 +1,192 @@
 import { motion } from "motion/react";
-import { Link } from "@tanstack/react-router";
-import { Mic, Sparkles, Send, Check, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+import {
+  Mic,
+  Sparkles,
+  Send,
+  Check,
+  ArrowRight,
+  Globe2,
+  LockKeyhole,
+  PackageCheck,
+  ShieldCheck,
+  Timer,
+} from "lucide-react";
 import { GoldParticles } from "./GoldParticles";
 import { Reveal, SectionDivider, Ornament } from "./Reveal";
-import totemLogo from "@/assets/totem-logo.png";
-import oeuvreParchemin from "@/assets/oeuvre-parchemin.jpg";
-import oeuvreVisuelle from "@/assets/oeuvre-visuelle-voix.jpg";
+
+const totemLogo = "/assets/totem-logo.png";
+const oeuvreParchemin = "/assets/oeuvre-parchemin.jpg";
+const oeuvreVisuelle = "/assets/oeuvre-visuelle-voix.jpg";
+
+type ManifestItem = {
+  title: string;
+  body: string;
+};
+
+type StepText = {
+  title: string;
+  text: string;
+};
+
+type PieceText = {
+  title: string;
+  subtitle: string;
+  alt: string;
+};
+
+type OfferText = {
+  name: string;
+  price: string;
+  subtitle: string;
+  features: string[];
+  cta: string;
+  featured: boolean;
+  badge?: string;
+};
+
+type ProofItem = {
+  value: string;
+  label: string;
+};
+
+type AssuranceItem = {
+  title: string;
+  text: string;
+};
+
+type TestimonialText = {
+  q: string;
+  a: string;
+  n: string;
+};
 
 /* ---------- HERO ---------- */
 export function Hero() {
+  const t = useTranslations("home.hero");
+  const brand = useTranslations("brand");
+
   return (
     <section
-      className="relative min-h-screen flex items-center justify-center overflow-hidden px-5 pt-32 pb-24"
+      className="relative flex min-h-[92svh] items-center justify-center overflow-hidden px-5 pb-14 pt-28 md:px-10 md:pb-16 md:pt-32"
       style={{ background: "var(--nuit-profonde)" }}
     >
       <GoldParticles count={28} />
 
-      <div className="relative max-w-4xl mx-auto text-center flex flex-col items-center gap-10">
-        <motion.img
-          src={totemLogo}
-          alt="Totem Ancestral — L'âme des origines"
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.6, ease: "easeOut" }}
-          className="w-[280px] sm:w-[360px] md:w-[440px] h-auto drop-shadow-[0_20px_60px_rgba(201,168,76,0.18)]"
-        />
-
-        <Ornament />
-
-        <motion.h1
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
-          className="h-display text-[36px] sm:text-5xl md:text-6xl lg:text-[68px]"
-          style={{ color: "var(--ivoire)" }}
-        >
-          Le portrait imaginaire
-          <br />
-          de l'Africain
-          <br />
-          <span style={{ color: "var(--or-ancestral)" }}>que vous auriez pu être.</span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.2, delay: 0.8 }}
-          className="quote-italic text-xl md:text-2xl max-w-2xl"
-        >
-          Et si l'un de vos ancêtres n'était jamais parti d'Afrique&nbsp;?
-        </motion.p>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.2, delay: 1.1 }}
-          className="text-base md:text-lg max-w-xl leading-relaxed"
-          style={{ color: "rgba(254,252,240,0.8)" }}
-        >
-          Une œuvre numérique unique, assistée par intelligence artificielle, inspirée des cosmogonies africaines.
-          Composée pour vous, ou pour celui à qui vous l'offrez.
-        </motion.p>
-
+      <div className="relative mx-auto grid w-full max-w-6xl items-center gap-10 md:grid-cols-[0.92fr_1.08fr] lg:gap-16">
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1.4 }}
-          className="flex flex-col sm:flex-row items-center gap-6 mt-2"
+          initial={{ opacity: 0, x: -22, scale: 0.98 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ duration: 1.3, ease: "easeOut" }}
+          className="relative mx-auto w-full max-w-[500px] md:mx-0"
         >
-          <a href="#experience" className="link-gold text-sm tracking-[0.14em] uppercase inline-flex items-center gap-2">
-            Découvrir l'expérience
-            <ArrowRight size={14} strokeWidth={1.5} />
-          </a>
+          <div
+            className="relative aspect-[4/5] overflow-hidden rounded-lg border"
+            style={{
+              borderColor: "rgba(201,168,76,0.28)",
+              boxShadow: "0 28px 80px rgba(0,0,0,0.36)",
+            }}
+          >
+            <img
+              src={oeuvreVisuelle}
+              alt={t("logoAlt", { brand: brand("name") })}
+              className="h-full w-full object-cover object-center"
+            />
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: "linear-gradient(180deg, transparent 50%, rgba(13,13,26,0.82) 100%)",
+              }}
+            />
+            <img
+              src={totemLogo}
+              alt={brand("name")}
+              className="absolute bottom-5 left-5 h-auto w-[118px] drop-shadow-[0_10px_35px_rgba(0,0,0,0.45)] md:w-[140px]"
+            />
+          </div>
         </motion.div>
+
+        <div className="flex flex-col items-center gap-7 text-center md:items-start md:text-left">
+          <Ornament />
+
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
+            className="h-display text-[36px] sm:text-5xl md:text-6xl lg:text-[68px]"
+            style={{ color: "var(--ivoire)" }}
+          >
+            {t("titleLine1")}
+            <br />
+            {t("titleLine2")}
+            <br />
+            <span style={{ color: "var(--or-ancestral)" }}>{t("titleHighlight")}</span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.2, delay: 0.8 }}
+            className="quote-italic max-w-2xl text-xl md:text-2xl"
+          >
+            {t("question")}
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.2, delay: 1.1 }}
+            className="body-copy max-w-xl md:text-lg"
+            style={{ color: "rgba(254,252,240,0.8)" }}
+          >
+            {t("description")}
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 1.4 }}
+            className="mt-1 flex flex-col items-center gap-6 sm:flex-row md:items-start"
+          >
+            <a
+              href="#experience"
+              className="link-gold inline-flex items-center gap-2 text-sm uppercase tracking-[0.14em]"
+            >
+              {t("discover")}
+              <ArrowRight size={14} strokeWidth={1.5} />
+            </a>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- PREUVES ---------- */
+export function ProofBand() {
+  const t = useTranslations("home.proofBand");
+  const items = t.raw("items") as ProofItem[];
+
+  return (
+    <section
+      className="px-5 py-10 md:px-10"
+      style={{
+        background: "var(--indigo-ancestral)",
+        borderBlock: "1px solid rgba(201,168,76,0.12)",
+      }}
+    >
+      <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map((item) => (
+          <div key={item.label} className="text-center">
+            <p className="h-display text-3xl md:text-4xl" style={{ color: "var(--or-ancestral)" }}>
+              {item.value}
+            </p>
+            <p className="eyebrow mt-3" style={{ color: "rgba(254,252,240,0.72)" }}>
+              {item.label}
+            </p>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -80,28 +194,23 @@ export function Hero() {
 
 /* ---------- LE GESTE ---------- */
 export function LeGeste() {
+  const t = useTranslations("home.gesture");
+
   return (
     <section className="py-32 px-5 md:px-10 bg-gradient-totem">
       <div className="max-w-3xl mx-auto text-center">
         <Reveal>
           <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-            Avant d'être qui vous êtes,
+            {t("titleLine1")}
             <br />
-            vous avez été quelque part.
+            {t("titleLine2")}
           </h2>
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div className="mt-16 space-y-6 text-base md:text-lg leading-[1.85]" style={{ color: "var(--ivoire)" }}>
-            <p>
-              Il y a soixante mille ans, vos ancêtres ont quitté l'Afrique.
-              Certains sont restés. Sont nés sous d'autres ciels,
-              ont parlé d'autres langues, ont sculpté d'autres masques.
-            </p>
-            <p>
-              TOTEM ANCESTRAL imagine, pour chacun d'entre nous, l'aïeul qui n'est jamais parti.
-              Celui que nous aurions pu être si l'histoire avait choisi un autre chemin.
-            </p>
+          <div className="body-copy mt-16 space-y-6 md:text-lg" style={{ color: "var(--ivoire)" }}>
+            <p>{t("body1")}</p>
+            <p>{t("body2")}</p>
           </div>
         </Reveal>
 
@@ -109,9 +218,9 @@ export function LeGeste() {
           <div className="mt-20">
             <SectionDivider />
             <p className="quote-italic text-xl md:text-2xl leading-relaxed">
-              «&nbsp;Un cadeau à offrir. Un voyage à s'offrir.
+              {t("quoteLine1")}
               <br />
-              Un miroir tendu à votre imagination.&nbsp;»
+              {t("quoteLine2")}
             </p>
           </div>
         </Reveal>
@@ -121,30 +230,12 @@ export function LeGeste() {
 }
 
 /* ---------- LE MANIFESTE (enriched landing block) ---------- */
-const manifesteLines = [
-  {
-    title: "Une œuvre, pas un test",
-    body:
-      "TOTEM ANCESTRAL n'est pas un quiz de personnalité. C'est une composition — narrative, visuelle, sonore — modelée sur ce que vous confiez au griot.",
-  },
-  {
-    title: "Le geste, pas le hasard",
-    body:
-      "Chaque pièce est numérotée, signée, et ne sera jamais re-créée à l'identique. Votre exemplaire est unique dans la collection en cours.",
-  },
-  {
-    title: "L'imaginaire, pas la généalogie",
-    body:
-      "Nous ne reconstituons pas un arbre. Nous imaginons l'aïeul que l'histoire aurait pu vous laisser — celui qui n'est jamais parti.",
-  },
-];
-
 export function Manifeste() {
+  const t = useTranslations("home.manifest");
+  const manifesteLines = t.raw("items") as ManifestItem[];
+
   return (
-    <section
-      className="py-32 px-5 md:px-10"
-      style={{ background: "var(--nuit-profonde)" }}
-    >
+    <section className="py-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
       <div className="max-w-5xl mx-auto">
         <Reveal>
           <div className="text-center max-w-2xl mx-auto">
@@ -153,11 +244,9 @@ export function Manifeste() {
               className="h-display text-3xl md:text-5xl mt-6"
               style={{ color: "var(--or-ancestral)" }}
             >
-              Un manifeste en trois temps.
+              {t("title")}
             </h2>
-            <p className="quote-italic mt-6 text-lg md:text-xl">
-              Pourquoi cette maison existe — et ce qu'elle refuse d'être.
-            </p>
+            <p className="quote-italic mt-6 text-lg md:text-xl">{t("subtitle")}</p>
           </div>
         </Reveal>
 
@@ -165,22 +254,13 @@ export function Manifeste() {
           {manifesteLines.map((m, i) => (
             <Reveal key={m.title} delay={i * 0.1}>
               <article className="card-totem h-full flex flex-col gap-4">
-                <span
-                  className="h-display text-5xl"
-                  style={{ color: "rgba(201,168,76,0.3)" }}
-                >
+                <span className="h-display text-5xl" style={{ color: "rgba(201,168,76,0.3)" }}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3
-                  className="h-display text-2xl"
-                  style={{ color: "var(--or-pale)" }}
-                >
+                <h3 className="h-display text-2xl" style={{ color: "var(--or-pale)" }}>
                   {m.title}
                 </h3>
-                <p
-                  className="text-[15px] leading-[1.75]"
-                  style={{ color: "rgba(254,252,240,0.85)" }}
-                >
+                <p className="card-copy md:text-[17px]" style={{ color: "rgba(254,252,240,0.85)" }}>
                   {m.body}
                 </p>
               </article>
@@ -193,40 +273,32 @@ export function Manifeste() {
 }
 
 /* ---------- L'EXPÉRIENCE ---------- */
-const steps = [
-  {
-    n: "01",
-    icon: Mic,
-    title: "Le griot vous interroge",
-    text: "Vos réponses reflètent qui vous êtes.",
-  },
-  {
-    n: "02",
-    icon: Sparkles,
-    title: "La maison compose",
-    text: "Votre œuvre est en cours de construction, brique après brique.",
-  },
-  {
-    n: "03",
-    icon: Send,
-    title: "Votre TOTEM vous est livré",
-    text: "15 min plus tard, votre coffret secret arrivera par email. Numéroté, signé, accompagné de son certificat d'authenticité. Il est unique au monde.",
-  },
-];
+const stepIcons = [Mic, Sparkles, Send] as const;
 
 export function Experience() {
+  const t = useTranslations("home.experience");
+  const steps = (t.raw("steps") as StepText[]).map((step, index) => ({
+    ...step,
+    icon: stepIcons[index] ?? Sparkles,
+    n: String(index + 1).padStart(2, "0"),
+  }));
+
   return (
-    <section id="experience" className="py-32 px-5 md:px-10" style={{ background: "var(--indigo-ancestral)" }}>
+    <section
+      id="experience"
+      className="py-32 px-5 md:px-10"
+      style={{ background: "var(--indigo-ancestral)" }}
+    >
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <div className="text-center max-w-2xl mx-auto">
             <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-              Une traversée en trois temps.
+              {t("title")}
             </h2>
             <p className="quote-italic mt-6 text-lg md:text-xl">
-              Quinze minutes. Pas de hâte.
+              {t("subtitleLine1")}
               <br />
-              La fable se compose pendant que vous respirez.
+              {t("subtitleLine2")}
             </p>
           </div>
         </Reveal>
@@ -236,10 +308,7 @@ export function Experience() {
             <Reveal key={s.n} delay={i * 0.12}>
               <article className="card-totem h-full flex flex-col gap-6">
                 <div className="flex items-start justify-between">
-                  <span
-                    className="h-display text-5xl"
-                    style={{ color: "rgba(201,168,76,0.3)" }}
-                  >
+                  <span className="h-display text-5xl" style={{ color: "rgba(201,168,76,0.3)" }}>
                     {s.n}
                   </span>
                   <s.icon size={24} strokeWidth={1.5} color="var(--or-ancestral)" />
@@ -247,7 +316,7 @@ export function Experience() {
                 <h3 className="h-display text-2xl" style={{ color: "var(--or-pale)" }}>
                   {s.title}
                 </h3>
-                <p className="text-[15px] leading-[1.75]" style={{ color: "rgba(254,252,240,0.85)" }}>
+                <p className="card-copy md:text-[17px]" style={{ color: "rgba(254,252,240,0.85)" }}>
                   {s.text}
                 </p>
               </article>
@@ -259,31 +328,75 @@ export function Experience() {
   );
 }
 
-/* ---------- L'ŒUVRE ---------- */
-const pieces = [
-  {
-    image: oeuvreParchemin,
-    title: "Le Parchemin",
-    subtitle: "Cinq mouvements. Une chronique.",
-  },
-  {
-    image: oeuvreVisuelle,
-    title: "L'Œuvre visuelle et la voix de l'ancêtre",
-    subtitle: "Une peinture numérique. Une parole intime.",
-  },
-];
+/* ---------- GARANTIES ---------- */
+const assuranceIcons = [Timer, LockKeyhole, PackageCheck, Globe2] as const;
 
+export function Assurances() {
+  const t = useTranslations("home.assurances");
+  const items = (t.raw("items") as AssuranceItem[]).map((item, index) => ({
+    ...item,
+    icon: assuranceIcons[index] ?? ShieldCheck,
+  }));
+
+  return (
+    <section className="px-5 py-28 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
+      <div className="mx-auto max-w-6xl">
+        <Reveal>
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
+              {t("eyebrow")}
+            </p>
+            <h2 className="h-display mt-5 text-3xl md:text-5xl" style={{ color: "var(--ivoire)" }}>
+              {t("title")}
+            </h2>
+            <p className="quote-italic mx-auto mt-6 max-w-2xl text-lg md:text-xl">
+              {t("subtitle")}
+            </p>
+          </div>
+        </Reveal>
+
+        <div className="mt-16 grid gap-5 md:grid-cols-4">
+          {items.map((item, index) => (
+            <Reveal key={item.title} delay={index * 0.08}>
+              <article className="card-totem flex h-full flex-col gap-5">
+                <item.icon size={24} strokeWidth={1.5} color="var(--or-ancestral)" />
+                <h3 className="h-display text-2xl" style={{ color: "var(--or-pale)" }}>
+                  {item.title}
+                </h3>
+                <p className="card-copy" style={{ color: "rgba(254,252,240,0.84)" }}>
+                  {item.text}
+                </p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- L'ŒUVRE ---------- */
 export function Oeuvre() {
+  const t = useTranslations("home.artwork");
+  const pieceImages = [oeuvreParchemin, oeuvreVisuelle];
+  const pieces = (t.raw("pieces") as PieceText[]).map((piece, index) => ({
+    ...piece,
+    image: pieceImages[index] ?? oeuvreParchemin,
+  }));
+
   return (
     <section className="py-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <div className="text-center max-w-2xl mx-auto">
             <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-              Une œuvre. Plusieurs pièces.
+              {t("title")}
             </h2>
-            <p className="mt-6 text-base md:text-lg leading-relaxed" style={{ color: "var(--ivoire)" }}>
-              Chaque coffret TOTEM ANCESTRAL réunit des pièces artistiques composées pour vous seul.
+            <p
+              className="mt-6 text-base md:text-lg leading-relaxed"
+              style={{ color: "var(--ivoire)" }}
+            >
+              {t("description")}
             </p>
           </div>
         </Reveal>
@@ -295,13 +408,10 @@ export function Oeuvre() {
                 className="card-totem h-full flex flex-col overflow-hidden"
                 style={{ padding: 0 }}
               >
-                <div
-                  className="relative w-full overflow-hidden"
-                  style={{ aspectRatio: "4/3" }}
-                >
+                <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4/3" }}>
                   <img
                     src={p.image}
-                    alt={p.title}
+                    alt={p.alt}
                     loading="lazy"
                     className="absolute inset-0 w-full h-full object-cover"
                   />
@@ -327,8 +437,11 @@ export function Oeuvre() {
         <Reveal delay={0.2}>
           <div className="mt-16 text-center">
             <SectionDivider />
-            <p className="text-sm md:text-base italic" style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}>
-              Et toujours&nbsp;: le certificat d'authenticité — numéroté, signé, unique.
+            <p
+              className="text-sm md:text-base italic"
+              style={{ color: "var(--or-pale)", fontFamily: "var(--font-subtext)" }}
+            >
+              {t("certificate")}
             </p>
           </div>
         </Reveal>
@@ -338,69 +451,34 @@ export function Oeuvre() {
 }
 
 /* ---------- OFFRES ---------- */
-const offers = [
-  {
-    name: "Totem Origine",
-    price: "49",
-    subtitle: "L'expérience essentielle.",
-    features: [
-      "Le Parchemin narratif (PDF)",
-      "L'Œuvre visuelle (PNG haute résolution)",
-      "Le Certificat d'authenticité numéroté",
-      "Livraison sous 15 minutes par email",
-    ],
-    cta: "Choisir Origine",
-    featured: false,
-  },
-  {
-    name: "Totem Ancestral",
-    price: "89",
-    subtitle: "L'expérience complète.",
-    features: [
-      "Le Parchemin narratif (PDF)",
-      "L'Œuvre visuelle (PNG haute résolution)",
-      "La Voix de l'ancêtre imaginaire (MP3, 90s)",
-      "Le Certificat d'authenticité numéroté",
-      "Livraison sous 15 minutes par email",
-    ],
-    cta: "Choisir Ancestral",
-    featured: true,
-    badge: "Le cœur de la collection",
-  },
-  {
-    name: "Totem Famille",
-    price: "199",
-    subtitle: "L'expérience à partager.",
-    features: [
-      "Trois œuvres TOTEM ANCESTRAL complètes",
-      "Trois destinataires au choix",
-      "Trois certificats d'authenticité distincts",
-      "Une présentation soignée pour offrir",
-      "Livraison sous 30 minutes",
-    ],
-    cta: "Choisir Famille",
-    featured: false,
-  },
-];
-
 export function Offres() {
+  const locale = useLocale();
+  const t = useTranslations("home.offers");
+  const offers = t.raw("items") as OfferText[];
+
   return (
-    <section id="offres" className="py-32 px-5 md:px-10" style={{ background: "var(--indigo-ancestral)" }}>
+    <section
+      id="offres"
+      className="py-32 px-5 md:px-10"
+      style={{ background: "var(--indigo-ancestral)" }}
+    >
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <div className="text-center max-w-2xl mx-auto">
             <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-              Trois manières de recevoir l'œuvre.
+              {t("title")}
             </h2>
-            <p className="quote-italic mt-6 text-lg md:text-xl">
-              Pour soi. Pour offrir. Pour partager en famille.
-            </p>
+            <p className="quote-italic mt-6 text-lg md:text-xl">{t("subtitle")}</p>
           </div>
         </Reveal>
 
         <div className="mt-20 grid md:grid-cols-3 gap-6 items-stretch">
           {offers.map((o, i) => (
-            <Reveal key={o.name} delay={i * 0.12} className={o.featured ? "md:-translate-y-4 order-first md:order-none" : ""}>
+            <Reveal
+              key={o.name}
+              delay={i * 0.12}
+              className={o.featured ? "md:-translate-y-4 order-first md:order-none" : ""}
+            >
               <article
                 className="card-totem h-full flex flex-col"
                 style={{
@@ -426,7 +504,10 @@ export function Offres() {
                   </div>
                 )}
 
-                <h3 className="h-display text-2xl tracking-[0.08em] uppercase text-center" style={{ color: "var(--ivoire)" }}>
+                <h3
+                  className="h-display text-2xl tracking-[0.08em] uppercase text-center"
+                  style={{ color: "var(--ivoire)" }}
+                >
                   {o.name}
                 </h3>
 
@@ -437,7 +518,10 @@ export function Offres() {
                   >
                     {o.price}
                   </span>
-                  <span className="h-display text-3xl ml-1" style={{ color: o.featured ? "var(--or-ancestral)" : "var(--ivoire)" }}>
+                  <span
+                    className="h-display text-3xl ml-1"
+                    style={{ color: o.featured ? "var(--or-ancestral)" : "var(--ivoire)" }}
+                  >
                     €
                   </span>
                 </div>
@@ -446,8 +530,17 @@ export function Offres() {
 
                 <ul className="flex flex-col gap-4 mb-10">
                   {o.features.map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-[14px] leading-[1.6]" style={{ color: "var(--ivoire)" }}>
-                      <Check size={16} strokeWidth={1.5} color="var(--or-ancestral)" className="mt-1 shrink-0" />
+                    <li
+                      key={f}
+                      className="flex items-start gap-3 text-[14px] leading-[1.6]"
+                      style={{ color: "var(--ivoire)" }}
+                    >
+                      <Check
+                        size={16}
+                        strokeWidth={1.5}
+                        color="var(--or-ancestral)"
+                        className="mt-1 shrink-0"
+                      />
                       <span>{f}</span>
                     </li>
                   ))}
@@ -455,7 +548,7 @@ export function Offres() {
 
                 <div className="mt-auto">
                   <Link
-                    to="/parcours"
+                    href={`/${locale}/parcours`}
                     className={`${o.featured ? "btn-primary" : "btn-secondary"} w-full text-center justify-center`}
                   >
                     {o.cta}
@@ -467,9 +560,7 @@ export function Offres() {
         </div>
 
         <Reveal delay={0.2}>
-          <p className="caption text-center mt-12">
-            Carte cadeau gratuite à chaque commande · Paiements internationaux · RGPD
-          </p>
+          <p className="caption text-center mt-12">{t("footnote")}</p>
         </Reveal>
       </div>
     </section>
@@ -479,38 +570,48 @@ export function Offres() {
 /* ---------- LA MAISON ---------- */
 
 export function Maison() {
+  const locale = useLocale();
+  const t = useTranslations("home.house");
+  const paragraphs = t.raw("paragraphs") as string[];
+
   return (
-    <section id="maison" className="py-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
+    <section
+      id="maison"
+      className="py-32 px-5 md:px-10"
+      style={{ background: "var(--nuit-profonde)" }}
+    >
       <div className="max-w-3xl mx-auto text-center">
         <Reveal>
           <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-            Une maison de création.
+            {t("title")}
           </h2>
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div className="mt-16 space-y-6 text-base md:text-lg leading-[1.85]" style={{ color: "var(--ivoire)" }}>
-            <p>TOTEM ANCESTRAL est une maison de création artistique fondée à Paris.</p>
-            <p>
-              Nous composons des œuvres numériques uniques — des fables personnelles inspirées des cosmogonies africaines —
-              assistées par intelligence artificielle.
-            </p>
-            <p>
-              Nous ne faisons ni de la science, ni de la généalogie, ni de la divination.
-              <br />
-              Nous faisons des œuvres. Pour célébrer un proche. Pour s'offrir un voyage intérieur. Pour nourrir l'imagination.
-            </p>
-            <p style={{ color: "rgba(254,252,240,0.8)" }}>
-              Chaque œuvre porte un numéro, une signature, un certificat. Elle ne sera jamais reproduite, ni rééditée,
-              ni revendue. Elle est votre exemplaire dans la collection en cours.
-            </p>
+          <div
+            className="mt-16 space-y-6 text-base md:text-lg leading-[1.85]"
+            style={{ color: "var(--ivoire)" }}
+          >
+            {paragraphs.map((paragraph, index) => (
+              <p
+                key={paragraph}
+                style={
+                  index === paragraphs.length - 1 ? { color: "rgba(254,252,240,0.8)" } : undefined
+                }
+              >
+                {paragraph}
+              </p>
+            ))}
           </div>
         </Reveal>
 
         <Reveal delay={0.2}>
           <div className="mt-12">
-            <Link to="/a-propos" className="link-gold text-sm tracking-[0.14em] uppercase">
-              Lire le manifeste complet →
+            <Link
+              href={`/${locale}/a-propos`}
+              className="link-gold text-sm tracking-[0.14em] uppercase"
+            >
+              {t("link")} →
             </Link>
           </div>
         </Reveal>
@@ -520,31 +621,19 @@ export function Maison() {
 }
 
 /* ---------- AVIS ---------- */
-const testimonials = [
-  {
-    q: "Je m'attendais à un test de personnalité. J'ai reçu une œuvre. Le parchemin, je l'ai lu trois fois. La voix, je l'ai écoutée seul, le soir. Quelque chose s'est posé.",
-    a: "Kofi A., Paris",
-    n: "Œuvre n°12 — Lion",
-  },
-  {
-    q: "Je l'ai offert à ma mère pour son anniversaire. Elle a pleuré. Pas de tristesse — quelque chose de plus profond.",
-    a: "Amélie D., Lyon",
-    n: "Œuvre n°47 — Aigle",
-  },
-  {
-    q: "I'm not African. I was curious. The parchment is a small literary work. I framed the image — it hangs above my desk.",
-    a: "James T., London",
-    n: "Œuvre n°83 — Éléphant",
-  },
-];
-
 export function Avis() {
+  const t = useTranslations("home.testimonials");
+  const testimonials = t.raw("items") as TestimonialText[];
+
   return (
     <section className="py-32 px-5 md:px-10" style={{ background: "var(--indigo-ancestral)" }}>
       <div className="max-w-6xl mx-auto">
         <Reveal>
-          <h2 className="h-display text-3xl md:text-5xl text-center" style={{ color: "var(--or-ancestral)" }}>
-            Ce qu'ils en disent.
+          <h2
+            className="h-display text-3xl md:text-5xl text-center"
+            style={{ color: "var(--or-ancestral)" }}
+          >
+            {t("title")}
           </h2>
         </Reveal>
 
@@ -560,8 +649,13 @@ export function Avis() {
                   "
                 </span>
                 <p className="quote-italic text-lg leading-relaxed pt-8 relative">{t.q}</p>
-                <div className="mt-auto pt-4 border-t" style={{ borderColor: "rgba(201,168,76,0.15)" }}>
-                  <p className="text-sm" style={{ color: "var(--ivoire)" }}>— {t.a}</p>
+                <div
+                  className="mt-auto pt-4 border-t"
+                  style={{ borderColor: "rgba(201,168,76,0.15)" }}
+                >
+                  <p className="text-sm" style={{ color: "var(--ivoire)" }}>
+                    — {t.a}
+                  </p>
                   <p className="caption mt-1">{t.n}</p>
                 </div>
               </article>
@@ -575,36 +669,41 @@ export function Avis() {
 
 /* ---------- CTA FINAL ---------- */
 export function CtaFinal() {
+  const locale = useLocale();
+  const t = useTranslations("home.ctaFinal");
+  const brand = useTranslations("brand");
+
   return (
     <section className="py-32 px-5 md:px-10 bg-gradient-totem relative overflow-hidden">
       <GoldParticles count={14} />
       <div className="max-w-3xl mx-auto text-center relative flex flex-col items-center gap-8">
         <Reveal>
-          <img src={totemLogo} alt="Totem Ancestral" className="w-[200px] md:w-[260px] h-auto" />
+          <img src={totemLogo} alt={brand("name")} className="w-[200px] md:w-[260px] h-auto" />
         </Reveal>
         <Ornament />
         <Reveal delay={0.1}>
           <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--ivoire)" }}>
-            L'œuvre vous attend.
+            {t("title")}
           </h2>
         </Reveal>
         <Reveal delay={0.2}>
           <p className="quote-italic text-xl md:text-2xl">
-            Quinze minutes pour la composer.
+            {t("subtitleLine1")}
             <br />
-            Toute une vie pour la garder.
+            {t("subtitleLine2")}
           </p>
         </Reveal>
         <Reveal delay={0.3}>
-          <Link to="/parcours" className="btn-primary animate-pulse-glow !px-14 !py-5">
-            Composer mon œuvre
+          <Link
+            href={`/${locale}/parcours`}
+            className="btn-primary animate-pulse-glow !px-14 !py-5"
+          >
+            {t("button")}
             <ArrowRight size={16} strokeWidth={1.5} />
           </Link>
         </Reveal>
         <Reveal delay={0.4}>
-          <p className="caption mt-2">
-            Œuvre numérique unique · Livrée sous 15 minutes · Certificat d'authenticité inclus
-          </p>
+          <p className="caption mt-2">{t("caption")}</p>
         </Reveal>
       </div>
     </section>
