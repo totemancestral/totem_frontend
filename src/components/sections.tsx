@@ -79,30 +79,24 @@ export function Hero() {
           initial={{ opacity: 0, x: -22, scale: 0.98 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 1.3, ease: "easeOut" }}
-          className="relative mx-auto w-full max-w-[500px] md:mx-0"
+          className="relative mx-auto flex w-full max-w-[500px] items-center justify-center md:mx-0"
         >
           <div
-            className="relative aspect-[4/5] overflow-hidden rounded-lg border"
+            className="relative flex aspect-square w-full items-center justify-center overflow-visible"
             style={{
-              borderColor: "rgba(201,168,76,0.28)",
-              boxShadow: "0 28px 80px rgba(0,0,0,0.36)",
+              filter: "drop-shadow(0 28px 70px rgba(201,168,76,0.18))",
             }}
           >
-            <img
-              src={oeuvreVisuelle}
-              alt={t("logoAlt", { brand: brand("name") })}
-              className="h-full w-full object-cover object-center"
-            />
             <div
-              className="absolute inset-0 pointer-events-none"
+              className="pointer-events-none absolute inset-x-6 top-10 bottom-24 rounded-full"
               style={{
-                background: "linear-gradient(180deg, transparent 50%, rgba(13,13,26,0.82) 100%)",
+                background: "radial-gradient(circle, rgba(201,168,76,0.16), transparent 68%)",
               }}
             />
             <img
               src={totemLogo}
-              alt={brand("name")}
-              className="absolute bottom-5 left-5 h-auto w-[118px] drop-shadow-[0_10px_35px_rgba(0,0,0,0.45)] md:w-[140px]"
+              alt={t("logoAlt", { brand: brand("name") })}
+              className="relative z-10 h-auto w-full max-w-[380px] object-contain md:max-w-[460px]"
             />
           </div>
         </motion.div>

@@ -1217,7 +1217,7 @@ function Paywall({ onPaid }: { onPaid: () => void }) {
           ))}
         </div>
 
-        <div className="mx-auto flex max-w-3xl flex-col gap-2 text-center">
+        <div className="relative z-10 mx-auto mt-5 flex max-w-3xl flex-col gap-2 text-center md:mt-7">
           <p className="caption">
             Paiement sécurisé · Visa · Mastercard · Apple Pay · Google Pay · Aucun abonnement · RGPD
           </p>
