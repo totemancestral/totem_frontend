@@ -54,7 +54,6 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
             ref={videoRef}
             src={introVideo}
             playsInline
-            muted
             preload="auto"
             onEnded={goToWelcome}
             controls={false}
