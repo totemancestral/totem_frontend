@@ -9,14 +9,17 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
   const [phase, setPhase] = useState<Phase>("loading");
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Autoplay the video as a loading screen (muted to satisfy autoplay policies)
+  // Autoplay the video with sound. If blocked by browser policy, fallback to muted.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    v.muted = true;
+    v.muted = false;
     v.play().catch(() => {
-      // If even muted autoplay fails, skip to welcome
-      setPhase("welcome");
+      // If unmuted autoplay is blocked, try muted
+      v.muted = true;
+      v.play().catch(() => {
+        setPhase("welcome");
+      });
     });
   }, []);
 
@@ -51,7 +54,6 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
             ref={videoRef}
             src={introVideo}
             playsInline
-            muted
             preload="auto"
             onEnded={goToWelcome}
             controls={false}
