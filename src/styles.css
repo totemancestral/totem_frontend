@@ -1,0 +1,281 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap");
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@font-face {
+  font-family: "MAKALO Regular";
+  src: url("/fonts/totem/MAKALO-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+/* TOTEM ANCESTRAL — Design System
+ * Palette de 6 codes définitifs — toute couleur hors palette est interdite.
+ */
+
+@theme inline {
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  --color-background: var(--nuit-profonde);
+  --color-foreground: var(--ivoire);
+  --color-card: var(--indigo-ancestral);
+  --color-card-foreground: var(--ivoire);
+  --color-popover: var(--indigo-ancestral);
+  --color-popover-foreground: var(--ivoire);
+  --color-primary: var(--or-ancestral);
+  --color-primary-foreground: var(--indigo-ancestral);
+  --color-secondary: var(--ombre-doree);
+  --color-secondary-foreground: var(--or-pale);
+  --color-muted: var(--indigo-ancestral);
+  --color-muted-foreground: var(--or-pale);
+  --color-accent: var(--ombre-doree);
+  --color-accent-foreground: var(--or-ancestral);
+  --color-destructive: oklch(0.55 0.18 25);
+  --color-destructive-foreground: var(--ivoire);
+  --color-border: color-mix(in oklab, var(--or-ancestral) 18%, transparent);
+  --color-input: var(--ombre-doree);
+  --color-ring: var(--or-ancestral);
+
+  --color-nuit: var(--nuit-profonde);
+  --color-indigo: var(--indigo-ancestral);
+  --color-ombre: var(--ombre-doree);
+  --color-or: var(--or-ancestral);
+  --color-or-pale: var(--or-pale);
+  --color-ivoire: var(--ivoire);
+  --color-caption: #888888;
+
+  /* Anciennes polices archivees dans l'historique du projet. */
+  --font-display: "MAKALO Regular", serif;
+  --font-sans: "Space Grotesk", sans-serif;
+  --font-subtext: "Space Grotesk", sans-serif;
+}
+
+:root {
+  --nuit-profonde: #0D0D1A;
+  --indigo-ancestral: #1A1A2E;
+  --ombre-doree: #2D2D1A;
+  --or-ancestral: #C9A84C;
+  --or-pale: #EDD99A;
+  --ivoire: #FEFCF0;
+  --radius: 6px;
+}
+
+.dark {
+  --nuit-profonde: #0D0D1A;
+  --indigo-ancestral: #1A1A2E;
+  --ombre-doree: #2D2D1A;
+  --or-ancestral: #C9A84C;
+  --or-pale: #EDD99A;
+  --ivoire: #FEFCF0;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    background-color: var(--nuit-profonde);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--nuit-profonde);
+    color: var(--ivoire);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: var(--or-ancestral);
+    color: var(--indigo-ancestral);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    background: var(--or-ancestral);
+    color: var(--indigo-ancestral);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 2px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: box-shadow 0.4s ease, transform 0.4s ease;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 32px rgba(201, 168, 76, 0.45);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--or-ancestral);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 14px;
+    padding: 15px 39px;
+    border: 1px solid var(--or-ancestral);
+    border-radius: 2px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+  .btn-secondary:hover {
+    background: var(--ombre-doree);
+  }
+
+  .card-totem {
+    background: var(--indigo-ancestral);
+    border-radius: 8px;
+    padding: 40px 32px;
+    border: 1px solid rgba(201, 168, 76, 0.35);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+  }
+  .card-totem:hover {
+    border-color: rgba(201, 168, 76, 1);
+    box-shadow: 0 0 32px rgba(201, 168, 76, 0.12);
+  }
+
+  .form-input {
+    background: var(--indigo-ancestral);
+    border: 1px solid var(--ombre-doree);
+    border-radius: 6px;
+    padding: 14px 18px;
+    color: var(--ivoire);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    width: 100%;
+    transition: border-color 0.3s ease;
+  }
+  .form-input::placeholder { color: #888888; }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--or-ancestral);
+  }
+
+  .section-divider {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--or-ancestral), transparent);
+    margin: 0 auto 48px auto;
+  }
+
+  .logo-wordmark {
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--or-pale);
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+  }
+
+  .h-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: 0;
+  }
+
+  .quote-italic {
+    font-family: var(--font-subtext);
+    font-style: normal;
+    font-weight: 400;
+    color: var(--or-pale);
+    line-height: 1.45;
+  }
+
+  .body-copy {
+    font-family: var(--font-subtext);
+    font-size: 16px;
+    line-height: 1.85;
+    letter-spacing: 0.018em;
+  }
+
+  .card-copy {
+    font-family: var(--font-subtext);
+    font-size: 16px;
+    line-height: 1.9;
+    letter-spacing: 0.025em;
+  }
+
+  .eyebrow {
+    font-family: var(--font-subtext);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .caption {
+    font-family: var(--font-subtext);
+    font-size: 13px;
+    color: #888888;
+    letter-spacing: 0.04em;
+  }
+
+  .subtext {
+    font-family: var(--font-subtext);
+  }
+
+  .link-gold {
+    color: var(--or-ancestral);
+    text-decoration: underline;
+    text-underline-offset: 6px;
+    text-decoration-thickness: 1px;
+    transition: color 0.3s ease;
+  }
+  .link-gold:hover {
+    color: var(--or-pale);
+  }
+}
+
+@layer utilities {
+  .bg-gradient-totem {
+    background: linear-gradient(180deg, #0D0D1A 0%, #1A1A2E 100%);
+  }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0); opacity: 0.4; }
+    50% { transform: translate(20px, -30px); opacity: 0.7; }
+  }
+  .animate-drift {
+    animation: drift 18s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 rgba(201, 168, 76, 0); }
+    50% { box-shadow: 0 0 24px rgba(201, 168, 76, 0.25); }
+  }
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes spin-slow {
+    to { transform: rotate(360deg); }
+  }
+  .animate-spin-slow {
+    animation: spin-slow 3s linear infinite;
+  }
+}

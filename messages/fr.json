@@ -1,0 +1,262 @@
+{
+  "brand": {
+    "name": "Totem Ancestral"
+  },
+  "header": {
+    "menu": "Menu",
+    "compose": "Composer",
+    "composeWork": "Composer mon oeuvre",
+    "nav": {
+      "experience": "L'experience",
+      "offers": "Les offres",
+      "house": "La maison",
+      "faq": "FAQ"
+    }
+  },
+  "intro": {
+    "start": "Lancer l'experience",
+    "startAria": "Lancer l'introduction avec le son",
+    "skip": "Passer",
+    "welcomePrefix": "Bienvenue sur",
+    "line1": "Appretez-vous a entrer dans une experience sacree.",
+    "line2": "L'ancetre vous parlera.",
+    "line3": "Ecoutez sa voix et laissez-le vous conduire.",
+    "enter": "J'entre dans l'experience ancestrale",
+    "enterAria": "J'entre dans l'experience ancestrale",
+    "withSound": "(avec le son)"
+  },
+  "footer": {
+    "tagline": "Le portrait imaginaire de l'Africain que vous auriez pu etre.",
+    "nav": {
+      "experience": "L'experience",
+      "offers": "Les offres",
+      "about": "A propos"
+    },
+    "legal": {
+      "privacy": "Politique de confidentialite",
+      "mentions": "Mentions legales"
+    },
+    "copyright": "SENYCE PARTNERS © 2026 - Tous droits reserves.",
+    "studioLine": "Une maison de creation artistique. Une oeuvre assistee par intelligence artificielle."
+  },
+  "home": {
+    "hero": {
+      "logoAlt": "{brand} - L'ame des origines",
+      "titleLine1": "Le portrait imaginaire",
+      "titleLine2": "de l'Africain",
+      "titleHighlight": "que vous auriez pu etre.",
+      "question": "Et si l'un de vos ancetres n'etait jamais parti d'Afrique ?",
+      "description": "Une oeuvre numerique unique, assistee par intelligence artificielle, inspiree des cosmogonies africaines. Composee pour vous, ou pour celui a qui vous l'offrez.",
+      "discover": "Decouvrir l'experience"
+    },
+    "proofBand": {
+      "items": [
+        {
+          "value": "15 min",
+          "label": "Livraison cible"
+        },
+        {
+          "value": "FR / EN",
+          "label": "Experience bilingue"
+        },
+        {
+          "value": "4 pieces",
+          "label": "Image, voix, parchemin, certificat"
+        },
+        {
+          "value": "Unique",
+          "label": "Numerote et signe"
+        }
+      ]
+    },
+    "gesture": {
+      "titleLine1": "Avant d'etre qui vous etes,",
+      "titleLine2": "vous avez ete quelque part.",
+      "body1": "Il y a soixante mille ans, vos ancetres ont quitte l'Afrique. Certains sont restes. Sont nes sous d'autres ciels, ont parle d'autres langues, ont sculpte d'autres masques.",
+      "body2": "TOTEM ANCESTRAL imagine, pour chacun d'entre nous, l'aieul qui n'est jamais parti. Celui que nous aurions pu etre si l'histoire avait choisi un autre chemin.",
+      "quoteLine1": "Un cadeau a offrir. Un voyage a s'offrir.",
+      "quoteLine2": "Un miroir tendu a votre imagination."
+    },
+    "manifest": {
+      "title": "Un manifeste en trois temps.",
+      "subtitle": "Pourquoi cette maison existe - et ce qu'elle refuse d'etre.",
+      "items": [
+        {
+          "title": "Une oeuvre, pas un test",
+          "body": "TOTEM ANCESTRAL n'est pas un quiz de personnalite. C'est une composition narrative, visuelle et sonore, modelee sur ce que vous confiez au griot."
+        },
+        {
+          "title": "Le geste, pas le hasard",
+          "body": "Chaque piece est numerotee, signee, et ne sera jamais recreee a l'identique. Votre exemplaire est unique dans la collection en cours."
+        },
+        {
+          "title": "L'imaginaire, pas la genealogie",
+          "body": "Nous ne reconstituons pas un arbre. Nous imaginons l'aieul que l'histoire aurait pu vous laisser, celui qui n'est jamais parti."
+        }
+      ]
+    },
+    "experience": {
+      "title": "Une traversee en trois temps.",
+      "subtitleLine1": "Quinze minutes. Pas de hate.",
+      "subtitleLine2": "La fable se compose pendant que vous respirez.",
+      "steps": [
+        {
+          "title": "Le griot vous interroge",
+          "text": "Vos reponses refletent qui vous etes."
+        },
+        {
+          "title": "La maison compose",
+          "text": "Votre oeuvre est en cours de construction, brique apres brique."
+        },
+        {
+          "title": "Votre TOTEM vous est livre",
+          "text": "15 min plus tard, votre coffret secret arrivera par email. Numerote, signe, accompagne de son certificat d'authenticite. Il est unique au monde."
+        }
+      ]
+    },
+    "assurances": {
+      "eyebrow": "Ce que vous recevez",
+      "title": "Une experience artistique complete, tenue de bout en bout.",
+      "subtitle": "Chaque commande est pensee comme un coffret numerique premium : lisible, intime, durable et accessible partout.",
+      "items": [
+        {
+          "title": "Delai clair",
+          "text": "Le pipeline est concu pour livrer le coffret complet en moins de quinze minutes apres paiement valide."
+        },
+        {
+          "title": "Confidentialite",
+          "text": "Vos reponses servent uniquement a composer l'oeuvre. Les prompts et secrets restent cote serveur."
+        },
+        {
+          "title": "Coffret durable",
+          "text": "Les fichiers sont prepares pour etre telecharges, archives et conserves comme une piece personnelle."
+        },
+        {
+          "title": "Portee internationale",
+          "text": "La plateforme est structuree pour fonctionner en francais et en anglais, avec paiement et livraison mondiale."
+        }
+      ]
+    },
+    "artwork": {
+      "title": "Une oeuvre. Plusieurs pieces.",
+      "description": "Chaque coffret TOTEM ANCESTRAL reunit des pieces artistiques composees pour vous seul.",
+      "pieces": [
+        {
+          "title": "Le Parchemin",
+          "subtitle": "Cinq mouvements. Une chronique.",
+          "alt": "Parchemin narratif Totem Ancestral"
+        },
+        {
+          "title": "L'oeuvre visuelle et la voix de l'ancetre",
+          "subtitle": "Une peinture numerique. Une parole intime.",
+          "alt": "Oeuvre visuelle et voix de l'ancetre Totem Ancestral"
+        }
+      ],
+      "certificate": "Et toujours : le certificat d'authenticite - numerote, signe, unique."
+    },
+    "offers": {
+      "title": "Trois manieres de recevoir l'oeuvre.",
+      "subtitle": "Pour soi. Pour offrir. Pour partager en famille.",
+      "footnote": "Carte cadeau gratuite a chaque commande - Paiements internationaux - RGPD",
+      "items": [
+        {
+          "name": "Totem Origine",
+          "price": "49",
+          "subtitle": "L'experience essentielle.",
+          "features": [
+            "Le Parchemin narratif (PDF)",
+            "L'oeuvre visuelle (PNG haute resolution)",
+            "Le Certificat d'authenticite numerote",
+            "Livraison sous 15 minutes par email"
+          ],
+          "cta": "Choisir Origine",
+          "featured": false
+        },
+        {
+          "name": "Totem Ancestral",
+          "price": "89",
+          "subtitle": "L'experience complete.",
+          "features": [
+            "Le Parchemin narratif (PDF)",
+            "L'oeuvre visuelle (PNG haute resolution)",
+            "La Voix de l'ancetre imaginaire (MP3, 90s)",
+            "Le Certificat d'authenticite numerote",
+            "Livraison sous 15 minutes par email"
+          ],
+          "cta": "Choisir Ancestral",
+          "featured": true,
+          "badge": "Le coeur de la collection"
+        },
+        {
+          "name": "Totem Famille",
+          "price": "199",
+          "subtitle": "L'experience a partager.",
+          "features": [
+            "Trois oeuvres TOTEM ANCESTRAL completes",
+            "Trois destinataires au choix",
+            "Trois certificats d'authenticite distincts",
+            "Une presentation soignee pour offrir",
+            "Livraison sous 30 minutes"
+          ],
+          "cta": "Choisir Famille",
+          "featured": false
+        }
+      ]
+    },
+    "house": {
+      "title": "Une maison de creation.",
+      "paragraphs": [
+        "TOTEM ANCESTRAL est une maison de creation artistique fondee a Paris.",
+        "Nous composons des oeuvres numeriques uniques, des fables personnelles inspirees des cosmogonies africaines, assistees par intelligence artificielle.",
+        "Nous ne faisons ni de la science, ni de la genealogie, ni de la divination. Nous faisons des oeuvres. Pour celebrer un proche. Pour s'offrir un voyage interieur. Pour nourrir l'imagination.",
+        "Chaque oeuvre porte un numero, une signature, un certificat. Elle ne sera jamais reproduite, ni reeditee, ni revendue. Elle est votre exemplaire dans la collection en cours."
+      ],
+      "link": "Lire le manifeste complet"
+    },
+    "testimonials": {
+      "title": "Ce qu'ils en disent.",
+      "items": [
+        {
+          "q": "Je m'attendais a un test de personnalite. J'ai recu une oeuvre. Le parchemin, je l'ai lu trois fois. La voix, je l'ai ecoutee seul, le soir. Quelque chose s'est pose.",
+          "a": "Kofi A., Paris",
+          "n": "Oeuvre n°12 - Lion"
+        },
+        {
+          "q": "Je l'ai offert a ma mere pour son anniversaire. Elle a pleure. Pas de tristesse, quelque chose de plus profond.",
+          "a": "Amelie D., Lyon",
+          "n": "Oeuvre n°47 - Aigle"
+        },
+        {
+          "q": "Je ne suis pas africain. J'etais curieux. Le parchemin est une petite oeuvre litteraire. J'ai encadre l'image, elle est au-dessus de mon bureau.",
+          "a": "James T., Londres",
+          "n": "Oeuvre n°83 - Elephant"
+        }
+      ]
+    },
+    "instructions": {
+      "title": "Comment vivre l'experience TOTEM.",
+      "subtitle": "Quatre gestes simples pour accueillir l'oeuvre.",
+      "items": [
+        {
+          "text": "Devant votre ecran, adoptez une posture de profonde connexion avec vous-meme."
+        },
+        {
+          "text": "Assurez-vous de mettre votre volume pour ecouter l'ancetre imaginaire."
+        },
+        {
+          "text": "Donnez des reponses qui viennent de votre coeur et qui refletent qui vous etes a l'interieur."
+        },
+        {
+          "text": "Gardez votre oeuvre TOTEM tel un heritage a conserver et garder jalousement."
+        }
+      ]
+    },
+    "ctaFinal": {
+      "title": "L'oeuvre vous attend.",
+      "subtitleLine1": "Quinze minutes pour la composer.",
+      "subtitleLine2": "Toute une vie pour la garder.",
+      "button": "Composer mon oeuvre",
+      "caption": "Oeuvre numerique unique - Livree sous 15 minutes - Certificat d'authenticite inclus"
+    }
+  }
+}

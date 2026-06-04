@@ -1,0 +1,11 @@
+import type { Metadata } from "next";
+import { ContactPage } from "@/components/pages/ContactPage";
+
+export const metadata: Metadata = {
+  title: "Contact - Totem Ancestral",
+  description: "Ecrivez a la maison Totem Ancestral. Reponse sous 48h.",
+};
+
+export default function Page() {
+  return <ContactPage />;
+}
