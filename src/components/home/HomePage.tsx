@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AmbientAudio } from "@/components/AmbientAudio";
 import { ExperienceConsignes } from "@/components/ExperienceConsignes";
 import { IntroExperience } from "@/components/IntroExperience";
@@ -18,12 +18,42 @@ import {
   ProofBand,
 } from "@/components/sections";
 
+const INTRO_SESSION_KEY = "totem_intro_played";
+
+function hasPlayedIntro() {
+  try {
+    return sessionStorage.getItem(INTRO_SESSION_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function rememberIntroPlayed() {
+  try {
+    sessionStorage.setItem(INTRO_SESSION_KEY, "true");
+  } catch {
+    /* session storage can be unavailable in restricted browser contexts */
+  }
+}
+
 export function HomePage() {
-  const [introDone, setIntroDone] = useState(false);
+  const [introState, setIntroState] = useState<"checking" | "pending" | "done">("checking");
+
+  useEffect(() => {
+    const played = hasPlayedIntro();
+    setIntroState(played ? "done" : "pending");
+  }, []);
+
+  const finishIntro = () => {
+    rememberIntroPlayed();
+    setIntroState("done");
+  };
+
+  const introDone = introState === "done";
 
   return (
     <>
-      {!introDone && <IntroExperience onFinished={() => setIntroDone(true)} />}
+      {introState === "pending" && <IntroExperience onFinished={finishIntro} />}
       <AmbientAudio active={introDone} />
       <Hero />
       <ProofBand />
