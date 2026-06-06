@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
 const music = "/assets/totem-music.mp3";
@@ -7,7 +7,8 @@ const music = "/assets/totem-music.mp3";
  * Ambient background music — seamless loop via two crossfading <audio> elements.
  * The next instance starts ~CROSSFADE_S before the current one ends, and both
  * are gain-faded so the "join" between loop iterations is inaudible.
- * Stops automatically when the user clicks any CTA button.
+ * The control remains visible when autoplay is blocked, so the user can start
+ * the ambient sound manually from the fixed button.
  */
 const CROSSFADE_S = 2.5;
 const TARGET_VOL = 0.55;
@@ -18,27 +19,39 @@ export function AmbientAudio({ active }: { active: boolean }) {
   const currentRef = useRef<"a" | "b">("a");
   const swappedAtRef = useRef<number>(-Infinity);
   const [stopped, setStopped] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
 
-  // Start when active becomes true
-  useEffect(() => {
+  const startPlayback = useCallback(() => {
     if (!active || stopped) return;
     const a = aRef.current;
     if (!a) return;
+
+    currentRef.current = "a";
+    swappedAtRef.current = -Infinity;
+    a.muted = muted;
     a.volume = 0;
+
     a.play()
       .then(() => {
+        setPlaying(true);
         fadeTo(a, TARGET_VOL, 1800);
       })
       .catch(() => {
-        setStopped(true);
+        setPlaying(false);
       });
-  }, [active, stopped]);
+  }, [active, muted, stopped]);
+
+  // Start when active becomes true
+  useEffect(() => {
+    if (!active || stopped || playing) return;
+    startPlayback();
+  }, [active, playing, startPlayback, stopped]);
 
   // Seamless crossfade loop: poll the active element's time, when it nears the
   // end, start the other element from 0 and crossfade gains.
   useEffect(() => {
-    if (!active || stopped) return;
+    if (!active || stopped || !playing) return;
     let raf = 0;
     const tick = () => {
       const cur = currentRef.current === "a" ? aRef.current : bRef.current;
@@ -71,15 +84,15 @@ export function AmbientAudio({ active }: { active: boolean }) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [active, stopped, muted]);
+  }, [active, playing, stopped, muted]);
 
-  // Listen for CTA clicks anywhere on the page
+  // Only explicit controls should stop the ambient sound.
   useEffect(() => {
     if (!active || stopped) return;
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      const el = target.closest(".btn-primary, .btn-secondary, [data-stop-ambient]");
+      const el = target.closest("[data-stop-ambient]");
       if (el) fadeOutAndStop();
     };
     document.addEventListener("click", onClick, true);
@@ -101,37 +114,45 @@ export function AmbientAudio({ active }: { active: boolean }) {
           /* noop */
         }
         remaining -= 1;
-        if (remaining <= 0) setStopped(true);
+        if (remaining <= 0) {
+          setPlaying(false);
+          setStopped(true);
+        }
       }),
     );
   };
 
-  if (stopped) return null;
+  if (!active || stopped) return null;
 
   return (
     <>
       <audio ref={aRef} src={music} preload="auto" />
       <audio ref={bRef} src={music} preload="auto" />
-      {active && (
-        <button
-          onClick={() => {
-            const next = !muted;
-            setMuted(next);
-            [aRef.current, bRef.current].forEach((el) => {
-              if (el) el.muted = next;
-            });
-          }}
-          aria-label={muted ? "Activer le son" : "Couper le son"}
-          className="fixed bottom-6 right-6 z-[90] flex h-11 w-11 items-center justify-center rounded-full border backdrop-blur transition-all hover:scale-105"
-          style={{
-            borderColor: "rgba(212,175,55,0.4)",
-            background: "rgba(11,11,15,0.55)",
-            color: "var(--or-ancestral)",
-          }}
-        >
-          {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => {
+          if (!playing) {
+            startPlayback();
+            return;
+          }
+
+          const next = !muted;
+          setMuted(next);
+          [aRef.current, bRef.current].forEach((el) => {
+            if (el) el.muted = next;
+          });
+        }}
+        aria-label={!playing ? "Lancer l'audio" : muted ? "Activer le son" : "Couper le son"}
+        title={!playing ? "Lancer l'audio" : muted ? "Activer le son" : "Couper le son"}
+        className="fixed bottom-6 right-6 z-[190] flex h-11 w-11 items-center justify-center rounded-full border backdrop-blur transition-all hover:scale-105"
+        style={{
+          borderColor: "rgba(212,175,55,0.4)",
+          background: "rgba(11,11,15,0.55)",
+          color: "var(--or-ancestral)",
+        }}
+      >
+        {!playing || !muted ? <Volume2 size={18} /> : <VolumeX size={18} />}
+      </button>
     </>
   );
 }
