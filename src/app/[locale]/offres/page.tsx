@@ -3,7 +3,7 @@ import { OffersPage } from "@/components/pages/OffersPage";
 
 export const metadata: Metadata = {
   title: "Les offres - Totem Ancestral",
-  description: "Trois manieres de recevoir l'oeuvre Totem Ancestral, comparees en detail.",
+  description: "Trois manières de recevoir l'œuvre Totem Ancestral, comparées en détail.",
 };
 
 export default function Page() {

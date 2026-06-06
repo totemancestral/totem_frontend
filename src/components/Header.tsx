@@ -59,11 +59,19 @@ export function Header({ locale }: { locale: Locale }) {
       }}
     >
       <div className="max-w-[1280px] mx-auto px-5 md:px-10 py-4 flex items-center justify-between gap-6">
-        <Link href={`/${locale}`} className="flex items-center gap-3 shrink-0">
-          <img src="/assets/totem-logo.png" alt="Totem Ancestral" className="h-9 w-auto" />
-          <span className="logo-wordmark text-[11px] md:text-[13px] hidden sm:inline">
-            Totem Ancestral
-          </span>
+        <Link
+          href={`/${locale}`}
+          aria-label="Totem Ancestral"
+          className="flex shrink-0 items-center gap-2"
+        >
+          <span className="logo-wordmark text-[18px] leading-none md:text-[22px]">T</span>
+          <img
+            src="/assets/totem-logo.png"
+            alt=""
+            aria-hidden="true"
+            className="h-8 w-auto md:h-10"
+          />
+          <span className="logo-wordmark text-[18px] leading-none md:text-[22px]">A</span>
         </Link>
 
         <nav className="hidden lg:flex items-center gap-10">

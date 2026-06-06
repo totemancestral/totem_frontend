@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AmbientAudio } from "@/components/AmbientAudio";
 import { ExperienceConsignes } from "@/components/ExperienceConsignes";
 import { IntroExperience } from "@/components/IntroExperience";
+import { SiteTourModal } from "@/components/SiteTourModal";
 import {
   Assurances,
   Avis,
@@ -54,6 +55,7 @@ export function HomePage() {
   return (
     <>
       {introState === "pending" && <IntroExperience onFinished={finishIntro} />}
+      <SiteTourModal active={introDone} />
       <AmbientAudio active={introDone} />
       <Hero />
       <ProofBand />

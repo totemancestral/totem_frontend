@@ -19,9 +19,16 @@ export function ClientChrome({ children, locale }: { children: ReactNode; locale
   }, [pathname]);
 
   return (
-    <div style={{ background: "var(--nuit-profonde)", minHeight: "100vh" }}>
+    <div
+      style={{
+        background: "var(--nuit-profonde)",
+        minHeight: "100vh",
+        maxWidth: "100%",
+        overflowX: "clip",
+      }}
+    >
       <Header locale={locale} />
-      <main>{children}</main>
+      <main style={{ maxWidth: "100%", overflowX: "clip" }}>{children}</main>
       <Footer locale={locale} />
     </div>
   );

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { PrivacyPage } from "@/components/pages/PrivacyPage";
 
 export const metadata: Metadata = {
-  title: "Politique de confidentialite - Totem Ancestral",
-  description: "Comment Totem Ancestral protege vos donnees personnelles.",
+  title: "Politique de confidentialité - Totem Ancestral",
+  description: "Comment Totem Ancestral protège vos données personnelles.",
 };
 
 export default function Page() {

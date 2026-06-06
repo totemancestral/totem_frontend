@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/PageHero";
 
 export const metadata: Metadata = {
-  title: "Reinitialiser le mot de passe - Totem Ancestral",
+  title: "Réinitialiser le mot de passe - Totem Ancestral",
 };
 
 export default function Page() {
   return (
     <>
       <PageHero
-        title="Reinitialisation"
-        subtitle="Cette route sera connectee a Supabase Auth dans le module M6."
+        title="Réinitialisation"
+        subtitle="Cette route sera connectée à Supabase Auth dans le module M6."
       />
       <section className="pb-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
         <div className="max-w-xl mx-auto card-totem text-center">

@@ -15,7 +15,7 @@ export default function Page() {
       <section className="pb-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
         <div className="max-w-xl mx-auto card-totem text-center">
           <p className="quote-italic text-lg">
-            La protection Supabase et les URLs R2 seront ajoutees apres Stripe.
+            La protection Supabase et les URLs R2 seront ajoutées après Stripe.
           </p>
         </div>
       </section>

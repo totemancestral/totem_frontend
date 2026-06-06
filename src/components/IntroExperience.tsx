@@ -126,8 +126,7 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.25 }}
-                  className="btn-primary animate-pulse-glow"
-                  style={{ animation: "pulseBlink 1.4s ease-in-out infinite" }}
+                  className="btn-primary animate-pulse-blink"
                   aria-label={t("startAria")}
                 >
                   {t("start")}
@@ -193,8 +192,7 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 1, delay: 1.4 }}
-                  className="btn-primary mt-4 animate-pulse-glow"
-                  style={{ animation: "pulseBlink 1.4s ease-in-out infinite" }}
+                  className="btn-primary mt-4 animate-pulse-blink"
                   aria-label={t("enterAria")}
                 >
                   {t("enter")}
@@ -212,13 +210,6 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
               </motion.div>
             )}
           </AnimatePresence>
-
-          <style>{`
-            @keyframes pulseBlink {
-              0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.6), 0 0 24px rgba(201,168,76,0.35); opacity: 1; }
-              50% { box-shadow: 0 0 0 12px rgba(201,168,76,0), 0 0 40px rgba(201,168,76,0.55); opacity: 0.85; }
-            }
-          `}</style>
         </motion.div>
       )}
     </AnimatePresence>

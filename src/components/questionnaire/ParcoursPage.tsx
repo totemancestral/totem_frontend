@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { GoldParticles } from "@/components/GoldParticles";
 import { MaskLogo } from "@/components/MaskLogo";
 import { Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type FieldLevel = "PRIORITAIRE" | "SECONDAIRE" | "TERTIAIRE" | "SPECIAL";
 
@@ -352,7 +353,21 @@ type Phase =
 type Answer = { choice?: "A" | "B" | "C" | "D"; field?: string; skipped?: boolean };
 type AccountDraft = { prenom: string; email: string };
 
+type Offer = {
+  name: string;
+  price: string;
+  sub: string;
+  bestFor: string;
+  delivery: string;
+  includes: string;
+  features: string[];
+  cta: string;
+  featured: boolean;
+};
+
 export function ParcoursPage() {
+  const t = useTranslations("parcours");
+  const questions = t.raw("questions") as Question[];
   const [phase, setPhase] = useState<Phase>("intro");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
@@ -409,7 +424,7 @@ export function ParcoursPage() {
     }
   }, [answers, account, hasUnlockedRest, index, phase]);
 
-  const current = QUESTIONS[index];
+  const current = questions[index] ?? QUESTIONS[index];
   const progress =
     phase === "intro"
       ? 0
@@ -483,7 +498,7 @@ export function ParcoursPage() {
 
   return (
     <div
-      className="fixed inset-0 z-[200] overflow-hidden"
+      className="fixed inset-0 z-[200] w-full max-w-full overflow-hidden"
       style={{ background: "var(--nuit-profonde)" }}
     >
       {/* Progress bar */}
@@ -561,7 +576,7 @@ export function ParcoursPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed left-1/2 -translate-x-1/2 z-[220] px-6 py-3 rounded"
+            className="fixed left-1/2 z-[220] max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded px-6 py-3 text-center"
             style={{
               bottom: 32,
               background: "rgba(13,13,26,0.92)",
@@ -590,6 +605,7 @@ const fadeSlide = {
 };
 
 function IntroScreen({ onStart }: { onStart: () => void }) {
+  const t = useTranslations("parcours.intro");
   const lines = [
     {
       delay: 0.3,
@@ -606,7 +622,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
             transformOrigin: "center",
           }}
         >
-          Le Griot parle.
+          {t("title")}
         </motion.p>
       ),
     },
@@ -614,8 +630,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
       delay: 0.6,
       render: () => (
         <p className="quote-italic" style={{ fontSize: 18 }}>
-          Il n'y a pas de bonnes ou de mauvaises réponses ici. Il y a ta vérité — et celle que tu
-          t'autorises à voir.
+          {t("body1")}
         </p>
       ),
     },
@@ -630,10 +645,10 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
             lineHeight: 1.7,
           }}
         >
-          Réponds avec ce que tu ressens. Pas avec ce que tu crois devoir répondre.
+          {t("body2")}
           <br />
           <br />
-          Le temps n'existe pas ici. L'ancêtre attend.
+          {t("body3")}
         </p>
       ),
     },
@@ -665,7 +680,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           className="flex flex-col items-center gap-4 mt-4"
         >
           <button className="btn-primary" onClick={onStart}>
-            Je commence mon voyage
+            {t("start")}
           </button>
         </motion.div>
       </div>
@@ -694,6 +709,7 @@ function QuestionScreen({
   canContinue: boolean;
   isFirst: boolean;
 }) {
+  const t = useTranslations("parcours.questionUi");
   const [showTertiary, setShowTertiary] = useState(false);
   const isD = answer?.choice === "D";
   const baseRows = q.field.rows;
@@ -705,18 +721,16 @@ function QuestionScreen({
     q.field.level === "SPECIAL" ||
     (q.field.level === "TERTIAIRE" && showTertiary);
 
-  const dLabel = isD
-    ? "Tu as choisi la liberté. Le griot voudrait comprendre la tienne — en une phrase."
-    : q.field.label;
+  const dLabel = isD ? t("freedom") : q.field.label;
 
   return (
     <motion.section
       {...fadeSlide}
-      className="relative flex min-h-0 items-center justify-center overflow-hidden px-4 pb-5 pt-12 md:px-8 md:pb-8 md:pt-20"
+      className="relative flex min-h-0 items-center justify-center overflow-y-auto px-4 pb-6 pt-12 md:px-6 md:pb-8 md:pt-20 lg:overflow-hidden"
       style={{ height: "100svh" }}
     >
-      <div className="grid h-full min-h-0 w-full max-w-[1180px] grid-rows-[0.78fr_1.22fr] gap-4 lg:max-h-[760px] lg:grid-cols-[0.88fr_1.12fr] lg:grid-rows-1 lg:gap-10">
-        <div className="flex min-h-0 flex-col justify-center gap-3 overflow-hidden text-left lg:gap-5 lg:pr-4">
+      <div className="grid min-h-full w-full max-w-[1180px] grid-rows-[auto_1fr] gap-4 py-4 md:h-full md:min-h-0 md:grid-cols-[0.86fr_1.14fr] md:grid-rows-1 md:gap-6 md:py-0 lg:max-h-[760px] lg:gap-10">
+        <div className="flex min-h-0 flex-col justify-center gap-3 text-left md:overflow-hidden lg:gap-5 lg:pr-4">
           <div style={{ color: "var(--or-pale)", fontSize: 18, letterSpacing: "0.3em" }}>✦</div>
           <div className="flex flex-wrap items-center gap-3">
             <p
@@ -727,7 +741,7 @@ function QuestionScreen({
                 letterSpacing: "0.18em",
               }}
             >
-              QUESTION {q.n} SUR 10
+              {t("count", { current: q.n, total: 10 })}
             </p>
             <span
               style={{
@@ -738,7 +752,7 @@ function QuestionScreen({
                 textTransform: "uppercase",
               }}
             >
-              {q.n <= 4 ? "Ouverture" : "Composition"}
+              {q.n <= 4 ? t("opening") : t("composition")}
             </span>
           </div>
           {q.note && (
@@ -756,8 +770,8 @@ function QuestionScreen({
           </h1>
         </div>
 
-        <div className="flex min-h-0 flex-col justify-center gap-3 overflow-hidden">
-          <div className="grid min-h-0 gap-2 md:gap-3">
+        <div className="flex min-h-0 flex-col justify-center gap-3 md:overflow-hidden">
+          <div className="grid min-h-0 gap-2 md:gap-3 md:overflow-y-auto md:pr-1">
             {q.choices.map((c) => {
               const selected = answer?.choice === c.letter;
               return (
@@ -820,7 +834,7 @@ function QuestionScreen({
                 border: "none",
               }}
             >
-              + ajouter une nuance
+              {q.field.label}
             </button>
           )}
 
@@ -884,7 +898,7 @@ function QuestionScreen({
                   cursor: "pointer",
                 }}
               >
-                ← Question précédente
+                {t("previous")}
               </button>
             ) : (
               <span />
@@ -906,7 +920,7 @@ function QuestionScreen({
                     cursor: "pointer",
                   }}
                 >
-                  Passer →
+                  {t("skip")}
                 </button>
               )}
               <button
@@ -919,7 +933,7 @@ function QuestionScreen({
                   cursor: canContinue ? "pointer" : "not-allowed",
                 }}
               >
-                Continuer
+                {t("continue")}
               </button>
             </div>
           </div>
@@ -940,6 +954,7 @@ function AccountScreen({
   onBack: () => void;
   onContinue: () => void;
 }) {
+  const t = useTranslations("parcours.account");
   const emailIsValid = /^\S+@\S+\.\S+$/.test(account.email.trim());
   const canContinue = account.prenom.trim().length >= 2 && emailIsValid;
 
@@ -952,17 +967,16 @@ function AccountScreen({
       <div className="grid h-full min-h-0 w-full max-w-5xl items-center gap-8 md:grid-cols-[0.9fr_1.1fr]">
         <div className="flex min-h-0 flex-col justify-center gap-5 text-left">
           <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
-            Creation du compte
+            {t("eyebrow")}
           </p>
           <h2 className="h-display text-[32px] md:text-[50px]" style={{ color: "var(--ivoire)" }}>
-            Reserve ton espace personnel.
+            {t("title")}
           </h2>
           <p className="body-copy max-w-xl" style={{ color: "rgba(254,252,240,0.78)" }}>
-            Les quatre premieres reponses ouvrent le parcours. Ton email servira a retrouver ton
-            coffret, recevoir la livraison et reprendre l'experience sans perdre ta progression.
+            {t("body")}
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
-            {["4 questions ecoutees", "Compte prepare", "Choix du coffret"].map((item) => (
+            {(t.raw("checks") as string[]).map((item) => (
               <div
                 key={item}
                 className="rounded-md border px-4 py-3"
@@ -988,43 +1002,42 @@ function AccountScreen({
         >
           <div>
             <p className="eyebrow" style={{ color: "rgba(237,217,154,0.8)" }}>
-              Identite de livraison
+              {t("formEyebrow")}
             </p>
             <h3 className="h-display mt-2 text-[28px]" style={{ color: "var(--or-ancestral)" }}>
-              Avant le choix du prix
+              {t("formTitle")}
             </h3>
           </div>
 
           <label className="flex flex-col gap-2">
             <span className="caption" style={{ color: "rgba(254,252,240,0.72)" }}>
-              Prenom
+              {t("firstName")}
             </span>
             <input
               value={account.prenom}
               onChange={(event) => onChange({ ...account, prenom: event.target.value })}
               className="form-input"
-              placeholder="Ton prenom"
+              placeholder={t("firstNamePlaceholder")}
               autoComplete="given-name"
             />
           </label>
 
           <label className="flex flex-col gap-2">
             <span className="caption" style={{ color: "rgba(254,252,240,0.72)" }}>
-              Email
+              {t("email")}
             </span>
             <input
               value={account.email}
               onChange={(event) => onChange({ ...account, email: event.target.value })}
               className="form-input"
-              placeholder="ton@email.com"
+              placeholder={t("emailPlaceholder")}
               type="email"
               autoComplete="email"
             />
           </label>
 
           <p className="caption" style={{ color: "rgba(254,252,240,0.58)" }}>
-            Le compte sera finalise apres paiement pour donner acces au coffret et aux fichiers
-            generes.
+            {t("note")}
           </p>
 
           <div className="flex items-center justify-between gap-3 pt-2">
@@ -1039,7 +1052,7 @@ function AccountScreen({
                 cursor: "pointer",
               }}
             >
-              ← Revenir
+              {t("back")}
             </button>
             <button
               className="btn-primary"
@@ -1050,7 +1063,7 @@ function AccountScreen({
                 cursor: canContinue ? "pointer" : "not-allowed",
               }}
             >
-              Voir les offres
+              {t("continue")}
             </button>
           </div>
         </div>
@@ -1060,6 +1073,7 @@ function AccountScreen({
 }
 
 function PaywallTransition() {
+  const t = useTranslations("parcours.paywallTransition");
   return (
     <motion.section
       {...fadeSlide}
@@ -1077,10 +1091,10 @@ function PaywallTransition() {
       />
       <div className="relative max-w-[560px] flex flex-col gap-4">
         <p className="quote-italic" style={{ fontSize: 22 }}>
-          Le Griot t'a écouté. Il perçoit déjà ton essence.
+          {t("title")}
         </p>
         <p style={{ fontFamily: "var(--font-sans)", fontSize: 15, color: "rgba(254,252,240,0.7)" }}>
-          Choisis comment recevoir ton œuvre pour continuer la composition.
+          {t("body")}
         </p>
       </div>
     </motion.section>
@@ -1092,6 +1106,9 @@ const offers = [
     name: "TOTEM ORIGINE",
     price: "49€",
     sub: "L'expérience essentielle.",
+    bestFor: "Premier voyage",
+    delivery: "15 min",
+    includes: "3 pièces",
     features: [
       "Le Parchemin narratif (PDF)",
       "L'Œuvre visuelle (PNG haute résolution)",
@@ -1105,6 +1122,9 @@ const offers = [
     name: "TOTEM ANCESTRAL",
     price: "89€",
     sub: "L'expérience complète.",
+    bestFor: "Coffret complet",
+    delivery: "15 min",
+    includes: "4 pièces",
     features: [
       "Le Parchemin narratif (PDF)",
       "L'Œuvre visuelle (PNG haute résolution)",
@@ -1119,6 +1139,9 @@ const offers = [
     name: "TOTEM FAMILLE",
     price: "199€",
     sub: "L'expérience à partager.",
+    bestFor: "Trois destinataires",
+    delivery: "30 min",
+    includes: "3 coffrets",
     features: [
       "Trois œuvres TOTEM ANCESTRAL complètes",
       "Trois destinataires au choix",
@@ -1131,77 +1154,116 @@ const offers = [
 ];
 
 function Paywall({ onPaid }: { onPaid: () => void }) {
+  const t = useTranslations("parcours.paywall");
+  const translatedOffers = (t.raw("offers") as Offer[]) || offers;
+
   return (
     <motion.section
       {...fadeSlide}
-      className="relative flex min-h-0 items-center overflow-hidden px-4 py-12 md:px-8"
-      style={{ height: "100svh" }}
+      data-paywall-scroll
+      className="relative h-[100svh] overflow-y-auto overflow-x-hidden px-4 pb-[calc(24px+env(safe-area-inset-bottom))] pt-6 md:px-6 md:py-10 lg:flex lg:items-center lg:py-12"
+      style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
     >
-      <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl flex-col justify-center gap-5">
-        <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 text-center">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 pb-8 pt-2 md:gap-5 md:py-4 lg:min-h-full lg:justify-center lg:py-0">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 text-center md:gap-3">
           <h2
-            className="h-display text-[30px] md:text-[42px]"
+            className="h-display text-[26px] leading-tight md:text-[42px]"
             style={{ color: "var(--or-ancestral)" }}
           >
-            Choisis ton offre pour continuer.
+            {t("title")}
           </h2>
-          <p className="quote-italic text-[16px] md:text-[20px]">
-            Ton coffret te sera livré sous 15 minutes après le paiement.
+          <p className="quote-italic max-w-3xl text-[15px] leading-relaxed md:text-[20px]">
+            {t("subtitle")}
           </p>
         </div>
 
-        <div className="mx-auto grid min-h-0 w-full max-w-6xl grid-cols-3 gap-3 md:gap-6">
-          {offers.map((o) => (
+        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3 lg:gap-6">
+          {translatedOffers.map((o) => (
             <div
               key={o.name}
-              className="card-totem flex flex-col"
+              className={`card-totem flex flex-col !p-4 md:!p-5 lg:!p-6 ${o.featured ? "md:col-span-2 lg:col-span-1 lg:-translate-y-2" : ""}`}
               style={{
                 borderColor: o.featured ? "#C9A84C" : "rgba(201,168,76,0.35)",
                 borderWidth: o.featured ? 2 : 1,
-                transform: o.featured ? "translateY(-8px)" : "none",
                 position: "relative",
-                padding: "clamp(14px, 2vh, 26px) clamp(12px, 2vw, 24px)",
               }}
             >
               {o.featured && (
-                <div
-                  className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                  style={{
-                    background: "#C9A84C",
-                    color: "#1A1A2E",
-                    fontFamily: "var(--font-sans)",
-                    fontWeight: 700,
-                    fontSize: 10,
-                    padding: "5px 10px",
-                    letterSpacing: "0.12em",
-                    borderRadius: 2,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  LE CŒUR DE LA COLLECTION
+                <div className="mb-3 flex justify-center">
+                  <span
+                    className="inline-flex max-w-full items-center justify-center text-center uppercase"
+                    style={{
+                      background: "#C9A84C",
+                      color: "#1A1A2E",
+                      fontFamily: "var(--font-sans)",
+                      fontWeight: 700,
+                      fontSize: 10,
+                      padding: "5px 10px",
+                      letterSpacing: "0.12em",
+                      borderRadius: 2,
+                      lineHeight: 1.25,
+                    }}
+                  >
+                    {t("badge")}
+                  </span>
                 </div>
               )}
               <h3
-                className="h-display uppercase text-center"
-                style={{ fontSize: 20, color: "var(--ivoire)", letterSpacing: "0.08em" }}
+                className="h-display text-center uppercase text-[18px] leading-tight md:text-[20px]"
+                style={{ color: "var(--ivoire)", letterSpacing: "0.08em" }}
               >
                 {o.name}
               </h3>
               <div
-                className="h-display mt-3 text-center text-[34px] md:text-[46px]"
+                className="h-display mt-2 text-center text-[32px] leading-none md:mt-3 md:text-[46px]"
                 style={{ color: o.featured ? "var(--or-ancestral)" : "var(--ivoire)" }}
               >
                 {o.price}
               </div>
-              <p className="quote-italic mt-1 text-center text-[13px] md:text-[15px]">{o.sub}</p>
-              <ul className="my-4 flex flex-1 flex-col gap-2 md:my-5">
+              <p className="quote-italic mt-1 text-center text-[13px] leading-relaxed md:text-[15px]">
+                {o.sub}
+              </p>
+              <div className="mt-3 grid grid-cols-3 gap-1.5 text-center md:mt-4 md:gap-2">
+                {[
+                  [t("labels.usage"), o.bestFor],
+                  [t("labels.content"), o.includes],
+                  [t("labels.delivery"), o.delivery],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="rounded border px-1.5 py-1.5 md:px-2 md:py-2"
+                    style={{
+                      borderColor: "rgba(201,168,76,0.22)",
+                      background: "rgba(13,13,26,0.34)",
+                    }}
+                  >
+                    <p
+                      className="caption uppercase"
+                      style={{ color: "rgba(237,217,154,0.58)", fontSize: 8 }}
+                    >
+                      {label}
+                    </p>
+                    <p
+                      style={{
+                        color: "var(--ivoire)",
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 10,
+                        lineHeight: 1.25,
+                      }}
+                    >
+                      {value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <ul className="my-3 flex flex-1 flex-col gap-1.5 md:my-5 md:gap-2">
                 {o.features.map((f) => (
                   <li
                     key={f}
-                    className="flex gap-3 items-start"
-                    style={{ color: "var(--ivoire)", fontSize: 13, lineHeight: 1.35 }}
+                    className="flex items-start gap-2 md:gap-3"
+                    style={{ color: "var(--ivoire)", fontSize: 12, lineHeight: 1.35 }}
                   >
-                    <Check size={16} color="var(--or-ancestral)" className="mt-1 shrink-0" />
+                    <Check size={15} color="var(--or-ancestral)" className="mt-0.5 shrink-0" />
                     <span>{f}</span>
                   </li>
                 ))}
@@ -1209,7 +1271,7 @@ function Paywall({ onPaid }: { onPaid: () => void }) {
               <button
                 className={o.featured ? "btn-primary w-full" : "btn-secondary w-full"}
                 onClick={onPaid}
-                style={{ padding: "13px 16px", fontSize: 12 }}
+                style={{ padding: "11px 12px", fontSize: 11 }}
               >
                 {o.cta}
               </button>
@@ -1217,12 +1279,10 @@ function Paywall({ onPaid }: { onPaid: () => void }) {
           ))}
         </div>
 
-        <div className="relative z-10 mx-auto mt-5 flex max-w-3xl flex-col gap-2 text-center md:mt-7">
-          <p className="caption">
-            Paiement sécurisé · Visa · Mastercard · Apple Pay · Google Pay · Aucun abonnement · RGPD
-          </p>
+        <div className="relative z-10 mx-auto mt-3 flex max-w-3xl flex-col gap-2 pb-2 text-center md:mt-5">
+          <p className="caption leading-relaxed">{t("security")}</p>
           <p className="quote-italic" style={{ fontSize: 14 }}>
-            ✦ Ton parcours est sauvegardé. Les questions restantes t'attendent.
+            {t("saved")}
           </p>
         </div>
       </div>
@@ -1231,6 +1291,7 @@ function Paywall({ onPaid }: { onPaid: () => void }) {
 }
 
 function PostPayment({ onContinue }: { onContinue: () => void }) {
+  const t = useTranslations("parcours.postPayment");
   return (
     <motion.section
       {...fadeSlide}
@@ -1239,13 +1300,13 @@ function PostPayment({ onContinue }: { onContinue: () => void }) {
     >
       <div className="max-w-[560px] flex flex-col items-center gap-6">
         <p className="h-display" style={{ fontSize: 26, color: "var(--ivoire)" }}>
-          Ton engagement est reçu.
+          {t("title")}
         </p>
         <p className="quote-italic" style={{ fontSize: 18 }}>
-          Le Griot reprend la parole. Les questions restantes construiront ton œuvre.
+          {t("body")}
         </p>
         <button className="btn-primary" onClick={onContinue}>
-          Continuer mon voyage →
+          {t("continue")}
         </button>
       </div>
     </motion.section>
@@ -1253,11 +1314,8 @@ function PostPayment({ onContinue }: { onContinue: () => void }) {
 }
 
 function FinalTransition() {
-  const lines = [
-    "Le Griot a écouté.",
-    "Il tient maintenant ta vérité entre ses mains.",
-    "Les ancêtres délibèrent.",
-  ];
+  const t = useTranslations("parcours.finalTransition");
+  const lines = t.raw("lines") as string[];
   return (
     <motion.section
       {...fadeSlide}
@@ -1273,47 +1331,37 @@ function FinalTransition() {
           background: "radial-gradient(circle at center, rgba(201,168,76,0.35), transparent 65%)",
         }}
       />
-      <div className="relative flex flex-col gap-6 max-w-[600px]">
-        {lines.map((l, i) => (
+      <div className="relative flex max-w-[720px] flex-col items-center gap-6">
+        {lines.map((line, i) => (
           <motion.p
-            key={i}
-            initial={{ opacity: 0, y: 8 }}
+            key={line}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 + i * 0.8 }}
+            transition={{ delay: i * 0.65, duration: 0.9 }}
             className="h-display"
-            style={{ fontSize: 28, color: "var(--ivoire)" }}
+            style={{
+              fontSize: i === 2 ? 32 : 24,
+              color: i === 2 ? "var(--or-ancestral)" : "var(--ivoire)",
+            }}
           >
-            {l}
+            {line}
           </motion.p>
         ))}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 + 3 * 0.8 }}
-          className="quote-italic"
-          style={{ fontSize: 22 }}
-        >
-          Ton totem est en train de naître.
-        </motion.p>
+        <p className="quote-italic" style={{ fontSize: 16 }}>
+          {t("born")}
+        </p>
       </div>
     </motion.section>
   );
 }
-
-const ROTATING = [
-  "Les mots cherchent leur forme...",
-  "Le portrait prend vie dans l'ombre...",
-  "La voix de l'ancêtre se lève...",
-  "Ton parchemin est en train d'être écrit...",
-  "Un peu de patience — les ancêtres ne se pressent pas.",
-];
-
 function WaitingScreen() {
+  const t = useTranslations("parcours.waiting");
+  const rotating = t.raw("rotating") as string[];
   const [idx, setIdx] = useState(0);
   useEffect(() => {
-    const i = setInterval(() => setIdx((x) => (x + 1) % ROTATING.length), 6000);
+    const i = setInterval(() => setIdx((x) => (x + 1) % rotating.length), 6000);
     return () => clearInterval(i);
-  }, []);
+  }, [rotating.length]);
   return (
     <motion.section
       {...fadeSlide}
@@ -1333,7 +1381,7 @@ function WaitingScreen() {
           }}
         />
         <h2 className="h-display" style={{ fontSize: 32, color: "var(--or-ancestral)" }}>
-          L'œuvre se compose.
+          {t("title")}
         </h2>
         <AnimatePresence mode="wait">
           <motion.p
@@ -1345,7 +1393,7 @@ function WaitingScreen() {
             className="quote-italic"
             style={{ fontSize: 18, minHeight: 28 }}
           >
-            {ROTATING[idx]}
+            {rotating[idx]}
           </motion.p>
         </AnimatePresence>
         <p
@@ -1356,7 +1404,7 @@ function WaitingScreen() {
             lineHeight: 1.7,
           }}
         >
-          Tu peux fermer cette fenêtre. Les ancêtres terminent leur travail.
+          {t("body")}
         </p>
       </div>
     </motion.section>

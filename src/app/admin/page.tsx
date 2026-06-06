@@ -18,7 +18,7 @@ export default function AdminPage() {
           Tableau de bord admin
         </h1>
         <p className="quote-italic text-lg">
-          Socle reserve au module M7: commandes, revenus, erreurs pipeline et relance manuelle.
+          Socle réservé au module M7 : commandes, revenus, erreurs pipeline et relance manuelle.
         </p>
       </div>
     </main>

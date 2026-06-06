@@ -5,7 +5,6 @@ import {
   Mic,
   Sparkles,
   Send,
-  Check,
   ArrowRight,
   Globe2,
   LockKeyhole,
@@ -474,14 +473,14 @@ export function Offres() {
               className={o.featured ? "md:-translate-y-4 order-first md:order-none" : ""}
             >
               <article
-                className="card-totem h-full flex flex-col"
+                className="card-totem h-full flex flex-col text-center"
                 style={{
                   borderColor: o.featured ? "var(--or-ancestral)" : "rgba(201,168,76,0.35)",
                   boxShadow: o.featured ? "0 0 40px rgba(201,168,76,0.15)" : "none",
                   background: o.featured
                     ? "linear-gradient(180deg, #1A1A2E 0%, #14142a 100%)"
                     : "var(--indigo-ancestral)",
-                  minHeight: 520,
+                  minHeight: 310,
                 }}
               >
                 {o.featured && (
@@ -505,40 +504,13 @@ export function Offres() {
                   {o.name}
                 </h3>
 
-                <div className="text-center my-8">
-                  <span
-                    className="h-display text-6xl"
-                    style={{ color: o.featured ? "var(--or-ancestral)" : "var(--ivoire)" }}
-                  >
-                    {o.price}
-                  </span>
-                  <span
-                    className="h-display text-3xl ml-1"
-                    style={{ color: o.featured ? "var(--or-ancestral)" : "var(--ivoire)" }}
-                  >
-                    €
-                  </span>
-                </div>
-
-                <p className="quote-italic text-center text-base mb-8">{o.subtitle}</p>
-
-                <ul className="flex flex-col gap-4 mb-10">
-                  {o.features.map((f) => (
-                    <li
-                      key={f}
-                      className="flex items-start gap-3 text-[14px] leading-[1.6]"
-                      style={{ color: "var(--ivoire)" }}
-                    >
-                      <Check
-                        size={16}
-                        strokeWidth={1.5}
-                        color="var(--or-ancestral)"
-                        className="mt-1 shrink-0"
-                      />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="quote-italic mx-auto mt-8 max-w-[240px] text-base">{o.subtitle}</p>
+                <p
+                  className="body-copy mx-auto mt-6 max-w-[260px] text-[14px]"
+                  style={{ color: "rgba(254,252,240,0.72)" }}
+                >
+                  {t("teaser")}
+                </p>
 
                 <div className="mt-auto">
                   <Link

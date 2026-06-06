@@ -9,6 +9,9 @@
     "start": "next start",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
+    "i18n:check": "next-auto-i18n check",
+    "i18n:check:json": "next-auto-i18n check --json",
+    "i18n:sync": "next-auto-i18n sync",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -16,7 +19,6 @@
     "@aws-sdk/s3-request-presigner": "^3.954.0",
     "@getbrevo/brevo": "^3.0.1",
     "@hookform/resolvers": "^5.2.2",
-    "@react-pdf/renderer": "^4.3.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
@@ -43,6 +45,7 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@react-pdf/renderer": "^4.3.1",
     "@supabase/supabase-js": "^2.107.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -81,6 +84,7 @@
     "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^15.15.0",
+    "next-auto-i18n": "^1.0.2",
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1"

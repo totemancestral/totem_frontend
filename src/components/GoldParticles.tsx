@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 function seededRandom(seed: number) {
   const value = Math.sin(seed) * 10000;
@@ -10,6 +10,7 @@ function particleValue(index: number, count: number, offset: number) {
 }
 
 export function GoldParticles({ count = 26 }: { count?: number }) {
+  const [mounted, setMounted] = useState(false);
   const particles = useMemo(
     () =>
       Array.from({ length: count }).map((_, i) => ({
@@ -24,25 +25,30 @@ export function GoldParticles({ count = 26 }: { count?: number }) {
     [count],
   );
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      {particles.map((p) => (
-        <span
-          key={p.id}
-          className="absolute rounded-full animate-drift"
-          style={{
-            left: `${p.left}%`,
-            top: `${p.top}%`,
-            width: `${p.size}px`,
-            height: `${p.size}px`,
-            background: "#C9A84C",
-            opacity: p.opacity,
-            animationDelay: `${p.delay}s`,
-            animationDuration: `${p.duration}s`,
-            boxShadow: "0 0 6px rgba(201, 168, 76, 0.6)",
-          }}
-        />
-      ))}
+      {mounted &&
+        particles.map((p) => (
+          <span
+            key={p.id}
+            className="absolute rounded-full animate-drift"
+            style={{
+              left: `${p.left}%`,
+              top: `${p.top}%`,
+              width: `${p.size}px`,
+              height: `${p.size}px`,
+              background: "#C9A84C",
+              opacity: p.opacity,
+              animationDelay: `${p.delay}s`,
+              animationDuration: `${p.duration}s`,
+              boxShadow: "0 0 6px rgba(201, 168, 76, 0.6)",
+            }}
+          />
+        ))}
     </div>
   );
 }

@@ -1,0 +1,30 @@
+{
+  "$schema": "./node_modules/next-auto-i18n/schema/auto-i18n.config.schema.json",
+  "sourceLocale": "fr",
+  "targetLocales": ["en"],
+  "provider": "deepl",
+  "apiKeyEnv": "AUTO_I18N_DEEPL_KEY",
+  "messagesDir": "./messages",
+  "ignore": [
+    "node_modules",
+    ".next",
+    ".vercel",
+    "dist",
+    "build",
+    "out",
+    "public",
+    "coverage",
+    "src/app/api/**",
+    "src/app/layout.tsx",
+    "src/app/page.tsx",
+    "src/components/SiteTourModal.tsx",
+    "src/components/questionnaire/ParcoursPage.tsx",
+    "src/components/ui/**",
+    "src/hooks/**",
+    "src/integrations/**",
+    "src/lib/**",
+    "src/routes/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ]
+}
