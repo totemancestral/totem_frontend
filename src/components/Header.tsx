@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, UserRound, X } from "lucide-react";
 
 type Locale = "fr" | "en";
 
@@ -112,6 +112,15 @@ export function Header({ locale }: { locale: Locale }) {
             </button>
           </div>
           <Link
+            href={`/${locale}/espace-personnel`}
+            aria-label={t("account")}
+            title={t("account")}
+            className="hidden h-10 w-10 items-center justify-center rounded-sm border transition-colors hover:bg-ombre md:inline-flex"
+            style={{ borderColor: "rgba(201,168,76,0.28)", color: "var(--or-ancestral)" }}
+          >
+            <UserRound size={17} />
+          </Link>
+          <Link
             href={`/${locale}/parcours`}
             className="hidden md:inline-flex btn-primary !py-3 !px-6 !text-[11px]"
           >
@@ -146,7 +155,15 @@ export function Header({ locale }: { locale: Locale }) {
               </Link>
             ))}
             <Link
-              href={`/${locale}/#offres`}
+              href={`/${locale}/espace-personnel`}
+              onClick={() => setOpen(false)}
+              className="subtext text-sm tracking-[0.14em] uppercase"
+              style={{ color: "var(--ivoire)" }}
+            >
+              {t("account")}
+            </Link>
+            <Link
+              href={`/${locale}/parcours`}
               onClick={() => setOpen(false)}
               className="btn-primary w-full mt-2"
             >

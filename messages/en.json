@@ -139,6 +139,7 @@
     "menu": "Menu",
     "compose": "Compose",
     "composeWork": "Compose my artwork",
+    "account": "Account",
     "nav": {
       "experience": "The experience",
       "offers": "Offers",
@@ -674,11 +675,7 @@
       "eyebrow": "Account creation",
       "title": "Reserve your personal space.",
       "body": "The first four answers open the journey. Your email will help you retrieve your box, receive delivery and resume the experience without losing progress.",
-      "checks": [
-        "4 questions heard",
-        "Account prepared",
-        "Box selection"
-      ],
+      "checks": ["4 questions heard", "Account prepared", "Box selection"],
       "formEyebrow": "Delivery identity",
       "formTitle": "Before choosing the price",
       "firstName": "First name",

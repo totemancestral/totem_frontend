@@ -4,6 +4,14 @@
 @import "tw-animate-css";
 
 @font-face {
+  font-family: "Bebas Neue";
+  src: url("/fonts/totem/BebasNeue-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "MAKALO Regular";
   src: url("/fonts/totem/MAKALO-Regular.otf") format("opentype");
   font-weight: 400;
@@ -59,8 +67,8 @@
   --color-ivoire: var(--ivoire);
   --color-caption: #888888;
 
-  /* Police grand titre precedente conservee : "MAKALO Regular", serif. */
-  --font-display: "Survivor", "MAKALO Regular", serif;
+  /* Polices grand titre precedentes conservees en fallback : "Survivor", "MAKALO Regular", serif. */
+  --font-display: "Bebas Neue", "Survivor", "MAKALO Regular", serif;
   --font-sans: "Space Grotesk", sans-serif;
   --font-subtext: "Space Grotesk", sans-serif;
 }
