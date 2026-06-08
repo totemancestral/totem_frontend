@@ -121,7 +121,7 @@ export function Header({ locale }: { locale: Locale }) {
             <UserRound size={17} />
           </Link>
           <Link
-            href={`/${locale}/parcours`}
+            href={`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`}
             className="hidden md:inline-flex btn-primary !py-3 !px-6 !text-[11px]"
           >
             {t("compose")}
@@ -163,7 +163,7 @@ export function Header({ locale }: { locale: Locale }) {
               {t("account")}
             </Link>
             <Link
-              href={`/${locale}/parcours`}
+              href={`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`}
               onClick={() => setOpen(false)}
               className="btn-primary w-full mt-2"
             >

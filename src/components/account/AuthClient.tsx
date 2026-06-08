@@ -9,45 +9,61 @@ import { ArrowRight, Mail, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type Locale = "fr" | "en";
+type Mode = "signin" | "signup";
 
 const copy = {
   fr: {
     eyebrow: "Acces personnel",
-    title: "Revenir dans ton espace",
-    text: "Cet acces est reserve aux utilisateurs qui ont deja commence ou commande une oeuvre.",
+    signinTitle: "Revenir dans ton espace",
+    signupTitle: "Creer ton espace",
+    signinText: "Connecte-toi pour retrouver ton parcours, tes commandes et tes oeuvres.",
+    signupText:
+      "Cree ton compte pour commencer la composition. Ton parcours sera rattache a cet espace.",
+    firstName: "Prenom",
+    firstNamePlaceholder: "Ton prenom",
     email: "Email",
     emailPlaceholder: "ton@email.com",
     password: "Mot de passe",
     passwordPlaceholder: "Minimum 6 caracteres",
     signin: "Entrer",
+    signup: "Creer mon compte",
     magic: "Recevoir un lien magique",
     forgot: "Mot de passe oublie",
     site: "Entrer sur le site",
-    newVisitor:
-      "Nouveau ici ? L'inscription se fait dans le parcours, apres avoir clique sur Composer.",
+    switchSignup: "Je viens composer mon oeuvre",
+    switchSignin: "J'ai deja un compte",
     legal: "Tes donnees restent rattachees a ton compte et protegees par Supabase Auth.",
     magicSent: "Lien magique envoye. Verifie ta boite mail.",
-    sessionReady: "Session ouverte. Redirection vers ton espace...",
+    signupSent: "Compte cree. Si la confirmation email est activee, verifie ta boite mail.",
+    sessionReady: "Session ouverte. Redirection...",
     authError: "Authentification impossible.",
     loading: "...",
     checks: ["Parcours sauvegarde", "Livrables rattaches", "Retour securise"],
   },
   en: {
     eyebrow: "Personal access",
-    title: "Return to your space",
-    text: "This access is for users who have already started or ordered an artwork.",
+    signinTitle: "Return to your space",
+    signupTitle: "Create your space",
+    signinText: "Sign in to find your journey, orders and artworks.",
+    signupText:
+      "Create your account to start composing. Your journey will be attached to this space.",
+    firstName: "First name",
+    firstNamePlaceholder: "Your first name",
     email: "Email",
     emailPlaceholder: "you@email.com",
     password: "Password",
     passwordPlaceholder: "Minimum 6 characters",
     signin: "Enter",
+    signup: "Create my account",
     magic: "Send me a magic link",
     forgot: "Forgot password",
     site: "Enter the site",
-    newVisitor: "New here? Signup happens inside the journey, after clicking Compose.",
+    switchSignup: "I came to compose",
+    switchSignin: "I already have an account",
     legal: "Your data stays attached to your account and protected by Supabase Auth.",
     magicSent: "Magic link sent. Check your inbox.",
-    sessionReady: "Session opened. Redirecting to your space...",
+    signupSent: "Account created. If email confirmation is enabled, check your inbox.",
+    sessionReady: "Session opened. Redirecting...",
     authError: "Authentication failed.",
     loading: "...",
     checks: ["Saved journey", "Attached files", "Secure access"],
@@ -58,6 +74,9 @@ export function AuthClient({ locale }: { locale: Locale }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = copy[locale];
+  const initialMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
+  const [mode, setMode] = useState<Mode>(initialMode);
+  const [prenom, setPrenom] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -98,6 +117,26 @@ export function AuthClient({ locale }: { locale: Locale }) {
     setNotice(null);
 
     try {
+      if (mode === "signup") {
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}${redirectPath}`,
+            data: { prenom, langue: locale },
+          },
+        });
+        if (signUpError) throw signUpError;
+        if (data.session) {
+          await ensureProfile(data.session.user, locale, email, prenom);
+          setNotice(t.sessionReady);
+          router.replace(redirectPath);
+          return;
+        }
+        setNotice(t.signupSent);
+        return;
+      }
+
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -121,8 +160,8 @@ export function AuthClient({ locale }: { locale: Locale }) {
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}${dashboardPath}`,
-          shouldCreateUser: false,
+          emailRedirectTo: `${window.location.origin}${redirectPath}`,
+          shouldCreateUser: mode === "signup",
         },
       });
       if (otpError) throw otpError;
@@ -153,10 +192,10 @@ export function AuthClient({ locale }: { locale: Locale }) {
             className="h-display text-4xl leading-tight md:text-6xl"
             style={{ color: "var(--ivoire)" }}
           >
-            {t.title}
+            {mode === "signin" ? t.signinTitle : t.signupTitle}
           </h1>
           <p className="body-copy max-w-xl" style={{ color: "rgba(254,252,240,0.76)" }}>
-            {t.text}
+            {mode === "signin" ? t.signinText : t.signupText}
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
             {t.checks.map((item) => (
@@ -184,9 +223,37 @@ export function AuthClient({ locale }: { locale: Locale }) {
           transition={{ duration: 0.7, delay: 0.1 }}
           className="card-totem mx-auto flex w-full max-w-[520px] flex-col gap-6 !p-5 md:!p-8"
         >
-          <p className="quote-italic text-center text-lg">{t.signin}</p>
+          <div
+            className="grid grid-cols-2 gap-2 rounded-md border p-1"
+            style={{ borderColor: "rgba(201,168,76,0.22)" }}
+          >
+            <button
+              type="button"
+              onClick={() => setMode("signin")}
+              className={tabClass(mode === "signin")}
+            >
+              {t.signin}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("signup")}
+              className={tabClass(mode === "signup")}
+            >
+              {t.signup}
+            </button>
+          </div>
 
           <form onSubmit={submit} className="flex flex-col gap-4">
+            {mode === "signup" && (
+              <Field
+                label={t.firstName}
+                value={prenom}
+                onChange={setPrenom}
+                placeholder={t.firstNamePlaceholder}
+                autoComplete="given-name"
+                required
+              />
+            )}
             <Field
               label={t.email}
               value={email}
@@ -202,7 +269,7 @@ export function AuthClient({ locale }: { locale: Locale }) {
               onChange={setPassword}
               placeholder={t.passwordPlaceholder}
               type="password"
-              autoComplete="current-password"
+              autoComplete={mode === "signin" ? "current-password" : "new-password"}
               minLength={6}
               required
             />
@@ -223,7 +290,7 @@ export function AuthClient({ locale }: { locale: Locale }) {
               disabled={loading}
               className="btn-primary w-full disabled:cursor-wait disabled:opacity-60"
             >
-              {loading ? t.loading : t.signin}
+              {loading ? t.loading : mode === "signin" ? t.signin : t.signup}
             </button>
           </form>
 
@@ -245,13 +312,18 @@ export function AuthClient({ locale }: { locale: Locale }) {
             >
               {t.forgot}
             </Link>
-            <Link
-              href={`/${locale}`}
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "signin" ? "signup" : "signin");
+                setError(null);
+                setNotice(null);
+              }}
               className="caption uppercase"
               style={{ color: "var(--or-ancestral)" }}
             >
-              {t.newVisitor}
-            </Link>
+              {mode === "signin" ? t.switchSignup : t.switchSignin}
+            </button>
             <p className="caption max-w-sm" style={{ color: "rgba(254,252,240,0.52)" }}>
               {t.legal}
             </p>
@@ -314,6 +386,12 @@ function Field({
       />
     </label>
   );
+}
+
+function tabClass(active: boolean) {
+  return `rounded px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors ${
+    active ? "bg-or text-indigo" : "text-or-pale hover:bg-ombre"
+  }`;
 }
 
 function translateAuthError(error: unknown, locale: Locale) {

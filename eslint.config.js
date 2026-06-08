@@ -9,6 +9,7 @@ export default tseslint.config(
     ignores: [
       "dist",
       ".next",
+      "backend",
       ".output",
       ".vinxi",
       "src/routes",

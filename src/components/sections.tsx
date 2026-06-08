@@ -514,7 +514,7 @@ export function Offres() {
 
                 <div className="mt-auto">
                   <Link
-                    href={`/${locale}/parcours`}
+                    href={`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`}
                     className={`${o.featured ? "btn-primary" : "btn-secondary"} w-full text-center justify-center`}
                   >
                     {o.cta}
@@ -661,7 +661,7 @@ export function CtaFinal() {
         </Reveal>
         <Reveal delay={0.3}>
           <Link
-            href={`/${locale}/parcours`}
+            href={`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`}
             className="btn-primary animate-pulse-glow !px-14 !py-5"
           >
             {t("button")}
