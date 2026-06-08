@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { motion } from "motion/react";
 import {
+  Activity,
   AlertTriangle,
   Clock3,
   Download,
   FileText,
   Image as ImageIcon,
+  ListChecks,
   LogOut,
   PackageCheck,
   Plus,
@@ -18,11 +20,14 @@ import {
   Volume2,
 } from "lucide-react";
 import {
+  countJourneyAnswers,
   getLocalArtworks,
+  getLocalJourney,
   getLocalOrders,
   getLocalSession,
   signOutLocalUser,
   type LocalArtwork,
+  type LocalJourney,
   type LocalOffer,
   type LocalOrder,
   type LocalOrderStatus,
@@ -34,6 +39,12 @@ type Commande = LocalOrder;
 type Oeuvre = LocalArtwork;
 type CommandeStatut = LocalOrderStatus;
 type OfferType = LocalOffer;
+type CompositionState = {
+  status: string;
+  progress: number;
+  events: string[];
+  hasComposition: boolean;
+};
 
 const copy = {
   fr: {
@@ -46,6 +57,7 @@ const copy = {
     orders: "Commandes",
     delivered: "Oeuvres livrees",
     active: "En cours",
+    answers: "Reponses",
     compose: "Composer une oeuvre",
     logout: "Se deconnecter",
     profile: "Profil",
@@ -67,6 +79,23 @@ const copy = {
     waitingFiles: "Les fichiers apparaitront quand la livraison sera terminee.",
     unnamed: "Oeuvre sans nom",
     defaultName: "Voyageur",
+    currentComposition: "Composition en cours",
+    compositionProgress: "Progression",
+    compositionStatus: "Statut",
+    events: "Evenements",
+    noComposition: "Aucune composition en cours.",
+    noEvents: "Aucun evenement pour le moment.",
+    draftStatus: "Questionnaire en cours",
+    offerStatus: "Offre a choisir",
+    paidStatus: "Commande enregistree",
+    generatingStatus: "Generation en cours",
+    deliveredStatus: "Livraison disponible",
+    errorStatus: "Intervention requise",
+    accountEvent: "Espace test ouvert",
+    answersEvent: "{count}/10 reponses sauvegardees",
+    offerEvent: "Questionnaire termine, offre a choisir",
+    orderEvent: "Commande #{id} en generation",
+    deliveryEvent: "Livrables disponibles dans le dashboard",
   },
   en: {
     eyebrow: "Personal space",
@@ -78,6 +107,7 @@ const copy = {
     orders: "Orders",
     delivered: "Delivered artworks",
     active: "In progress",
+    answers: "Answers",
     compose: "Compose an artwork",
     logout: "Sign out",
     profile: "Profile",
@@ -99,8 +129,27 @@ const copy = {
     waitingFiles: "Files will appear when delivery is complete.",
     unnamed: "Untitled artwork",
     defaultName: "Traveler",
+    currentComposition: "Current composition",
+    compositionProgress: "Progress",
+    compositionStatus: "Status",
+    events: "Events",
+    noComposition: "No composition in progress.",
+    noEvents: "No event yet.",
+    draftStatus: "Questionnaire in progress",
+    offerStatus: "Offer to choose",
+    paidStatus: "Order saved",
+    generatingStatus: "Generation in progress",
+    deliveredStatus: "Delivery available",
+    errorStatus: "Action required",
+    accountEvent: "Test space opened",
+    answersEvent: "{count}/10 answers saved",
+    offerEvent: "Questionnaire complete, offer to choose",
+    orderEvent: "Order #{id} is generating",
+    deliveryEvent: "Deliverables available in the dashboard",
   },
 } as const;
+
+type DashboardCopy = Record<keyof (typeof copy)["fr"], string>;
 
 const statusLabels: Record<Locale, Record<CommandeStatut, string>> = {
   fr: {
@@ -145,6 +194,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
   const [userEmail, setUserEmail] = useState("");
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [oeuvres, setOeuvres] = useState<Oeuvre[]>([]);
+  const [journey, setJourney] = useState<LocalJourney | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -175,6 +225,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
       setOeuvres(
         getLocalArtworks(session.id).sort((a, b) => b.created_at.localeCompare(a.created_at)),
       );
+      setJourney(getLocalJourney());
       setLoading(false);
     }
 
@@ -192,6 +243,14 @@ export function DashboardClient({ locale }: { locale: Locale }) {
   const activeCount = commandes.filter((commande) =>
     ["en_attente_paiement", "paye", "en_generation"].includes(commande.statut),
   ).length;
+  const answeredCount = countJourneyAnswers(journey);
+  const composition = buildCompositionState({
+    journey,
+    commandes,
+    oeuvres,
+    answeredCount,
+    copy: t,
+  });
 
   const logout = async () => {
     signOutLocalUser();
@@ -270,7 +329,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
           </div>
         </motion.header>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           <StatCard
             icon={<PackageCheck size={20} />}
             label={t.orders}
@@ -282,7 +341,14 @@ export function DashboardClient({ locale }: { locale: Locale }) {
             value={deliveredCount.toString()}
           />
           <StatCard icon={<Clock3 size={20} />} label={t.active} value={activeCount.toString()} />
+          <StatCard
+            icon={<ListChecks size={20} />}
+            label={t.answers}
+            value={`${answeredCount}/10`}
+          />
         </div>
+
+        <CompositionPanel composition={composition} locale={locale} />
 
         <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
           <aside
@@ -355,6 +421,142 @@ function StatCard({ icon, label, value }: { icon: ReactNode; label: string; valu
       </p>
     </article>
   );
+}
+
+function CompositionPanel({
+  composition,
+  locale,
+}: {
+  composition: CompositionState;
+  locale: Locale;
+}) {
+  const t = copy[locale];
+
+  return (
+    <section
+      className="grid gap-5 rounded-lg border p-5 md:grid-cols-[0.82fr_1.18fr] md:p-6"
+      style={{ background: "rgba(26,26,46,0.72)", borderColor: "rgba(201,168,76,0.22)" }}
+    >
+      <div className="flex flex-col gap-5">
+        <div className="flex items-center gap-3">
+          <Activity size={20} color="var(--or-ancestral)" />
+          <h2 className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
+            {t.currentComposition}
+          </h2>
+        </div>
+
+        <div>
+          <p className="caption uppercase" style={{ color: "rgba(237,217,154,0.72)" }}>
+            {t.compositionStatus}
+          </p>
+          <p className="mt-2 text-lg" style={{ color: "var(--ivoire)" }}>
+            {composition.hasComposition ? composition.status : t.noComposition}
+          </p>
+        </div>
+
+        <div>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <p className="caption uppercase" style={{ color: "rgba(237,217,154,0.72)" }}>
+              {t.compositionProgress}
+            </p>
+            <span className="caption" style={{ color: "var(--or-pale)" }}>
+              {composition.progress}%
+            </span>
+          </div>
+          <div
+            className="h-2 overflow-hidden rounded-sm"
+            style={{ background: "rgba(13,13,26,0.86)" }}
+          >
+            <div
+              className="h-full rounded-sm transition-all duration-500"
+              style={{ width: `${composition.progress}%`, background: "var(--or-ancestral)" }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <h3 className="h-display text-2xl" style={{ color: "var(--ivoire)" }}>
+          {t.events}
+        </h3>
+        {composition.events.length === 0 ? (
+          <p className="caption" style={{ color: "rgba(254,252,240,0.58)" }}>
+            {t.noEvents}
+          </p>
+        ) : (
+          <ol className="flex flex-col gap-3">
+            {composition.events.map((event) => (
+              <li key={event} className="flex items-start gap-3">
+                <span
+                  className="mt-1 h-2 w-2 shrink-0 rounded-full"
+                  style={{ background: "var(--or-ancestral)" }}
+                />
+                <span
+                  className="text-sm leading-relaxed"
+                  style={{ color: "rgba(254,252,240,0.78)" }}
+                >
+                  {event}
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function buildCompositionState({
+  journey,
+  commandes,
+  oeuvres,
+  answeredCount,
+  copy: t,
+}: {
+  journey: LocalJourney | null;
+  commandes: Commande[];
+  oeuvres: Oeuvre[];
+  answeredCount: number;
+  copy: DashboardCopy;
+}): CompositionState {
+  const latestOrder = commandes[0];
+  const hasDeliveredArtwork = oeuvres.some(
+    (oeuvre) => oeuvre.statut === "livree" || oeuvre.image_url || oeuvre.pdf_url,
+  );
+  const hasComposition = answeredCount > 0 || Boolean(latestOrder) || hasDeliveredArtwork;
+
+  if (!hasComposition) {
+    return { status: t.noComposition, progress: 0, events: [], hasComposition: false };
+  }
+
+  const events = [t.accountEvent];
+  if (answeredCount > 0) events.push(t.answersEvent.replace("{count}", answeredCount.toString()));
+  if (answeredCount >= 10 && !latestOrder) events.push(t.offerEvent);
+  if (latestOrder) events.push(t.orderEvent.replace("{id}", latestOrder.id.slice(0, 8)));
+  if (hasDeliveredArtwork) events.push(t.deliveryEvent);
+
+  if (hasDeliveredArtwork) {
+    return { status: t.deliveredStatus, progress: 100, events, hasComposition: true };
+  }
+  if (latestOrder?.statut === "erreur") {
+    return { status: t.errorStatus, progress: 100, events, hasComposition: true };
+  }
+  if (latestOrder?.statut === "en_generation") {
+    return { status: t.generatingStatus, progress: 88, events, hasComposition: true };
+  }
+  if (latestOrder?.statut === "paye") {
+    return { status: t.paidStatus, progress: 72, events, hasComposition: true };
+  }
+  if (journey?.phase === "paywall" || answeredCount >= 10) {
+    return { status: t.offerStatus, progress: 64, events, hasComposition: true };
+  }
+
+  return {
+    status: t.draftStatus,
+    progress: Math.max(8, Math.min(60, answeredCount * 6)),
+    events,
+    hasComposition: true,
+  };
 }
 
 function ProfileLine({ label, value }: { label: string; value: string }) {

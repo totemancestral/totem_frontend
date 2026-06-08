@@ -46,10 +46,19 @@ export type LocalArtwork = {
   created_at: string;
 };
 
+export type LocalJourney = {
+  answers?: Record<string, unknown>;
+  account?: { prenom?: string; email?: string };
+  hasUnlockedRest?: boolean;
+  index?: number;
+  phase?: string;
+};
+
 const USERS_KEY = "totem_local_users_v1";
 const SESSION_KEY = "totem_local_session_v1";
 const ORDERS_KEY = "totem_local_orders_v1";
 const ARTWORKS_KEY = "totem_local_artworks_v1";
+const JOURNEY_KEY = "totem_parcours_v1";
 
 export function getLocalSession(): LocalSession | null {
   return readJson<LocalSession | null>(SESSION_KEY, null);
@@ -160,6 +169,19 @@ export function getLocalArtworks(userId: string): LocalArtwork[] {
   return readJson<LocalArtwork[]>(ARTWORKS_KEY, []).filter((artwork) => artwork.user_id === userId);
 }
 
+export function getLocalJourney(): LocalJourney | null {
+  return readJson<LocalJourney | null>(JOURNEY_KEY, null);
+}
+
+export function countJourneyAnswers(journey: LocalJourney | null): number {
+  if (!journey?.answers) return 0;
+  return Object.values(journey.answers).filter((answer) => {
+    if (!answer || typeof answer !== "object") return false;
+    const value = answer as { choice?: string; field?: string; skipped?: boolean };
+    return Boolean(value.choice || value.field?.trim() || value.skipped);
+  }).length;
+}
+
 export function createLocalOrder(input: {
   userId: string;
   offre: LocalOffer;
@@ -173,7 +195,7 @@ export function createLocalOrder(input: {
     id: createId(),
     user_id: input.userId,
     offre: input.offre,
-    statut: "paye",
+    statut: "en_generation",
     montant_cents: input.montantCents,
     devise: input.devise ?? "EUR",
     langue: input.langue,

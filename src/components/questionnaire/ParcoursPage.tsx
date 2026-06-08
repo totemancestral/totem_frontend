@@ -1,10 +1,11 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GoldParticles } from "@/components/GoldParticles";
 import { MaskLogo } from "@/components/MaskLogo";
-import { Check } from "lucide-react";
+import { Check, Home, LayoutDashboard } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   createLocalOrder,
@@ -615,6 +616,8 @@ export function ParcoursPage() {
         />
       </div>
 
+      <JourneyNav locale={locale} phase={phase} currentStep={current?.n ?? 0} progress={progress} />
+
       <GoldParticles count={20} />
 
       <AnimatePresence mode="wait">
@@ -704,6 +707,105 @@ const fadeSlide = {
   exit: { opacity: 0, y: -20 },
   transition: { duration: 0.6, ease: "easeOut" as const },
 };
+
+function JourneyNav({
+  locale,
+  phase,
+  currentStep,
+  progress,
+}: {
+  locale: "fr" | "en";
+  phase: Phase;
+  currentStep: number;
+  progress: number;
+}) {
+  const isFrench = locale === "fr";
+  const label = getJourneyLabel({ phase, currentStep, progress, isFrench });
+
+  return (
+    <nav
+      className="fixed left-0 right-0 z-[230] px-4 pt-4 md:px-8"
+      aria-label={isFrench ? "Navigation du parcours" : "Journey navigation"}
+    >
+      <div
+        className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 rounded-md border px-3 md:px-4"
+        style={{
+          background: "rgba(13,13,26,0.88)",
+          borderColor: "rgba(201,168,76,0.24)",
+          backdropFilter: "blur(14px)",
+        }}
+      >
+        <Link
+          href={`/${locale}`}
+          className="flex min-w-0 items-center gap-2"
+          aria-label="Totem Ancestral"
+        >
+          <span
+            className="logo-wordmark text-[18px] leading-none"
+            style={{ color: "var(--ivoire)" }}
+          >
+            T
+          </span>
+          <img src="/assets/totem-logo.png" alt="" aria-hidden="true" className="h-8 w-auto" />
+          <span
+            className="logo-wordmark text-[18px] leading-none"
+            style={{ color: "var(--ivoire)" }}
+          >
+            A
+          </span>
+        </Link>
+
+        <p
+          className="hidden min-w-0 truncate text-center text-[11px] uppercase tracking-[0.16em] md:block"
+          style={{ color: "rgba(237,217,154,0.72)" }}
+        >
+          {label}
+        </p>
+
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href={`/${locale}`}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-sm border transition-colors hover:bg-ombre"
+            style={{ borderColor: "rgba(201,168,76,0.24)", color: "var(--or-ancestral)" }}
+            aria-label={isFrench ? "Accueil" : "Home"}
+          >
+            <Home size={16} />
+          </Link>
+          <Link
+            href={`/${locale}/espace-personnel`}
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-sm border px-3 text-[11px] uppercase tracking-[0.12em] transition-colors hover:bg-ombre"
+            style={{ borderColor: "rgba(201,168,76,0.28)", color: "var(--or-ancestral)" }}
+          >
+            <LayoutDashboard size={15} />
+            <span className="hidden sm:inline">{isFrench ? "Dashboard" : "Dashboard"}</span>
+          </Link>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function getJourneyLabel({
+  phase,
+  currentStep,
+  progress,
+  isFrench,
+}: {
+  phase: Phase;
+  currentStep: number;
+  progress: number;
+  isFrench: boolean;
+}) {
+  if (phase === "question") {
+    return isFrench
+      ? `Question ${currentStep}/10 - ${progress}%`
+      : `Question ${currentStep}/10 - ${progress}%`;
+  }
+  if (phase === "paywall") return isFrench ? "Choix de l'offre" : "Offer selection";
+  if (phase === "waiting") return isFrench ? "Composition en cours" : "Composition in progress";
+  if (phase === "post-payment") return isFrench ? "Commande enregistree" : "Order saved";
+  return isFrench ? "Parcours du griot" : "Griot journey";
+}
 
 function IntroScreen({ onStart }: { onStart: () => void }) {
   const t = useTranslations("parcours.intro");
@@ -827,7 +929,7 @@ function QuestionScreen({
   return (
     <motion.section
       {...fadeSlide}
-      className="relative flex min-h-0 items-center justify-center overflow-y-auto px-4 pb-6 pt-12 md:px-6 md:pb-8 md:pt-20 lg:overflow-hidden"
+      className="relative flex min-h-0 items-center justify-center overflow-y-auto px-4 pb-6 pt-24 md:px-6 md:pb-8 md:pt-28 lg:overflow-hidden"
       style={{ height: "100svh" }}
     >
       <div className="grid min-h-full w-full max-w-[1180px] grid-rows-[auto_1fr] gap-4 py-4 md:h-full md:min-h-0 md:grid-cols-[0.86fr_1.14fr] md:grid-rows-1 md:gap-6 md:py-0 lg:max-h-[760px] lg:gap-10">
@@ -1062,7 +1164,7 @@ function AccountScreen({
   return (
     <motion.section
       {...fadeSlide}
-      className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 pb-8 pt-16 md:px-10 md:pt-20"
+      className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 pb-8 pt-28 md:px-10"
       style={{ height: "100svh" }}
     >
       <div className="grid h-full min-h-0 w-full max-w-5xl items-center gap-8 md:grid-cols-[0.9fr_1.1fr]">
@@ -1178,7 +1280,7 @@ function PaywallTransition() {
   return (
     <motion.section
       {...fadeSlide}
-      className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 text-center"
+      className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 pt-24 text-center"
       style={{ height: "100svh" }}
     >
       <motion.div
@@ -1278,7 +1380,7 @@ function Paywall({
     <motion.section
       {...fadeSlide}
       data-paywall-scroll
-      className="relative h-[100svh] overflow-y-auto overflow-x-hidden px-4 pb-[calc(24px+env(safe-area-inset-bottom))] pt-6 md:px-6 md:py-10 lg:flex lg:items-center lg:py-12"
+      className="relative h-[100svh] overflow-y-auto overflow-x-hidden px-4 pb-[calc(24px+env(safe-area-inset-bottom))] pt-24 md:px-6 md:pb-10 lg:flex lg:items-center lg:pb-12"
       style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
     >
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 pb-8 pt-2 md:gap-5 md:py-4 lg:min-h-full lg:justify-center lg:py-0">
@@ -1418,7 +1520,7 @@ function PostPayment({ onContinue }: { onContinue: () => void }) {
   return (
     <motion.section
       {...fadeSlide}
-      className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 text-center"
+      className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 pt-24 text-center"
       style={{ height: "100svh" }}
     >
       <div className="max-w-[560px] flex flex-col items-center gap-6">
@@ -1442,7 +1544,7 @@ function FinalTransition() {
   return (
     <motion.section
       {...fadeSlide}
-      className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 text-center"
+      className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 pt-24 text-center"
       style={{ height: "100svh" }}
     >
       <motion.div
@@ -1488,7 +1590,7 @@ function WaitingScreen() {
   return (
     <motion.section
       {...fadeSlide}
-      className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 text-center"
+      className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 pt-24 text-center"
       style={{ height: "100svh" }}
     >
       <div className="max-w-[560px] flex flex-col items-center gap-8">
