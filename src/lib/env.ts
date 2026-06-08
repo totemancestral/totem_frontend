@@ -28,6 +28,7 @@ export const serverEnvSchema = z.object({
   SENYCE_API_KEY: z.string().optional(),
   ADMIN_EMAIL: z.string().email().optional(),
   NEXT_PUBLIC_SITE_URL: optionalUrl,
+  TOTEM_BACKEND_URL: optionalUrl,
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

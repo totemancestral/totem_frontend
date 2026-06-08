@@ -1,10 +1,18 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { GoldParticles } from "@/components/GoldParticles";
 import { MaskLogo } from "@/components/MaskLogo";
 import { Check } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import {
+  createLocalOrder,
+  getLocalSession,
+  localOfferFromCheckoutOffer,
+  updateLocalUserProfile,
+  type LocalSession,
+} from "@/lib/local-auth";
 
 type FieldLevel = "PRIORITAIRE" | "SECONDAIRE" | "TERTIAIRE" | "SPECIAL";
 
@@ -340,6 +348,8 @@ const QUESTIONS: Question[] = [
   },
 ];
 
+const PENDING_CHECKOUT_KEY = "totem_pending_checkout_v1";
+
 type Phase =
   | "intro"
   | "question"
@@ -354,7 +364,9 @@ type Answer = { choice?: "A" | "B" | "C" | "D"; field?: string; skipped?: boolea
 type AccountDraft = { prenom: string; email: string };
 
 type Offer = {
+  id: OfferId;
   name: string;
+  amountCents: number;
   price: string;
   sub: string;
   bestFor: string;
@@ -365,17 +377,65 @@ type Offer = {
   featured: boolean;
 };
 
+type OfferId = "origine" | "ancestral" | "famille";
+
 export function ParcoursPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const locale = toLocale(useLocale());
   const t = useTranslations("parcours");
   const questions = t.raw("questions") as Question[];
   const [phase, setPhase] = useState<Phase>("intro");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
   const [account, setAccount] = useState<AccountDraft>({ prenom: "", email: "" });
+  const [session, setSession] = useState<LocalSession | null>(null);
   const [hasUnlockedRest, setHasUnlockedRest] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [loadingOffer, setLoadingOffer] = useState<OfferId | null>(null);
   const [nudgeCount, setNudgeCount] = useState(0);
   const [nudge, setNudge] = useState<string | null>(null);
   const filledRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    const currentSession = getLocalSession();
+    if (!currentSession) {
+      router.replace(`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`);
+      return;
+    }
+    setSession(currentSession);
+    setAccount({ prenom: currentSession.prenom, email: currentSession.email });
+  }, [locale, router]);
+
+  useEffect(() => {
+    if (!session) return;
+    const checkout = searchParams.get("checkout");
+    if (!checkout) return;
+
+    if (checkout === "cancelled") {
+      setCheckoutError("Paiement annule.");
+      setPhase("paywall");
+      router.replace(`/${locale}/parcours`, { scroll: false });
+      return;
+    }
+
+    if (checkout === "success") {
+      const pending = readPendingCheckout();
+      if (pending) {
+        createLocalOrder({
+          userId: session.id,
+          offre: localOfferFromCheckoutOffer(pending.offerId),
+          montantCents: pending.amountCents,
+          langue: locale,
+          stripeSessionId: searchParams.get("session_id"),
+        });
+      }
+      clearPendingCheckout();
+      setHasUnlockedRest(true);
+      setPhase("post-payment");
+      router.replace(`/${locale}/parcours`, { scroll: false });
+    }
+  }, [locale, router, searchParams, session]);
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
@@ -402,10 +462,12 @@ export function ParcoursPage() {
         phase?: Phase;
       };
       if (saved.answers) setAnswers(saved.answers);
-      if (saved.account) setAccount(saved.account);
+      if (saved.account && !getLocalSession()) setAccount(saved.account);
       if (typeof saved.hasUnlockedRest === "boolean") setHasUnlockedRest(saved.hasUnlockedRest);
       if (typeof saved.index === "number") setIndex(saved.index);
-      if (saved.phase && saved.phase !== "waiting") setPhase(saved.phase);
+      if (saved.phase && saved.phase !== "waiting") {
+        setPhase(saved.phase === "account" ? "paywall-transition" : saved.phase);
+      }
     } catch {
       /* ignore corrupted storage */
     }
@@ -425,17 +487,7 @@ export function ParcoursPage() {
   }, [answers, account, hasUnlockedRest, index, phase]);
 
   const current = questions[index] ?? QUESTIONS[index];
-  const progress =
-    phase === "intro"
-      ? 0
-      : phase === "question"
-        ? current.progress
-        : phase === "account" ||
-            phase === "paywall-transition" ||
-            phase === "paywall" ||
-            phase === "post-payment"
-          ? 40
-          : 100;
+  const progress = phase === "intro" ? 0 : phase === "question" ? current.progress : 100;
 
   // Paywall auto-transition
   useEffect(() => {
@@ -444,7 +496,7 @@ export function ParcoursPage() {
       return () => clearTimeout(t);
     }
     if (phase === "final-transition") {
-      const t = setTimeout(() => setPhase("waiting"), 4000);
+      const t = setTimeout(() => setPhase("paywall"), 4000);
       return () => clearTimeout(t);
     }
   }, [phase]);
@@ -474,10 +526,6 @@ export function ParcoursPage() {
   }
 
   function next() {
-    if (current.n === 4 && !hasUnlockedRest) {
-      setPhase("account");
-      return;
-    }
     if (current.n === 10) {
       setPhase("final-transition");
       return;
@@ -495,6 +543,57 @@ export function ParcoursPage() {
 
   const a = answers[current?.n ?? 1];
   const canContinue = phase !== "question" ? true : !!a?.choice || (current.canSkip && a?.skipped);
+
+  async function chooseOffer(offer: Offer) {
+    if (!session) return;
+    setCheckoutError(null);
+    setLoadingOffer(offer.id);
+
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          offre: offer.id,
+          answers,
+          locale,
+          userId: session.id,
+          email: session.email,
+          prenom: session.prenom,
+        }),
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        checkoutUrl?: string;
+        mode?: string;
+        checkoutSessionId?: string;
+        error?: string;
+      } | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "checkout_failed");
+      }
+
+      if (payload?.checkoutUrl) {
+        writePendingCheckout({ offerId: offer.id, amountCents: offer.amountCents });
+        window.location.href = payload.checkoutUrl;
+        return;
+      }
+
+      createLocalOrder({
+        userId: session.id,
+        offre: localOfferFromCheckoutOffer(offer.id),
+        montantCents: offer.amountCents,
+        langue: locale,
+        stripeSessionId: payload?.checkoutSessionId ?? null,
+      });
+      setHasUnlockedRest(true);
+      setPhase("post-payment");
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : "checkout_failed");
+    } finally {
+      setLoadingOffer(null);
+    }
+  }
 
   return (
     <div
@@ -542,25 +641,27 @@ export function ParcoursPage() {
             account={account}
             onChange={setAccount}
             onBack={() => setPhase("question")}
-            onContinue={() => setPhase("paywall-transition")}
+            onContinue={() => {
+              const nextSession = updateLocalUserProfile({ ...account, langue: locale });
+              setSession(nextSession);
+              setPhase("paywall-transition");
+            }}
           />
         )}
         {phase === "paywall-transition" && <PaywallTransition key="pt" />}
         {phase === "paywall" && (
           <Paywall
             key="pw"
-            onPaid={() => {
-              setHasUnlockedRest(true);
-              setPhase("post-payment");
-            }}
+            onChoose={chooseOffer}
+            loadingOffer={loadingOffer}
+            checkoutError={checkoutError}
           />
         )}
         {phase === "post-payment" && (
           <PostPayment
             key="pp"
             onContinue={() => {
-              setIndex(4);
-              setPhase("question");
+              setPhase("waiting");
             }}
           />
         )}
@@ -1103,7 +1204,9 @@ function PaywallTransition() {
 
 const offers = [
   {
+    id: "origine",
     name: "TOTEM ORIGINE",
+    amountCents: 4900,
     price: "49€",
     sub: "L'expérience essentielle.",
     bestFor: "Premier voyage",
@@ -1119,7 +1222,9 @@ const offers = [
     featured: false,
   },
   {
+    id: "ancestral",
     name: "TOTEM ANCESTRAL",
+    amountCents: 8900,
     price: "89€",
     sub: "L'expérience complète.",
     bestFor: "Coffret complet",
@@ -1136,7 +1241,9 @@ const offers = [
     featured: true,
   },
   {
+    id: "famille",
     name: "TOTEM FAMILLE",
+    amountCents: 19900,
     price: "199€",
     sub: "L'expérience à partager.",
     bestFor: "Trois destinataires",
@@ -1151,11 +1258,21 @@ const offers = [
     cta: "Choisir · 199€",
     featured: false,
   },
-];
+] satisfies Offer[];
 
-function Paywall({ onPaid }: { onPaid: () => void }) {
+function Paywall({
+  onChoose,
+  loadingOffer,
+  checkoutError,
+}: {
+  onChoose: (offer: Offer) => void;
+  loadingOffer: OfferId | null;
+  checkoutError: string | null;
+}) {
   const t = useTranslations("parcours.paywall");
-  const translatedOffers = (t.raw("offers") as Offer[]) || offers;
+  const translatedOffers = (
+    (t.raw("offers") as Array<Omit<Offer, "id" | "amountCents">>) || offers
+  ).map((offer, index) => ({ ...(offers[index] ?? offers[1]), ...offer }) as Offer);
 
   return (
     <motion.section
@@ -1270,16 +1387,22 @@ function Paywall({ onPaid }: { onPaid: () => void }) {
               </ul>
               <button
                 className={o.featured ? "btn-primary w-full" : "btn-secondary w-full"}
-                onClick={onPaid}
+                onClick={() => onChoose(o)}
+                disabled={loadingOffer !== null}
                 style={{ padding: "11px 12px", fontSize: 11 }}
               >
-                {o.cta}
+                {loadingOffer === o.id ? "..." : o.cta}
               </button>
             </div>
           ))}
         </div>
 
         <div className="relative z-10 mx-auto mt-3 flex max-w-3xl flex-col gap-2 pb-2 text-center md:mt-5">
+          {checkoutError && (
+            <p className="caption leading-relaxed" style={{ color: "#E07A6B" }}>
+              {checkoutError}
+            </p>
+          )}
           <p className="caption leading-relaxed">{t("security")}</p>
           <p className="quote-italic" style={{ fontSize: 14 }}>
             {t("saved")}
@@ -1409,4 +1532,36 @@ function WaitingScreen() {
       </div>
     </motion.section>
   );
+}
+
+function toLocale(locale: string): "fr" | "en" {
+  return locale === "en" ? "en" : "fr";
+}
+
+function writePendingCheckout(value: { offerId: OfferId; amountCents: number }) {
+  try {
+    window.localStorage.setItem(PENDING_CHECKOUT_KEY, JSON.stringify(value));
+  } catch {
+    /* ignore local test storage errors */
+  }
+}
+
+function readPendingCheckout(): { offerId: OfferId; amountCents: number } | null {
+  try {
+    const raw = window.localStorage.getItem(PENDING_CHECKOUT_KEY);
+    if (!raw) return null;
+    const value = JSON.parse(raw) as { offerId?: OfferId; amountCents?: number };
+    if (!value.offerId || typeof value.amountCents !== "number") return null;
+    return { offerId: value.offerId, amountCents: value.amountCents };
+  } catch {
+    return null;
+  }
+}
+
+function clearPendingCheckout() {
+  try {
+    window.localStorage.removeItem(PENDING_CHECKOUT_KEY);
+  } catch {
+    /* ignore local test storage errors */
+  }
 }

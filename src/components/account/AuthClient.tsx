@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { User } from "@supabase/supabase-js";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Mail, ShieldCheck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  createLocalUser,
+  getLocalSession,
+  sendLocalMagicLink,
+  signInLocalUser,
+} from "@/lib/local-auth";
 
 type Locale = "fr" | "en";
 type Mode = "signin" | "signup";
@@ -87,27 +91,7 @@ export function AuthClient({ locale }: { locale: Locale }) {
   const redirectPath = searchParams.get("redirect") || dashboardPath;
 
   useEffect(() => {
-    let alive = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (alive && data.session) {
-        ensureProfile(data.session.user, locale).finally(() => {
-          if (alive) router.replace(redirectPath);
-        });
-      }
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        ensureProfile(session.user, locale).finally(() => {
-          if (alive) router.replace(redirectPath);
-        });
-      }
-    });
-    return () => {
-      alive = false;
-      subscription.unsubscribe();
-    };
+    if (getLocalSession()) router.replace(redirectPath);
   }, [locale, redirectPath, router]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -118,31 +102,18 @@ export function AuthClient({ locale }: { locale: Locale }) {
 
     try {
       if (mode === "signup") {
-        const { data, error: signUpError } = await supabase.auth.signUp({
+        createLocalUser({
           email,
           password,
-          options: {
-            emailRedirectTo: `${window.location.origin}${redirectPath}`,
-            data: { prenom, langue: locale },
-          },
+          prenom,
+          langue: locale,
         });
-        if (signUpError) throw signUpError;
-        if (data.session) {
-          await ensureProfile(data.session.user, locale, email, prenom);
-          setNotice(t.sessionReady);
-          router.replace(redirectPath);
-          return;
-        }
-        setNotice(t.signupSent);
+        setNotice(t.sessionReady);
+        router.replace(redirectPath);
         return;
       }
 
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInError) throw signInError;
-      if (data.user) await ensureProfile(data.user, locale, email);
+      signInLocalUser(email, password);
       setNotice(t.sessionReady);
       router.replace(redirectPath);
     } catch (authError) {
@@ -157,15 +128,9 @@ export function AuthClient({ locale }: { locale: Locale }) {
     setError(null);
     setNotice(null);
     try {
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}${redirectPath}`,
-          shouldCreateUser: mode === "signup",
-        },
-      });
-      if (otpError) throw otpError;
+      sendLocalMagicLink(email, locale, mode === "signup");
       setNotice(t.magicSent);
+      router.replace(redirectPath);
     } catch (authError) {
       setError(translateAuthError(authError, locale));
     } finally {
@@ -334,22 +299,6 @@ export function AuthClient({ locale }: { locale: Locale }) {
   );
 }
 
-async function ensureProfile(user: User, locale: Locale, fallbackEmail = "", fallbackPrenom = "") {
-  const metadata = user.user_metadata as { prenom?: string; langue?: Locale };
-  const prenom = fallbackPrenom.trim() || metadata.prenom?.trim();
-  const email = user.email || fallbackEmail.trim();
-
-  await supabase.from("profiles").upsert(
-    {
-      id: user.id,
-      email: email || null,
-      langue: metadata.langue || locale,
-      ...(prenom ? { prenom } : {}),
-    },
-    { onConflict: "id" },
-  );
-}
-
 function Field({
   label,
   value,
@@ -398,6 +347,8 @@ function translateAuthError(error: unknown, locale: Locale) {
   const message = error instanceof Error ? error.message : "";
   const lower = message.toLowerCase();
   if (locale === "en") {
+    if (lower.includes("invalid_credentials")) return "Incorrect email or password.";
+    if (lower.includes("user_not_found")) return "Create an account first.";
     if (lower.includes("invalid login")) return "Incorrect email or password.";
     if (lower.includes("already registered") || lower.includes("already exists"))
       return "An account already exists with this email.";
@@ -405,6 +356,8 @@ function translateAuthError(error: unknown, locale: Locale) {
     if (lower.includes("email")) return "Check the email address.";
     return message || copy.en.authError;
   }
+  if (lower.includes("invalid_credentials")) return "Email ou mot de passe incorrect.";
+  if (lower.includes("user_not_found")) return "Cree d'abord ton compte.";
   if (lower.includes("invalid login")) return "Email ou mot de passe incorrect.";
   if (lower.includes("already registered") || lower.includes("already exists"))
     return "Un compte existe deja avec cet email.";

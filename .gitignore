@@ -36,3 +36,6 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Backend clone lives in its own Git repository.
+backend/

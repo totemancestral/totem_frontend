@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
 import { ArrowLeft, KeyRound, Mail } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 type Locale = "fr" | "en";
 type Phase = "request" | "update";
@@ -59,12 +58,6 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
 
   useEffect(() => {
     if (window.location.hash.includes("type=recovery")) setPhase("update");
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") setPhase("update");
-    });
-    return () => subscription.unsubscribe();
   }, []);
 
   const requestReset = async (event: FormEvent<HTMLFormElement>) => {
@@ -73,15 +66,7 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
     setError(null);
     setNotice(null);
 
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/${locale}/reset-password`,
-    });
-
     setLoading(false);
-    if (resetError) {
-      setError(translateResetError(resetError, locale));
-      return;
-    }
     setNotice(t.sent);
   };
 
@@ -91,13 +76,7 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
     setError(null);
     setNotice(null);
 
-    const { error: updateError } = await supabase.auth.updateUser({ password });
-
     setLoading(false);
-    if (updateError) {
-      setError(translateResetError(updateError, locale));
-      return;
-    }
     setNotice(t.updated);
     setTimeout(() => router.replace(`/${locale}/auth`), 1200);
   };

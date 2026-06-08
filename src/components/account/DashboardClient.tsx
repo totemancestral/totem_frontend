@@ -17,36 +17,23 @@ import {
   UserRound,
   Volume2,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import {
+  getLocalArtworks,
+  getLocalOrders,
+  getLocalSession,
+  signOutLocalUser,
+  type LocalArtwork,
+  type LocalOffer,
+  type LocalOrder,
+  type LocalOrderStatus,
+} from "@/lib/local-auth";
 
 type Locale = "fr" | "en";
-type Profile = Pick<Tables<"profiles">, "prenom" | "email" | "langue">;
-type Commande = Pick<
-  Tables<"commandes">,
-  | "id"
-  | "offre"
-  | "statut"
-  | "montant_cents"
-  | "devise"
-  | "created_at"
-  | "stripe_session_id"
-  | "stripe_payment_intent_id"
->;
-type Oeuvre = Pick<
-  Tables<"oeuvres">,
-  | "id"
-  | "commande_id"
-  | "nom_totem"
-  | "numero_serie"
-  | "image_url"
-  | "audio_url"
-  | "pdf_url"
-  | "statut"
-  | "created_at"
->;
-type CommandeStatut = Tables<"commandes">["statut"];
-type OfferType = Tables<"commandes">["offre"];
+type Profile = { prenom: string | null; email: string | null; langue: Locale };
+type Commande = LocalOrder;
+type Oeuvre = LocalArtwork;
+type CommandeStatut = LocalOrderStatus;
+type OfferType = LocalOffer;
 
 const copy = {
   fr: {
@@ -68,6 +55,7 @@ const copy = {
     artworks: "Tes oeuvres",
     noOrders: "Aucune commande rattachee a ce compte.",
     noArtworks: "Aucune oeuvre livree pour le moment.",
+    testMode: "Mode test local: les donnees sont stockees dans ce navigateur.",
     emptyCta: "Commencer le parcours",
     amount: "Montant",
     date: "Date",
@@ -99,6 +87,7 @@ const copy = {
     artworks: "Your artworks",
     noOrders: "No order is attached to this account.",
     noArtworks: "No delivered artwork yet.",
+    testMode: "Local test mode: data is stored in this browser.",
     emptyCta: "Start the journey",
     amount: "Amount",
     date: "Date",
@@ -162,55 +151,30 @@ export function DashboardClient({ locale }: { locale: Locale }) {
   useEffect(() => {
     let alive = true;
 
-    async function load() {
+    function load() {
       setLoading(true);
       setError(null);
 
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+      const session = getLocalSession();
 
       if (!alive) return;
-      if (userError || !user) {
+      if (!session) {
         router.replace(authPath);
         return;
       }
 
-      setUserEmail(user.email ?? "");
-
-      const [profileResult, commandesResult, oeuvresResult] = await Promise.all([
-        supabase.from("profiles").select("prenom, email, langue").eq("id", user.id).maybeSingle(),
-        supabase
-          .from("commandes")
-          .select(
-            "id, offre, statut, montant_cents, devise, created_at, stripe_session_id, stripe_payment_intent_id",
-          )
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("oeuvres")
-          .select(
-            "id, commande_id, nom_totem, numero_serie, image_url, audio_url, pdf_url, statut, created_at",
-          )
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false }),
-      ]);
-
-      if (!alive) return;
-      if (profileResult.error || commandesResult.error || oeuvresResult.error) {
-        setError(t.error);
-      }
-
-      setProfile(
-        (profileResult.data as Profile | null) ?? {
-          prenom: null,
-          email: user.email ?? null,
-          langue: locale,
-        },
+      setUserEmail(session.email ?? "");
+      setProfile({
+        prenom: session.prenom || null,
+        email: session.email || null,
+        langue: session.langue,
+      });
+      setCommandes(
+        getLocalOrders(session.id).sort((a, b) => b.created_at.localeCompare(a.created_at)),
       );
-      setCommandes((commandesResult.data ?? []) as Commande[]);
-      setOeuvres((oeuvresResult.data ?? []) as Oeuvre[]);
+      setOeuvres(
+        getLocalArtworks(session.id).sort((a, b) => b.created_at.localeCompare(a.created_at)),
+      );
       setLoading(false);
     }
 
@@ -230,7 +194,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
   ).length;
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    signOutLocalUser();
     router.replace(`/${locale}/auth`);
   };
 
@@ -289,6 +253,9 @@ export function DashboardClient({ locale }: { locale: Locale }) {
             </h1>
             <p className="body-copy max-w-2xl" style={{ color: "rgba(254,252,240,0.72)" }}>
               {t.subtitle}
+            </p>
+            <p className="caption uppercase" style={{ color: "rgba(237,217,154,0.7)" }}>
+              {t.testMode}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
