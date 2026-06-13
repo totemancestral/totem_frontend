@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
 import { ArrowLeft, KeyRound, Mail } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 type Locale = "fr" | "en";
 type Phase = "request" | "update";
@@ -66,8 +67,19 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
     setError(null);
     setNotice(null);
 
-    setLoading(false);
-    setNotice(t.sent);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/${locale}/reset-password`,
+      });
+
+      if (resetError) throw resetError;
+
+      setNotice(t.sent);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.defaultError);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updatePassword = async (event: FormEvent<HTMLFormElement>) => {
@@ -76,9 +88,18 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
     setError(null);
     setNotice(null);
 
-    setLoading(false);
-    setNotice(t.updated);
-    setTimeout(() => router.replace(`/${locale}/auth`), 1200);
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+
+      if (updateError) throw updateError;
+
+      setNotice(t.updated);
+      setTimeout(() => router.replace(`/${locale}/auth`), 1200);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.defaultError);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -171,7 +192,7 @@ function Field({
   value,
   onChange,
   placeholder,
-  type,
+  type = "text",
   autoComplete,
   minLength,
   required,
@@ -180,8 +201,8 @@ function Field({
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
-  type: string;
-  autoComplete: string;
+  type?: string;
+  autoComplete?: string;
   minLength?: number;
   required?: boolean;
 }) {
@@ -202,17 +223,4 @@ function Field({
       />
     </label>
   );
-}
-
-function translateResetError(error: unknown, locale: Locale) {
-  const message = error instanceof Error ? error.message : "";
-  const lower = message.toLowerCase();
-  if (locale === "en") {
-    if (lower.includes("password")) return "Password must contain at least 6 characters.";
-    if (lower.includes("email")) return "Check the email address.";
-    return message || copy.en.defaultError;
-  }
-  if (lower.includes("password")) return "Mot de passe trop court, minimum 6 caracteres.";
-  if (lower.includes("email")) return "Verifie l'adresse email.";
-  return message || copy.fr.defaultError;
 }

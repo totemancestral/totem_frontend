@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/server-auth";
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: Request) {
   const auth = await authenticateRequest(request);
   if (auth instanceof NextResponse) return auth;
-
-  const { id } = await params;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -17,24 +12,21 @@ export async function GET(
   }
 
   const { createClient } = await import("@supabase/supabase-js");
+
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: { autoRefreshToken: false, persistSession: false },
     global: { headers: { authorization: request.headers.get("authorization") ?? "" } },
   });
 
-  const { data: commande, error } = await supabase
+  const { data, error } = await supabase
     .from("commandes")
-    .select("*, oeuvres(*)")
-    .eq("id", id)
+    .select("*")
     .eq("user_id", auth.userId)
-    .single();
+    .order("created_at", { ascending: false });
 
   if (error) {
-    if (error.code === "PGRST116") {
-      return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
-    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(commande);
+  return NextResponse.json(data);
 }

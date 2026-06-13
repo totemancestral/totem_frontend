@@ -5,12 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Mail, ShieldCheck } from "lucide-react";
-import {
-  createLocalUser,
-  getLocalSession,
-  sendLocalMagicLink,
-  signInLocalUser,
-} from "@/lib/local-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useSupabaseSession } from "@/hooks/use-supabase-session";
 
 type Locale = "fr" | "en";
 type Mode = "signin" | "signup";
@@ -38,7 +34,6 @@ const copy = {
     switchSignin: "J'ai deja un compte",
     legal: "Tes donnees restent rattachees a ton compte et protegees par Supabase Auth.",
     magicSent: "Lien magique envoye. Verifie ta boite mail.",
-    signupSent: "Compte cree. Si la confirmation email est activee, verifie ta boite mail.",
     sessionReady: "Session ouverte. Redirection...",
     authError: "Authentification impossible.",
     loading: "...",
@@ -66,7 +61,6 @@ const copy = {
     switchSignin: "I already have an account",
     legal: "Your data stays attached to your account and protected by Supabase Auth.",
     magicSent: "Magic link sent. Check your inbox.",
-    signupSent: "Account created. If email confirmation is enabled, check your inbox.",
     sessionReady: "Session opened. Redirecting...",
     authError: "Authentication failed.",
     loading: "...",
@@ -77,6 +71,7 @@ const copy = {
 export function AuthClient({ locale }: { locale: Locale }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { session: existingSession } = useSupabaseSession();
   const t = copy[locale];
   const initialMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
   const [mode, setMode] = useState<Mode>(initialMode);
@@ -91,8 +86,8 @@ export function AuthClient({ locale }: { locale: Locale }) {
   const redirectPath = searchParams.get("redirect") || dashboardPath;
 
   useEffect(() => {
-    if (getLocalSession()) router.replace(redirectPath);
-  }, [locale, redirectPath, router]);
+    if (existingSession) router.replace(redirectPath);
+  }, [existingSession, locale, redirectPath, router]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -102,18 +97,28 @@ export function AuthClient({ locale }: { locale: Locale }) {
 
     try {
       if (mode === "signup") {
-        createLocalUser({
+        const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          prenom,
-          langue: locale,
+          options: {
+            data: { prenom: prenom.trim() || email.split("@")[0] },
+          },
         });
+
+        if (signUpError) throw signUpError;
+
         setNotice(t.sessionReady);
         router.replace(redirectPath);
         return;
       }
 
-      signInLocalUser(email, password);
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) throw signInError;
+
       setNotice(t.sessionReady);
       router.replace(redirectPath);
     } catch (authError) {
@@ -128,9 +133,16 @@ export function AuthClient({ locale }: { locale: Locale }) {
     setError(null);
     setNotice(null);
     try {
-      sendLocalMagicLink(email, locale, mode === "signup");
+      const { error: magicError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: mode === "signup",
+        },
+      });
+
+      if (magicError) throw magicError;
+
       setNotice(t.magicSent);
-      router.replace(redirectPath);
     } catch (authError) {
       setError(translateAuthError(authError, locale));
     } finally {
@@ -346,22 +358,30 @@ function tabClass(active: boolean) {
 function translateAuthError(error: unknown, locale: Locale) {
   const message = error instanceof Error ? error.message : "";
   const lower = message.toLowerCase();
+
   if (locale === "en") {
-    if (lower.includes("invalid_credentials")) return "Incorrect email or password.";
+    if (lower.includes("invalid_credentials") || lower.includes("invalid login"))
+      return "Incorrect email or password.";
     if (lower.includes("user_not_found")) return "Create an account first.";
-    if (lower.includes("invalid login")) return "Incorrect email or password.";
     if (lower.includes("already registered") || lower.includes("already exists"))
       return "An account already exists with this email.";
+    if (lower.includes("email not confirmed")) return "Please confirm your email address.";
     if (lower.includes("password")) return "Password must contain at least 6 characters.";
     if (lower.includes("email")) return "Check the email address.";
+    if (lower.includes("rate limit"))
+      return "Too many attempts. Please wait a moment and try again.";
     return message || copy.en.authError;
   }
-  if (lower.includes("invalid_credentials")) return "Email ou mot de passe incorrect.";
+
+  if (lower.includes("invalid_credentials") || lower.includes("invalid login"))
+    return "Email ou mot de passe incorrect.";
   if (lower.includes("user_not_found")) return "Cree d'abord ton compte.";
-  if (lower.includes("invalid login")) return "Email ou mot de passe incorrect.";
   if (lower.includes("already registered") || lower.includes("already exists"))
     return "Un compte existe deja avec cet email.";
+  if (lower.includes("email not confirmed")) return "Confirme d'abord ton adresse email.";
   if (lower.includes("password")) return "Mot de passe trop court, minimum 6 caracteres.";
   if (lower.includes("email")) return "Verifie l'adresse email.";
+  if (lower.includes("rate limit"))
+    return "Trop de tentatives. Attends un moment avant de reessayer.";
   return message || copy.fr.authError;
 }

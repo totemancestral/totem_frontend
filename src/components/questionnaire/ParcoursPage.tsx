@@ -7,12 +7,11 @@ import { GoldParticles } from "@/components/GoldParticles";
 import { MaskLogo } from "@/components/MaskLogo";
 import { Check, Home, LayoutDashboard } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import type { Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 import {
   createLocalOrder,
-  getLocalSession,
   localOfferFromCheckoutOffer,
-  updateLocalUserProfile,
-  type LocalSession,
 } from "@/lib/local-auth";
 
 type FieldLevel = "PRIORITAIRE" | "SECONDAIRE" | "TERTIAIRE" | "SPECIAL";
@@ -390,7 +389,7 @@ export function ParcoursPage() {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
   const [account, setAccount] = useState<AccountDraft>({ prenom: "", email: "" });
-  const [session, setSession] = useState<LocalSession | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [hasUnlockedRest, setHasUnlockedRest] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [loadingOffer, setLoadingOffer] = useState<OfferId | null>(null);
@@ -399,13 +398,17 @@ export function ParcoursPage() {
   const filledRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
-    const currentSession = getLocalSession();
-    if (!currentSession) {
-      router.replace(`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`);
-      return;
-    }
-    setSession(currentSession);
-    setAccount({ prenom: currentSession.prenom, email: currentSession.email });
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      if (!currentSession) {
+        router.replace(`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`);
+        return;
+      }
+      setSession(currentSession);
+      setAccount({
+        prenom: currentSession.user.user_metadata?.prenom ?? "",
+        email: currentSession.user.email ?? "",
+      });
+    });
   }, [locale, router]);
 
   useEffect(() => {
@@ -424,7 +427,7 @@ export function ParcoursPage() {
       const pending = readPendingCheckout();
       if (pending) {
         createLocalOrder({
-          userId: session.id,
+          userId: session.user.id,
           offre: localOfferFromCheckoutOffer(pending.offerId),
           montantCents: pending.amountCents,
           langue: locale,
@@ -463,7 +466,7 @@ export function ParcoursPage() {
         phase?: Phase;
       };
       if (saved.answers) setAnswers(saved.answers);
-      if (saved.account && !getLocalSession()) setAccount(saved.account);
+      if (saved.account) setAccount(saved.account);
       if (typeof saved.hasUnlockedRest === "boolean") setHasUnlockedRest(saved.hasUnlockedRest);
       if (typeof saved.index === "number") setIndex(saved.index);
       if (saved.phase && saved.phase !== "waiting") {
@@ -558,9 +561,9 @@ export function ParcoursPage() {
           offre: offer.id,
           answers,
           locale,
-          userId: session.id,
-          email: session.email,
-          prenom: session.prenom,
+          userId: session.user.id,
+          email: session.user.email,
+          prenom: session.user.user_metadata?.prenom ?? "",
         }),
       });
       const payload = (await response.json().catch(() => null)) as {
@@ -581,7 +584,7 @@ export function ParcoursPage() {
       }
 
       createLocalOrder({
-        userId: session.id,
+        userId: session.user.id,
         offre: localOfferFromCheckoutOffer(offer.id),
         montantCents: offer.amountCents,
         langue: locale,
@@ -645,8 +648,19 @@ export function ParcoursPage() {
             onChange={setAccount}
             onBack={() => setPhase("question")}
             onContinue={() => {
-              const nextSession = updateLocalUserProfile({ ...account, langue: locale });
-              setSession(nextSession);
+              if (session) {
+                fetch("/api/profiles", {
+                  method: "PATCH",
+                  headers: {
+                    "Content-Type": "application/json",
+                    authorization: `Bearer ${session.access_token}`,
+                  },
+                  body: JSON.stringify({
+                    prenom: account.prenom.trim(),
+                    langue: locale,
+                  }),
+                }).catch(() => {});
+              }
               setPhase("paywall-transition");
             }}
           />

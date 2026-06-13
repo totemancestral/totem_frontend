@@ -19,26 +19,36 @@ import {
   UserRound,
   Volume2,
 } from "lucide-react";
-import {
-  countJourneyAnswers,
-  getLocalArtworks,
-  getLocalJourney,
-  getLocalOrders,
-  getLocalSession,
-  signOutLocalUser,
-  type LocalArtwork,
-  type LocalJourney,
-  type LocalOffer,
-  type LocalOrder,
-  type LocalOrderStatus,
-} from "@/lib/local-auth";
+import { useSupabaseSession } from "@/hooks/use-supabase-session";
 
 type Locale = "fr" | "en";
-type Profile = { prenom: string | null; email: string | null; langue: Locale };
-type Commande = LocalOrder;
-type Oeuvre = LocalArtwork;
-type CommandeStatut = LocalOrderStatus;
-type OfferType = LocalOffer;
+
+type Commande = {
+  id: string;
+  user_id: string;
+  offre: "essentiel" | "signature" | "heritage";
+  statut: "en_attente_paiement" | "paye" | "en_generation" | "livree" | "erreur" | "remboursee";
+  montant_cents: number;
+  devise: string;
+  langue: string;
+  created_at: string;
+  stripe_session_id: string | null;
+  stripe_payment_intent_id: string | null;
+};
+
+type Oeuvre = {
+  id: string;
+  user_id: string;
+  commande_id: string;
+  nom_totem: string | null;
+  numero_serie: string | null;
+  image_url: string | null;
+  audio_url: string | null;
+  pdf_url: string | null;
+  statut: string;
+  created_at: string;
+};
+
 type CompositionState = {
   status: string;
   progress: number;
@@ -57,7 +67,6 @@ const copy = {
     orders: "Commandes",
     delivered: "Oeuvres livrees",
     active: "En cours",
-    answers: "Reponses",
     compose: "Composer une oeuvre",
     logout: "Se deconnecter",
     profile: "Profil",
@@ -67,7 +76,6 @@ const copy = {
     artworks: "Tes oeuvres",
     noOrders: "Aucune commande rattachee a ce compte.",
     noArtworks: "Aucune oeuvre livree pour le moment.",
-    testMode: "Mode test local: les donnees sont stockees dans ce navigateur.",
     emptyCta: "Commencer le parcours",
     amount: "Montant",
     date: "Date",
@@ -91,11 +99,6 @@ const copy = {
     generatingStatus: "Generation en cours",
     deliveredStatus: "Livraison disponible",
     errorStatus: "Intervention requise",
-    accountEvent: "Espace test ouvert",
-    answersEvent: "{count}/10 reponses sauvegardees",
-    offerEvent: "Questionnaire termine, offre a choisir",
-    orderEvent: "Commande #{id} en generation",
-    deliveryEvent: "Livrables disponibles dans le dashboard",
   },
   en: {
     eyebrow: "Personal space",
@@ -107,7 +110,6 @@ const copy = {
     orders: "Orders",
     delivered: "Delivered artworks",
     active: "In progress",
-    answers: "Answers",
     compose: "Compose an artwork",
     logout: "Sign out",
     profile: "Profile",
@@ -117,7 +119,6 @@ const copy = {
     artworks: "Your artworks",
     noOrders: "No order is attached to this account.",
     noArtworks: "No delivered artwork yet.",
-    testMode: "Local test mode: data is stored in this browser.",
     emptyCta: "Start the journey",
     amount: "Amount",
     date: "Date",
@@ -141,17 +142,10 @@ const copy = {
     generatingStatus: "Generation in progress",
     deliveredStatus: "Delivery available",
     errorStatus: "Action required",
-    accountEvent: "Test space opened",
-    answersEvent: "{count}/10 answers saved",
-    offerEvent: "Questionnaire complete, offer to choose",
-    orderEvent: "Order #{id} is generating",
-    deliveryEvent: "Deliverables available in the dashboard",
   },
 } as const;
 
-type DashboardCopy = Record<keyof (typeof copy)["fr"], string>;
-
-const statusLabels: Record<Locale, Record<CommandeStatut, string>> = {
+const statusLabels: Record<Locale, Record<string, string>> = {
   fr: {
     en_attente_paiement: "Paiement attendu",
     paye: "Payee",
@@ -170,94 +164,88 @@ const statusLabels: Record<Locale, Record<CommandeStatut, string>> = {
   },
 };
 
-const offerLabels: Record<Locale, Record<OfferType, string>> = {
-  fr: {
-    essentiel: "Totem Origine",
-    signature: "Totem Ancestral",
-    heritage: "Totem Famille",
-  },
-  en: {
-    essentiel: "Totem Origin",
-    signature: "Totem Ancestral",
-    heritage: "Totem Family",
-  },
+const offerLabels: Record<Locale, Record<string, string>> = {
+  fr: { essentiel: "Totem Origine", signature: "Totem Ancestral", heritage: "Totem Famille" },
+  en: { essentiel: "Totem Origin", signature: "Totem Ancestral", heritage: "Totem Family" },
 };
 
 export function DashboardClient({ locale }: { locale: Locale }) {
   const router = useRouter();
+  const { session, user, loading: authLoading, signOut } = useSupabaseSession();
   const t = copy[locale];
   const authPath = useMemo(
     () => `/${locale}/auth?redirect=${encodeURIComponent(`/${locale}/espace-personnel`)}`,
     [locale],
   );
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [userEmail, setUserEmail] = useState("");
+
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [oeuvres, setOeuvres] = useState<Oeuvre[]>([]);
-  const [journey, setJourney] = useState<LocalJourney | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const token = session?.access_token;
+
   useEffect(() => {
+    if (authLoading) return;
+    if (!session) {
+      router.replace(authPath);
+      return;
+    }
+
     let alive = true;
 
-    function load() {
+    async function load() {
       setLoading(true);
       setError(null);
 
-      const session = getLocalSession();
+      try {
+        const [commandesRes, oeuvresRes] = await Promise.all([
+          fetch("/api/commandes", {
+            headers: { authorization: `Bearer ${token}` },
+          }),
+          fetch("/api/oeuvres", {
+            headers: { authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-      if (!alive) return;
-      if (!session) {
-        router.replace(authPath);
-        return;
+        if (!alive) return;
+
+        if (!commandesRes.ok) {
+          throw new Error("Erreur chargement commandes");
+        }
+        if (!oeuvresRes.ok) {
+          throw new Error("Erreur chargement oeuvres");
+        }
+
+        const commandesData: Commande[] = await commandesRes.json();
+        const oeuvresData: Oeuvre[] = await oeuvresRes.json();
+
+        setCommandes(commandesData);
+        setOeuvres(oeuvresData);
+      } catch (err) {
+        if (alive) setError(err instanceof Error ? err.message : t.error);
+      } finally {
+        if (alive) setLoading(false);
       }
-
-      setUserEmail(session.email ?? "");
-      setProfile({
-        prenom: session.prenom || null,
-        email: session.email || null,
-        langue: session.langue,
-      });
-      setCommandes(
-        getLocalOrders(session.id).sort((a, b) => b.created_at.localeCompare(a.created_at)),
-      );
-      setOeuvres(
-        getLocalArtworks(session.id).sort((a, b) => b.created_at.localeCompare(a.created_at)),
-      );
-      setJourney(getLocalJourney());
-      setLoading(false);
     }
 
     load();
-    return () => {
-      alive = false;
-    };
-  }, [authPath, locale, router, t.error]);
+    return () => { alive = false; };
+  }, [authLoading, session, token, authPath, locale, router, t.error]);
 
   const name =
-    profile?.prenom || profile?.email?.split("@")[0] || userEmail.split("@")[0] || t.defaultName;
+    user?.user_metadata?.prenom ||
+    user?.email?.split("@")[0] ||
+    t.defaultName;
   const deliveredCount = oeuvres.filter(
     (oeuvre) => oeuvre.statut === "livree" || oeuvre.image_url || oeuvre.pdf_url,
   ).length;
   const activeCount = commandes.filter((commande) =>
     ["en_attente_paiement", "paye", "en_generation"].includes(commande.statut),
   ).length;
-  const answeredCount = countJourneyAnswers(journey);
-  const composition = buildCompositionState({
-    journey,
-    commandes,
-    oeuvres,
-    answeredCount,
-    copy: t,
-  });
+  const composition = buildCompositionState({ commandes, oeuvres, copy: t });
 
-  const logout = async () => {
-    signOutLocalUser();
-    router.replace(`/${locale}/auth`);
-  };
-
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <section
         className="flex min-h-[100svh] items-center justify-center px-5 pt-28"
@@ -313,16 +301,13 @@ export function DashboardClient({ locale }: { locale: Locale }) {
             <p className="body-copy max-w-2xl" style={{ color: "rgba(254,252,240,0.72)" }}>
               {t.subtitle}
             </p>
-            <p className="caption uppercase" style={{ color: "rgba(237,217,154,0.7)" }}>
-              {t.testMode}
-            </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link href={`/${locale}/parcours`} className="btn-primary">
               <Plus size={16} />
               {t.compose}
             </Link>
-            <button type="button" onClick={logout} className="btn-secondary">
+            <button type="button" onClick={signOut} className="btn-secondary">
               <LogOut size={16} />
               {t.logout}
             </button>
@@ -341,11 +326,6 @@ export function DashboardClient({ locale }: { locale: Locale }) {
             value={deliveredCount.toString()}
           />
           <StatCard icon={<Clock3 size={20} />} label={t.active} value={activeCount.toString()} />
-          <StatCard
-            icon={<ListChecks size={20} />}
-            label={t.answers}
-            value={`${answeredCount}/10`}
-          />
         </div>
 
         <CompositionPanel composition={composition} locale={locale} />
@@ -362,8 +342,8 @@ export function DashboardClient({ locale }: { locale: Locale }) {
               </h2>
             </div>
             <dl className="flex flex-col gap-4">
-              <ProfileLine label={t.email} value={profile?.email || userEmail || "-"} />
-              <ProfileLine label={t.language} value={(profile?.langue || locale).toUpperCase()} />
+              <ProfileLine label={t.email} value={user?.email ?? "-"} />
+              <ProfileLine label={t.language} value={locale.toUpperCase()} />
             </dl>
           </aside>
 
@@ -507,33 +487,27 @@ function CompositionPanel({
 }
 
 function buildCompositionState({
-  journey,
   commandes,
   oeuvres,
-  answeredCount,
   copy: t,
 }: {
-  journey: LocalJourney | null;
   commandes: Commande[];
   oeuvres: Oeuvre[];
-  answeredCount: number;
-  copy: DashboardCopy;
+  copy: { [key: string]: string };
 }): CompositionState {
   const latestOrder = commandes[0];
   const hasDeliveredArtwork = oeuvres.some(
     (oeuvre) => oeuvre.statut === "livree" || oeuvre.image_url || oeuvre.pdf_url,
   );
-  const hasComposition = answeredCount > 0 || Boolean(latestOrder) || hasDeliveredArtwork;
+  const hasComposition = commandes.length > 0 || hasDeliveredArtwork;
 
   if (!hasComposition) {
     return { status: t.noComposition, progress: 0, events: [], hasComposition: false };
   }
 
-  const events = [t.accountEvent];
-  if (answeredCount > 0) events.push(t.answersEvent.replace("{count}", answeredCount.toString()));
-  if (answeredCount >= 10 && !latestOrder) events.push(t.offerEvent);
-  if (latestOrder) events.push(t.orderEvent.replace("{id}", latestOrder.id.slice(0, 8)));
-  if (hasDeliveredArtwork) events.push(t.deliveryEvent);
+  const events: string[] = [];
+  if (latestOrder) events.push(`Commande #${latestOrder.id.slice(0, 8)} en generation`);
+  if (hasDeliveredArtwork) events.push("Livrables disponibles dans le dashboard");
 
   if (hasDeliveredArtwork) {
     return { status: t.deliveredStatus, progress: 100, events, hasComposition: true };
@@ -547,13 +521,10 @@ function buildCompositionState({
   if (latestOrder?.statut === "paye") {
     return { status: t.paidStatus, progress: 72, events, hasComposition: true };
   }
-  if (journey?.phase === "paywall" || answeredCount >= 10) {
-    return { status: t.offerStatus, progress: 64, events, hasComposition: true };
-  }
 
   return {
-    status: t.draftStatus,
-    progress: Math.max(8, Math.min(60, answeredCount * 6)),
+    status: t.draftStatus ?? "",
+    progress: 50,
     events,
     hasComposition: true,
   };
@@ -574,7 +545,7 @@ function ProfileLine({ label, value }: { label: string; value: string }) {
 
 function OrderCard({ commande, locale }: { commande: Commande; locale: Locale }) {
   const t = copy[locale];
-  const status = statusLabels[locale][commande.statut];
+  const status = statusLabels[locale][commande.statut] ?? commande.statut;
   return (
     <article
       className="rounded-lg border p-5"
@@ -583,7 +554,7 @@ function OrderCard({ commande, locale }: { commande: Commande; locale: Locale })
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="h-display text-2xl" style={{ color: "var(--ivoire)" }}>
-            {offerLabels[locale][commande.offre]}
+            {offerLabels[locale][commande.offre] ?? commande.offre}
           </h3>
           <p className="caption mt-1">#{commande.id.slice(0, 8)}</p>
         </div>
@@ -687,7 +658,7 @@ function EmptyState({ text, cta, href }: { text: string; cta: string; href: stri
   );
 }
 
-function statusStyle(status: CommandeStatut): CSSProperties {
+function statusStyle(status: string): CSSProperties {
   if (status === "livree") {
     return {
       borderColor: "rgba(201,168,76,0.45)",

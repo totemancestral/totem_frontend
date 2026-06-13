@@ -1,14 +1,19 @@
 import { NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/server-auth";
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function POST(request: Request) {
   const auth = await authenticateRequest(request);
   if (auth instanceof NextResponse) return auth;
 
-  const { id } = await params;
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Corps de requete invalide" }, { status: 422 });
+  }
+
+  const { reponses, termine } = body as {
+    reponses?: Record<string, unknown>;
+    termine?: boolean;
+  };
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -22,19 +27,24 @@ export async function GET(
     global: { headers: { authorization: request.headers.get("authorization") ?? "" } },
   });
 
-  const { data: commande, error } = await supabase
-    .from("commandes")
-    .select("*, oeuvres(*)")
-    .eq("id", id)
-    .eq("user_id", auth.userId)
+  const { data, error } = await supabase
+    .from("reponses_parcours")
+    .upsert(
+      {
+        user_id: auth.userId,
+        session_id: auth.userId,
+        reponses: (reponses ?? {}) as Record<string, unknown>,
+        termine: termine ?? false,
+        langue: (body as { langue?: string }).langue ?? "fr",
+      },
+      { onConflict: "user_id, session_id" },
+    )
+    .select()
     .single();
 
   if (error) {
-    if (error.code === "PGRST116") {
-      return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
-    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(commande);
+  return NextResponse.json(data);
 }
