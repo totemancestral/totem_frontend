@@ -6,3 +6,4 @@ supabase/cli
 supabase/supabase
 supabase/supabase-go
 *.md
+dist
