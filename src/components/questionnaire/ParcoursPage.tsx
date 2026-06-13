@@ -1370,7 +1370,7 @@ function Paywall({
     <motion.section
       {...fadeSlide}
       data-paywall-scroll
-      className="relative h-[100svh] overflow-y-auto overflow-x-hidden px-4 pb-[calc(24px+env(safe-area-inset-bottom))] pt-24 md:px-6 md:pb-10 lg:flex lg:items-center lg:pb-12"
+      className="relative min-h-[100svh] overflow-y-auto overflow-x-hidden px-4 pb-[calc(24px+env(safe-area-inset-bottom))] pt-28 md:px-6 md:pb-10 lg:flex lg:items-center lg:pb-12"
       style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
     >
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 pb-8 pt-2 md:gap-5 md:py-4 lg:min-h-full lg:justify-center lg:py-0">

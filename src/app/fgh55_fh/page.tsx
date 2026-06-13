@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, type FormEvent } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 
 type AdminStats = {
@@ -23,26 +23,28 @@ type CommandeRow = {
 };
 
 export default function AdminPage() {
-  const router = useRouter();
   const { session } = useSupabaseSession();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [commandes, setCommandes] = useState<CommandeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
+
   const token = session?.access_token;
 
   useEffect(() => {
-    if (!session) {
-      router.replace("/fr/janua_vitae");
+    if (!session || !token) {
+      setLoading(false);
       return;
     }
-    if (!token) return;
+    setLoading(true);
 
     async function load() {
-      setLoading(true);
       setError(null);
-
       try {
         const [statsRes, cmdRes] = await Promise.all([
           fetch("/api/fgh55_fh/stats", {
@@ -71,7 +73,98 @@ export default function AdminPage() {
     }
 
     load();
-  }, [token]);
+  }, [token, session]);
+
+  async function handleLogin(e: FormEvent) {
+    e.preventDefault();
+    setLoginError(null);
+    setLoginLoading(true);
+
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) {
+      setLoginError(authError.message);
+      setLoginLoading(false);
+    }
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    setStats(null);
+    setCommandes([]);
+    setEmail("");
+    setPassword("");
+  }
+
+  if (!session) {
+    return (
+      <main
+        className="min-h-screen flex items-center justify-center px-5"
+        style={{ background: "var(--nuit-profonde)", color: "var(--ivoire)" }}
+      >
+        <form
+          onSubmit={handleLogin}
+          className="flex w-full max-w-sm flex-col gap-5 rounded-lg border p-8"
+          style={{ borderColor: "rgba(201,168,76,0.3)" }}
+        >
+          <div className="text-center">
+            <p className="caption uppercase mb-2" style={{ color: "var(--or-ancestral)" }}>
+              SENYCE PARTNERS
+            </p>
+            <h1 className="h-display text-2xl" style={{ color: "var(--or-ancestral)" }}>
+              Administration
+            </h1>
+            <p className="text-sm mt-2" style={{ color: "rgba(254,252,240,0.6)" }}>
+              Identifie-toi pour accéder au tableau de bord.
+            </p>
+          </div>
+
+          <label className="flex flex-col gap-2">
+            <span className="caption uppercase text-xs" style={{ color: "rgba(237,217,154,0.78)" }}>
+              Email
+            </span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@totemancestral.com"
+              required
+              className="form-input"
+              autoComplete="email"
+            />
+          </label>
+
+          <label className="flex flex-col gap-2">
+            <span className="caption uppercase text-xs" style={{ color: "rgba(237,217,154,0.78)" }}>
+              Mot de passe
+            </span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              className="form-input"
+              autoComplete="current-password"
+            />
+          </label>
+
+          {loginError && (
+            <p className="text-sm text-center" style={{ color: "#E07A6B" }}>
+              {loginError}
+            </p>
+          )}
+
+          <button type="submit" disabled={loginLoading} className="btn-primary w-full">
+            {loginLoading ? "..." : "Entrer"}
+          </button>
+        </form>
+      </main>
+    );
+  }
 
   return (
     <main
@@ -79,12 +172,19 @@ export default function AdminPage() {
       style={{ background: "var(--nuit-profonde)", color: "var(--ivoire)" }}
     >
       <div className="mx-auto max-w-5xl">
-        <p className="caption uppercase mb-4" style={{ color: "var(--or-ancestral)" }}>
-          SENYCE PARTNERS
-        </p>
-        <h1 className="h-display text-4xl mb-6" style={{ color: "var(--or-ancestral)" }}>
-          Tableau de bord admin
-        </h1>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <p className="caption uppercase mb-2" style={{ color: "var(--or-ancestral)" }}>
+              SENYCE PARTNERS
+            </p>
+            <h1 className="h-display text-4xl" style={{ color: "var(--or-ancestral)" }}>
+              Tableau de bord admin
+            </h1>
+          </div>
+          <button type="button" onClick={handleLogout} className="btn-secondary text-sm">
+            Déconnexion
+          </button>
+        </div>
 
         {loading && <p className="quote-italic">Chargement...</p>}
 
@@ -104,10 +204,7 @@ export default function AdminPage() {
             <div className="grid gap-4 mb-8 md:grid-cols-5">
               <StatCard label="Commandes" value={stats.totalCommandes.toString()} />
               <StatCard label="Actives" value={stats.commandesActives.toString()} />
-              <StatCard
-                label="Revenu"
-                value={`${(stats.revenuTotal / 100).toFixed(0)} €`}
-              />
+              <StatCard label="Revenu" value={`${(stats.revenuTotal / 100).toFixed(0)} €`} />
               <StatCard label="Erreurs" value={stats.erreurs.toString()} />
               <StatCard label="Aujourd'hui" value={stats.aujourdHui.toString()} />
             </div>
