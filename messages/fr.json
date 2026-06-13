@@ -140,6 +140,8 @@
     "compose": "Composer",
     "composeWork": "Composer mon œuvre",
     "account": "Espace",
+    "dashboard": "Dashboard",
+    "logout": "Déconnexion",
     "nav": {
       "experience": "L'expérience",
       "offers": "Les offres",

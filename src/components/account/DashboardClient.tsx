@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { motion } from "motion/react";
 import {
   Activity,
@@ -11,13 +11,16 @@ import {
   Download,
   FileText,
   Image as ImageIcon,
+  LayoutDashboard,
   ListChecks,
   LogOut,
+  Menu,
   PackageCheck,
   Plus,
   Sparkles,
   UserRound,
   Volume2,
+  X,
 } from "lucide-react";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 
@@ -249,6 +252,21 @@ export function DashboardClient({ locale }: { locale: Locale }) {
     ["en_attente_paiement", "paye", "en_generation"].includes(commande.statut),
   ).length;
   const composition = buildCompositionState({ commandes, oeuvres, copy: t });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const scrollTo = (id: string) => {
+    setSidebarOpen(false);
+    setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
+
+  const sidebarItems: Array<{ id: string; label: string; icon: ReactNode }> = [
+    { id: "dashboard-overview", label: "Tableau de bord", icon: <LayoutDashboard size={18} /> },
+    { id: "dashboard-orders", label: "Mes commandes", icon: <PackageCheck size={18} /> },
+    { id: "dashboard-artworks", label: "Mes œuvres", icon: <Sparkles size={18} /> },
+    { id: "dashboard-profile", label: "Mon profil", icon: <UserRound size={18} /> },
+  ];
 
   if (authLoading || loading) {
     return (
@@ -281,83 +299,112 @@ export function DashboardClient({ locale }: { locale: Locale }) {
     );
   }
 
-  return (
-    <section
-      className="min-h-[100svh] px-5 pb-24 pt-32 md:px-10"
-      style={{ background: "var(--nuit-profonde)" }}
-    >
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
-        <motion.header
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end"
-        >
-          <div className="flex flex-col gap-4">
-            <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
-              {t.eyebrow}
-            </p>
-            <h1
-              className="h-display text-4xl leading-tight md:text-6xl"
-              style={{ color: "var(--ivoire)" }}
-            >
-              {t.title.replace("{name}", name)}
-            </h1>
-            <p className="body-copy max-w-2xl" style={{ color: "rgba(254,252,240,0.72)" }}>
-              {t.subtitle}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href={`/${locale}/via_sapientiae`} className="btn-primary">
-              <Plus size={16} />
-              {t.compose}
-            </Link>
-            <button type="button" onClick={signOut} className="btn-secondary">
-              <LogOut size={16} />
-              {t.logout}
-            </button>
-          </div>
-        </motion.header>
+  const sidebar = (
+    <div className="flex h-full flex-col gap-6 p-6" style={{ background: "rgba(26,26,46,0.95)" }}>
+      <div className="text-center">
+        <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>ESPACE</p>
+        <h2 className="logo-wordmark text-base mt-1">Totem Ancestral</h2>
+      </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
-          <StatCard
-            icon={<PackageCheck size={20} />}
-            label={t.orders}
-            value={commandes.length.toString()}
-          />
-          <StatCard
-            icon={<Sparkles size={20} />}
-            label={t.delivered}
-            value={deliveredCount.toString()}
-          />
-          <StatCard icon={<Clock3 size={20} />} label={t.active} value={activeCount.toString()} />
-        </div>
-
-        <CompositionPanel composition={composition} locale={locale} />
-
-        <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
-          <aside
-            className="rounded-lg border p-6"
-            style={{ background: "rgba(26,26,46,0.72)", borderColor: "rgba(201,168,76,0.22)" }}
+      <nav className="flex flex-col gap-1">
+        {sidebarItems.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => scrollTo(item.id)}
+            className="flex items-center gap-3 rounded px-4 py-3 text-left text-sm uppercase tracking-wider transition-colors"
+            style={{ color: "rgba(254,252,240,0.72)" }}
           >
-            <div className="mb-6 flex items-center gap-3">
-              <UserRound size={20} color="var(--or-ancestral)" />
-              <h2 className="h-display text-2xl" style={{ color: "var(--or-ancestral)" }}>
-                {t.profile}
-              </h2>
-            </div>
-            <dl className="flex flex-col gap-4">
-              <ProfileLine label={t.email} value={user?.email ?? "-"} />
-              <ProfileLine label={t.language} value={locale.toUpperCase()} />
-            </dl>
-          </aside>
+            <span style={{ color: "var(--or-ancestral)" }}>{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+      </nav>
 
-          <section className="flex flex-col gap-5">
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
-                {t.latestOrders}
-              </h2>
+      <div className="mt-auto flex flex-col gap-3">
+        <Link
+          href={`/${locale}/via_sapientiae`}
+          className="btn-primary w-full text-xs py-3"
+        >
+          <Plus size={14} />
+          {t.compose}
+        </Link>
+        <button type="button" onClick={signOut} className="btn-secondary w-full text-xs py-3">
+          <LogOut size={14} />
+          {t.logout}
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex min-h-[100svh]" style={{ background: "var(--nuit-profonde)" }}>
+      <aside className="fixed left-0 top-0 z-40 hidden h-full w-64 pt-20 lg:block" style={{ borderRight: "1px solid rgba(201,168,76,0.15)" }}>
+        {sidebar}
+      </aside>
+
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
+          <aside className="relative h-full w-72 pt-20" style={{ borderRight: "1px solid rgba(201,168,76,0.15)" }}>
+            {sidebar}
+          </aside>
+        </div>
+      )}
+
+      <main className="flex-1 overflow-y-auto px-5 py-6 md:px-8 md:py-10 lg:ml-64">
+        <div className="mx-auto max-w-5xl flex flex-col gap-10">
+
+          <div className="flex items-center justify-between lg:hidden">
+            <button type="button" onClick={() => setSidebarOpen(true)} className="btn-secondary text-xs px-4 py-2">
+              <Menu size={16} />
+              Menu
+            </button>
+            <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>ESPACE</p>
+          </div>
+
+          <section id="dashboard-overview">
+            <motion.header
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="grid gap-4 mb-6"
+            >
+              <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
+                {t.eyebrow}
+              </p>
+              <h1
+                className="h-display text-4xl leading-tight md:text-5xl"
+                style={{ color: "var(--ivoire)" }}
+              >
+                {t.title.replace("{name}", name)}
+              </h1>
+              <p className="max-w-2xl" style={{ color: "rgba(254,252,240,0.72)" }}>
+                {t.subtitle}
+              </p>
+            </motion.header>
+
+            <div className="grid gap-4 mb-8 sm:grid-cols-2 md:grid-cols-3">
+              <StatCard
+                icon={<PackageCheck size={20} />}
+                label={t.orders}
+                value={commandes.length.toString()}
+              />
+              <StatCard
+                icon={<Sparkles size={20} />}
+                label={t.delivered}
+                value={deliveredCount.toString()}
+              />
+              <StatCard icon={<Clock3 size={20} />} label={t.active} value={activeCount.toString()} />
             </div>
+
+            <CompositionPanel composition={composition} locale={locale} />
+          </section>
+
+          <section id="dashboard-orders" className="flex flex-col gap-5">
+            <h2 className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
+              {t.latestOrders}
+            </h2>
             {commandes.length === 0 ? (
               <EmptyState text={t.noOrders} cta={t.emptyCta} href={`/${locale}/via_sapientiae`} />
             ) : (
@@ -368,24 +415,42 @@ export function DashboardClient({ locale }: { locale: Locale }) {
               </div>
             )}
           </section>
-        </div>
 
-        <section className="flex flex-col gap-5">
-          <h2 className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
-            {t.artworks}
-          </h2>
-          {oeuvres.length === 0 ? (
-            <EmptyState text={t.noArtworks} cta={t.emptyCta} href={`/${locale}/via_sapientiae`} />
-          ) : (
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {oeuvres.map((oeuvre) => (
-                <ArtworkCard key={oeuvre.id} oeuvre={oeuvre} locale={locale} />
-              ))}
+          <section id="dashboard-artworks" className="flex flex-col gap-5">
+            <h2 className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
+              {t.artworks}
+            </h2>
+            {oeuvres.length === 0 ? (
+              <EmptyState text={t.noArtworks} cta={t.emptyCta} href={`/${locale}/via_sapientiae`} />
+            ) : (
+              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {oeuvres.map((oeuvre) => (
+                  <ArtworkCard key={oeuvre.id} oeuvre={oeuvre} locale={locale} />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section id="dashboard-profile">
+            <div
+              className="rounded-lg border p-6"
+              style={{ background: "rgba(26,26,46,0.72)", borderColor: "rgba(201,168,76,0.22)" }}
+            >
+              <div className="mb-6 flex items-center gap-3">
+                <UserRound size={20} color="var(--or-ancestral)" />
+                <h2 className="h-display text-2xl" style={{ color: "var(--or-ancestral)" }}>
+                  {t.profile}
+                </h2>
+              </div>
+              <dl className="flex flex-col gap-4">
+                <ProfileLine label={t.email} value={user?.email ?? "-"} />
+                <ProfileLine label={t.language} value={locale.toUpperCase()} />
+              </dl>
             </div>
-          )}
-        </section>
-      </div>
-    </section>
+          </section>
+        </div>
+      </main>
+    </div>
   );
 }
 
