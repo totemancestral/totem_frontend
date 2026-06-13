@@ -47,6 +47,7 @@ type Oeuvre = {
   pdf_url: string | null;
   statut: string;
   created_at: string;
+  recit: string | null;
 };
 
 type CompositionState = {
@@ -84,6 +85,8 @@ const copy = {
     image: "Image",
     audio: "Audio",
     pdf: "PDF",
+    text: "Recit",
+    hideText: "Masquer le recit",
     waitingFiles: "Les fichiers apparaitront quand la livraison sera terminee.",
     unnamed: "Oeuvre sans nom",
     defaultName: "Voyageur",
@@ -127,6 +130,8 @@ const copy = {
     image: "Image",
     audio: "Audio",
     pdf: "PDF",
+    text: "Story",
+    hideText: "Hide story",
     waitingFiles: "Files will appear when delivery is complete.",
     unnamed: "Untitled artwork",
     defaultName: "Traveler",
@@ -582,6 +587,7 @@ function OrderCard({ commande, locale }: { commande: Commande; locale: Locale })
 
 function ArtworkCard({ oeuvre, locale }: { oeuvre: Oeuvre; locale: Locale }) {
   const t = copy[locale];
+  const [showRecit, setShowRecit] = useState(false);
   const links: Array<{ label: string; href: string; icon: ReactNode }> = [
     { label: t.image, href: oeuvre.image_url, icon: <ImageIcon size={15} /> },
     { label: t.audio, href: oeuvre.audio_url, icon: <Volume2 size={15} /> },
@@ -618,6 +624,32 @@ function ArtworkCard({ oeuvre, locale }: { oeuvre: Oeuvre; locale: Locale }) {
               : formatDate(oeuvre.created_at, locale)}
           </p>
         </div>
+
+        {oeuvre.recit && (
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowRecit(!showRecit)}
+              className="btn-secondary !px-4 !py-2 !text-[11px]"
+            >
+              <FileText size={14} />
+              {showRecit ? t.hideText : t.text}
+            </button>
+            {showRecit && (
+              <div
+                className="mt-4 max-h-80 overflow-y-auto rounded border p-4 text-sm leading-relaxed whitespace-pre-line"
+                style={{
+                  background: "rgba(13,13,26,0.6)",
+                  borderColor: "rgba(201,168,76,0.18)",
+                  color: "var(--or-pale)",
+                }}
+              >
+                {oeuvre.recit}
+              </div>
+            )}
+          </div>
+        )}
+
         {links.length > 0 ? (
           <div className="flex flex-wrap gap-2" aria-label={t.files}>
             {links.map((link) => (

@@ -53,9 +53,9 @@ export function Header({ locale }: { locale: Locale }) {
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-colors duration-500"
       style={{
-        background: scrolled ? "rgba(13,13,26,0.92)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(201,168,76,0.12)" : "1px solid transparent",
+        background: scrolled ? "rgba(13,13,26,0.95)" : "rgba(13,13,26,0.88)",
+        backdropFilter: scrolled ? "blur(12px)" : "blur(4px)",
+        borderBottom: "1px solid rgba(201,168,76,0.12)",
       }}
     >
       <div className="max-w-[1280px] mx-auto px-5 md:px-10 py-4 flex items-center justify-between gap-6">
