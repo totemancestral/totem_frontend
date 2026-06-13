@@ -2,6 +2,7 @@
 
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { CookieConsent } from "@/components/CookieConsent";
 import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
@@ -30,6 +31,7 @@ export function ClientChrome({ children, locale }: { children: ReactNode; locale
       <Header locale={locale} />
       <main style={{ maxWidth: "100%", overflowX: "clip" }}>{children}</main>
       <Footer locale={locale} />
+      <CookieConsent />
     </div>
   );
 }

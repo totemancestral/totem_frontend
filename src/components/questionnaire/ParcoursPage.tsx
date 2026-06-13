@@ -9,10 +9,7 @@ import { Check, Home, LayoutDashboard } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  createLocalOrder,
-  localOfferFromCheckoutOffer,
-} from "@/lib/local-auth";
+
 
 type FieldLevel = "PRIORITAIRE" | "SECONDAIRE" | "TERTIAIRE" | "SPECIAL";
 
@@ -424,16 +421,6 @@ export function ParcoursPage() {
     }
 
     if (checkout === "success") {
-      const pending = readPendingCheckout();
-      if (pending) {
-        createLocalOrder({
-          userId: session.user.id,
-          offre: localOfferFromCheckoutOffer(pending.offerId),
-          montantCents: pending.amountCents,
-          langue: locale,
-          stripeSessionId: searchParams.get("session_id"),
-        });
-      }
       clearPendingCheckout();
       setHasUnlockedRest(true);
       setPhase("post-payment");
@@ -556,20 +543,18 @@ export function ParcoursPage() {
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({
           offre: offer.id,
           answers,
           locale,
-          userId: session.user.id,
-          email: session.user.email,
-          prenom: session.user.user_metadata?.prenom ?? "",
         }),
       });
       const payload = (await response.json().catch(() => null)) as {
         checkoutUrl?: string;
-        mode?: string;
-        checkoutSessionId?: string;
         error?: string;
       } | null;
 
@@ -577,21 +562,12 @@ export function ParcoursPage() {
         throw new Error(payload?.error || "checkout_failed");
       }
 
-      if (payload?.checkoutUrl) {
-        writePendingCheckout({ offerId: offer.id, amountCents: offer.amountCents });
-        window.location.href = payload.checkoutUrl;
-        return;
+      if (!payload?.checkoutUrl) {
+        throw new Error("URL de paiement non disponible");
       }
 
-      createLocalOrder({
-        userId: session.user.id,
-        offre: localOfferFromCheckoutOffer(offer.id),
-        montantCents: offer.amountCents,
-        langue: locale,
-        stripeSessionId: payload?.checkoutSessionId ?? null,
-      });
-      setHasUnlockedRest(true);
-      setPhase("post-payment");
+      writePendingCheckout({ offerId: offer.id, amountCents: offer.amountCents });
+      window.location.href = payload.checkoutUrl;
     } catch (error) {
       setCheckoutError(error instanceof Error ? error.message : "checkout_failed");
     } finally {

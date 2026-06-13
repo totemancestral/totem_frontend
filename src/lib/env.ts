@@ -56,6 +56,9 @@ export const serverEnvSchema = z.object({
   SENYCE_API_AUDIO: optionalUrl,
   SENYCE_API_KEY: z.string().optional(),
 
+  // Anthropic / Claude
+  ANTHROPIC_API_KEY: z.string().optional(),
+
   // Admin
   ADMIN_EMAIL: z.string().email().optional(),
 

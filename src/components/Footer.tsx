@@ -26,25 +26,25 @@ export function Footer({ locale }: { locale: Locale }) {
             <Link href={`/${locale}/#offres`} style={{ color: "var(--ivoire)" }}>
               {t("nav.offers")}
             </Link>
-            <Link href={`/${locale}/a-propos`} style={{ color: "var(--ivoire)" }}>
+            <Link href={`/${locale}/athenaeum_arc`} style={{ color: "var(--ivoire)" }}>
               {t("nav.about")}
             </Link>
-            <Link href={`/${locale}/faq`} style={{ color: "var(--ivoire)" }}>
+            <Link href={`/${locale}/quaestio_sacra`} style={{ color: "var(--ivoire)" }}>
               FAQ
             </Link>
-            <Link href={`/${locale}/contact`} style={{ color: "var(--ivoire)" }}>
+            <Link href={`/${locale}/scriba_mundi`} style={{ color: "var(--ivoire)" }}>
               Contact
             </Link>
           </nav>
 
           <nav className="subtext flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-2 text-[12px]">
-            <Link href={`/${locale}/cgv`} style={{ color: "#888" }}>
+            <Link href={`/${locale}/lex_mercatoria`} style={{ color: "#888" }}>
               CGV
             </Link>
-            <Link href={`/${locale}/confidentialite`} style={{ color: "#888" }}>
+            <Link href={`/${locale}/arcanum_privata`} style={{ color: "#888" }}>
               {t("legal.privacy")}
             </Link>
-            <Link href={`/${locale}/mentions`} style={{ color: "#888" }}>
+            <Link href={`/${locale}/notitia_legalis`} style={{ color: "#888" }}>
               {t("legal.mentions")}
             </Link>
           </nav>

@@ -12,7 +12,7 @@ const nav = [
   { to: "/", hash: "#experience", labelKey: "experience" },
   { to: "/", hash: "#offres", labelKey: "offers" },
   { to: "/", hash: "#maison", labelKey: "house" },
-  { to: "/faq", hash: "", labelKey: "faq" },
+  { to: "/quaestio_sacra", hash: "", labelKey: "faq" },
 ];
 
 export function Header({ locale }: { locale: Locale }) {
@@ -112,7 +112,7 @@ export function Header({ locale }: { locale: Locale }) {
             </button>
           </div>
           <Link
-            href={`/${locale}/espace-personnel`}
+            href={`/${locale}/domus_animi`}
             aria-label={t("account")}
             title={t("account")}
             className="hidden h-10 w-10 items-center justify-center rounded-sm border transition-colors hover:bg-ombre md:inline-flex"

@@ -43,11 +43,20 @@ export async function POST(request: Request) {
 
   const origin =
     request.headers.get("origin") || env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const metadata = buildStripeMetadata(parsed.data, auth.userId, auth.email);
+  const supabase = createServiceClient();
+
+  // Récupérer le prénom de l'utilisateur
+  const profileResult = await supabase
+    .from("profiles")
+    .select("prenom")
+    .eq("id", auth.userId)
+    .single()
+    .catch(() => ({ data: null }));
+  const prenom = (profileResult?.data as { prenom?: string } | null)?.prenom ?? "";
+
+  const metadata = buildStripeMetadata(parsed.data, auth.userId, auth.email, prenom);
 
   try {
-    const supabase = createServiceClient();
-
     await supabase.from("reponses_parcours").upsert(
       {
         user_id: auth.userId,
@@ -89,12 +98,15 @@ function buildStripeMetadata(
   data: z.infer<typeof checkoutSchema>,
   userId: string,
   email: string,
+  prenom: string,
 ) {
   const metadata: Record<string, string> = {
     userId,
     email,
+    prenom,
     locale: data.locale,
     offre: data.offre,
+    reponses: trimMetadataValue(JSON.stringify(data.answers)),
   };
 
   for (let index = 1; index <= 10; index += 1) {

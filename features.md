@@ -1,190 +1,156 @@
 # TOTEM ANCESTRAL - Fonctionnalites MVP
 
-Ce fichier suit les fonctionnalites attendues et leur etat actuel. Les statuts utilises sont :
-
-- `Fait` : implemente et observe dans le code.
-- `Partiel` : socle present, mais fonction incomplete.
-- `Placeholder` : route/page/service present mais retourne une reponse d'attente ou une erreur volontaire.
-- `A faire` : non observe dans le code.
+Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 
 ## 1. Presentation et navigation
 
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| Landing page one-pager | Hero, geste, experience, oeuvre, offres, maison, avis, CTA | Fait | Refonte avancee dans `src/components/sections.tsx` et `HomePage` |
-| Intro immersive | Video/animation jouee une fois par session | Fait | `IntroExperience`, cle `totem_intro_played` |
-| Audio ambiant | Bouton de controle audio visible apres entree | Fait | `AmbientAudio`, correction recente pour conserver le bouton |
-| Modal de visite | Presentation guidee apres entree | Fait | `SiteTourModal` |
-| Header responsive | Navigation, logo T + icone + A, switch langue | Fait | `Header.tsx` |
-| Changement langue sans reload complet | FR/EN via next-intl | Fait/Partiel | `router.replace`; reste du contenu secondaire a traduire |
-| Footer | Navigation et liens legaux | Fait/Partiel | i18n present pour footer |
-| Pages legales | Mentions, CGV, confidentialite | Partiel | Pages presentes, textes surtout FR |
-| FAQ | Questions/reponses | Partiel | Page presente, contenu surtout FR |
-| Contact | Formulaire + Brevo | Placeholder | API valide Zod mais n'envoie pas encore Brevo |
-| Consentement cookies RGPD | Bandeau + journalisation | A faire | Non observe |
-| SEO localise | Metadata par locale, hreflang/canonical | Partiel | Metadata globale; localisation complete non observee |
+| Fonctionnalite | Etat | Notes |
+| --- | --- | --- |
+| Landing page one-pager | Fait | Sections : Hero, geste, manifeste, oeuvre, experience, offres, maison, avis, CTA |
+| Intro immersive | Fait | `IntroExperience` avec `totem_intro_played` |
+| Audio ambiant | Fait | `AmbientAudio` avec toggle |
+| Modal de visite | Fait | `SiteTourModal` guidee |
+| Header responsive | Fait | Logo T, switch FR/EN sans reload |
+| Footer | Fait | Liens legaux i18n |
+| Pages legales | Partiel | Mentions, CGV, confidentialite (FR surtout) |
+| FAQ | Partiel | Page presente, contenu surtout FR |
+| Contact | Fait | API Brevo branchée + UI reactive |
+| Consentement cookies RGPD | Fait | `CookieConsent` avec localStorage |
+| SEO localise | Partiel | `html lang` dynamique, metadata FR/EN |
 
 ## 2. Internationalisation
 
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| Locales FR/EN | `messages/fr.json`, `messages/en.json` | Fait | Fichiers presents |
-| Prefixes routes | `/fr/*`, `/en/*` | Fait | `next-intl` routing `always` |
-| Detection locale | Accept-Language + fallback FR | Partiel | Middleware next-intl actif; comportement exact cookie/header a confirmer |
-| Switcher manuel | FR/EN sans rechargement complet | Fait | Header |
-| Traduction landing | Home FR/EN | Fait/Partiel | Principales sections traduites |
-| Traduction parcours | Questions et UI FR/EN | Fait/Partiel | Messages integres; fallback FR existe dans composant |
-| Traduction pages secondaires | FAQ, offres, legal, auth | Partiel | Plusieurs textes hardcodes FR |
-| Automatisation traduction | next-auto-i18n | Partiel | Package et scripts presents |
+| Fonctionnalite | Etat | Notes |
+| --- | --- | --- |
+| Locales FR/EN | Fait | `messages/fr.json`, `messages/en.json` |
+| Prefixes routes | Fait | `/fr/*`, `/en/*` |
+| Detection locale | Fait | Middleware next-intl + Accept-Language |
+| Switcher manuel | Fait | Header sans rechargement |
+| Traduction landing | Fait | Sections principales traduites |
+| Traduction parcours | Fait | Questions et UI FR/EN |
+| Traduction pages secondaires | Partiel | Plusieurs textes hardcodes FR |
+| Automatisation | Partiel | `next-auto-i18n` present |
 
 ## 3. Parcours conversationnel
 
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| 10 questions | Parcours complet | Fait | `ParcoursPage` contient 10 questions + messages i18n |
-| Progression | Barre current/total | Fait | Barre en haut de l'interface parcours |
-| Transitions animees | Fade/slide | Fait | Motion |
-| Reponse choix unique | A/B/C/D | Fait | Chaque question propose 4 choix |
-| Champs libres nuance | Texte optionnel selon question | Fait | Niveaux PRIORITAIRE/SECONDAIRE/TERTIAIRE/SPECIAL |
-| Question skippable | Une question optionnelle | Fait | Q6 `canSkip` |
-| Navigation precedent | Sans perte | Fait | Fonction `previous` |
-| Persistance navigateur | Rechargement sans perte | Fait/Deviation | Utilise `localStorage` `totem_parcours_v1`, pas `sessionStorage` cible |
-| Creation compte apres Q4 | Collecte prenom/email avant offres | Fait | Demande produit recente |
-| Choix offre apres Q4 | Pricing dedie et mobile scrollable | Fait | Corrige pour 430x932 |
-| Reprise questions restantes | Apres pseudo-paiement | Fait/Simulation | Bouton offre appelle `onPaid`, pas Stripe reel |
-| Transmission paiement | POST `/api/checkout` | A faire | Non connecte dans UI finale |
+| Fonctionnalite | Etat | Notes |
+| --- | --- | --- |
+| 10 questions | Fait | A/B/C/D + champs libres |
+| Progression | Fait | Barre current/total |
+| Transitions animees | Fait | Motion |
+| Champs libres | Fait | P/S/T/SPECIAL |
+| Question skippable | Fait | Q6 canSkip |
+| Persistance localStorage | Fait | `totem_parcours_v1` |
+| Creation compte apres Q4 | Fait | Auth obligatoire avant offres |
+| Choix offre | Fait | Pricing dedie mobile |
+| Checkout Stripe | Fait | `/api/checkout` avec Bearer token |
 
 ## 4. Offres et pricing
 
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| Trois offres | Origine, Ancestral, Famille | Fait cote UI | Prix visibles dans parcours |
-| Details offres landing | Retires de landing, compares apres Q4 | Fait | Conforme demande produit recente |
-| Pricing responsive mobile | Lisible 430x932 | Fait | Test Chrome effectue precedemment |
-| Mapping Stripe Price IDs | Variables env | A faire | Non branche |
-| Offre Famille multi-destinataires | 3 coffrets distincts | A faire | Complexite phase MVP a arbitrer |
+| Fonctionnalite | Etat | Notes |
+| --- | --- | --- |
+| Trois offres | Fait | Origine 49€, Ancestral 89€, Famille 199€ |
+| Pricing responsive | Fait | Teste 430x932 |
+| Mapping Stripe Price IDs | Fait | `STRIPE_PRICE_*` env vars |
+| Offre Famille multi-destinataires | A faire | Complexite phase 2 |
 
-## 5. Paiement international
+## 5. Paiement
 
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| Stripe SDK serveur | Client Stripe | Partiel | `getStripeClient` present |
-| Creation Checkout | `/api/checkout` | Placeholder | Retourne `501` |
-| Stripe Tax | `automatic_tax` | A faire | Non implemente |
-| Metadata answers/locale/offre | Session Checkout | A faire | Schema Zod existe seulement |
-| Devise internationale | Stripe conversion | A faire | Dependra de Checkout |
-| Webhook signe | `/api/webhook-stripe` | Placeholder | Lit signature mais ne verifie pas HMAC |
-| Idempotence webhook | `stripe_id` unique | A faire | Non implemente cote API |
-| Creation commande | Supabase | A faire | Non implemente cote API |
-| Email confirmation | Brevo | A faire | Non implemente |
+| Fonctionnalite | Etat | Notes |
+| --- | --- | --- |
+| Creation Checkout | Fait | `/api/checkout` Stripe Checkout + metadata |
+| Stripe Tax | Fait | `automatic_tax: true` |
+| Metadata complet | Fait | reponses, prenom, userId, email, offre, locale |
+| Webhook signe | Fait | HMAC verification avec `constructEvent` |
+| Idempotence webhook | Fait | Doublon `stripe_session_id` |
+| Creation commande + oeuvre | Fait | Supabase via webhook |
+| Email confirmation | Fait | Brevo via webhook |
+| Upsert reponses | Fait | Contrainte UNIQUE (user_id, session_id) |
 
 ## 6. Pipeline de generation
 
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| Service pipeline | `generateCoffret` | Placeholder | Throw volontaire |
-| Retry backoff | 1s/3s/9s | Partiel | Utilitaire existe mais pas journalisation finale |
-| API Texte SENYCE | POST serveur | A faire | Non implemente |
-| API Image SENYCE | POST serveur | A faire | Non implemente |
-| API Audio SENYCE | POST serveur | A faire | Non implemente |
-| Parallelisation image/audio | Promise.all | A faire | Non implemente |
-| Generation PDF | @react-pdf/renderer | Placeholder | Dependance presente; service throw |
-| Erreurs pipeline | Table + alertes | A faire | Table cible absente du schema courant |
-| SLA 15 minutes | Livraison complete | A faire | Pas de pipeline reel |
+| Fonctionnalite | Etat | Notes |
+| --- | --- | --- |
+| Service pipeline | Fait | `generateCoffret` complet |
+| Retry backoff | Fait | 1s/3s avec retry 2 |
+| Texte parchemin Claude | Fait | `callClaudeForTexte` via Anthropic API (ton mystique/ancestral) |
+| API Texte SENYCE | Fait | Fallback si Claude indisponible |
+| API Image SENYCE | Fait | POST avec retry + download -> R2 |
+| API Audio SENYCE | Fait | POST avec retry + download -> R2 |
+| Parallelisation image/audio | Fait | Promise.all |
+| Generation PDF | Fait | Parchemin + Certificat avec @react-pdf/renderer |
+| Erreurs pipeline | Fait | Table `erreurs_pipeline` + alertes admin |
+| Telechargement assets -> R2 | Fait | URLs SENYCE -> R2 pour stockage persistant |
+| SLA 15 minutes | Partiel | Depend du backend (timeout Vercel) |
 
 ## 7. Stockage et livraison
 
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| Client R2 | AWS S3 compatible | Partiel | `getR2Client` present |
-| Upload fichiers | PNG, MP3, PDF | Placeholder | `uploadAndDeliver` throw |
-| URLs signees PDF | Expiration 30j | A faire | Non implemente |
-| URLs publiques PNG/MP3 | R2 public/CDN | A faire | Non implemente |
-| Mise a jour commande | URLs + statut livre | A faire | Non implemente |
-| Client Brevo | TransactionalEmailsApi | Partiel | `getBrevoClient` present |
-| Email livraison | Template FR/EN | Placeholder | Fonctions throw |
-| Alerte admin | Template erreur | Placeholder | Fonction throw |
+| Fonctionnalite | Etat | Notes |
+| --- | --- | --- |
+| Client R2 | Fait | `getR2Client` S3 compatible |
+| Upload fichiers | Fait | PNG, MP3, PDF vers R2 |
+| URLs signees PDF | Fait | 30 jours expiration |
+| Mise a jour commande/oeuvre | Fait | URLs + statut livree |
+| Client Brevo | Fait | `getBrevoClient` TransactionalEmailsApi |
+| Email livraison | Fait | Template FR/EN |
+| Alerte admin | Fait | Template erreur |
 
 ## 8. Authentification et espace personnel
 
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| Supabase client public | Client anon | Partiel | Present |
-| Supabase service role | Client serveur | Partiel | Present |
-| Migrations Auth/RLS | Tables + policies | Partiel | Schema courant different du document cible |
-| Magic link | Connexion email | A faire | Route non observee |
-| Page auth | Acces utilisateur | Placeholder | Page indique module M6 futur |
-| Espace personnel | Commandes/livrables | Placeholder | Page statique |
-| API commande utilisateur | `/api/commandes/[id]` | Placeholder | Retourne `501` |
-| Protection middleware | JWT sur routes protegees | A faire | Middleware actuel uniquement i18n |
+| Fonctionnalite | Etat | Notes |
+| --- | --- | --- |
+| Supabase client public | Fait | Client anon |
+| Supabase service role | Fait | Client serveur |
+| Migrations Auth/RLS | Fait | Tables + policies |
+| Magic link | Fait | OTP email |
+| Page auth | Fait | signup/signin/magic-link/reset-password |
+| Espace personnel | Fait | Dashboard avec commandes/oeuvres/profil |
+| API commandes | Fait | `/api/commandes` |
+| API oeuvres | Fait | `/api/oeuvres` |
+| API profiles | Fait | `/api/profiles` |
+| Protection route admin | Fait | Garde client-side + redirect |
+| Protection route espace-personnel | Fait | Garde client-side + redirect |
 
 ## 9. Administration
 
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| Page admin | Dashboard SENYCE | Placeholder | UI statique |
-| API commandes admin | Liste/filtres | Placeholder | Retourne `501` |
-| API stats admin | Revenus/statistiques | Placeholder | Retourne `501` |
-| Role admin middleware | Protection `/admin` | A faire | Non implemente |
-| Role admin API | `403` si non admin | A faire | Non implemente |
-| Relance pipeline | Action admin | A faire | Route absente |
-| Graphiques | Recharts/chart | A faire | Recharts installe |
-| Exports | Donnees admin | A faire | Non implemente |
+| Fonctionnalite | Etat | Notes |
+| --- | --- | --- |
+| Page admin | Fait | Route obfusquée `/fgh55_fh` (sécurité par obscurité) |
+| API commandes admin | Fait | `/api/admin/commandes` |
+| API stats admin | Fait | `/api/fgh55_fh/stats` |
+| Role admin API | Fait | 403 si non admin |
+| Garde admin page | Fait | Redirect /fr/auth si non connecte |
+| Graphiques Recharts | Installe | Non utilise (dette technique) |
+| Relance pipeline | A faire | Phase 2 |
 
 ## 10. Securite
 
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| Secrets non suivis | `.env*` ignores | Fait | Git ne suit pas `.env`/`.env.local` |
-| Validation env Zod | Variables obligatoires | Partiel | Schema present mais optionnel |
-| Headers securite | HSTS, CSP, frame, nosniff | Partiel | HSTS/CSP manquants |
-| Webhook HMAC | Stripe constructEvent | A faire | Non implemente |
-| RLS | Toutes tables sensibles | Partiel | Migrations RLS presentes |
-| Admin logs | Journalisation admin | A faire | Non observe |
-| Logs webhooks | Type/ID/resultat | A faire | Non implemente |
-
-## 11. Performance et accessibilite
-
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| Build production | `npm run build` | Fait | Dernier build local et Vercel passes avant ces docs |
-| Mobile 430x932 | Pas de debordement horizontal | Fait sur parcours/pricing | Test Chrome realise precedemment |
-| Lighthouse >= 90 | Accueil/parcours | A faire | Non mesure |
-| Chargement < 3s regions cible | Europe/US/Afrique | A faire | Non mesure |
-| WCAG AA | Contraste/ARIA/clavier | Partiel | Plusieurs ARIA; audit complet non fait |
-| Tests E2E | Playwright | A faire | Pas de config observee |
-
-## 12. Deploiement et exploitation
-
-| Fonctionnalite | Exigence MVP | Etat | Notes |
-| --- | --- | --- | --- |
-| GitHub remote | Repo projet | Fait | `REBCDR07/totem-project` |
-| Production Vercel | App en ligne | Fait | `https://totemancestrale.vercel.app` |
-| Staging | Domaine staging | A faire | Non observe |
-| CI GitHub Actions | Lint/type/test/build | A faire | Non observe |
-| Branch protection | PR obligatoire | Non verifie | Hors depot local |
-| Variables Vercel | Env par environnement | Partiel/non verifie | Vercel signale presence `.env` pendant build |
-
-## 13. Fonctionnalites hors perimetre MVP
-
-| Fonctionnalite | Phase | Etat |
+| Fonctionnalite | Etat | Notes |
 | --- | --- | --- |
-| Video dynamique livree par archetype | Phase 2 | A faire |
-| Abonnement TOTEM VIVANT | Phase 2 | A faire |
-| Langues PT/ES/AR/ZH | Phase 2-4 | A faire |
-| Carte cadeau livraison differee | Phase 2 | A faire |
-| Application mobile native | Phase 3 | A faire |
-| Extraction pipeline en microservice | Phase 3 | A faire |
+| Secrets non suivis | Fait | `.env*` ignores |
+| Validation env Zod | Fait | Schema strict en production |
+| Headers securite | Fait | HSTS, CSP, X-Frame-Options, nosniff, Referrer-Policy |
+| Webhook HMAC | Fait | `stripe.webhooks.constructEvent` |
+| RLS | Fait | Toutes tables sensibles |
+| Bandeau cookies RGPD | Fait | `CookieConsent` |
+| CSP | Fait | Supabase, Stripe, Brevo, R2 whitelisted |
 
-## 14. Prochaine feuille de route conseillee
+## 11. Tests et CI
 
-1. Finaliser la decision produit sur le flux Q4 -> offre -> Q5-Q10.
-2. Internationaliser toutes les pages secondaires et metadonnees.
-3. Brancher Stripe Checkout avec Tax et Price IDs.
-4. Brancher webhook Stripe signe + idempotence.
-5. Aligner schema Supabase avec le document ou mettre a jour le document comme source de verite.
-6. Implementer pipeline SENYCE avec retries et timeouts.
-7. Implementer R2 + PDF + Brevo.
-8. Finaliser auth utilisateur, espace personnel et admin.
-9. Ajouter tests unitaires/integration/E2E.
-10. Durcir securite : CSP, HSTS, env strictes, admin logs.
+| Fonctionnalite | Etat | Notes |
+| --- | --- | --- |
+| Tests unitaires | A faire | 0 fichier |
+| CI GitHub Actions | A faire | Absent |
+| .env.example | Fait | Cree dans racine |
+| README.md | A faire | |
+
+## 12. Dette technique
+
+| Element | Etat |
+| --- | --- |
+| Documentation features.md | A jour |
+| Documentation Architecture.md | A mettre a jour |
+| Code legacy TanStack src/routes/ | Present (exclu du build) |
+| local-auth.ts | Present (non importe dans flux prod) |
+| Double lockfile (package-lock.json + bun.lock) | Present |
+| recharts installe sans usage | Present |

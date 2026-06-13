@@ -1,9 +1,43 @@
 "use client";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { PageHero } from "@/components/PageHero";
 
 export function ContactPage() {
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setStatus("sending");
+    setErrorMsg("");
+
+    const form = e.currentTarget;
+    const data = {
+      prenom: (form.elements.namedItem("prenom") as HTMLInputElement).value,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      sujet: (form.elements.namedItem("sujet") as HTMLInputElement).value,
+      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
+    };
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        throw new Error((payload as { error?: string }).error ?? "Erreur d'envoi");
+      }
+
+      setStatus("sent");
+    } catch (error) {
+      setStatus("error");
+      setErrorMsg(error instanceof Error ? error.message : "Erreur inconnue");
+    }
+  }
+
   return (
     <>
       <PageHero
@@ -12,7 +46,7 @@ export function ContactPage() {
       />
       <section className="pb-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
         <div className="max-w-xl mx-auto">
-          {sent ? (
+          {status === "sent" ? (
             <div className="card-totem text-center">
               <p className="quote-italic text-xl mb-4">Votre message est parti.</p>
               <p className="text-sm" style={{ color: "var(--ivoire)" }}>
@@ -20,42 +54,30 @@ export function ContactPage() {
               </p>
             </div>
           ) : (
-            <form
-              className="flex flex-col gap-5"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSent(true);
-              }}
-            >
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
               <div className="grid sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="caption uppercase mb-2 block">Prénom</label>
-                  <input required className="form-input" placeholder="Votre prénom" />
+                  <label className="caption uppercase mb-2 block" htmlFor="prenom">Prénom</label>
+                  <input id="prenom" name="prenom" required className="form-input" placeholder="Votre prénom" />
                 </div>
                 <div>
-                  <label className="caption uppercase mb-2 block">Email</label>
-                  <input
-                    required
-                    type="email"
-                    className="form-input"
-                    placeholder="vous@exemple.com"
-                  />
+                  <label className="caption uppercase mb-2 block" htmlFor="email">Email</label>
+                  <input id="email" name="email" required type="email" className="form-input" placeholder="vous@exemple.com" />
                 </div>
               </div>
               <div>
-                <label className="caption uppercase mb-2 block">Numéro d'œuvre (optionnel)</label>
-                <input className="form-input" placeholder="N°…" />
+                <label className="caption uppercase mb-2 block" htmlFor="sujet">Sujet</label>
+                <input id="sujet" name="sujet" required className="form-input" placeholder="L'objet de votre message" />
               </div>
               <div>
-                <label className="caption uppercase mb-2 block">Sujet</label>
-                <input required className="form-input" placeholder="L'objet de votre message" />
+                <label className="caption uppercase mb-2 block" htmlFor="message">Message</label>
+                <textarea id="message" name="message" required rows={6} className="form-input" placeholder="Écrivez-nous…" />
               </div>
-              <div>
-                <label className="caption uppercase mb-2 block">Message</label>
-                <textarea required rows={6} className="form-input" placeholder="Écrivez-nous…" />
-              </div>
-              <button type="submit" className="btn-primary mt-4">
-                Envoyer
+              {status === "error" && (
+                <p className="text-sm" style={{ color: "#E07A6B" }}>{errorMsg}</p>
+              )}
+              <button type="submit" disabled={status === "sending"} className="btn-primary mt-4">
+                {status === "sending" ? "Envoi en cours..." : "Envoyer"}
               </button>
               <p className="caption text-center mt-4">
                 Ou écrivez directement à{" "}

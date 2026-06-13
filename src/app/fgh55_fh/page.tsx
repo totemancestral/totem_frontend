@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 
 type AdminStats = {
@@ -22,6 +23,7 @@ type CommandeRow = {
 };
 
 export default function AdminPage() {
+  const router = useRouter();
   const { session } = useSupabaseSession();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [commandes, setCommandes] = useState<CommandeRow[]>([]);
@@ -31,6 +33,10 @@ export default function AdminPage() {
   const token = session?.access_token;
 
   useEffect(() => {
+    if (!session) {
+      router.replace("/fr/auth");
+      return;
+    }
     if (!token) return;
 
     async function load() {
@@ -39,10 +45,10 @@ export default function AdminPage() {
 
       try {
         const [statsRes, cmdRes] = await Promise.all([
-          fetch("/api/admin/stats", {
+          fetch("/api/fgh55_fh/stats", {
             headers: { authorization: `Bearer ${token}` },
           }),
-          fetch("/api/admin/commandes?limit=10", {
+          fetch("/api/fgh55_fh/commandes?limit=10", {
             headers: { authorization: `Bearer ${token}` },
           }),
         ]);

@@ -2,11 +2,18 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getServerEnv } from "@/lib/env";
 import { createServiceClient } from "@/lib/server-auth";
+import { sendConfirmationEmail } from "@/lib/services/email";
 
 const OFFER_MAP: Record<string, "essentiel" | "signature" | "heritage"> = {
   origine: "essentiel",
   ancestral: "signature",
   famille: "heritage",
+};
+
+const OFFER_LABELS: Record<string, { fr: string; en: string }> = {
+  essentiel: { fr: "Origine", en: "Origin" },
+  signature: { fr: "Ancestral", en: "Ancestral" },
+  heritage: { fr: "Famille", en: "Family" },
 };
 
 export async function POST(request: Request) {
@@ -79,6 +86,20 @@ export async function POST(request: Request) {
   try {
     const supabase = createServiceClient();
 
+    // Idempotence : vérifier si la session a déjà été traitée
+    const { data: existing } = await supabase
+      .from("commandes")
+      .select("id, statut")
+      .eq("stripe_session_id", session.id)
+      .maybeSingle();
+
+    if (existing) {
+      return NextResponse.json(
+        { received: true, commandeId: existing.id, alreadyProcessed: true },
+        { status: 200 },
+      );
+    }
+
     // Create commande
     const { data: commande, error: commandeError } = await supabase
       .from("commandes")
@@ -110,16 +131,39 @@ export async function POST(request: Request) {
       throw new Error(`Erreur creation oeuvre: ${oeuvreError.message}`);
     }
 
-    // Try to trigger pipeline
-    try {
-      await fetch(`${new URL(request.url).origin}/api/generate-coffret`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ commandeId: commande.id }),
-      });
-    } catch {
-      // Pipeline pas encore disponible -- la commande est sauvegardee
+    // Envoyer l'email de confirmation
+    const offreLabel = OFFER_LABELS[offre]?.[locale] ?? offre;
+    sendConfirmationEmail(email, metadata.prenom ?? "", offreLabel, locale, commande.id).catch(
+      () => {},
+    );
+
+    // Upsert reponses_parcours depuis les metadata Stripe
+    const reponsesRaw = metadata.reponses;
+    if (reponsesRaw && userId) {
+      try {
+        const reponses = typeof reponsesRaw === "string" ? JSON.parse(reponsesRaw) : reponsesRaw;
+        await supabase.from("reponses_parcours").upsert(
+          {
+            user_id: userId,
+            session_id: `stripe_${session.id}`,
+            reponses,
+            langue: locale,
+            termine: true,
+          },
+          { onConflict: "user_id, session_id" },
+        );
+      } catch {
+        // Non bloquant
+      }
     }
+
+    // Déclencher le pipeline en arrière-plan (non bloquant)
+    const origin = new URL(request.url).origin;
+    fetch(`${origin}/api/generate-coffret`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ commandeId: commande.id }),
+    }).catch(() => {});
 
     return NextResponse.json({ received: true, commandeId: commande.id }, { status: 202 });
   } catch (error) {

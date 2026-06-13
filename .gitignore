@@ -39,3 +39,9 @@ dist-ssr
 
 # Backend clone lives in its own Git repository.
 backend/
+
+# Supabase CLI binaries
+supabase/cli
+supabase/supabase
+supabase/supabase-go
+supabase/.temp/

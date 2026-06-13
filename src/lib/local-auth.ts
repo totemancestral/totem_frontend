@@ -1,3 +1,9 @@
+/**
+ * @deprecated Legacy local auth — plus utilisé dans le flux production.
+ * Conservé pour reference et tests locaux uniquement.
+ * Toute nouvelle fonctionnalité doit utiliser Supabase Auth.
+ */
+
 export type Locale = "fr" | "en";
 
 export type LocalUser = {
