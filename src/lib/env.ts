@@ -7,22 +7,11 @@ const isProduction = process.env.NODE_ENV === "production";
 export const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 
-  // Stripe — requis en production
-  STRIPE_SECRET_KEY: isProduction
-    ? z.string().startsWith("sk_")
-    : z.string().startsWith("sk_").optional(),
-  STRIPE_WEBHOOK_SECRET: isProduction
-    ? z.string().startsWith("whsec_")
-    : z.string().startsWith("whsec_").optional(),
-  STRIPE_PRICE_ORIGINE: isProduction
-    ? z.string().startsWith("price_")
-    : z.string().startsWith("price_").optional(),
-  STRIPE_PRICE_ANCESTRAL: isProduction
-    ? z.string().startsWith("price_")
-    : z.string().startsWith("price_").optional(),
-  STRIPE_PRICE_FAMILLE: isProduction
-    ? z.string().startsWith("price_")
-    : z.string().startsWith("price_").optional(),
+  STRIPE_SECRET_KEY: z.string().startsWith("sk_").optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_").optional(),
+  STRIPE_PRICE_ORIGINE: z.string().startsWith("price_").optional(),
+  STRIPE_PRICE_ANCESTRAL: z.string().startsWith("price_").optional(),
+  STRIPE_PRICE_FAMILLE: z.string().startsWith("price_").optional(),
 
   // Supabase — requis en production
   NEXT_PUBLIC_SUPABASE_URL: isProduction

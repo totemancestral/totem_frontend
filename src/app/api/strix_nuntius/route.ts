@@ -159,7 +159,7 @@ export async function POST(request: Request) {
 
     // Déclencher le pipeline en arrière-plan (non bloquant)
     const origin = new URL(request.url).origin;
-    fetch(`${origin}/api/generate-coffret`, {
+    fetch(`${origin}/api/arca_generatrix`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ commandeId: commande.id }),
