@@ -87,6 +87,7 @@
     "next-auto-i18n": "^1.0.2",
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.56.1"
+    "typescript-eslint": "^8.56.1",
+    "vercel": "^54.13.0"
   }
 }

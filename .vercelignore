@@ -1,0 +1,8 @@
+node_modules
+.next
+.git
+.cursor
+supabase/cli
+supabase/supabase
+supabase/supabase-go
+*.md

@@ -50,8 +50,7 @@ export async function POST(request: Request) {
     .from("profiles")
     .select("prenom")
     .eq("id", auth.userId)
-    .single()
-    .catch(() => ({ data: null }));
+    .maybeSingle();
   const prenom = (profileResult?.data as { prenom?: string } | null)?.prenom ?? "";
 
   const metadata = buildStripeMetadata(parsed.data, auth.userId, auth.email, prenom);

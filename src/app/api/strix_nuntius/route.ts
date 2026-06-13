@@ -132,8 +132,8 @@ export async function POST(request: Request) {
     }
 
     // Envoyer l'email de confirmation
-    const offreLabel = OFFER_LABELS[offre]?.[locale] ?? offre;
-    sendConfirmationEmail(email, metadata.prenom ?? "", offreLabel, locale, commande.id).catch(
+    const offreLabel = OFFER_LABELS[offre]?.[locale as keyof typeof OFFER_LABELS[string]] ?? offre;
+    sendConfirmationEmail(email, metadata.prenom ?? "", offreLabel, locale as "fr" | "en", commande.id).catch(
       () => {},
     );
 

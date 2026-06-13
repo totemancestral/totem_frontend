@@ -37,7 +37,8 @@ async function logPipelineError(
 ): Promise<void> {
   try {
     const supabase = createServiceClient();
-    await supabase.from("erreurs_pipeline").insert({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).from("erreurs_pipeline").insert({
       commande_id: commandeId,
       etape,
       message,
@@ -269,7 +270,8 @@ async function callSenyceApi(
   return response.json() as Promise<Record<string, unknown>>;
 }
 
-function castArrayBuffer(value: ArrayBuffer | Buffer): Buffer {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function castArrayBuffer(value: any): Buffer {
   if (value instanceof Buffer) return value;
   return Buffer.from(value);
 }
@@ -350,19 +352,11 @@ export async function generateCoffret(commandeId: string): Promise<void> {
   await supabase.from("oeuvres").update({ statut: "en_cours" }).eq("commande_id", commandeId);
 
   try {
-    const commandeResult = (await supabase
-      .from("commandes")
-      .select("*")
-      .eq("id", commandeId)
-      .single()) as Promise<{ data: CommandeData | null; error: unknown }>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabaseAny = supabase as any;
 
-    const oeuvreResult = (await supabase
-      .from("oeuvres")
-      .select("id")
-      .eq("commande_id", commandeId)
-      .single()) as Promise<{ data: OeuvreData | null; error: unknown }>;
-
-    const [commande, oeuvre] = await Promise.all([commandeResult, oeuvreResult]);
+    const commande = await supabaseAny.from("commandes").select("*").eq("id", commandeId).single();
+    const oeuvre = await supabaseAny.from("oeuvres").select("id").eq("commande_id", commandeId).single();
 
     if (!commande.data || !oeuvre.data) {
       throw new Error("Commande ou oeuvre introuvable");
@@ -372,23 +366,17 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     const langue = (commande.data.langue || "fr") as "fr" | "en";
     const offre = commande.data.offre;
 
-    const profileResult = (await supabase
-      .from("profiles")
-      .select("prenom, email")
-      .eq("id", userId)
-      .single()) as Promise<{ data: ProfileData | null; error: unknown }>;
+    const profile = await supabaseAny.from("profiles").select("prenom, email").eq("id", userId).single();
+    const prenom = profile.data?.prenom ?? "Voyageur";
+    const email = profile.data?.email ?? "";
 
-    const profile = profileResult.data;
-    const prenom = profile?.prenom ?? "Voyageur";
-    const email = profile?.email ?? "";
-
-    const reponsesResult = (await supabase
+    const reponsesResult = await supabaseAny
       .from("reponses_parcours")
       .select("reponses")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(1)
-      .single()) as Promise<{ data: ReponsesData | null; error: unknown }>;
+      .single();
 
     const reponses = reponsesResult.data?.reponses ?? {};
 
