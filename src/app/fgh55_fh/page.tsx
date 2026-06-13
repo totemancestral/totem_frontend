@@ -34,7 +34,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!session) {
-      router.replace("/fr/auth");
+      router.replace("/fr/janua_vitae");
       return;
     }
     if (!token) return;

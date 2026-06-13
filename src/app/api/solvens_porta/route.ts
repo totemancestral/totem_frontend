@@ -82,8 +82,8 @@ export async function POST(request: Request) {
       customer_email: auth.email,
       metadata,
       payment_intent_data: { metadata },
-      success_url: `${origin}/${parsed.data.locale}/parcours?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/${parsed.data.locale}/parcours?checkout=cancelled`,
+      success_url: `${origin}/${parsed.data.locale}/via_sapientiae?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/${parsed.data.locale}/via_sapientiae?checkout=cancelled`,
     });
 
     return NextResponse.json({ checkoutUrl: session.url, checkoutSessionId: session.id });

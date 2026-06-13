@@ -82,7 +82,7 @@ export function AuthClient({ locale }: { locale: Locale }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const dashboardPath = useMemo(() => `/${locale}/espace-personnel`, [locale]);
+  const dashboardPath = useMemo(() => `/${locale}/domus_animi`, [locale]);
   const redirectPath = searchParams.get("redirect") || dashboardPath;
 
   useEffect(() => {
@@ -283,7 +283,7 @@ export function AuthClient({ locale }: { locale: Locale }) {
 
           <div className="flex flex-col items-center gap-3 text-center">
             <Link
-              href={`/${locale}/reset-password`}
+              href={`/${locale}/renovare_clavis`}
               className="caption uppercase"
               style={{ color: "var(--or-pale)" }}
             >

@@ -69,7 +69,7 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
 
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/${locale}/reset-password`,
+        redirectTo: `${window.location.origin}/${locale}/renovare_clavis`,
       });
 
       if (resetError) throw resetError;
@@ -94,7 +94,7 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
       if (updateError) throw updateError;
 
       setNotice(t.updated);
-      setTimeout(() => router.replace(`/${locale}/auth`), 1200);
+      setTimeout(() => router.replace(`/${locale}/janua_vitae`), 1200);
     } catch (err) {
       setError(err instanceof Error ? err.message : t.defaultError);
     } finally {
@@ -178,7 +178,7 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
           </button>
         </form>
 
-        <Link href={`/${locale}/auth`} className="btn-secondary w-full !px-4">
+        <Link href={`/${locale}/janua_vitae`} className="btn-secondary w-full !px-4">
           <ArrowLeft size={16} />
           {t.back}
         </Link>

@@ -514,7 +514,7 @@ export function Offres() {
 
                 <div className="mt-auto">
                   <Link
-                    href={`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`}
+                    href={`/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`}
                     className={`${o.featured ? "btn-primary" : "btn-secondary"} w-full text-center justify-center`}
                   >
                     {o.cta}
@@ -574,7 +574,7 @@ export function Maison() {
         <Reveal delay={0.2}>
           <div className="mt-12">
             <Link
-              href={`/${locale}/a-propos`}
+              href={`/${locale}/athenaeum_arc`}
               className="link-gold text-sm tracking-[0.14em] uppercase"
             >
               {t("link")} →
@@ -661,7 +661,7 @@ export function CtaFinal() {
         </Reveal>
         <Reveal delay={0.3}>
           <Link
-            href={`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`}
+            href={`/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`}
             className="btn-primary animate-pulse-glow !px-14 !py-5"
           >
             {t("button")}

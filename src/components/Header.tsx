@@ -121,7 +121,7 @@ export function Header({ locale }: { locale: Locale }) {
             <UserRound size={17} />
           </Link>
           <Link
-            href={`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`}
+            href={`/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`}
             className="hidden md:inline-flex btn-primary !py-3 !px-6 !text-[11px]"
           >
             {t("compose")}
@@ -155,7 +155,7 @@ export function Header({ locale }: { locale: Locale }) {
               </Link>
             ))}
             <Link
-              href={`/${locale}/espace-personnel`}
+              href={`/${locale}/domus_animi`}
               onClick={() => setOpen(false)}
               className="subtext text-sm tracking-[0.14em] uppercase"
               style={{ color: "var(--ivoire)" }}
@@ -163,7 +163,7 @@ export function Header({ locale }: { locale: Locale }) {
               {t("account")}
             </Link>
             <Link
-              href={`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`}
+              href={`/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`}
               onClick={() => setOpen(false)}
               className="btn-primary w-full mt-2"
             >

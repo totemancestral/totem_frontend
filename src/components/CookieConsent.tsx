@@ -31,7 +31,7 @@ export function CookieConsent() {
           Ce site utilise des cookies techniques et analytiques pour votre expérience.
           En poursuivant votre navigation, vous acceptez leur utilisation.
           {" "}
-          <a href="/fr/confidentialite" className="underline" style={{ color: "var(--or-ancestral)" }}>
+          <a href="/fr/arcanum_privata" className="underline" style={{ color: "var(--or-ancestral)" }}>
             En savoir plus
           </a>
         </p>

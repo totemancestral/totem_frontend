@@ -174,7 +174,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
   const { session, user, loading: authLoading, signOut } = useSupabaseSession();
   const t = copy[locale];
   const authPath = useMemo(
-    () => `/${locale}/auth?redirect=${encodeURIComponent(`/${locale}/espace-personnel`)}`,
+    () => `/${locale}/janua_vitae?redirect=${encodeURIComponent(`/${locale}/domus_animi`)}`,
     [locale],
   );
 
@@ -303,7 +303,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href={`/${locale}/parcours`} className="btn-primary">
+            <Link href={`/${locale}/via_sapientiae`} className="btn-primary">
               <Plus size={16} />
               {t.compose}
             </Link>
@@ -354,7 +354,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
               </h2>
             </div>
             {commandes.length === 0 ? (
-              <EmptyState text={t.noOrders} cta={t.emptyCta} href={`/${locale}/parcours`} />
+              <EmptyState text={t.noOrders} cta={t.emptyCta} href={`/${locale}/via_sapientiae`} />
             ) : (
               <div className="grid gap-4">
                 {commandes.map((commande) => (
@@ -370,7 +370,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
             {t.artworks}
           </h2>
           {oeuvres.length === 0 ? (
-            <EmptyState text={t.noArtworks} cta={t.emptyCta} href={`/${locale}/parcours`} />
+            <EmptyState text={t.noArtworks} cta={t.emptyCta} href={`/${locale}/via_sapientiae`} />
           ) : (
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {oeuvres.map((oeuvre) => (

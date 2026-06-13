@@ -397,7 +397,7 @@ export function ParcoursPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       if (!currentSession) {
-        router.replace(`/${locale}/auth?mode=signup&redirect=/${locale}/parcours`);
+        router.replace(`/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`);
         return;
       }
       setSession(currentSession);
@@ -416,7 +416,7 @@ export function ParcoursPage() {
     if (checkout === "cancelled") {
       setCheckoutError("Paiement annule.");
       setPhase("paywall");
-      router.replace(`/${locale}/parcours`, { scroll: false });
+      router.replace(`/${locale}/via_sapientiae`, { scroll: false });
       return;
     }
 
@@ -424,7 +424,7 @@ export function ParcoursPage() {
       clearPendingCheckout();
       setHasUnlockedRest(true);
       setPhase("post-payment");
-      router.replace(`/${locale}/parcours`, { scroll: false });
+      router.replace(`/${locale}/via_sapientiae`, { scroll: false });
     }
   }, [locale, router, searchParams, session]);
 
@@ -762,7 +762,7 @@ function JourneyNav({
             <Home size={16} />
           </Link>
           <Link
-            href={`/${locale}/espace-personnel`}
+            href={`/${locale}/domus_animi`}
             className="inline-flex h-9 items-center justify-center gap-2 rounded-sm border px-3 text-[11px] uppercase tracking-[0.12em] transition-colors hover:bg-ombre"
             style={{ borderColor: "rgba(201,168,76,0.28)", color: "var(--or-ancestral)" }}
           >
