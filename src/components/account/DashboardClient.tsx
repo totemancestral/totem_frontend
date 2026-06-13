@@ -200,10 +200,10 @@ export function DashboardClient({ locale }: { locale: Locale }) {
 
       try {
         const [commandesRes, oeuvresRes] = await Promise.all([
-          fetch("/api/commandes", {
+          fetch("/api/ordo_tabulae", {
             headers: { authorization: `Bearer ${token}` },
           }),
-          fetch("/api/oeuvres", {
+          fetch("/api/opera_artificis", {
             headers: { authorization: `Bearer ${token}` },
           }),
         ]);
