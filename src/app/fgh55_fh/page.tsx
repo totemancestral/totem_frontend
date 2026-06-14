@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import {
@@ -76,6 +76,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [relanceLoading, setRelanceLoading] = useState<string | null>(null);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -132,6 +134,28 @@ export default function AdminPage() {
     }
   }
 
+  const handleRelancer = useCallback(async (commandeId: string) => {
+    if (!token) return;
+    setRelanceLoading(commandeId);
+    try {
+      const res = await fetch("/api/fgh55_fh/relancer", {
+        method: "POST",
+        headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+        body: JSON.stringify({ commandeId }),
+      });
+      if (res.ok) {
+        loadAll(token);
+      } else {
+        const err = await res.json() as { error: string };
+        alert(err.error || "Erreur lors de la relance");
+      }
+    } catch {
+      alert("Erreur reseau");
+    } finally {
+      setRelanceLoading(null);
+    }
+  }, [token]);
+
   async function handleLogout() {
     await supabase.auth.signOut();
     setStats(null);
@@ -180,7 +204,15 @@ export default function AdminPage() {
           {section === "commandes" && <OrdersSection commandes={commandes} />}
           {section === "utilisateurs" && <UsersSection utilisateurs={utilisateurs} />}
           {section === "activite" && <ActivitySection activite={activite} />}
-          {section === "evenements" && <EventsSection erreurs={erreurs} changements={changements} />}
+          {section === "evenements" && (
+            <EventsSection
+              erreurs={erreurs}
+              changements={changements}
+              commandes={commandes}
+              onRelancer={handleRelancer}
+              relanceLoading={relanceLoading}
+            />
+          )}
         </div>
       </main>
     </div>
@@ -461,7 +493,15 @@ function ActivitySection({ activite }: { activite: ActivitePoint[] }) {
 /* ------------------------------------------------------------------ */
 /*  Events Section                                                    */
 /* ------------------------------------------------------------------ */
-function EventsSection({ erreurs, changements }: { erreurs: EvenementErreur[]; changements: ChangementStatut[] }) {
+function EventsSection({ erreurs, changements, commandes, onRelancer, relanceLoading }: {
+  erreurs: EvenementErreur[];
+  changements: ChangementStatut[];
+  commandes: CommandeRow[];
+  onRelancer: (id: string) => void;
+  relanceLoading: string | null;
+}) {
+  const commandesErreur = commandes.filter((c) => c.statut === "erreur");
+
   return (
     <section>
       <h2 className="h-display text-2xl mb-6" style={{ color: "var(--or-ancestral)" }}>Événements</h2>
@@ -488,6 +528,40 @@ function EventsSection({ erreurs, changements }: { erreurs: EvenementErreur[]; c
           </div>
         )}
       </div>
+
+      {commandesErreur.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-sm uppercase tracking-wider mb-3" style={{ color: "rgba(224,122,107,0.8)" }}>
+            Commandes en erreur — Relance
+          </h3>
+          <div className="grid gap-2">
+            {commandesErreur.map((cmd) => (
+              <div key={cmd.id} className="rounded-lg border p-4 flex items-center justify-between"
+                style={{ background: "rgba(224,122,107,0.06)", borderColor: "rgba(224,122,107,0.25)" }}>
+                <div className="flex items-center gap-4">
+                  <span className="font-mono text-xs">{cmd.id.slice(0, 12)}…</span>
+                  <span className="capitalize text-sm">{cmd.offre}</span>
+                  <StatusBadge statut={cmd.statut} />
+                </div>
+                <button
+                  type="button"
+                  disabled={relanceLoading === cmd.id}
+                  onClick={() => onRelancer(cmd.id)}
+                  className="rounded px-4 py-2 text-xs uppercase tracking-wider transition-colors"
+                  style={{
+                    background: relanceLoading === cmd.id ? "rgba(201,168,76,0.12)" : "rgba(224,122,107,0.72)",
+                    color: "#fff",
+                    opacity: relanceLoading === cmd.id ? 0.6 : 1,
+                    border: "1px solid rgba(224,122,107,0.45)",
+                  }}
+                >
+                  {relanceLoading === cmd.id ? "..." : "Relancer"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div>
         <h3 className="text-sm uppercase tracking-wider mb-3" style={{ color: "rgba(224,122,107,0.8)" }}>Erreurs pipeline</h3>

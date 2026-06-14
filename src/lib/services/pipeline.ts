@@ -349,7 +349,13 @@ export async function generateCoffret(commandeId: string): Promise<void> {
 
   await supabase.from("commandes").update({ statut: "en_generation" }).eq("id", commandeId);
 
-  await supabase.from("oeuvres").update({ statut: "en_cours" }).eq("commande_id", commandeId);
+  await supabase.from("oeuvres").update({ statut: "en_generation" }).eq("commande_id", commandeId);
+
+  async function updateOeuvreStep(step: string, meta?: Record<string, unknown>) {
+    const update: Record<string, unknown> = { statut: step };
+    if (meta) update.metadata = meta;
+    await supabase.from("oeuvres").update(update).eq("commande_id", commandeId);
+  }
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -391,6 +397,7 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     const nomTotem = `${prenom} ${archetypeName}`;
 
     // Étape 1 : Texte du parchemin via Edge Function ou Claude direct
+    await updateOeuvreStep("generation_texte");
     let texteParchemin = "";
 
     try {
@@ -455,6 +462,7 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     }
 
     // Étape 2 : Image et Audio via Edge Functions ou SENYCE (en parallèle)
+    await updateOeuvreStep("generation_image_audio");
     let senyceImageUrl = "";
     let senyceAudioUrl = "";
 
@@ -509,6 +517,7 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     }
 
     // Étape 3 : Génération PDF
+    await updateOeuvreStep("generation_pdf");
     let parcheminBuffer: Buffer;
     let certificatBuffer: Buffer;
 
@@ -536,6 +545,7 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     }
 
     // Étape 4 : Upload fichiers vers R2
+    await updateOeuvreStep("upload");
     const files: GeneratedFile[] = [
       {
         type: "parchemin",
