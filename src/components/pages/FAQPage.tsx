@@ -1,73 +1,12 @@
 "use client";
+
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 
 type Item = { q: string; a: string };
 type Cat = { title: string; items: Item[] };
-
-const categories: Cat[] = [
-  {
-    title: "La nature de l'œuvre",
-    items: [
-      {
-        q: "S'agit-il d'un test ADN ou généalogique ?",
-        a: "Non. Totem Ancestral n'est ni un test ADN, ni un service de généalogie. C'est une fable artistique : une œuvre numérique inspirée de vos réponses à dix questions intimes, composée pour célébrer un imaginaire — pas pour révéler une vérité.",
-      },
-      {
-        q: "Chaque œuvre est-elle vraiment unique ?",
-        a: "Oui. Chaque coffret porte un numéro, une signature et un certificat d'authenticité. Aucune œuvre n'est jamais reproduite, rééditée ou revendue.",
-      },
-      {
-        q: "L'IA remplace-t-elle l'artiste ?",
-        a: "Non. Nos directions artistiques composent les cadres, les références, les mouvements narratifs. L'intelligence artificielle est notre outil — pas notre auteur.",
-      },
-    ],
-  },
-  {
-    title: "L'expérience pratique",
-    items: [
-      {
-        q: "Combien de temps prend la composition ?",
-        a: "Le questionnaire dure environ quinze minutes. L'œuvre est livrée par email sous quinze minutes après validation (trente minutes pour le Totem Famille).",
-      },
-      {
-        q: "Sous quel format reçoit-on l'œuvre ?",
-        a: "Vous recevez un parchemin PDF, une œuvre visuelle PNG haute résolution, et — pour Ancestral et Famille — un fichier audio MP3 de 90 secondes.",
-      },
-      {
-        q: "Puis-je offrir une œuvre ?",
-        a: "Absolument. Chaque commande inclut une carte cadeau gratuite, et vous pouvez désigner un destinataire au moment du paiement.",
-      },
-    ],
-  },
-  {
-    title: "La technique",
-    items: [
-      {
-        q: "L'œuvre est-elle imprimable ?",
-        a: "Oui. L'œuvre visuelle est livrée en très haute résolution, encadrable, imprimable jusqu'au format A2.",
-      },
-      {
-        q: "Mes données sont-elles protégées ?",
-        a: "Vos réponses sont utilisées uniquement pour composer votre œuvre, puis archivées de manière sécurisée. Conformité RGPD complète.",
-      },
-    ],
-  },
-  {
-    title: "La maison",
-    items: [
-      {
-        q: "Qui est derrière Totem Ancestral ?",
-        a: "Totem Ancestral est une maison de création artistique fondée à Paris par SENYCE PARTNERS, à la croisée des cosmogonies africaines, de la littérature et des arts numériques.",
-      },
-      {
-        q: "Comment vous contacter ?",
-        a: "Par email à contact@totemancestral.com ou via notre formulaire de contact. Nous répondons sous 48h.",
-      },
-    ],
-  },
-];
 
 function AccordionItem({ q, a }: Item) {
   const [open, setOpen] = useState(false);
@@ -97,11 +36,76 @@ function AccordionItem({ q, a }: Item) {
 }
 
 export function FAQPage() {
+  const t = useTranslations();
+
+  const categories: Cat[] = [
+    {
+      title: t("la_nature_de_l_uvre"),
+      items: [
+        {
+          q: t("s_agit_il_d_un_test_adn_ou_genealogique"),
+          a: t("non_totem_ancestral_n_est_ni_un_test_adn_ni_un_service_de"),
+        },
+        {
+          q: t("chaque_uvre_est_elle_vraiment_unique"),
+          a: t("oui_chaque_coffret_porte_un_numero_une_signature_et_un"),
+        },
+        {
+          q: t("l_ia_remplace_t_elle_l_artiste"),
+          a: t("non_nos_directions_artistiques_composent_les_cadres_les"),
+        },
+      ],
+    },
+    {
+      title: t("l_experience_pratique"),
+      items: [
+        {
+          q: t("combien_de_temps_prend_la_composition"),
+          a: t("le_questionnaire_dure_environ_quinze_minutes_l_uvre_est"),
+        },
+        {
+          q: t("sous_quel_format_recoit_on_l_uvre"),
+          a: t("vous_recevez_un_parchemin_pdf_une_uvre_visuelle_png_haute"),
+        },
+        {
+          q: t("puis_je_offrir_une_uvre"),
+          a: t("absolument_chaque_commande_inclut_une_carte_cadeau_gratuite"),
+        },
+      ],
+    },
+    {
+      title: t("la_technique"),
+      items: [
+        {
+          q: t("l_uvre_est_elle_imprimable"),
+          a: t("oui_l_uvre_visuelle_est_livree_en_tres_haute_resolution"),
+        },
+        {
+          q: t("mes_donnees_sont_elles_protegees"),
+          a: t("vos_reponses_sont_utilisees_uniquement_pour_composer_votre"),
+        },
+      ],
+    },
+    {
+      title: t("la_maison"),
+      items: [
+        {
+          q: t("qui_est_derriere_totem_ancestral"),
+          a: t("totem_ancestral_est_une_maison_de_creation_artistique_2"),
+        },
+        {
+          q: t("comment_vous_contacter"),
+          a: t("par_email_a_contact_totemancestral_com_ou_via_notre"),
+        },
+      ],
+    },
+  ];
+
   return (
     <>
       <PageHero
-        title="Questions fréquentes"
-        subtitle="Tout ce que vous avez voulu nous demander avant de composer."
+        title={t("questions_frequentes")}
+        subtitle={t("questions_frequentes_sur_l_experience_totem_ancestral")}
       />
       <section className="pb-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
         <div className="max-w-3xl mx-auto flex flex-col gap-16">
@@ -125,3 +129,4 @@ export function FAQPage() {
     </>
   );
 }
+

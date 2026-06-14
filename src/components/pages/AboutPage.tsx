@@ -1,65 +1,58 @@
+import { useTranslations } from "next-intl";
 import { PageHero } from "@/components/PageHero";
 import { SectionDivider } from "@/components/Reveal";
 
 export function AboutPage() {
+  const t = useTranslations();
+
   return (
     <>
-      <PageHero title="La maison" subtitle="Notre manifeste." />
+      <PageHero title={t("la_maison")} subtitle={t("le_manifeste_de_la_maison_totem_ancestral")} />
       <section className="pb-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
         <article
           className="max-w-2xl mx-auto space-y-8 text-base md:text-lg leading-[1.9]"
           style={{ color: "var(--ivoire)" }}
         >
           <p>
-            TOTEM ANCESTRAL est une maison de création artistique fondée à Paris par SENYCE
-            PARTNERS. Nous composons des œuvres numériques uniques — des fables personnelles
-            inspirées des cosmogonies africaines — assistées par intelligence artificielle.
+            {t("totem_ancestral_est_une_maison_de_creation_artistique")}
           </p>
 
           <SectionDivider />
 
           <h2 className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
-            Ce que nous croyons
+            {t("ce_que_nous_croyons")}
           </h2>
           <p>
-            Nous croyons que chaque être humain mérite une histoire qui lui ressemble. Pas une
-            vérité. Une fable. Une œuvre qui célèbre, qui interroge, qui transmet.
+            {t("nous_croyons_que_chaque_etre_humain_merite_une_histoire_qui")}
           </p>
           <p>
-            Nous croyons que l'intelligence artificielle, mise au service de la sensibilité
-            artistique, peut produire des objets de mémoire — pas des contenus.
+            {t("nous_croyons_que_l_intelligence_artificielle_mise_au")}
           </p>
 
           <h2 className="h-display text-3xl mt-12" style={{ color: "var(--or-ancestral)" }}>
-            Ce que nous ne faisons pas
+            {t("ce_que_nous_ne_faisons_pas")}
           </h2>
           <p>
-            Nous ne faisons pas de la science. Pas de la généalogie. Pas de la divination. Pas de
-            l'identité. Pas du folklore.
+            {t("nous_ne_faisons_pas_de_la_science_pas_de_la_genealogie_pas")}
           </p>
           <p>
-            Nous faisons des œuvres. Pour célébrer un proche. Pour s'offrir un voyage intérieur.
-            Pour nourrir l'imagination.
+            {t("nous_faisons_des_uvres_pour_celebrer_un_proche_pour_s")}
           </p>
 
           <h2 className="h-display text-3xl mt-12" style={{ color: "var(--or-ancestral)" }}>
-            Notre exigence
+            {t("notre_exigence")}
           </h2>
           <p>
-            Chaque œuvre porte un numéro, une signature, un certificat. Elle ne sera jamais
-            reproduite, ni rééditée, ni revendue. Elle est votre exemplaire dans la collection en
-            cours.
+            {t("chaque_uvre_porte_un_numero_une_signature_un_certificat")}
           </p>
           <p>
-            Notre standard de référence est celui des maisons de parfumerie de niche et de la haute
-            joaillerie : la rareté, l'élégance, la justesse du geste.
+            {t("notre_standard_de_reference_est_celui_des_maisons_de")}
           </p>
 
           <SectionDivider />
 
           <p className="quote-italic text-xl md:text-2xl text-center">
-            «&nbsp;Une œuvre n'est jamais finie. Elle est seulement abandonnée à celui qui la
-            reçoit.&nbsp;»
+            {t("nbsp_une_uvre_n_est_jamais_finie_elle_est_seulement")}
           </p>
         </article>
       </section>

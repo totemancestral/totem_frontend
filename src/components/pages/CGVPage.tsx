@@ -1,40 +1,43 @@
+import { useTranslations } from "next-intl";
 import { PageHero } from "@/components/PageHero";
 
-const sections = [
-  {
-    t: "1. Objet",
-    c: "Les présentes conditions régissent la vente des œuvres numériques Totem Ancestral éditées par SENYCE PARTNERS.",
-  },
-  {
-    t: "2. Produits",
-    c: "Trois offres : Totem Origine (49€), Totem Ancestral (89€), Totem Famille (199€). Chaque œuvre est numérotée, signée et accompagnée d'un certificat d'authenticité.",
-  },
-  {
-    t: "3. Commande",
-    c: "La commande est validée après réception du paiement intégral. Un email de confirmation est envoyé immédiatement.",
-  },
-  {
-    t: "4. Livraison",
-    c: "L'œuvre est livrée par email sous quinze minutes (trente minutes pour Totem Famille) après validation du questionnaire.",
-  },
-  {
-    t: "5. Droit de rétractation",
-    c: "S'agissant d'une œuvre numérique personnalisée, composée à votre demande, le droit de rétractation ne s'applique pas une fois la composition lancée (article L221-28 du Code de la consommation).",
-  },
-  {
-    t: "6. Garanties",
-    c: "Si une difficulté technique empêche la livraison, l'œuvre est recomposée ou remboursée intégralement.",
-  },
-  {
-    t: "7. Litiges",
-    c: "Les présentes conditions sont régies par le droit français. Tout litige relève de la compétence des tribunaux de Paris.",
-  },
-];
-
 export function CGVPage() {
+  const t = useTranslations();
+
+  const sections = [
+    {
+      t: t("1_objet"),
+      c: t("les_presentes_conditions_regissent_la_vente_des_uvres"),
+    },
+    {
+      t: t("2_produits"),
+      c: t("trois_offres_totem_origine_49_totem_ancestral_89_totem"),
+    },
+    {
+      t: t("3_commande"),
+      c: t("la_commande_est_validee_apres_reception_du_paiement"),
+    },
+    {
+      t: t("4_livraison"),
+      c: t("l_uvre_est_livree_par_email_sous_quinze_minutes_trente"),
+    },
+    {
+      t: t("5_droit_de_retractation"),
+      c: t("s_agissant_d_une_uvre_numerique_personnalisee_composee_a"),
+    },
+    {
+      t: t("6_garanties"),
+      c: t("si_une_difficulte_technique_empeche_la_livraison_l_uvre_est"),
+    },
+    {
+      t: t("7_litiges"),
+      c: t("les_presentes_conditions_sont_regies_par_le_droit_francais"),
+    },
+  ];
+
   return (
     <>
-      <PageHero title="Conditions générales de vente" />
+      <PageHero title={t("conditions_generales_de_vente")} />
       <section className="pb-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
         <article
           className="max-w-2xl mx-auto space-y-8 text-[15px] leading-[1.85]"
@@ -53,3 +56,4 @@ export function CGVPage() {
     </>
   );
 }
+

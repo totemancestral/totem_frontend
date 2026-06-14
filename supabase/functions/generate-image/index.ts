@@ -1,3 +1,53 @@
+const ARCHETYPE_LABELS: Record<string, { fr: string; en: string }> = {
+  A: { fr: "Guerrier", en: "Warrior" },
+  B: { fr: "Sage", en: "Sage" },
+  C: { fr: "Gardien", en: "Guardian" },
+  D: { fr: "Visionnaire", en: "Visionary" },
+};
+
+function buildImagePrompt(
+  prenom: string,
+  texte: string,
+  archetype: string,
+  langue: "fr" | "en",
+): string {
+  if (langue === "fr") {
+    return `Illustration mystique et ancestrale pour un parchemin spirituel.
+
+Contexte : Ce parchemin raconte l'histoire initiatique de ${prenom}, dont l'archétype ancestral est "${archetype}".
+
+Texte du parchemin :
+"${texte.slice(0, 500)}"
+
+Style :
+- Art africain contemporain mêlé de symbolisme mystique
+- Palette terreuse (ocre, indigo, or, ivoire)
+- Motifs géométriques sacrés et symboles ancestraux
+- Ambiance spirituelle, intemporelle, solennelle
+- Format portrait, aspect mystique et noble
+- Peinture numérique avec textures rappelant le papier parchemin vieilli
+- Pas de texte visible dans l'image
+- L'image doit évoquer la sagesse, la mémoire des ancêtres et le destin`;
+  }
+
+  return `Mystical and ancestral illustration for a spiritual parchment.
+
+Context: This parchment tells the initiatory story of ${prenom}, whose ancestral archetype is "${archetype}".
+
+Parchment text:
+"${texte.slice(0, 500)}"
+
+Style:
+- Contemporary African art blended with mystical symbolism
+- Earthy palette (ochre, indigo, gold, ivory)
+- Sacred geometric patterns and ancestral symbols
+- Spiritual, timeless, solemn atmosphere
+- Portrait format, mystical and noble feel
+- Digital painting with aged parchment paper textures
+- No visible text in the image
+- The image should evoke wisdom, ancestral memory, and destiny`;
+}
+
 Deno.serve(async (req) => {
   try {
     const { prenom, texte, archetypeId, langue = "fr" } = await req.json();
@@ -9,33 +59,53 @@ Deno.serve(async (req) => {
       });
     }
 
-    const senyceKey = Deno.env.get("SENYCE_API_KEY");
-    const senyceEndpoint = Deno.env.get("SENYCE_API_IMAGE");
-
-    if (!senyceKey || !senyceEndpoint) {
-      return new Response(JSON.stringify({ error: "SENYCE non configuré" }), {
+    const openaiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openaiKey) {
+      return new Response(JSON.stringify({ error: "OPENAI_API_KEY non configurée" }), {
         status: 503,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    const response = await fetch(senyceEndpoint, {
+    const l = (langue === "en" ? "en" : "fr") as "fr" | "en";
+    const archetype = ARCHETYPE_LABELS[archetypeId as string]?.[l] ?? "Griot";
+    const prompt = buildImagePrompt(prenom, texte, archetype, l);
+
+    const response = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${senyceKey}`,
+        Authorization: `Bearer ${openaiKey}`,
       },
-      body: JSON.stringify({ prenom, texte, archetype: archetypeId, langue }),
+      body: JSON.stringify({
+        model: "gpt-image-2",
+        prompt,
+        n: 1,
+        size: "1024x1024",
+      }),
     });
 
     if (!response.ok) {
-      throw new Error(`SENYCE API error: ${response.status}`);
+      const errorBody = await response.text().catch(() => "");
+      throw new Error(`OpenAI API error: ${response.status} ${errorBody}`);
     }
 
-    const result = (await response.json()) as { imageUrl?: string; url?: string };
-    const imageUrl = result.imageUrl ?? result.url ?? "";
+    const result = (await response.json()) as {
+      data?: { b64_json?: string; url?: string; revised_prompt?: string }[];
+      output_format?: string;
+    };
 
-    return new Response(JSON.stringify({ imageUrl }), {
+    const imageUrl = result.data?.[0]?.url ?? "";
+    const b64 = result.data?.[0]?.b64_json ?? "";
+    const format = result.output_format ?? "png";
+
+    if (!imageUrl && !b64) {
+      throw new Error("OpenAI n'a pas retourné d'image");
+    }
+
+    const finalUrl = imageUrl || `data:image/${format};base64,${b64}`;
+
+    return new Response(JSON.stringify({ imageUrl: finalUrl, revisedPrompt: result.data?.[0]?.revised_prompt }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });

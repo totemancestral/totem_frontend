@@ -1,34 +1,37 @@
+import { useTranslations } from "next-intl";
 import { PageHero } from "@/components/PageHero";
 
-const sections = [
-  {
-    t: "Données collectées",
-    c: "Nous collectons uniquement les informations nécessaires à la composition de votre œuvre : prénom, email, réponses au questionnaire, informations de paiement (gérées par notre prestataire sécurisé).",
-  },
-  {
-    t: "Finalité",
-    c: "Vos données servent exclusivement à composer votre œuvre, vous la livrer et assurer le suivi commercial. Aucune revente, aucun partage marketing.",
-  },
-  {
-    t: "Conservation",
-    c: "Vos réponses au questionnaire sont conservées de manière chiffrée pour vous permettre de récupérer votre œuvre. Vous pouvez demander leur suppression à tout moment.",
-  },
-  {
-    t: "Vos droits",
-    c: "Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, de suppression et de portabilité de vos données. Écrivez à contact@totemancestral.com.",
-  },
-  {
-    t: "Cookies",
-    c: "Nous utilisons uniquement des cookies techniques nécessaires au fonctionnement du site. Aucun cookie publicitaire ni de tracking tiers.",
-  },
-];
-
 export function PrivacyPage() {
+  const t = useTranslations();
+
+  const sections = [
+    {
+      t: t("donnees_collectees"),
+      c: t("nous_collectons_uniquement_les_informations_necessaires_a"),
+    },
+    {
+      t: t("finalite"),
+      c: t("vos_donnees_servent_exclusivement_a_composer_votre_uvre"),
+    },
+    {
+      t: t("conservation"),
+      c: t("vos_reponses_au_questionnaire_sont_conservees_de_maniere"),
+    },
+    {
+      t: t("vos_droits"),
+      c: t("conformement_au_rgpd_vous_disposez_d_un_droit_d_acces_de"),
+    },
+    {
+      t: t("cookies"),
+      c: t("nous_utilisons_uniquement_des_cookies_techniques"),
+    },
+  ];
+
   return (
     <>
       <PageHero
-        title="Politique de confidentialité"
-        subtitle="Vos données, comme votre œuvre, vous appartiennent."
+        title={t("politique_de_confidentialite")}
+        subtitle={t("comment_totem_ancestral_protege_vos_donnees_personnelles")}
       />
       <section className="pb-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
         <article
@@ -48,3 +51,4 @@ export function PrivacyPage() {
     </>
   );
 }
+
