@@ -465,6 +465,7 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     await updateOeuvreStep("generation_image_audio");
     let senyceImageUrl = "";
     let senyceAudioUrl = "";
+    let imageBufferForPdf: Buffer | null = null;
 
     const [imageResult, audioResult] = await Promise.all([
       generateImage(
@@ -516,6 +517,26 @@ export async function generateCoffret(commandeId: string): Promise<void> {
       }
     }
 
+    // Pré-téléchargement de l'image pour l'embarquer dans le PDF
+    let imageDataUrl = "";
+    if (senyceImageUrl) {
+      try {
+        if (senyceImageUrl.startsWith("data:")) {
+          imageDataUrl = senyceImageUrl;
+          imageBufferForPdf = Buffer.from(senyceImageUrl.split(",")[1], "base64");
+        } else {
+          const imgRes = await fetch(senyceImageUrl);
+          if (imgRes.ok) {
+            const imgBuf = Buffer.from(await imgRes.arrayBuffer());
+            imageBufferForPdf = imgBuf;
+            imageDataUrl = `data:image/png;base64,${imgBuf.toString("base64")}`;
+          }
+        }
+      } catch {
+        // Silencieux
+      }
+    }
+
     // Étape 3 : Génération PDF
     await updateOeuvreStep("generation_pdf");
     let parcheminBuffer: Buffer;
@@ -529,6 +550,8 @@ export async function generateCoffret(commandeId: string): Promise<void> {
         texteParchemin,
         numeroCollection: numeroSerie,
         langue,
+        imageUrl: senyceImageUrl || undefined,
+        imageDataUrl: imageDataUrl || undefined,
       };
 
       ({ parcheminBuffer, certificatBuffer } = await generatePDFs(pdfPayload));
@@ -578,19 +601,19 @@ export async function generateCoffret(commandeId: string): Promise<void> {
       );
     }
 
-    // Télécharger et re-uploader les assets SENYCE vers R2 (stockage persistant)
-    if (senyceImageUrl) {
+    // Uploader les assets vers R2 (stockage persistant)
+    if (senyceImageUrl && imageBufferForPdf) {
       try {
-        r2ImageUrl = await downloadAndUploadToR2(commandeId, senyceImageUrl, "image", "image/png");
+        const ext = "png";
+        const mimeType = "image/png";
+        const fileName = `image_${commandeId}.${ext}`;
+        const { url: uploadedUrl } = await uploadFile(commandeId, {
+          type: "image", buffer: imageBufferForPdf, mimeType, fileName,
+        });
+        r2ImageUrl = uploadedUrl;
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Erreur download/upload image";
-        await logPipelineError(
-          commandeId,
-          "upload",
-          message,
-          error instanceof Error ? error.stack : undefined,
-          1,
-        );
+        const message = error instanceof Error ? error.message : "Erreur upload image";
+        await logPipelineError(commandeId, "upload", message, undefined, 1);
       }
     }
 

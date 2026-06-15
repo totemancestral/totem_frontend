@@ -41,7 +41,7 @@ export async function uploadFile(
     : `https://${bucket}.r2.cloudflarestorage.com/${key}`;
 
   const signedUrl = await getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), {
-    expiresIn: 30 * 24 * 60 * 60,
+    expiresIn: 7 * 24 * 60 * 60, // Cloudflare R2 max = 7 jours
   });
 
   return { url: publicUrl, signedUrl, key };

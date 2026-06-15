@@ -1,5 +1,5 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 
 export type PdfPayload = {
   prenom: string;
@@ -8,288 +8,265 @@ export type PdfPayload = {
   texteParchemin: string;
   numeroCollection: number;
   langue: "fr" | "en";
+  imageUrl?: string;
+  imageDataUrl?: string;
 };
 
 const parchmentBase = "#F0DFA0";
+const parchmentLight = "#F4E4A8";
+const parchmentMid = "#E8CC80";
 const parchmentDark = "#8A4810";
-const parchmentLight = "#E8CC80";
-const gold = "#C9A84C";
-const goldText = "#8A520D";
 const ink = "#1E0A00";
+const gold = "#C9A84C";
+const goldLight = "#FFCD6E";
 const sealRed = "#A60C06";
 
 const styles = StyleSheet.create({
-  parcheminPage: {
+  page: {
     backgroundColor: parchmentBase,
     padding: 0,
   },
-  certificatPage: {
-    padding: 40,
-    backgroundColor: "#FFFFFF",
-  },
-  outerBorder: {
-    margin: 18,
-    borderWidth: 2,
-    borderColor: parchmentDark,
-    padding: 6,
-  },
-  innerBorder: {
-    borderWidth: 1,
-    borderColor: goldText,
-    padding: 4,
-  },
-  cornerTL: {
-    position: "absolute",
-    top: -1,
-    left: -1,
-    width: 20,
-    height: 20,
-    borderTopWidth: 3,
-    borderLeftWidth: 3,
-    borderColor: gold,
-  },
-  cornerTR: {
-    position: "absolute",
-    top: -1,
-    right: -1,
-    width: 20,
-    height: 20,
-    borderTopWidth: 3,
-    borderRightWidth: 3,
-    borderColor: gold,
-  },
-  cornerBL: {
-    position: "absolute",
-    bottom: -1,
-    left: -1,
-    width: 20,
-    height: 20,
-    borderBottomWidth: 3,
-    borderLeftWidth: 3,
-    borderColor: gold,
-  },
-  cornerBR: {
-    position: "absolute",
-    bottom: -1,
-    right: -1,
-    width: 20,
-    height: 20,
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-    borderColor: gold,
-  },
-  bodyContent: {
-    padding: 35,
-    backgroundColor: parchmentBase,
+  rod: {
+    height: 18,
+    backgroundColor: "#8A520D",
+    marginHorizontal: 12,
+    borderRadius: 9,
+    borderBottom: "1px solid #6A3800",
   },
   rodTop: {
-    height: 14,
-    backgroundColor: goldText,
-    borderBottomWidth: 2,
-    borderBottomColor: "#6A3800",
-    marginHorizontal: 8,
-    borderRadius: 7,
+    height: 18,
+    backgroundColor: "#8A520D",
+    marginHorizontal: 12,
+    borderBottomLeftRadius: 9,
+    borderBottomRightRadius: 9,
+    borderBottom: "1px solid #6A3800",
   },
   rodBottom: {
-    height: 14,
-    backgroundColor: goldText,
-    borderTopWidth: 2,
-    borderTopColor: "#6A3800",
-    marginHorizontal: 8,
-    borderRadius: 7,
+    height: 18,
+    backgroundColor: "#8A520D",
+    marginHorizontal: 12,
+    borderTopLeftRadius: 9,
+    borderTopRightRadius: 9,
+    borderTop: "1px solid #6A3800",
   },
-  curlTop: {
-    height: 10,
-    backgroundColor: parchmentDark,
-    opacity: 0.3,
-    marginHorizontal: 10,
+  curl: {
+    height: 12,
+    backgroundColor: "#9A5C10",
+    marginHorizontal: 14,
+    opacity: 0.4,
   },
-  curlBottom: {
-    height: 10,
-    backgroundColor: parchmentDark,
-    opacity: 0.3,
-    marginHorizontal: 10,
+  outerWrap: {
+    marginHorizontal: 16,
+    border: "1px solid #8A4810",
+    padding: 4,
+  },
+  borderWrap: {
+    border: "0.5px solid #C9A84C",
+    padding: 3,
+  },
+  body: {
+    paddingHorizontal: 28,
+    paddingVertical: 20,
+  },
+  line: {
+    borderBottom: "0.5px solid #8A4810",
+    opacity: 0.15,
+    marginVertical: 8,
   },
   title: {
-    fontFamily: "Times-Roman",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
     textAlign: "center",
     color: ink,
-    marginBottom: 6,
-    letterSpacing: 2,
+    marginBottom: 2,
+    letterSpacing: 3,
+    fontWeight: "bold",
   },
   divider: {
     textAlign: "center",
-    fontSize: 14,
-    color: goldText,
-    marginVertical: 8,
-    letterSpacing: 4,
+    fontSize: 13,
+    color: "#8A520D",
+    marginVertical: 6,
+    letterSpacing: 5,
+  },
+  imageWrap: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  image: {
+    width: 320,
+    height: 320,
+    objectFit: "contain",
   },
   label: {
-    fontSize: 9,
-    fontWeight: "bold",
-    color: goldText,
-    marginBottom: 2,
-    letterSpacing: 1,
+    fontSize: 8,
     textTransform: "uppercase",
+    color: "#8A520D",
+    letterSpacing: 1.5,
+    marginBottom: 1,
+    marginTop: 6,
   },
   value: {
     fontSize: 11,
     color: ink,
-    marginBottom: 8,
-    fontFamily: "Times-Roman",
+    marginBottom: 4,
   },
-  body: {
-    fontSize: 11,
-    lineHeight: 1.9,
+  bodyText: {
+    fontSize: 10.5,
+    lineHeight: 1.85,
     textAlign: "justify",
     color: ink,
-    fontFamily: "Times-Roman",
-    marginTop: 6,
+    marginBottom: 6,
   },
-  bodyFirst: {
-    fontSize: 11,
-    lineHeight: 1.9,
+  bodyItalic: {
+    fontSize: 10.5,
+    lineHeight: 1.85,
     textAlign: "justify",
     color: ink,
-    fontFamily: "Times-Roman",
     fontStyle: "italic",
-  },
-  signature: {
-    marginTop: 24,
-    textAlign: "right",
-    fontFamily: "Times-Roman",
-    fontSize: 10,
-    color: goldText,
-    fontStyle: "italic",
+    marginBottom: 6,
   },
   sealWrap: {
     alignItems: "center",
-    marginVertical: 14,
+    marginVertical: 10,
   },
   seal: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: sealRed,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#FFCD6E",
+    border: "1.5px solid #FFCD6E",
   },
   sealInner: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: sealRed,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,205,110,0.5)",
+    border: "0.5px solid rgba(255,205,110,0.5)",
+  },
+  sealFleur: {
+    fontSize: 22,
+    color: goldLight,
   },
   sealText: {
-    fontSize: 20,
-    color: "#FFCD6E",
-  },
-  sealRingText: {
     fontSize: 5,
     color: "#F5CD64",
-    letterSpacing: 2,
+    letterSpacing: 1,
     textAlign: "center",
     marginTop: 2,
   },
-  numeroSerie: {
-    fontSize: 8,
+  signature: {
+    textAlign: "right",
+    fontSize: 9,
+    color: "#8A520D",
+    fontStyle: "italic",
+    marginTop: 6,
+  },
+  serieNum: {
     textAlign: "center",
-    color: goldText,
-    marginTop: 20,
-    fontFamily: "Times-Roman",
+    fontSize: 7,
+    color: "#8A520D",
     letterSpacing: 1,
+    marginTop: 14,
   },
-  lineRule: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: goldText,
-    opacity: 0.2,
-    marginVertical: 6,
-  },
-  foldLine: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: goldText,
+  fold: {
+    borderBottom: "0.5px solid #8A4810",
     opacity: 0.08,
-    marginVertical: 12,
-    marginHorizontal: 10,
+    marginVertical: 10,
+    marginHorizontal: 8,
   },
 
+  // Certificate styles
+  certPage: {
+    backgroundColor: "#FFFDF5",
+    padding: 0,
+  },
   certBorder: {
-    borderWidth: 2,
-    borderColor: gold,
-    padding: 30,
-    marginTop: 10,
+    margin: 16,
+    border: "1.5px solid #C9A84C",
+    padding: 24,
+  },
+  certInner: {
+    border: "0.5px solid #8A520D",
+    padding: 20,
   },
   certTitle: {
-    fontFamily: "Times-Roman",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 15,
     textAlign: "center",
-    color: gold,
-    marginBottom: 4,
-    letterSpacing: 1,
+    color: "#8A520D",
+    letterSpacing: 2,
+    fontWeight: "bold",
+    marginBottom: 2,
   },
   certSubtitle: {
-    fontSize: 10,
+    fontSize: 9,
     textAlign: "center",
-    color: goldText,
-    marginBottom: 16,
+    color: "#A06418",
+    marginBottom: 14,
     fontStyle: "italic",
   },
   certBody: {
     fontSize: 10,
-    lineHeight: 1.6,
+    lineHeight: 1.7,
     textAlign: "justify",
     color: ink,
-    fontFamily: "Times-Roman",
+    marginBottom: 6,
+  },
+  certDivider: {
+    borderBottom: "0.5px solid #C9A84C",
+    opacity: 0.3,
+    marginVertical: 10,
+  },
+  certRow: {
+    flexDirection: "row",
+    marginBottom: 4,
   },
   certLabel: {
-    fontSize: 9,
-    fontWeight: "bold",
-    color: gold,
-    marginBottom: 2,
-    marginTop: 8,
+    fontSize: 8,
     textTransform: "uppercase",
+    color: "#8A520D",
+    letterSpacing: 1,
+    width: 90,
   },
   certValue: {
     fontSize: 10,
     color: ink,
-    marginBottom: 4,
-    fontFamily: "Times-Roman",
-  },
-  certSignature: {
-    marginTop: 24,
-    textAlign: "right",
-    fontStyle: "italic",
-    fontSize: 10,
-    color: goldText,
+    flex: 1,
   },
   certSealWrap: {
     alignItems: "center",
-    marginVertical: 12,
+    marginVertical: 8,
+  },
+  certSig: {
+    textAlign: "right",
+    fontSize: 9,
+    color: "#8A520D",
+    fontStyle: "italic",
+    marginTop: 12,
+  },
+  certImageWrap: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  certImage: {
+    width: 200,
+    height: 200,
+    objectFit: "contain",
   },
 });
-
-function ParchmentDivider({ text = "⸻ ✦ ⸻" }: { text?: string }) {
-  return <Text style={styles.divider}>{text}</Text>;
-}
 
 function WaxSeal() {
   return (
     <View style={styles.sealWrap}>
       <View style={styles.seal}>
         <View style={styles.sealInner}>
-          <Text style={styles.sealText}>⚜</Text>
+          <Text style={styles.sealFleur}>⚜</Text>
         </View>
       </View>
-      <Text style={styles.sealRingText}>· SIGILLUM REGIS ·</Text>
+      <Text style={styles.sealText}>· SIGILLUM TOTEM ·</Text>
     </View>
   );
 }
@@ -303,54 +280,59 @@ function ParcheminDocument({ payload }: { payload: PdfPayload }) {
 
   return (
     <Document>
-      <Page size="A4" style={styles.parcheminPage}>
+      <Page size="A4" style={styles.page}>
         <View style={styles.rodTop} />
-        <View style={styles.curlTop} />
+        <View style={styles.curl} />
 
-        <View style={styles.outerBorder}>
-          <View style={styles.innerBorder}>
-            <View style={styles.cornerTL} />
-            <View style={styles.cornerTR} />
-            <View style={styles.cornerBL} />
-            <View style={styles.cornerBR} />
+        <View style={styles.outerWrap}>
+          <View style={styles.borderWrap}>
+            <View style={styles.body}>
+              <Text style={styles.title}>TOTEM ANCESTRAL</Text>
+              <Text style={styles.divider}>⸻ ✦ ⸻</Text>
 
-            <View style={styles.bodyContent}>
-              <Text style={styles.title}>✦ TOTEM ANCESTRAL ✦</Text>
-              <ParchmentDivider />
+              {(payload.imageDataUrl || payload.imageUrl) && (
+                <View style={styles.imageWrap}>
+                  <Image style={styles.image} src={payload.imageDataUrl || payload.imageUrl!} />
+                </View>
+              )}
 
-              <Text style={styles.label}>Destinataire</Text>
+              <View style={styles.line} />
+
+              <Text style={styles.label}>{payload.langue === "fr" ? "Destinataire" : "Recipient"}</Text>
               <Text style={styles.value}>{payload.prenom}</Text>
 
-              <Text style={styles.label}>Nom Ancestral</Text>
+              <Text style={styles.label}>{payload.langue === "fr" ? "Nom Ancestral" : "Ancestral Name"}</Text>
               <Text style={styles.value}>{payload.nomAncestral}</Text>
 
-              <Text style={styles.label}>Collection</Text>
-              <Text style={styles.value}>Tome {serieNum}</Text>
+              <Text style={styles.label}>{payload.langue === "fr" ? "Collection" : "Collection"}</Text>
+              <Text style={styles.value}>{payload.langue === "fr" ? "Tome" : "Volume"} {serieNum}</Text>
 
-              <View style={styles.lineRule} />
-              <View style={styles.foldLine} />
+              <View style={styles.fold} />
+              <View style={styles.line} />
 
               {paragraphs.map((para, i) => (
-                <Text key={i} style={i === 0 ? styles.bodyFirst : styles.body}>
+                <Text key={i} style={i === 0 ? styles.bodyItalic : styles.bodyText}>
                   {para}
                 </Text>
               ))}
 
-              <View style={styles.foldLine} />
-              <View style={styles.lineRule} />
+              <View style={styles.line} />
+              <View style={styles.fold} />
 
               <WaxSeal />
 
               <Text style={styles.signature}>✦ SENYCE PARTNERS ✦</Text>
 
-              <Text style={styles.numeroSerie}>
-                Certifié authentique — {payload.nomAncestral} — N° {serieNum}
+              <Text style={styles.serieNum}>
+                {payload.langue === "fr"
+                  ? `Certifié authentique — ${payload.nomAncestral} — N° ${serieNum}`
+                  : `Certified authentic — ${payload.nomAncestral} — No. ${serieNum}`}
               </Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.curlBottom} />
+        <View style={styles.curl} />
         <View style={styles.rodBottom} />
       </Page>
     </Document>
@@ -359,60 +341,82 @@ function ParcheminDocument({ payload }: { payload: PdfPayload }) {
 
 function CertificatDocument({ payload }: { payload: PdfPayload }) {
   const serieNum = String(payload.numeroCollection).padStart(6, "0");
-  const localeText =
-    payload.langue === "fr"
-      ? {
-          title: "CERTIFICAT D'AUTHENTICITÉ",
-          subtitle: "Œuvre d'art numérique générée par intelligence artificielle",
-          body: `Nous, SENYCE PARTNERS, certifions que l'œuvre intitulée "${payload.nomAncestral}" a été créée exclusivement pour ${payload.prenom} à l'aide de notre pipeline d'intelligence artificielle Totem Ancestral.`,
-          detail: "Cette œuvre unique, numérotée et scellée, est le fruit des réponses personnelles fournies par le destinataire lors de son parcours initiatique. Elle intègre des éléments narratifs, visuels et sonores générés sur mesure par nos algorithmes sacrés.",
-          date: `Fait à distance du monde, le ${new Date().toLocaleDateString("fr-FR")}`,
-          signature: "Pour SENYCE PARTNERS",
-        }
-      : {
-          title: "CERTIFICATE OF AUTHENTICITY",
-          subtitle: "Digital artwork generated by artificial intelligence",
-          body: `We, SENYCE PARTNERS, certify that the artwork titled "${payload.nomAncestral}" was created exclusively for ${payload.prenom} using our Totem Ancestral artificial intelligence pipeline.`,
-          detail: "This unique, numbered and sealed work is the fruit of the personal responses provided by the recipient during their initiatory journey. It integrates custom-generated narrative, visual and audio elements crafted by our sacred algorithms.",
-          date: `Done on ${new Date().toLocaleDateString("en-US")}`,
-          signature: "For SENYCE PARTNERS",
-        };
+
+  const t = payload.langue === "fr"
+    ? {
+        title: "CERTIFICAT D'AUTHENTICITÉ",
+        subtitle: "Œuvre d'art numérique générée par intelligence artificielle",
+        line1: `Nous, SENYCE PARTNERS, certifions que l'œuvre intitulée "${payload.nomAncestral}" a été créée exclusivement pour ${payload.prenom} à l'aide de notre pipeline d'intelligence artificielle Totem Ancestral.`,
+        line2: "Cette œuvre unique, numérotée et scellée, est le fruit des réponses personnelles fournies par le destinataire lors de son parcours initiatique. Elle intègre des éléments narratifs, visuels et sonores générés sur mesure par nos algorithmes sacrés.",
+        date: `Fait à distance du monde, le ${new Date().toLocaleDateString("fr-FR")}`,
+        sig: "Pour SENYCE PARTNERS",
+        artwork: "Œuvre",
+        serial: "Numéro de série",
+        owner: "Propriétaire",
+        dateLabel: "Date",
+      }
+    : {
+        title: "CERTIFICATE OF AUTHENTICITY",
+        subtitle: "Digital artwork generated by artificial intelligence",
+        line1: `We, SENYCE PARTNERS, certify that the artwork titled "${payload.nomAncestral}" was created exclusively for ${payload.prenom} using our Totem Ancestral artificial intelligence pipeline.`,
+        line2: "This unique, numbered and sealed work is the fruit of the personal responses provided by the recipient during their initiatory journey. It integrates custom-generated narrative, visual and audio elements crafted by our sacred algorithms.",
+        date: `Done on ${new Date().toLocaleDateString("en-US")}`,
+        sig: "For SENYCE PARTNERS",
+        artwork: "Artwork",
+        serial: "Serial Number",
+        owner: "Owner",
+        dateLabel: "Date",
+      };
 
   return (
     <Document>
-      <Page size="A4" style={styles.certificatPage}>
+      <Page size="A4" style={styles.certPage}>
         <View style={styles.certBorder}>
-          <Text style={styles.certTitle}>✦ {localeText.title} ✦</Text>
-          <Text style={styles.certSubtitle}>{localeText.subtitle}</Text>
-          <View style={styles.lineRule} />
+          <View style={styles.certInner}>
+            <Text style={styles.certTitle}>✦ {t.title} ✦</Text>
+            <Text style={styles.certSubtitle}>{t.subtitle}</Text>
 
-          <View style={styles.certSealWrap}>
-            <View style={styles.seal}>
-              <View style={styles.sealInner}>
-                <Text style={styles.sealText}>⚜</Text>
+            {(payload.imageDataUrl || payload.imageUrl) && (
+              <View style={styles.certImageWrap}>
+                <Image style={styles.certImage} src={payload.imageDataUrl || payload.imageUrl!} />
+              </View>
+            )}
+
+            <View style={styles.certDivider} />
+
+            <View style={styles.certSealWrap}>
+              <View style={styles.seal}>
+                <View style={styles.sealInner}>
+                  <Text style={styles.sealFleur}>⚜</Text>
+                </View>
               </View>
             </View>
+
+            <Text style={styles.certBody}>{t.line1}</Text>
+            <Text style={{ ...styles.certBody, marginTop: 6 }}>{t.line2}</Text>
+
+            <View style={styles.certDivider} />
+
+            <View style={styles.certRow}>
+              <Text style={styles.certLabel}>{t.artwork}</Text>
+              <Text style={styles.certValue}>{payload.nomAncestral}</Text>
+            </View>
+            <View style={styles.certRow}>
+              <Text style={styles.certLabel}>{t.serial}</Text>
+              <Text style={styles.certValue}>{serieNum}</Text>
+            </View>
+            <View style={styles.certRow}>
+              <Text style={styles.certLabel}>{t.owner}</Text>
+              <Text style={styles.certValue}>{payload.prenom}</Text>
+            </View>
+            <View style={styles.certRow}>
+              <Text style={styles.certLabel}>{t.dateLabel}</Text>
+              <Text style={styles.certValue}>{t.date}</Text>
+            </View>
+
+            <View style={styles.certDivider} />
+            <Text style={styles.certSig}>{t.sig}</Text>
           </View>
-
-          <Text style={styles.certBody}>{localeText.body}</Text>
-          <Text style={{ ...styles.certBody, marginTop: 8 }}>{localeText.detail}</Text>
-
-          <View style={styles.lineRule} />
-
-          <Text style={styles.certLabel}>{payload.langue === "fr" ? "Œuvre" : "Artwork"}</Text>
-          <Text style={styles.certValue}>{payload.nomAncestral}</Text>
-
-          <Text style={styles.certLabel}>{payload.langue === "fr" ? "Numéro de série" : "Serial Number"}</Text>
-          <Text style={styles.certValue}>{serieNum}</Text>
-
-          <Text style={styles.certLabel}>{payload.langue === "fr" ? "Propriétaire" : "Owner"}</Text>
-          <Text style={styles.certValue}>{payload.prenom}</Text>
-
-          <Text style={styles.certLabel}>{payload.langue === "fr" ? "Date" : "Date"}</Text>
-          <Text style={styles.certValue}>{localeText.date}</Text>
-
-          <View style={styles.lineRule} />
-          <Text style={styles.certSignature}>{localeText.signature}</Text>
         </View>
       </Page>
     </Document>
