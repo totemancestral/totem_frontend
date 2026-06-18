@@ -1,54 +1,66 @@
-import { useTranslations } from "next-intl";
 import { PageHero } from "@/components/PageHero";
 
 export function CGVPage() {
-  const t = useTranslations();
-
   const sections = [
     {
-      t: t("1_objet"),
-      c: t("les_presentes_conditions_regissent_la_vente_des_uvres"),
+      title: "1. Objet",
+      body: "Les présentes conditions générales de vente encadrent les commandes de coffrets numériques personnalisés Totem Ancestral, édités par SENYCE PARTNERS. Elles s'appliquent à toute commande passée sur le site.",
     },
     {
-      t: t("2_produits"),
-      c: t("trois_offres_totem_origine_49_totem_ancestral_89_totem"),
+      title: "2. Produits et nature artistique",
+      body: "Totem Ancestral propose des œuvres numériques personnalisées : parchemin narratif, œuvre visuelle, voix de l'ancêtre imaginaire, certificat d'authenticité et, selon l'offre, coffrets multiples ou abonnement saisonnier. Le service relève de la création artistique assistée par intelligence artificielle. Il ne constitue ni un test ADN, ni une recherche généalogique, ni une prestation divinatoire.",
     },
     {
-      t: t("3_commande"),
-      c: t("la_commande_est_validee_apres_reception_du_paiement"),
+      title: "3. Prix et paiement",
+      body: "Les prix sont indiqués en euros toutes taxes comprises lorsque celles-ci sont applicables. Le paiement est réalisé via un prestataire sécurisé, notamment Stripe. La commande est validée après paiement complet et confirmation des informations nécessaires à la composition.",
     },
     {
-      t: t("4_livraison"),
-      c: t("l_uvre_est_livree_par_email_sous_quinze_minutes_trente"),
+      title: "4. Commande et composition",
+      body: "Le client renseigne un questionnaire créatif. Ses réponses servent à composer une œuvre personnelle. La maison peut refuser ou suspendre une commande en cas d'usage frauduleux, de contenu illicite, de paiement non confirmé ou d'impossibilité technique manifeste.",
     },
     {
-      t: t("5_droit_de_retractation"),
-      c: t("s_agissant_d_une_uvre_numerique_personnalisee_composee_a"),
+      title: "5. Livraison",
+      body: "Les coffrets sont livrés par email et, lorsque l'espace personnel est disponible, depuis le compte du client. Le délai cible est de quinze minutes après paiement et questionnaire complet, trente minutes pour Totem Famille. Un retard technique exceptionnel ne peut ouvrir droit qu'à une recomposition ou un remboursement si la livraison devient impossible.",
     },
     {
-      t: t("6_garanties"),
-      c: t("si_une_difficulte_technique_empeche_la_livraison_l_uvre_est"),
+      title: "6. Droit de rétractation",
+      body: "Les œuvres étant personnalisées et composées à la demande, le droit de rétractation ne s'applique plus dès le lancement de la composition, conformément au Code de la consommation, notamment pour les biens personnalisés et contenus numériques fournis après accord du client.",
     },
     {
-      t: t("7_litiges"),
-      c: t("les_presentes_conditions_sont_regies_par_le_droit_francais"),
+      title: "7. Garanties et support",
+      body: "En cas de fichier manquant, illisible ou de défaut de livraison imputable au service, Totem Ancestral procède à une nouvelle mise à disposition ou à un remboursement. Les appréciations subjectives liées au style, au ton ou à l'interprétation artistique ne constituent pas, à elles seules, une non-conformité.",
+    },
+    {
+      title: "8. Propriété intellectuelle",
+      body: "Les textes, visuels, marques, éléments graphiques, méthodes créatives et contenus du site restent la propriété de SENYCE PARTNERS ou de ses ayants droit. Le client reçoit un droit d'usage personnel sur son coffret numérique. Toute exploitation commerciale, revente, reproduction massive ou republication sans autorisation écrite est interdite.",
+    },
+    {
+      title: "9. Données personnelles",
+      body: "Les données de commande et les réponses au questionnaire sont traitées pour composer, livrer et suivre l'œuvre. Les modalités détaillées figurent dans la Politique de confidentialité.",
+    },
+    {
+      title: "10. Litiges",
+      body: "Les présentes conditions sont régies par le droit français. En cas de difficulté, le client est invité à contacter la maison à contact@totemancestral.com afin de rechercher une solution amiable avant toute procédure.",
     },
   ];
 
   return (
     <>
-      <PageHero title={t("conditions_generales_de_vente")} />
-      <section className="pb-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
+      <PageHero
+        title="Conditions générales de vente"
+        subtitle="Dernière mise à jour : 18 juin 2026."
+      />
+      <section className="pb-24 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
         <article
-          className="max-w-2xl mx-auto space-y-8 text-[15px] leading-[1.85]"
+          className="max-w-3xl mx-auto space-y-8 text-[15px] leading-[1.85]"
           style={{ color: "var(--ivoire)" }}
         >
           {sections.map((s) => (
-            <div key={s.t}>
+            <div key={s.title}>
               <h2 className="h-display text-2xl mb-3" style={{ color: "var(--or-ancestral)" }}>
-                {s.t}
+                {s.title}
               </h2>
-              <p>{s.c}</p>
+              <p>{s.body}</p>
             </div>
           ))}
         </article>
@@ -56,4 +68,3 @@ export function CGVPage() {
     </>
   );
 }
-

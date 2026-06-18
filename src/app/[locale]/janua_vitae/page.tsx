@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { AuthClient } from "@/components/account/AuthClient";
 
 export const metadata: Metadata = {
-  title: "Accès - Totem Ancestral",
+  title: "Accès · Totem Ancestral",
 };
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {

@@ -12,7 +12,7 @@ export function PageHero({
 }) {
   return (
     <section
-      className="pt-40 pb-16 px-5 md:px-10 text-center"
+      className="px-5 pb-12 pt-36 text-center md:px-10"
       style={{ background: "var(--nuit-profonde)" }}
     >
       <div className="max-w-3xl mx-auto flex flex-col items-center gap-6">

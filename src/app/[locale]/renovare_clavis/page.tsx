@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ResetPasswordClient } from "@/components/account/ResetPasswordClient";
 
 export const metadata: Metadata = {
-  title: "Réinitialiser le mot de passe - Totem Ancestral",
+  title: "Réinitialiser le mot de passe · Totem Ancestral",
 };
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {

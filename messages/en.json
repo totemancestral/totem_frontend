@@ -13,21 +13,21 @@
   "a": "a",
   "a_2": "A",
   "a_ajouter_a_toute_commande_ancestral_ou_famille": "Add this to any Ancestral or Family order.",
-  "a_l_aube_quand_le_monde_est_encore_silence_et_que_tout_est": "At dawn—when the world is still silent and anything is possible—before the others arrive.",
-  "a_propos_totem_ancestral": "About - Ancestral Totem",
+  "a_l_aube_quand_le_monde_est_encore_silence_et_que_tout_est": "At dawn, when the world is still silent and anything is possible, before the others arrive.",
+  "a_propos_totem_ancestral": "About · Ancestral Totem",
   "a_quelle_heure_ton_ame_se_reveille_t_elle_vraiment": "At what time does your soul truly awaken?",
   "abonnement": "Subscription",
   "absolument_chaque_commande_inclut_une_carte_cadeau_gratuite": "Absolutely. Every order includes a free gift card, and you can specify a recipient at checkout.",
   "acces": "Access",
-  "acces_totem_ancestral": "Directions - Ancestral Totem",
+  "acces_totem_ancestral": "Directions · Ancestral Totem",
   "account": "account",
-  "admin_totem_ancestral": "Admin - Ancestral Totem",
-  "afrique_centrale_de_l_est_ou_du_sud_congo_kenya_tanzanie": "Central, East, or Southern Africa—Congo, Kenya, Tanzania, Ethiopia, South Africa, and surrounding areas.",
-  "afrique_de_l_ouest_senegal_mali_guinee_cote_d_ivoire": "West Africa — Senegal, Mali, Guinea, Ivory Coast, Nigeria, Ghana, Benin, and surrounding areas.",
+  "admin_totem_ancestral": "Admin · Ancestral Totem",
+  "afrique_centrale_de_l_est_ou_du_sud_congo_kenya_tanzanie": "Central, East, or Southern Africa, Congo, Kenya, Tanzania, Ethiopia, South Africa, and surrounding areas.",
+  "afrique_de_l_ouest_senegal_mali_guinee_cote_d_ivoire": "West Africa, Senegal, Mali, Guinea, Ivory Coast, Nigeria, Ghana, Benin, and surrounding areas.",
   "ajouter_une_nuance": "+ add a shade",
   "an": "/year",
   "ancestral": "Ancestral",
-  "au_crepuscule_quand_la_lumiere_change_quand_les_frontieres": "At dusk—when the light changes, when boundaries blur, when one can reflect.",
+  "au_crepuscule_quand_la_lumiere_change_quand_les_frontieres": "At dusk, when the light changes, when boundaries blur, when one can reflect.",
   "authentification_en_cours_de_migration_vers_l_architecture": "Authentication is currently being migrated to the target architecture.",
   "autre_chose": "Anything else?",
   "avant_le_choix_du_prix": "Before deciding on the price",
@@ -40,19 +40,19 @@
   "brand_2": "brand",
   "btn_primary_btn_secondary_data_stop_ambient": ".btn-primary, .btn-secondary, [data-stop-ambient]",
   "c": "C",
-  "caraibes_ameriques_ou_diaspora_africaine_une_origine": "The Caribbean, the Americas, or the African diaspora—a probable but undetermined African origin.",
+  "caraibes_ameriques_ou_diaspora_africaine_une_origine": "The Caribbean, the Americas, or the African diaspora, a probable but undetermined African origin.",
   "carte_cadeau_gratuite": "Free gift card",
-  "ce_que_les_autres_voient_en_toi_sans_que_tu_le_leur_demandes": "What do others see in you—without you even asking?",
+  "ce_que_les_autres_voient_en_toi_sans_que_tu_le_leur_demandes": "What do others see in you, without you even asking?",
   "ce_que_nous_croyons": "What We Believe",
   "ce_que_nous_ne_faisons_pas": "What we don't do",
-  "ce_que_tu_veux_qu_on_retienne_de_ta_vie_en_quelques_mots": "What do you want people to remember about your life—in a few words...",
-  "ce_qui_met_le_feu_en_toi_ta_colere_la_plus_profonde": "What sets you on fire—your deepest anger?",
-  "ce_qui_te_met_vraiment_hors_de_toi_ce_contre_quoi_tu_te": "What really gets under your skin—what you're struggling with inside...",
+  "ce_que_tu_veux_qu_on_retienne_de_ta_vie_en_quelques_mots": "What do you want people to remember about your life, in a few words...",
+  "ce_qui_met_le_feu_en_toi_ta_colere_la_plus_profonde": "What sets you on fire, your deepest anger?",
+  "ce_qui_te_met_vraiment_hors_de_toi_ce_contre_quoi_tu_te": "What really gets under your skin, what you're struggling with inside...",
   "certificat_d_authenticite_numerote": "Numbered certificate of authenticity",
   "cette_question_est_la_seule_que_tu_peux_choisir_de_ne_pas": "This is the only question you can choose not to answer.",
-  "cette_question_est_la_seule_que_tu_peux_choisir_de_ne_pas_2": "This is the only question you can choose not to answer. But if you do—the ancestors will be closer.",
+  "cette_question_est_la_seule_que_tu_peux_choisir_de_ne_pas_2": "This is the only question you can choose not to answer. But if you do, the ancestors will be closer.",
   "cgv": "Terms and Conditions",
-  "cgv_totem_ancestral": "Terms and Conditions - Ancestral Totem",
+  "cgv_totem_ancestral": "Terms and Conditions · Ancestral Totem",
   "chaque_uvre_est_elle_vraiment_unique": "Is every work of art truly unique?",
   "chaque_uvre_porte_un_numero_une_signature_un_certificat": "Each piece is numbered, signed, and comes with a certificate. It will never be\n            reproduced, reissued, or resold. It is your unique copy in the current\n            collection.",
   "checking": "checking",
@@ -78,7 +78,7 @@
   "conservation": "Preservation",
   "contact": "Contact",
   "contact_2": "Contact:",
-  "contact_totem_ancestral": "Contact - Ancestral Totem",
+  "contact_totem_ancestral": "Contact · Ancestral Totem",
   "contact_totemancestral_com": "contact@totemancestral.com",
   "contenu": "Contents",
   "continuer": "Continue",
@@ -86,17 +86,17 @@
   "cookies": "Cookies",
   "creation_du_compte": "Create an account",
   "d": "D",
-  "dans_la_nuit_quand_le_monde_dort_et_que_je_suis_enfin_seul": "At night—when the world is asleep and I am finally alone with my deepest thoughts.",
+  "dans_la_nuit_quand_le_monde_dort_et_que_je_suis_enfin_seul": "At night, when the world is asleep and I am finally alone with my deepest thoughts.",
   "dans_quel_moment_te_sens_tu_le_plus_vivant_e": "When do you feel most alive?",
   "decris_le_moment_ou_tu_te_sens_pleinement_vivant_e": "Describe a moment when you feel truly alive...",
   "delai": "Deadline",
   "delai_de_livraison": "Delivery time",
-  "derniere_question_la_plus_importante_l_ancetre_te_regarde": "Last question. The most important one. Your ancestor is watching you. He sees your whole life. Not what you’ve done—but what you carry within you.",
+  "derniere_question_la_plus_importante_l_ancetre_te_regarde": "Last question. The most important one. Your ancestor is watching you. He sees your whole life. Not what you’ve done, but what you carry within you.",
   "directeur_de_la_publication": "Publisher",
   "dis_lui_maintenant_ce_que_tu_n_as_jamais_dit_a_voix_haute": "Tell him now what you've never said out loud.",
   "done": "done",
   "donnees_collectees": "Data collected",
-  "ecoute_bien_ce_que_les_autres_voient_en_toi_sans_que_tu_le": "Listen carefully. What others see in you—without you even asking—is often what you refuse to see in yourself.",
+  "ecoute_bien_ce_que_les_autres_voient_en_toi_sans_que_tu_le": "Listen carefully. What others see in you, without you even asking, is often what you refuse to see in yourself.",
   "ecrire_a_la_maison": "Writing at home",
   "ecrivez_a_la_maison_totem_ancestral_reponse_sous_48h": "Please contact Maison Totem Ancestral. We will respond within 48 hours.",
   "ecrivez_nous": "Write to us…",
@@ -104,21 +104,21 @@
   "editeur": "Publisher",
   "email": "Email",
   "en": "EN",
-  "en_plein_jour_dans_le_feu_de_l_action_du_mouvement_des": "In broad daylight—amid the hustle and bustle, the movement, the encounters, and the lively noise.",
+  "en_plein_jour_dans_le_feu_de_l_action_du_mouvement_des": "In broad daylight, amid the hustle and bustle, the movement, the encounters, and the lively noise.",
   "envoi_en_cours": "Sending...",
   "envoyer": "Send",
   "error": "error",
   "espace_personnel": "My Account",
-  "espace_personnel_totem_ancestral": "My Account - Ancestral Totem",
-  "europe_asie_oceanie_ou_toute_autre_region_je_suis_ici_pour": "Europe, Asia, Oceania, or any other region—I’m here to discover my deep African roots.",
+  "espace_personnel_totem_ancestral": "My Account · Ancestral Totem",
+  "europe_asie_oceanie_ou_toute_autre_region_je_suis_ici_pour": "Europe, Asia, Oceania, or any other region, I’m here to discover my deep African roots.",
   "experience": "#experience",
   "experience_2": "experience",
-  "face_a_une_epreuve_comment_reagis_tu_vraiment": "When faced with a challenge—how do you really react?",
+  "face_a_une_epreuve_comment_reagis_tu_vraiment": "When faced with a challenge, how do you really react?",
   "famille": "Family",
   "faq": "FAQ",
   "faq_2": "FAQ",
-  "faq_totem_ancestral": "FAQ - Ancestral Totem",
-  "ferme_les_yeux_un_instant_pense_a_la_nature_a_ce_qui_t": "Close your eyes for a moment. Think about nature—about what draws you to it, even though you can’t quite explain why.",
+  "faq_totem_ancestral": "FAQ · Ancestral Totem",
+  "ferme_les_yeux_un_instant_pense_a_la_nature_a_ce_qui_t": "Close your eyes for a moment. Think about nature, about what draws you to it, even though you can’t quite explain why.",
   "finalite": "Purpose",
   "footer": {
     "tagline": "The imaginary portrait of the African you could have been.",
@@ -131,7 +131,7 @@
       "privacy": "Privacy policy",
       "mentions": "Legal notice"
     },
-    "copyright": "SENYCE PARTNERS © 2026 - All rights reserved.",
+    "copyright": "SENYCE PARTNERS © 2026 · All rights reserved.",
     "studioLine": "An artistic creation house. An artwork assisted by artificial intelligence."
   },
   "footer_2": "footer",
@@ -148,14 +148,15 @@
       "experience": "The experience",
       "offers": "Offers",
       "house": "The house",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "contact": "Contact"
     }
   },
   "header_2": "header",
   "hebergement": "Accommodation",
   "home": {
     "hero": {
-      "logoAlt": "{brand} - The soul of origins",
+      "logoAlt": "{brand} · The soul of origins",
       "titleLine1": "The imaginary portrait",
       "titleLine2": "of the African",
       "titleHighlight": "you could have been.",
@@ -193,7 +194,7 @@
     },
     "manifest": {
       "title": "A manifesto in three movements.",
-      "subtitle": "Why this house exists - and what it refuses to be.",
+      "subtitle": "Why this house exists, and what it refuses to be.",
       "items": [
         {
           "title": "An artwork, not a test",
@@ -206,6 +207,18 @@
         {
           "title": "Imagination, not genealogy",
           "body": "We do not rebuild a family tree. We imagine the ancestor history might have left you, the one who never departed."
+        },
+        {
+          "title": "Voice, not noise",
+          "body": "Each text seeks a slow, held, almost ritual word. Not content to consume, but a voice to receive."
+        },
+        {
+          "title": "Secrecy, not exposure",
+          "body": "Your answers remain inside the composition space. They are not used to profile, sell or feed a public spectacle."
+        },
+        {
+          "title": "Transmission, not decoration",
+          "body": "The box is made to be kept, offered, reread and passed on. An intimate digital object, not a passing image."
         }
       ]
     },
@@ -216,15 +229,15 @@
       "steps": [
         {
           "title": "The griot questions you",
-          "text": "Your answers reflect who you are."
+          "text": "You answer simple and deep questions. The griot listens to your impulses, silences, anger and loyalties."
         },
         {
           "title": "The house composes",
-          "text": "Your artwork is built step by step, piece by piece."
+          "text": "What you entrust becomes story, image, voice and certificate. Each piece follows the same sensitive direction."
         },
         {
           "title": "Your TOTEM is delivered",
-          "text": "15 minutes later, your secret box arrives by email. Numbered, signed, and accompanied by its certificate of authenticity. It is unique in the world."
+          "text": "Your secret box arrives by email. Numbered, signed, and accompanied by its certificate of authenticity. It is unique in the world."
         }
       ]
     },
@@ -266,13 +279,20 @@
           "alt": "Totem Ancestral visual artwork and ancestor voice"
         }
       ],
-      "certificate": "And always: the certificate of authenticity - numbered, signed, unique."
+      "certificate": "And always: the certificate of authenticity, numbered, signed, unique."
     },
     "offers": {
       "title": "Three ways to receive the artwork.",
       "subtitle": "For yourself. To offer. To share with family.",
-      "footnote": "Free gift card with every order - International payments - GDPR",
+      "footnote": "Free gift card with every order · International payments · GDPR",
       "teaser": "Full contents and pricing appear after the first four questions, when you choose your box.",
+      "living": {
+        "eyebrow": "Subscription",
+        "title": "Living Totem",
+        "subtitle": "So your artwork can continue to breathe.",
+        "text": "A previously unreleased audio message from your ancestor, delivered each season. Four times a year, your artwork gains a new word.",
+        "note": "Add this to any Ancestral or Family order."
+      },
       "items": [
         {
           "name": "Totem Origin",
@@ -320,12 +340,28 @@
     },
     "house": {
       "title": "A house of creation.",
+      "subtitle": "About Totem Ancestral, now at the heart of the homepage.",
       "paragraphs": [
         "TOTEM ANCESTRAL is an artistic creation house founded in Paris.",
         "We compose unique digital artworks, personal fables inspired by African cosmogonies and assisted by artificial intelligence.",
         "We do not do science, genealogy or divination. We make artworks. To celebrate someone close. To offer oneself an inner journey. To nourish imagination.",
         "Each artwork carries a number, a signature and a certificate. It will never be reproduced, reissued or resold. It is your edition in the current collection."
       ],
+      "pillars": [
+        {
+          "title": "What we believe",
+          "text": "Every human being deserves a story that resembles them. Not a cold truth, but a fable held with care."
+        },
+        {
+          "title": "What we refuse",
+          "text": "We do not make folklore, identity certainty or mystical promises. We treat imagination as an art."
+        },
+        {
+          "title": "Our standard",
+          "text": "Rarity, precision, confidentiality, durable files and clear delivery guide every box."
+        }
+      ],
+      "quote": "“An artwork is never finished. It is only entrusted to the one who receives it.”",
       "link": "Read the full manifesto"
     },
     "testimonials": {
@@ -334,34 +370,104 @@
         {
           "q": "I expected a personality test. I received an artwork. I read the parchment three times. I listened to the voice alone, at night. Something settled.",
           "a": "Kofi A., Paris",
-          "n": "Artwork n°12 - Lion"
+          "n": "Artwork n°12 · Lion"
         },
         {
           "q": "I offered it to my mother for her birthday. She cried. Not from sadness, from something deeper.",
           "a": "Amelie D., Lyon",
-          "n": "Artwork n°47 - Eagle"
+          "n": "Artwork n°47 · Eagle"
         },
         {
           "q": "I'm not African. I was curious. The parchment is a small literary work. I framed the image; it hangs above my desk.",
           "a": "James T., London",
-          "n": "Artwork n°83 - Elephant"
+          "n": "Artwork n°83 · Elephant"
+        }
+      ]
+    },
+    "faq": {
+      "title": "Frequently asked questions.",
+      "subtitle": "The essential answers before entrusting your material to the griot.",
+      "categories": [
+        {
+          "title": "The nature of the artwork",
+          "items": [
+            {
+              "q": "Is this a DNA or genealogy test?",
+              "a": "No. Totem Ancestral is a personalized artistic fiction. It draws from your answers and an African imaginary without claiming to reveal a real origin."
+            },
+            {
+              "q": "Is each artwork truly unique?",
+              "a": "Yes. Each box is composed for one person, with its number, certificate and files. The house does not resell your edition to another client."
+            },
+            {
+              "q": "Does artificial intelligence replace the artist?",
+              "a": "No. It is a composition tool. Artistic direction, narrative frame, tone and box constraints belong to the house."
+            }
+          ]
+        },
+        {
+          "title": "Order and delivery",
+          "items": [
+            {
+              "q": "How long does the passage take?",
+              "a": "The questionnaire takes about fifteen minutes. The target box delivery is fifteen minutes after confirmed payment, thirty minutes for Totem Family."
+            },
+            {
+              "q": "Which files will I receive?",
+              "a": "Depending on the offer: PDF parchment, high-resolution PNG artwork, MP3 voice of the imaginary ancestor and numbered certificate of authenticity."
+            },
+            {
+              "q": "Can I offer an artwork?",
+              "a": "Yes. The box can be ordered as a gift. A free gift card is planned and you can prepare the experience for a recipient."
+            }
+          ]
+        },
+        {
+          "title": "Data and privacy",
+          "items": [
+            {
+              "q": "What happens to my answers?",
+              "a": "They are used to compose the artwork, deliver it and provide support. They are not resold or used for third-party advertising."
+            },
+            {
+              "q": "Can I request data deletion?",
+              "a": "Yes. You can write to contact@totemancestral.com to exercise access, correction or deletion rights within applicable legal limits."
+            }
+          ]
+        },
+        {
+          "title": "Using the box",
+          "items": [
+            {
+              "q": "Can the image be printed?",
+              "a": "Yes. The visual artwork is delivered in high resolution so it can be kept, framed or printed in a suitable format."
+            },
+            {
+              "q": "Can I publish my artwork?",
+              "a": "You can share it in a personal context. Any commercial use or large-scale reproduction requires written permission."
+            }
+          ]
         }
       ]
     },
     "instructions": {
-      "title": "How to live the TOTEM experience.",
+      "title": "Before the passage.",
       "subtitle": "Four simple gestures to welcome the artwork.",
       "items": [
         {
+          "title": "Posture",
           "text": "In front of your screen, adopt a posture of deep connection with yourself."
         },
         {
+          "title": "Voice",
           "text": "Make sure your volume is on to hear the imaginary ancestor."
         },
         {
+          "title": "Heart",
           "text": "Give answers that come from the heart and reflect who you are within."
         },
         {
+          "title": "Legacy",
           "text": "Keep your TOTEM artwork like a legacy to preserve and guard closely."
         }
       ]
@@ -371,7 +477,7 @@
       "subtitleLine1": "Fifteen minutes to compose it.",
       "subtitleLine2": "A lifetime to keep it.",
       "button": "Compose my artwork",
-      "caption": "Unique digital artwork - Delivered within 15 minutes - Certificate of authenticity included"
+      "caption": "Unique digital artwork · Delivered within 15 minutes · Certificate of authenticity included"
     }
   },
   "home_artwork": "home.artwork",
@@ -387,7 +493,7 @@
   "house": "house",
   "httperror": "HTTPError",
   "identite_de_livraison": "Shipping Information",
-  "il_n_y_a_pas_de_bonnes_ou_de_mauvaises_reponses_ici_il_y_a": "There are no right or wrong answers here. There is your truth—and the one you\n          allow yourself to see.",
+  "il_n_y_a_pas_de_bonnes_ou_de_mauvaises_reponses_ici_il_y_a": "There are no right or wrong answers here. There is your truth, and the one you\n          allow yourself to see.",
   "il_tient_maintenant_ta_verite_entre_ses_mains": "He now holds your truth in his hands.",
   "il_y_a_une_heure_dans_la_journee_ou_tout_semble_plus_clair": "There’s a certain time of day when everything seems clearer. A time when you’re truly yourself.",
   "imagine_que_dans_cent_ans_quelqu_un_parle_de_toi_qu_est_ce": "Imagine that in a hundred years, someone is talking about you. What would they say?",
@@ -406,22 +512,22 @@
   "intro_2": "intro",
   "items": "items",
   "j_ai_connecte_j_ai_rassemble_les_gens_j_ai_cree_des_liens": "I connected people. I brought people together. I built bridges where there were none.",
-  "j_ai_cree_j_ai_bati_quelque_chose_qui_durera_une_uvre_une": "I have created. I have built something that will last—a work of art, a business, an idea, a legacy.",
+  "j_ai_cree_j_ai_bati_quelque_chose_qui_durera_une_uvre_une": "I have created. I have built something that will last, a work of art, a business, an idea, a legacy.",
   "j_ai_protege_j_ai_defendu_j_ai_rendu_le_monde_plus_juste": "I have protected. I have defended. I have made the world a fairer place for those who will come after me.",
   "j_ai_revele_j_ai_dit_des_verites_que_personne_n_osait_dire": "I spoke out. I told truths that no one dared to speak. I opened people’s eyes.",
-  "je_cherche_les_autres_je_construis_des_alliances_je_cree_du": "I reach out to others—I build alliances and foster support around me.",
+  "je_cherche_les_autres_je_construis_des_alliances_je_cree_du": "I reach out to others, I build alliances and foster support around me.",
   "je_commence_mon_voyage": "I'm starting my journey",
   "je_fonce_j_agis_je_prefere_me_tromper_dans_l_action_que": "I go for it. I take action. I’d rather make a mistake while taking action than stand still in doubt.",
-  "je_recule_j_observe_j_analyse_puis_je_choisis_le_moment_et": "I step back, observe, analyze—then choose the right moment and place to strike.",
-  "je_rentre_en_moi_meme_je_cherche_la_reponse_dans_le_silence": "I turn inward—I seek the answer in silence before looking for it outside.",
+  "je_recule_j_observe_j_analyse_puis_je_choisis_le_moment_et": "I step back, observe, analyze, then choose the right moment and place to strike.",
+  "je_rentre_en_moi_meme_je_cherche_la_reponse_dans_le_silence": "I turn inward, I seek the answer in silence before looking for it outside.",
   "key": "·",
   "key_2": "/",
   "key_3": "\"",
-  "key_4": "—",
-  "l_eau_qui_coule_sans_jamais_s_arreter_riviere_ocean_pluie": "Water that flows without ever stopping—rivers, oceans, rain—I always find myself drawn back to it.",
-  "l_eau_une_riviere_un_ocean_une_pluie_quelque_chose_qui": "Water—a river, an ocean, rain—something that flows, carries things away, and purifies.",
-  "l_ensemble_des_contenus_presents_sur_ce_site_textes_visuels": "All content on this website—including text, images, branding, and design guidelines—is\n              protected by intellectual property laws and is the property of SENYCE PARTNERS.\n              Any reproduction is prohibited without prior authorization.",
-  "l_epreuve_revele_pas_ce_qu_on_dit_qu_on_ferait_ce_qu_on": "Trial by fire reveals the truth. Not what we say we would do—but what we actually do.",
+  "key_4": ", ",
+  "l_eau_qui_coule_sans_jamais_s_arreter_riviere_ocean_pluie": "Water that flows without ever stopping, rivers, oceans, rain, I always find myself drawn back to it.",
+  "l_eau_une_riviere_un_ocean_une_pluie_quelque_chose_qui": "Water, a river, an ocean, rain, something that flows, carries things away, and purifies.",
+  "l_ensemble_des_contenus_presents_sur_ce_site_textes_visuels": "All content on this website, including text, images, branding, and design guidelines, is\n              protected by intellectual property laws and is the property of SENYCE PARTNERS.\n              Any reproduction is prohibited without prior authorization.",
+  "l_epreuve_revele_pas_ce_qu_on_dit_qu_on_ferait_ce_qu_on": "Trial by fire reveals the truth. Not what we say we would do, but what we actually do.",
   "l_espace_personnel_arrive_dans_la_prochaine_tranche": "The personal space feature will be included in the next release.",
   "l_experience_a_partager": "An experience to share.",
   "l_experience_complete": "The complete experience.",
@@ -436,14 +542,14 @@
   "l_uvre_visuelle_png_haute_resolution": "The Visual Work (High-Resolution PNG)",
   "la_colere_est_sacree_elle_dit_ce_qui_compte_vraiment_ce_qui": "Anger is sacred. It reveals what truly matters. What makes you angry reveals what you care about most.",
   "la_commande_est_validee_apres_reception_du_paiement": "The order is confirmed upon receipt of full payment. A confirmation email is sent immediately.",
-  "la_destruction_de_la_nature_de_la_beaute_de_la_memoire_de": "Destruction—of nature, of beauty, of memory, of what took centuries to build.",
-  "la_hauteur_une_falaise_un_sommet_un_vol_une_vision_d_en": "Height—a cliff, a mountaintop, a flight—a view from above, a perspective that others don't have.",
+  "la_destruction_de_la_nature_de_la_beaute_de_la_memoire_de": "Destruction, of nature, of beauty, of memory, of what took centuries to build.",
+  "la_hauteur_une_falaise_un_sommet_un_vol_une_vision_d_en": "Height, a cliff, a mountaintop, a flight, a view from above, a perspective that others don't have.",
   "la_maison": "The house",
   "la_mediocrite_acceptee_les_gens_qui_se_contentent_de_peu_le": "Accepted mediocrity. People who settle for less. Wasted potential. Giving up on dreams.",
   "la_nature_de_l_uvre": "The nature of the work",
   "la_protection_supabase_et_les_urls_r2_seront_ajoutees_apres": "Supabase protection and R2 URLs will be added after Stripe.",
   "la_technique": "The technique",
-  "la_terre_sous_mes_pieds_les_racines_les_pierres_les_forets": "The earth beneath my feet—the roots, the stones, the dense forests—what endures and holds firm.",
+  "la_terre_sous_mes_pieds_les_racines_les_pierres_les_forets": "The earth beneath my feet, the roots, the stones, the dense forests, what endures and holds firm.",
   "la_trace_que_tu_veux_laisser_dans_le_monde": "What mark do you want to leave on the world?",
   "la_trahison_et_le_mensonge_l_hypocrisie_les_gens_qui_jouent": "Betrayal and lies. Hypocrisy. People who put on a show instead of being genuine.",
   "la_voix_de_l_ancetre_imaginaire_mp3_90s": "The Voice of the Imaginary Ancestor (MP3, 90 sec)",
@@ -452,8 +558,8 @@
   "le_c_ur_de_la_collection_2": "THE HEART OF THE COLLECTION",
   "le_certificat_d_authenticite_numerote": "The numbered Certificate of Authenticity",
   "le_compte_sera_finalise_apres_paiement_pour_donner_acces_au": "The account will be activated after payment is received, granting access to the package and the\n            generated files.",
-  "le_feu_ou_la_lumiere_une_flamme_un_soleil_un_eclair_quelque": "Fire or light—a flame, the sun, a flash of lightning—something that burns and gives off light.",
-  "le_feu_qui_danse_dans_la_nuit_je_suis_attire_par_sa_lumiere": "The fire dancing in the night—I am drawn to its light, its unpredictable warmth, the way it transforms everything.",
+  "le_feu_ou_la_lumiere_une_flamme_un_soleil_un_eclair_quelque": "Fire or light, a flame, the sun, a flash of lightning, something that burns and gives off light.",
+  "le_feu_qui_danse_dans_la_nuit_je_suis_attire_par_sa_lumiere": "The fire dancing in the night, I am drawn to its light, its unpredictable warmth, the way it transforms everything.",
   "le_griot_a_ecoute": "The Griot listened.",
   "le_griot_parle": "The Griot speaks.",
   "le_griot_reprend_la_parole_les_questions_restantes": "The Griot speaks again. The remaining questions will shape your work.",
@@ -463,29 +569,29 @@
   "le_manifeste_de_la_maison_totem_ancestral": "The Totem Ancestral Manifesto.",
   "le_moment_de_la_journee_ou_tu_te_sens_vraiment_toi_meme": "The time of day when you really feel like yourself...",
   "le_parchemin_narratif_pdf": "The Narrative Scroll (PDF)",
-  "le_parcours_du_griot_totem_ancestral": "The Griot's Journey - Ancestral Totem",
+  "le_parcours_du_griot_totem_ancestral": "The Griot's Journey · Ancestral Totem",
   "le_portrait_prend_vie_dans_l_ombre": "The portrait comes to life in the shadows...",
   "le_questionnaire_dure_environ_quinze_minutes_l_uvre_est": "The questionnaire takes about fifteen minutes to complete. The results are delivered by email within fifteen minutes of submission (thirty minutes for the Family Totem).",
   "le_site_est_heberge_sur_une_infrastructure_cloud_securisee": "The site is hosted on a secure cloud infrastructure. Details are available upon\n              request.",
   "le_temps_n_existe_pas_ici_l_ancetre_attend": "Time does not exist here. The ancestor waits.",
-  "le_vent_qui_emporte_tout_l_espace_ouvert_les_hauteurs_l": "The wind that carries everything away—the open space, the heights, the horizon that we can’t grasp.",
+  "le_vent_qui_emporte_tout_l_espace_ouvert_les_hauteurs_l": "The wind that carries everything away, the open space, the heights, the horizon that we can’t grasp.",
   "les_ancetres_deliberent": "The ancestors are deliberating.",
   "les_ancetres_ecoutent_mieux_ceux_qui_osent_les_mots_qu_ils": "Ancestors listen more closely to those who dare to speak the words they keep to themselves.",
   "les_mots_cherchent_leur_forme": "Words are searching for their form...",
   "les_offres": "Offers",
-  "les_offres_totem_ancestral": "Special Offers - Totem Ancestral",
+  "les_offres_totem_ancestral": "Special Offers · Totem Ancestral",
   "les_presentes_conditions_regissent_la_vente_des_uvres": "These terms and conditions govern the sale of the digital works \"Totem Ancestral\" published by SENYCE PARTNERS.",
   "les_presentes_conditions_sont_regies_par_le_droit_francais": "These terms and conditions are governed by French law. Any dispute shall be subject to the jurisdiction of the courts of Paris.",
   "les_quatre_premieres_reponses_ouvrent_le_parcours_ton_email": "The first four answers kick off the journey. Your email address will be used to locate your\n            box, receive your delivery, and continue the experience without losing your progress.",
-  "les_racines_ou_la_foret_des_arbres_de_la_terre_des_chemins": "Roots or the forest—trees, earth, ancient paths—something deep and enduring.",
-  "les_reves_parlent_pas_litteralement_mais_symboliquement_qu": "Dreams speak. Not literally—but symbolically. What keeps coming up in your inner world?",
+  "les_racines_ou_la_foret_des_arbres_de_la_terre_des_chemins": "Roots or the forest, trees, earth, ancient paths, something deep and enduring.",
+  "les_reves_parlent_pas_litteralement_mais_symboliquement_qu": "Dreams speak. Not literally, but symbolically. What keeps coming up in your inner world?",
   "livraison_sous_15_minutes_par_email": "Delivered via email within 15 minutes",
   "livraison_sous_30_minutes": "Delivery within 30 minutes",
   "loading": "loading",
   "maison": "#home",
   "mentions_legales": "Legal Notice",
   "mentions_legales_de_totem_ancestral": "Legal Notice for Totem Ancestral.",
-  "mentions_legales_totem_ancestral": "Legal Notice - Totem Ancestral",
+  "mentions_legales_totem_ancestral": "Legal Notice · Totem Ancestral",
   "mes_donnees_sont_elles_protegees": "Is my data protected?",
   "message": "Message",
   "message_2": "message",
@@ -495,13 +601,13 @@
   "nbsp_une_uvre_n_est_jamais_finie_elle_est_seulement": "“A work of art is never finished. It is simply entrusted to the one who\n            receives it.”",
   "next_locale_nextlocale_path_max_age_31536000_samesite_lax": "NEXT_LOCALE= {nextLocale}; path=/; max-age=31536000; samesite=lax",
   "nombre_de_coffrets": "Number of sets",
-  "non_nos_directions_artistiques_composent_les_cadres_les": "No. Our creative teams establish the framework, the references, and the narrative arcs. Artificial intelligence is our tool—not our author.",
-  "non_totem_ancestral_n_est_ni_un_test_adn_ni_un_service_de": "No. Ancestral Totem is neither a DNA test nor a genealogy service. It is an artistic fable: a digital work inspired by your answers to ten personal questions, created to celebrate the imagination—not to reveal the truth.",
+  "non_nos_directions_artistiques_composent_les_cadres_les": "No. Our creative teams establish the framework, the references, and the narrative arcs. Artificial intelligence is our tool, not our author.",
+  "non_totem_ancestral_n_est_ni_un_test_adn_ni_un_service_de": "No. Ancestral Totem is neither a DNA test nor a genealogy service. It is an artistic fable: a digital work inspired by your answers to ten personal questions, created to celebrate the imagination, not to reveal the truth.",
   "notre_exigence": "Our standards",
   "notre_standard_de_reference_est_celui_des_maisons_de": "Our benchmark is that of niche perfume houses and high-end\n            jewelry: rarity, elegance, and precision.",
   "nous_collectons_uniquement_les_informations_necessaires_a": "We collect only the information necessary to create your artwork: first name, email address, questionnaire responses, and payment information (handled by our secure service provider).",
   "nous_croyons_que_chaque_etre_humain_merite_une_histoire_qui": "We believe that every human being deserves a story that reflects who they are. Not a\n            truth. A fable. A work that celebrates, questions, and passes on.",
-  "nous_croyons_que_l_intelligence_artificielle_mise_au": "We believe that artificial intelligence, when harnessed to serve artistic sensibility,\n            can produce objects of memory—not content.",
+  "nous_croyons_que_l_intelligence_artificielle_mise_au": "We believe that artificial intelligence, when harnessed to serve artistic sensibility,\n            can produce objects of memory, not content.",
   "nous_faisons_des_uvres_pour_celebrer_un_proche_pour_s": "We create art. To honor a loved one. To embark on a journey of self-discovery.\n            To fuel the imagination.",
   "nous_ne_faisons_pas_de_la_science_pas_de_la_genealogie_pas": "We don't do science. Not genealogy. Not divination. Not\n            identity. Not folklore.",
   "nous_utilisons_uniquement_des_cookies_techniques": "We use only technical cookies that are necessary for the website to function. We do not use any advertising cookies or third-party tracking cookies.",
@@ -525,19 +631,19 @@
   "pieces": "parts",
   "plus_tu_lui_confies_plus_l_uvre_te_ressemblera": "The more you entrust to it, the more the work will resemble you.",
   "politique_de_confidentialite": "Privacy Policy",
-  "politique_de_confidentialite_totem_ancestral": "Privacy Policy - Totem Ancestral",
+  "politique_de_confidentialite_totem_ancestral": "Privacy Policy · Totem Ancestral",
   "pour_que_votre_uvre_continue_de_respirer": "So your artwork can continue to breathe.",
   "premier_voyage": "First trip",
   "prenom": "First name",
   "prioritaire": "PRIORITY",
   "propriete_intellectuelle": "Intellectual Property",
   "puis_je_offrir_une_uvre": "Can I donate a piece of art?",
-  "quand_je_cree_quelque_chose_une_idee_une_uvre_un_projet": "When I create something—an idea, a work of art, a project—when my hands bring my vision to life.",
-  "quand_je_protege_quelqu_un_quand_je_me_bats_pour_ce_qui_est": "When I stand up for someone—when I fight for what’s right—when I’m right in the thick of it.",
-  "quand_je_suis_entoure_e_de_ceux_que_j_aime_dans_le_rire": "When I’m surrounded by the people I love—sharing laughter, sharing experiences, and feeling that connection.",
-  "quand_je_suis_seul_e_dans_la_nature_ou_dans_le_silence": "When I am alone in nature or in silence—when I observe, when I understand, when I look into the distance.",
+  "quand_je_cree_quelque_chose_une_idee_une_uvre_un_projet": "When I create something, an idea, a work of art, a project, when my hands bring my vision to life.",
+  "quand_je_protege_quelqu_un_quand_je_me_bats_pour_ce_qui_est": "When I stand up for someone, when I fight for what’s right, when I’m right in the thick of it.",
+  "quand_je_suis_entoure_e_de_ceux_que_j_aime_dans_le_rire": "When I’m surrounded by the people I love, sharing laughter, sharing experiences, and feeling that connection.",
+  "quand_je_suis_seul_e_dans_la_nature_ou_dans_le_silence": "When I am alone in nature or in silence, when I observe, when I understand, when I look into the distance.",
   "quel_element_naturel_t_appelle_le_plus_profondement": "Which natural element speaks to you the most?",
-  "quelle_est_l_origine_de_tes_ancetres_aussi_loin_que_tu_le": "Where are your ancestors from—as far back as you know?",
+  "quelle_est_l_origine_de_tes_ancetres_aussi_loin_que_tu_le": "Where are your ancestors from, as far back as you know?",
   "question": "QUESTION",
   "question_2": "question",
   "question_precedente": "← Previous question",
@@ -546,7 +652,7 @@
   "qui_est_derriere_totem_ancestral": "Who is behind Totem Ancestral?",
   "ready": "ready",
   "reinitialisation": "Reset",
-  "reinitialiser_le_mot_de_passe_totem_ancestral": "Reset Password - Ancestral Totem",
+  "reinitialiser_le_mot_de_passe_totem_ancestral": "Reset Password · Ancestral Totem",
   "reponds_avec_ce_que_tu_ressens_pas_avec_ce_que_tu_crois": "Answer based on how you feel. Not based on what you think you should say.",
   "reserve_ton_espace_personnel": "Reserve your personal space.",
   "revenir": "← Back",
@@ -555,8 +661,8 @@
   "secondaire": "SECONDARY",
   "senyce_partners": "SENYCE PARTNERS",
   "senyce_partners_2": "SENYCE PARTNERS.",
-  "senyce_partners_maison_de_creation_artistique": "SENYCE PARTNERS — Artistic Creation Studio",
-  "si_un_ancetre_pouvait_regarder_ta_vie_qu_est_ce_qu_il": "If an ancestor could look at your life—what would they see?",
+  "senyce_partners_maison_de_creation_artistique": "SENYCE PARTNERS, Artistic Creation Studio",
+  "si_un_ancetre_pouvait_regarder_ta_vie_qu_est_ce_qu_il": "If an ancestor could look at your life, what would they see?",
   "si_une_difficulte_technique_empeche_la_livraison_l_uvre_est": "If a technical issue prevents delivery, the artwork will be recreated or a full refund will be issued.",
   "siege_social_paris_france": "Headquarters: Paris, France",
   "siteTour": {
@@ -604,13 +710,13 @@
   "ton_parcours_est_sauvegarde_les_questions_restantes_t": "✦ Your progress has been saved. The remaining questions are waiting for you.",
   "ton_prenom": "Your first name",
   "ton_symbole_a_toi": "What's your symbol?",
-  "ton_symbole_interieur_ce_qui_revient_dans_tes_reves_ou_ta": "Your inner symbol—what keeps coming up in your dreams or your life?",
+  "ton_symbole_interieur_ce_qui_revient_dans_tes_reves_ou_ta": "Your inner symbol, what keeps coming up in your dreams or your life?",
   "ton_totem_est_en_train_de_naitre": "Your totem is coming to life.",
   "totem_ancestral": "Ancestral Totem",
   "totem_ancestral_2": "ANCESTRAL TOTEM",
-  "totem_ancestral_est_une_maison_de_creation_artistique": "TOTEM ANCESTRAL is an artistic studio founded in Paris by SENYCE\n            PARTNERS. We create unique digital works—personal fables\n            inspired by African cosmogonies—with the assistance of artificial intelligence.",
+  "totem_ancestral_est_une_maison_de_creation_artistique": "TOTEM ANCESTRAL is an artistic studio founded in Paris by SENYCE\n            PARTNERS. We create unique digital works, personal fables\n            inspired by African cosmogonies, with the assistance of artificial intelligence.",
   "totem_ancestral_est_une_maison_de_creation_artistique_2": "Totem Ancestral is an artistic collective founded in Paris by SENYCE PARTNERS, at the intersection of African cosmogonies, literature, and digital arts.",
-  "totem_ancestral_le_portrait_imaginaire_de_l_africain_que": "Ancestral Totem - An imaginary portrait of the African you might have been",
+  "totem_ancestral_le_portrait_imaginaire_de_l_africain_que": "Ancestral Totem · An imaginary portrait of the African you might have been",
   "totem_famille": "FAMILY TOTEM",
   "totem_intro_played": "totem_intro_played",
   "totem_origine": "TOTEM ORIGIN",
@@ -622,7 +728,7 @@
   "trois_manieres_de_recevoir_l_uvre_totem_ancestral_comparees": "A detailed comparison of three ways to acquire the work *Ancestral Totem*.",
   "trois_offres_totem_origine_49_totem_ancestral_89_totem": "Three options: Totem Origine (€49), Totem Ancestral (€89), Totem Famille (€199). Each piece is numbered, signed, and comes with a certificate of authenticity.",
   "trois_uvres_totem_ancestral_completes": "Three complete works from the \"Ancestral Totem\" series",
-  "tu_as_choisi_la_liberte_le_griot_voudrait_comprendre_la": "You chose freedom. The griot would like to understand yours—in a single sentence.",
+  "tu_as_choisi_la_liberte_le_griot_voudrait_comprendre_la": "You chose freedom. The griot would like to understand yours, in a single sentence.",
   "tu_offres_au_griot_une_matiere_rare_ton_uvre_s_enrichit": "You are offering the griot a rare treasure. Your work is enriched.",
   "tu_peux_fermer_cette_fenetre_les_ancetres_terminent_leur": "You can close this window. The ancestors are finishing their work.",
   "tu_sais_quelque_chose_de_precis": "Do you know anything specific?",
@@ -632,12 +738,12 @@
   "un_guerrier_qui_n_a_pas_encore_trouve_sa_vraie_bataille_une": "A warrior who has not yet found his true battle. An immense force biding its time.",
   "un_message_audio_inedit_de_votre_ancetre_livre_chaque": "A previously unreleased audio message from your ancestor, delivered each season. Four times a year, your\n            collection is enriched with a new recording.",
   "un_pays_une_ethnie_une_region_que_tu_connais_ou_que_tu_as": "A country, an ethnic group, or a region that you know or would like to explore...",
-  "un_peu_de_patience_les_ancetres_ne_se_pressent_pas": "Be patient—ancestors aren't in a hurry.",
+  "un_peu_de_patience_les_ancetres_ne_se_pressent_pas": "Be patient, ancestors aren't in a hurry.",
   "un_questionnaire_conversationnel_en_10_questions_pour": "A 10-question interactive questionnaire to help you create your ancestral artwork.",
   "un_sage_qui_parle_trop_peu_une_sagesse_profonde_que_le": "A wise man who speaks too little. A profound wisdom that the world needs to hear more of.",
-  "une_confidence_une_verite_un_mot_quelque_chose_que_tu_n_as": "A secret, a truth, a word—something you've never said out loud...",
+  "une_confidence_une_verite_un_mot_quelque_chose_que_tu_n_as": "A secret, a truth, a word, something you've never said out loud...",
   "une_douceur_une_chaleur_quelqu_un_qui_accueille_qui_ecoute": "Such kindness. Such warmth. Someone who welcomes others, listens to them, and brings out the best in people.",
-  "une_force_une_presence_quelqu_un_vers_qui_on_se_tourne": "A source of strength. A guiding presence. Someone you turn to when things go wrong—or when you need to make a decision.",
+  "une_force_une_presence_quelqu_un_vers_qui_on_se_tourne": "A source of strength. A guiding presence. Someone you turn to when things go wrong, or when you need to make a decision.",
   "une_image_un_reve_recurrent_un_symbole_qui_revient_souvent": "An image, a recurring dream, a symbol that often comes up in your life...",
   "une_liberte_une_originalite_quelqu_un_qu_on_n_arrive_pas": "A sense of freedom. A unique spirit. Someone you can't really pigeonhole.",
   "une_phrase_qu_on_te_dit_souvent_que_tu_aimes_ou_que_tu_n": "A phrase you hear all the time, whether you like hearing it or not...",
@@ -655,13 +761,13 @@
   "votre_message_est_parti": "Your message has been sent.",
   "votre_prenom": "Your first name",
   "vous_exemple_com": "vous@exemple.com",
-  "vous_recevez_un_parchemin_pdf_une_uvre_visuelle_png_haute": "You will receive a PDF scroll, a high-resolution PNG image, and—for Ancestral and Family—a 90-second MP3 audio file.",
+  "vous_recevez_un_parchemin_pdf_une_uvre_visuelle_png_haute": "You will receive a PDF scroll, a high-resolution PNG image, and, for Ancestral and Family, a 90-second MP3 audio file.",
   "waiting": "waiting",
   "welcome": "Welcome",
   "parcours": {
     "intro": {
       "title": "The griot speaks.",
-      "body1": "There are no right or wrong answers here. There is your truth — and the truth you allow yourself to see.",
+      "body1": "There are no right or wrong answers here. There is your truth, and the truth you allow yourself to see.",
       "body2": "Answer with what you feel. Not with what you think you should say.",
       "body3": "Time does not exist here. The ancestor is waiting.",
       "start": "Start my journey"
@@ -670,7 +776,7 @@
       "count": "QUESTION {current} OF {total}",
       "opening": "Opening",
       "composition": "Composition",
-      "freedom": "You chose freedom. The griot wants to understand yours — in one sentence.",
+      "freedom": "You chose freedom. The griot wants to understand yours, in one sentence.",
       "previous": "← Previous question",
       "skip": "Skip →",
       "continue": "Continue"
@@ -777,7 +883,7 @@
         "The portrait comes alive in the shadows...",
         "The ancestor's voice rises...",
         "Your parchment is being written...",
-        "A little patience — the ancestors do not rush."
+        "A little patience, the ancestors do not rush."
       ],
       "body": "You can close this window. The ancestors are finishing their work."
     },
@@ -785,24 +891,24 @@
       {
         "n": 1,
         "progress": 10,
-        "griot": "Close your eyes for a moment. Think of nature — of what attracts you without being able to explain it.",
+        "griot": "Close your eyes for a moment. Think of nature, of what attracts you without being able to explain it.",
         "question": "Which natural element calls you most deeply?",
         "choices": [
           {
             "letter": "A",
-            "text": "Fire dancing in the night — I am drawn to its light, its unpredictable warmth, its way of transforming everything."
+            "text": "Fire dancing in the night, I am drawn to its light, its unpredictable warmth, its way of transforming everything."
           },
           {
             "letter": "B",
-            "text": "Water that never stops flowing — river, ocean, rain — I always return to it."
+            "text": "Water that never stops flowing, river, ocean, rain, I always return to it."
           },
           {
             "letter": "C",
-            "text": "Earth beneath my feet — roots, stones, dense forests — what lasts and holds."
+            "text": "Earth beneath my feet, roots, stones, dense forests, what lasts and holds."
           },
           {
             "letter": "D",
-            "text": "Wind that carries everything away — open space, heights, the horizon no one can catch."
+            "text": "Wind that carries everything away, open space, heights, the horizon no one can catch."
           }
         ],
         "field": {
@@ -820,19 +926,19 @@
         "choices": [
           {
             "letter": "A",
-            "text": "When I protect someone — when I fight for what is right — when I am at the heart of the action."
+            "text": "When I protect someone, when I fight for what is right, when I am at the heart of the action."
           },
           {
             "letter": "B",
-            "text": "When I create something — an idea, an artwork, a project — when my hands give life to my vision."
+            "text": "When I create something, an idea, an artwork, a project, when my hands give life to my vision."
           },
           {
             "letter": "C",
-            "text": "When I am surrounded by those I love — in laughter, sharing and connection."
+            "text": "When I am surrounded by those I love, in laughter, sharing and connection."
           },
           {
             "letter": "D",
-            "text": "When I am alone in nature or in silence — when I observe, understand and see far."
+            "text": "When I am alone in nature or in silence, when I observe, understand and see far."
           }
         ],
         "field": {
@@ -845,12 +951,12 @@
       {
         "n": 3,
         "progress": 30,
-        "griot": "Listen carefully. What others see in you — without you asking — is often what you refuse to see in yourself.",
-        "question": "What do others see in you — without you asking?",
+        "griot": "Listen carefully. What others see in you, without you asking, is often what you refuse to see in yourself.",
+        "question": "What do others see in you, without you asking?",
         "choices": [
           {
             "letter": "A",
-            "text": "Strength. Presence. Someone people turn to when things go wrong — or when a decision must be made."
+            "text": "Strength. Presence. Someone people turn to when things go wrong, or when a decision must be made."
           },
           {
             "letter": "B",
@@ -875,8 +981,8 @@
       {
         "n": 4,
         "progress": 40,
-        "griot": "Trials reveal. Not what we say we would do — what we actually do.",
-        "question": "Facing a trial — how do you truly react?",
+        "griot": "Trials reveal. Not what we say we would do, what we actually do.",
+        "question": "Facing a trial, how do you truly react?",
         "choices": [
           {
             "letter": "A",
@@ -884,15 +990,15 @@
           },
           {
             "letter": "B",
-            "text": "I step back, observe and analyze — then choose the right moment and place to strike precisely."
+            "text": "I step back, observe and analyze, then choose the right moment and place to strike precisely."
           },
           {
             "letter": "C",
-            "text": "I look for others — I build alliances and create support around me."
+            "text": "I look for others, I build alliances and create support around me."
           },
           {
             "letter": "D",
-            "text": "I go inward — I search for the answer in silence before looking outside."
+            "text": "I go inward, I search for the answer in silence before looking outside."
           }
         ],
         "field": {
@@ -910,19 +1016,19 @@
         "choices": [
           {
             "letter": "A",
-            "text": "At dawn — when the world is still silent and everything is possible — before the others arrive."
+            "text": "At dawn, when the world is still silent and everything is possible, before the others arrive."
           },
           {
             "letter": "B",
-            "text": "In full daylight — in action, movement, encounters and living noise."
+            "text": "In full daylight, in action, movement, encounters and living noise."
           },
           {
             "letter": "C",
-            "text": "At dusk — when light changes, boundaries blur and reflection becomes possible."
+            "text": "At dusk, when light changes, boundaries blur and reflection becomes possible."
           },
           {
             "letter": "D",
-            "text": "At night — when the world sleeps and I am finally alone with my deepest thoughts."
+            "text": "At night, when the world sleeps and I am finally alone with my deepest thoughts."
           }
         ],
         "field": {
@@ -937,24 +1043,24 @@
         "progress": 60,
         "note": "This is the only question you may choose not to answer.",
         "canSkip": true,
-        "griot": "This is the only question you may choose not to answer. But if you do — the ancestors will be closer.",
-        "question": "What is the origin of your ancestors — as far back as you know?",
+        "griot": "This is the only question you may choose not to answer. But if you do, the ancestors will be closer.",
+        "question": "What is the origin of your ancestors, as far back as you know?",
         "choices": [
           {
             "letter": "A",
-            "text": "West Africa — Senegal, Mali, Guinea, Ivory Coast, Nigeria, Ghana, Benin and surrounding areas."
+            "text": "West Africa, Senegal, Mali, Guinea, Ivory Coast, Nigeria, Ghana, Benin and surrounding areas."
           },
           {
             "letter": "B",
-            "text": "Central, East or Southern Africa — Congo, Kenya, Tanzania, Ethiopia, South Africa and surrounding areas."
+            "text": "Central, East or Southern Africa, Congo, Kenya, Tanzania, Ethiopia, South Africa and surrounding areas."
           },
           {
             "letter": "C",
-            "text": "Caribbean, Americas or African diaspora — a probable but undetermined African origin."
+            "text": "Caribbean, Americas or African diaspora, a probable but undetermined African origin."
           },
           {
             "letter": "D",
-            "text": "Europe, Asia, Oceania or another region — I am here to discover my deep African roots."
+            "text": "Europe, Asia, Oceania or another region, I am here to discover my deep African roots."
           }
         ],
         "field": {
@@ -968,7 +1074,7 @@
         "n": 7,
         "progress": 70,
         "griot": "Anger is sacred. It says what truly matters. What angers you reveals what you care about most.",
-        "question": "What sets fire inside you — your deepest anger?",
+        "question": "What sets fire inside you, your deepest anger?",
         "choices": [
           {
             "letter": "A",
@@ -984,13 +1090,13 @@
           },
           {
             "letter": "D",
-            "text": "Destruction — of nature, beauty, memory, and what took centuries to build."
+            "text": "Destruction, of nature, beauty, memory, and what took centuries to build."
           }
         ],
         "field": {
           "level": "PRIORITAIRE",
           "label": "The ancestors hear those who dare to name what they usually keep inside.",
-          "placeholder": "What truly gets you out of yourself — what you fight inwardly...",
+          "placeholder": "What truly gets you out of yourself, what you fight inwardly...",
           "rows": 2
         }
       },
@@ -1006,7 +1112,7 @@
           },
           {
             "letter": "B",
-            "text": "I created. I built something that will last — an artwork, a company, an idea, a legacy."
+            "text": "I created. I built something that will last, an artwork, a company, an idea, a legacy."
           },
           {
             "letter": "C",
@@ -1020,31 +1126,31 @@
         "field": {
           "level": "TERTIAIRE",
           "label": "+ add nuance",
-          "placeholder": "What you want people to remember from your life — in a few words...",
+          "placeholder": "What you want people to remember from your life, in a few words...",
           "rows": 1
         }
       },
       {
         "n": 9,
         "progress": 90,
-        "griot": "Dreams speak. Not literally — symbolically. What returns in your inner world?",
-        "question": "Your inner symbol — what returns in your dreams or your life?",
+        "griot": "Dreams speak. Not literally, symbolically. What returns in your inner world?",
+        "question": "Your inner symbol, what returns in your dreams or your life?",
         "choices": [
           {
             "letter": "A",
-            "text": "Water — a river, an ocean, a rain — something that flows, carries away and purifies."
+            "text": "Water, a river, an ocean, a rain, something that flows, carries away and purifies."
           },
           {
             "letter": "B",
-            "text": "Height — a cliff, a summit, a flight — a view from above, a perspective others do not have."
+            "text": "Height, a cliff, a summit, a flight, a view from above, a perspective others do not have."
           },
           {
             "letter": "C",
-            "text": "Fire or light — a flame, a sun, lightning — something that burns and illuminates."
+            "text": "Fire or light, a flame, a sun, lightning, something that burns and illuminates."
           },
           {
             "letter": "D",
-            "text": "Roots or forest — trees, earth, ancient paths — something deep and durable."
+            "text": "Roots or forest, trees, earth, ancient paths, something deep and durable."
           }
         ],
         "field": {
@@ -1057,8 +1163,8 @@
       {
         "n": 10,
         "progress": 100,
-        "griot": "Final question. The most important. The ancestor watches you. He sees your whole life. Not what you have done — what you carry.",
-        "question": "If an ancestor could look at your life — what would he see?",
+        "griot": "Final question. The most important. The ancestor watches you. He sees your whole life. Not what you have done, what you carry.",
+        "question": "If an ancestor could look at your life, what would he see?",
         "choices": [
           {
             "letter": "A",
@@ -1080,7 +1186,7 @@
         "field": {
           "level": "PRIORITAIRE",
           "label": "Tell him now what you have never said out loud.",
-          "placeholder": "A confession, a truth, a word — something you have never said out loud...",
+          "placeholder": "A confession, a truth, a word, something you have never said out loud...",
           "rows": 3
         }
       }

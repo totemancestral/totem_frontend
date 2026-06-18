@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/server-auth";
 import { generatePDFs } from "./pdf";
 import { uploadAndDeliver, uploadFile, type GeneratedFile } from "./storage";
 import { sendDeliveryEmail, sendAdminAlert } from "./email";
+import type { Database, Json } from "@/integrations/supabase/types";
 
 const SUPABASE_PROJECT_REF = "mjiealkqjcqvlfrxdcif";
 const EDGE_FUNCTION_URL = `https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1`;
@@ -71,7 +72,11 @@ const ARCHETYPE_LABELS: Record<string, { fr: string; en: string }> = {
   D: { fr: "Visionnaire", en: "Visionary" },
 };
 
-async function callEdgeFunction<T>(slug: string, payload: unknown, anonKey: string): Promise<T | null> {
+async function callEdgeFunction<T>(
+  slug: string,
+  payload: unknown,
+  anonKey: string,
+): Promise<T | null> {
   try {
     const response = await fetch(`${EDGE_FUNCTION_URL}/${slug}`, {
       method: "POST",
@@ -176,12 +181,16 @@ async function generateTexte(
 ): Promise<string> {
   // Tentative 1 : Edge Function Supabase (clés stockées dans les secrets Supabase)
   if (anonKey) {
-    const result = await callEdgeFunction<{ texte?: string }>("generate-texte", {
-      prenom,
-      reponses,
-      archetypeId,
-      langue,
-    }, anonKey);
+    const result = await callEdgeFunction<{ texte?: string }>(
+      "generate-texte",
+      {
+        prenom,
+        reponses,
+        archetypeId,
+        langue,
+      },
+      anonKey,
+    );
 
     if (result?.texte) return result.texte;
   }
@@ -213,12 +222,16 @@ async function generateImage(
   langue: "fr" | "en",
 ): Promise<string> {
   if (anonKey) {
-    const result = await callEdgeFunction<{ imageUrl?: string }>("generate-image", {
-      prenom,
-      texte,
-      archetypeId,
-      langue,
-    }, anonKey);
+    const result = await callEdgeFunction<{ imageUrl?: string }>(
+      "generate-image",
+      {
+        prenom,
+        texte,
+        archetypeId,
+        langue,
+      },
+      anonKey,
+    );
 
     if (result?.imageUrl) return result.imageUrl;
   }
@@ -234,12 +247,16 @@ async function generateAudio(
   langue: "fr" | "en",
 ): Promise<string> {
   if (anonKey) {
-    const result = await callEdgeFunction<{ audioUrl?: string }>("generate-audio", {
-      prenom,
-      texte,
-      archetypeId,
-      langue,
-    }, anonKey);
+    const result = await callEdgeFunction<{ audioUrl?: string }>(
+      "generate-audio",
+      {
+        prenom,
+        texte,
+        archetypeId,
+        langue,
+      },
+      anonKey,
+    );
 
     if (result?.audioUrl) return result.audioUrl;
   }
@@ -319,6 +336,8 @@ type ReponsesData = {
   reponses: Record<string, unknown>;
 };
 
+type OeuvreUpdate = Database["public"]["Tables"]["oeuvres"]["Update"];
+
 const ARCHETYPE_NAMES: Record<string, { fr: string; en: string }> = {
   A: { fr: "Guerrier", en: "Warrior" },
   B: { fr: "Sage", en: "Sage" },
@@ -352,8 +371,8 @@ export async function generateCoffret(commandeId: string): Promise<void> {
   await supabase.from("oeuvres").update({ statut: "en_generation" }).eq("commande_id", commandeId);
 
   async function updateOeuvreStep(step: string, meta?: Record<string, unknown>) {
-    const update: Record<string, unknown> = { statut: step };
-    if (meta) update.metadata = meta;
+    const update: OeuvreUpdate = { statut: step };
+    if (meta) update.metadata = meta as Json;
     await supabase.from("oeuvres").update(update).eq("commande_id", commandeId);
   }
 
@@ -362,7 +381,11 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     const supabaseAny = supabase as any;
 
     const commande = await supabaseAny.from("commandes").select("*").eq("id", commandeId).single();
-    const oeuvre = await supabaseAny.from("oeuvres").select("id").eq("commande_id", commandeId).single();
+    const oeuvre = await supabaseAny
+      .from("oeuvres")
+      .select("id")
+      .eq("commande_id", commandeId)
+      .single();
 
     if (!commande.data || !oeuvre.data) {
       throw new Error("Commande ou oeuvre introuvable");
@@ -372,7 +395,11 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     const langue = (commande.data.langue || "fr") as "fr" | "en";
     const offre = commande.data.offre;
 
-    const profile = await supabaseAny.from("profiles").select("prenom, email").eq("id", userId).single();
+    const profile = await supabaseAny
+      .from("profiles")
+      .select("prenom, email")
+      .eq("id", userId)
+      .single();
     const prenom = profile.data?.prenom ?? "Voyageur";
     const email = profile.data?.email ?? "";
 
@@ -468,37 +495,32 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     let imageBufferForPdf: Buffer | null = null;
 
     const [imageResult, audioResult] = await Promise.all([
-      generateImage(
-        env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        prenom,
-        texteParchemin,
-        archetypeId,
-        langue,
-      ).then((url) => {
-        senyceImageUrl = url || "";
-      }).catch(async (error) => {
-        const message = error instanceof Error ? error.message : "Erreur generation image";
-        await logPipelineError(commandeId, "image", message, undefined, 1);
-      }),
-      generateAudio(
-        env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        prenom,
-        texteParchemin,
-        archetypeId,
-        langue,
-      ).then((url) => {
-        senyceAudioUrl = url || "";
-      }).catch(async (error) => {
-        const message = error instanceof Error ? error.message : "Erreur generation audio";
-        await logPipelineError(commandeId, "audio", message, undefined, 1);
-      }),
+      generateImage(env.NEXT_PUBLIC_SUPABASE_ANON_KEY, prenom, texteParchemin, archetypeId, langue)
+        .then((url) => {
+          senyceImageUrl = url || "";
+        })
+        .catch(async (error) => {
+          const message = error instanceof Error ? error.message : "Erreur generation image";
+          await logPipelineError(commandeId, "image", message, undefined, 1);
+        }),
+      generateAudio(env.NEXT_PUBLIC_SUPABASE_ANON_KEY, prenom, texteParchemin, archetypeId, langue)
+        .then((url) => {
+          senyceAudioUrl = url || "";
+        })
+        .catch(async (error) => {
+          const message = error instanceof Error ? error.message : "Erreur generation audio";
+          await logPipelineError(commandeId, "audio", message, undefined, 1);
+        }),
     ]);
 
     // Fallback SENYCE direct si edge functions non déployées
     if (!senyceImageUrl && env.SENYCE_API_IMAGE && env.SENYCE_API_KEY) {
       try {
         const result = await callSenyceApi(env.SENYCE_API_IMAGE, env.SENYCE_API_KEY, {
-          prenom, texte: texteParchemin, archetype: archetypeId, langue,
+          prenom,
+          texte: texteParchemin,
+          archetype: archetypeId,
+          langue,
         });
         senyceImageUrl = (result?.imageUrl as string) ?? (result?.url as string) ?? "";
       } catch {
@@ -509,7 +531,10 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     if (!senyceAudioUrl && env.SENYCE_API_AUDIO && env.SENYCE_API_KEY) {
       try {
         const result = await callSenyceApi(env.SENYCE_API_AUDIO, env.SENYCE_API_KEY, {
-          prenom, texte: texteParchemin, archetype: archetypeId, langue,
+          prenom,
+          texte: texteParchemin,
+          archetype: archetypeId,
+          langue,
         });
         senyceAudioUrl = (result?.audioUrl as string) ?? (result?.url as string) ?? "";
       } catch {
@@ -608,7 +633,10 @@ export async function generateCoffret(commandeId: string): Promise<void> {
         const mimeType = "image/png";
         const fileName = `image_${commandeId}.${ext}`;
         const { url: uploadedUrl } = await uploadFile(commandeId, {
-          type: "image", buffer: imageBufferForPdf, mimeType, fileName,
+          type: "image",
+          buffer: imageBufferForPdf,
+          mimeType,
+          fileName,
         });
         r2ImageUrl = uploadedUrl;
       } catch (error) {

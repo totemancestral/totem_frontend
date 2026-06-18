@@ -2,6 +2,7 @@
 
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { AmbientAudio } from "@/components/AmbientAudio";
 import { CookieConsent } from "@/components/CookieConsent";
 import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
@@ -10,6 +11,7 @@ type Locale = "fr" | "en";
 
 export function ClientChrome({ children, locale }: { children: ReactNode; locale: Locale }) {
   const pathname = usePathname();
+  const ambientEnabled = !pathname?.includes("/domus_animi");
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -31,6 +33,7 @@ export function ClientChrome({ children, locale }: { children: ReactNode; locale
       <Header locale={locale} />
       <main style={{ maxWidth: "100%", overflowX: "clip" }}>{children}</main>
       <Footer locale={locale} />
+      <AmbientAudio active={ambientEnabled} />
       <CookieConsent />
     </div>
   );

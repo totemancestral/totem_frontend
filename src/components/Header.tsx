@@ -13,7 +13,8 @@ const nav = [
   { to: "/", hash: "#experience", labelKey: "experience" },
   { to: "/", hash: "#offres", labelKey: "offers" },
   { to: "/", hash: "#maison", labelKey: "house" },
-  { to: "/quaestio_sacra", hash: "", labelKey: "faq" },
+  { to: "/", hash: "#faq", labelKey: "faq" },
+  { to: "/", hash: "#contact", labelKey: "contact" },
 ];
 
 export function Header({ locale }: { locale: Locale }) {
@@ -30,7 +31,9 @@ export function Header({ locale }: { locale: Locale }) {
       setSession(!!s);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(!!s);
     });
 
@@ -72,35 +75,45 @@ export function Header({ locale }: { locale: Locale }) {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 transition-colors duration-500"
+      className="fixed left-0 right-0 top-0 z-50 transition-all duration-500"
       style={{
-        background: scrolled ? "rgba(13,13,26,0.95)" : "rgba(13,13,26,0.88)",
-        backdropFilter: scrolled ? "blur(12px)" : "blur(4px)",
-        borderBottom: "1px solid rgba(201,168,76,0.12)",
+        background: scrolled ? "rgba(13,13,26,0.86)" : "rgba(13,13,26,0.68)",
+        backdropFilter: "blur(16px)",
+        borderBottom: scrolled ? "1px solid rgba(201,168,76,0.14)" : "1px solid transparent",
       }}
     >
-      <div className="max-w-[1280px] mx-auto px-5 md:px-10 py-4 flex items-center justify-between gap-6">
+      <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-5 py-3 md:px-10">
         <Link
-          href={session ? `/${locale}/domus_animi` : `/${locale}`}
+          href={`/${locale}`}
           aria-label="Totem Ancestral"
-          className="flex shrink-0 items-center gap-2"
+          className="group flex shrink-0 items-center gap-3 rounded-full border px-3 py-2 transition-colors"
+          style={{
+            borderColor: "rgba(201,168,76,0.22)",
+            background: "rgba(254,252,240,0.03)",
+          }}
         >
-          <span className="logo-wordmark text-[18px] leading-none md:text-[22px]">T</span>
           <img
             src="/assets/totem-logo.png"
-            alt=""
-            aria-hidden="true"
-            className="h-8 w-auto md:h-10"
+            alt="Totem Ancestral"
+            className="h-8 w-auto transition-transform duration-300 group-hover:scale-105 md:h-9"
           />
-          <span className="logo-wordmark text-[18px] leading-none md:text-[22px]">A</span>
+          <span
+            className="hidden text-[13px] uppercase leading-none tracking-[0.16em] sm:block"
+            style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
+          >
+            Totem Ancestral
+          </span>
         </Link>
 
         {session ? (
           <>
-            <nav className="hidden lg:flex items-center gap-6">
+            <nav
+              className="hidden items-center gap-2 rounded-full border px-2 py-2 lg:flex"
+              style={{ borderColor: "rgba(201,168,76,0.16)", background: "rgba(26,26,46,0.62)" }}
+            >
               <Link
                 href={`/${locale}/domus_animi`}
-                className="subtext text-[13px] tracking-[0.14em] uppercase transition-colors flex items-center gap-2"
+                className="subtext flex items-center gap-2 rounded-full px-4 py-2 text-[12px] uppercase tracking-[0.14em] transition-colors hover:bg-ombre"
                 style={{ color: "var(--or-ancestral)" }}
               >
                 <LayoutDashboard size={16} />
@@ -136,12 +149,15 @@ export function Header({ locale }: { locale: Locale }) {
           </>
         ) : (
           <>
-            <nav className="hidden lg:flex items-center gap-10">
+            <nav
+              className="hidden items-center gap-1 rounded-full border p-1 lg:flex"
+              style={{ borderColor: "rgba(201,168,76,0.16)", background: "rgba(26,26,46,0.62)" }}
+            >
               {nav.map((item) => (
                 <Link
                   key={item.labelKey}
                   href={item.to === "/" ? `/${locale}${item.hash}` : `/${locale}${item.to}`}
-                  className="subtext text-[13px] tracking-[0.14em] uppercase transition-colors"
+                  className="subtext rounded-full px-4 py-2 text-[12px] uppercase tracking-[0.12em] transition-colors hover:bg-ombre"
                   style={{ color: "var(--ivoire)" }}
                 >
                   {t(`nav.${item.labelKey}`)}

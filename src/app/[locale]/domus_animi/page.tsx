@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { DashboardClient } from "@/components/account/DashboardClient";
 
 export const metadata: Metadata = {
-  title: "Espace personnel - Totem Ancestral",
+  title: "Espace personnel · Totem Ancestral",
 };
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {

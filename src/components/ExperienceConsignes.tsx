@@ -1,14 +1,15 @@
 import { useTranslations } from "next-intl";
 import { Reveal, Ornament } from "./Reveal";
 
-const posture = "/assets/consigne-1-posture.jpg";
-const volume = "/assets/consigne-2-volume.jpg";
-const coeur = "/assets/consigne-3-coeur.jpg";
-const heritage = "/assets/consigne-4-heritage.jpg";
+const posture = "/assets/avant-traverser-1-posez-le-monde.png";
+const volume = "/assets/avant-traverser-2-ouvrez-les-oreilles.png";
+const coeur = "/assets/avant-traverser-3-parlez-vrai.png";
+const heritage = "/assets/avant-traverser-4-gardez-le-totem.png";
 
 const consigneImages = [posture, volume, coeur, heritage];
 
 type Consigne = {
+  title?: string;
   text: string;
 };
 
@@ -21,7 +22,7 @@ export function ExperienceConsignes() {
   }));
 
   return (
-    <section className="py-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
+    <section className="px-5 py-24 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-6">
@@ -33,17 +34,17 @@ export function ExperienceConsignes() {
           </div>
         </Reveal>
 
-        <div className="mt-20 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mt-14 flex flex-col gap-10 md:gap-12">
           {consignes.map((c, i) => (
             <Reveal key={c.n} delay={i * 0.1}>
-              <article
-                className="card-totem h-full flex flex-col gap-5 overflow-hidden"
-                style={{ padding: 0 }}
-              >
-                <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4/3" }}>
+              <article className="grid items-center gap-6 md:grid-cols-2 md:gap-10">
+                <div
+                  className={`relative overflow-hidden rounded-lg border ${i % 2 === 1 ? "md:order-2" : ""}`}
+                  style={{ aspectRatio: "4/3", borderColor: "rgba(201,168,76,0.24)" }}
+                >
                   <img
                     src={c.img}
-                    alt={c.text}
+                    alt={c.title ?? c.text}
                     loading="lazy"
                     className="absolute inset-0 w-full h-full object-cover"
                   />
@@ -55,12 +56,20 @@ export function ExperienceConsignes() {
                     }}
                   />
                 </div>
-                <div className="px-6 pb-6 flex flex-col gap-4 flex-1">
-                  <span className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
+                <div className="flex flex-col gap-4">
+                  <span className="h-display text-4xl" style={{ color: "rgba(201,168,76,0.42)" }}>
                     {c.n}
                   </span>
+                  {c.title && (
+                    <h3
+                      className="h-display text-2xl md:text-3xl"
+                      style={{ color: "var(--or-pale)" }}
+                    >
+                      {c.title}
+                    </h3>
+                  )}
                   <p
-                    className="text-[15px] leading-[1.7]"
+                    className="body-copy text-[15px] md:text-base"
                     style={{ color: "rgba(254,252,240,0.9)" }}
                   >
                     {c.text}

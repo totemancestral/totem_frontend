@@ -45,3 +45,4 @@ supabase/cli
 supabase/supabase
 supabase/supabase-go
 supabase/.temp/
+secrets.txt

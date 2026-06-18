@@ -9,7 +9,7 @@ import { Check, Home, LayoutDashboard } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-
+import { apiPath } from "@/lib/routes";
 
 type FieldLevel = "PRIORITAIRE" | "SECONDAIRE" | "TERTIAIRE" | "SPECIAL";
 
@@ -34,24 +34,24 @@ const QUESTIONS: Question[] = [
     n: 1,
     progress: 10,
     griot:
-      "Ferme les yeux un instant. Pense à la nature — à ce qui t'attire sans que tu puisses l'expliquer.",
+      "Ferme les yeux un instant. Pense à la nature, à ce qui t'attire sans que tu puisses l'expliquer.",
     question: "Quel élément naturel t'appelle le plus profondément ?",
     choices: [
       {
         letter: "A",
-        text: "Le feu qui danse dans la nuit — je suis attiré par sa lumière, sa chaleur imprévisible, sa façon de tout transformer.",
+        text: "Le feu qui danse dans la nuit, je suis attiré par sa lumière, sa chaleur imprévisible, sa façon de tout transformer.",
       },
       {
         letter: "B",
-        text: "L'eau qui coule sans jamais s'arrêter — rivière, océan, pluie — je reviens toujours vers elle.",
+        text: "L'eau qui coule sans jamais s'arrêter, rivière, océan, pluie, je reviens toujours vers elle.",
       },
       {
         letter: "C",
-        text: "La terre sous mes pieds — les racines, les pierres, les forêts épaisses — ce qui dure et qui tient.",
+        text: "La terre sous mes pieds, les racines, les pierres, les forêts épaisses, ce qui dure et qui tient.",
       },
       {
         letter: "D",
-        text: "Le vent qui emporte tout — l'espace ouvert, les hauteurs, l'horizon qu'on ne peut pas attraper.",
+        text: "Le vent qui emporte tout, l'espace ouvert, les hauteurs, l'horizon qu'on ne peut pas attraper.",
       },
     ],
     field: {
@@ -69,19 +69,19 @@ const QUESTIONS: Question[] = [
     choices: [
       {
         letter: "A",
-        text: "Quand je protège quelqu'un — quand je me bats pour ce qui est juste — quand je suis au cœur de l'action.",
+        text: "Quand je protège quelqu'un, quand je me bats pour ce qui est juste, quand je suis au cœur de l'action.",
       },
       {
         letter: "B",
-        text: "Quand je crée quelque chose — une idée, une œuvre, un projet — quand mes mains donnent vie à ma vision.",
+        text: "Quand je crée quelque chose, une idée, une œuvre, un projet, quand mes mains donnent vie à ma vision.",
       },
       {
         letter: "C",
-        text: "Quand je suis entouré(e) de ceux que j'aime — dans le rire, dans le partage, dans le lien.",
+        text: "Quand je suis entouré(e) de ceux que j'aime, dans le rire, dans le partage, dans le lien.",
       },
       {
         letter: "D",
-        text: "Quand je suis seul(e) dans la nature ou dans le silence — quand j'observe, quand je comprends, quand je vois loin.",
+        text: "Quand je suis seul(e) dans la nature ou dans le silence, quand j'observe, quand je comprends, quand je vois loin.",
       },
     ],
     field: {
@@ -95,12 +95,12 @@ const QUESTIONS: Question[] = [
     n: 3,
     progress: 30,
     griot:
-      "Écoute bien. Ce que les autres voient en toi — sans que tu le demandes — c'est souvent ce que tu refuses de voir toi-même.",
-    question: "Ce que les autres voient en toi — sans que tu le leur demandes ?",
+      "Écoute bien. Ce que les autres voient en toi, sans que tu le demandes, c'est souvent ce que tu refuses de voir toi-même.",
+    question: "Ce que les autres voient en toi, sans que tu le leur demandes ?",
     choices: [
       {
         letter: "A",
-        text: "Une force. Une présence. Quelqu'un vers qui on se tourne quand ça va mal — ou quand il faut décider.",
+        text: "Une force. Une présence. Quelqu'un vers qui on se tourne quand ça va mal, ou quand il faut décider.",
       },
       {
         letter: "B",
@@ -126,8 +126,8 @@ const QUESTIONS: Question[] = [
   {
     n: 4,
     progress: 40,
-    griot: "L'épreuve révèle. Pas ce qu'on dit qu'on ferait — ce qu'on fait vraiment.",
-    question: "Face à une épreuve — comment réagis-tu vraiment ?",
+    griot: "L'épreuve révèle. Pas ce qu'on dit qu'on ferait, ce qu'on fait vraiment.",
+    question: "Face à une épreuve, comment réagis-tu vraiment ?",
     choices: [
       {
         letter: "A",
@@ -135,15 +135,15 @@ const QUESTIONS: Question[] = [
       },
       {
         letter: "B",
-        text: "Je recule, j'observe, j'analyse — puis je choisis le moment et l'endroit où frapper juste.",
+        text: "Je recule, j'observe, j'analyse, puis je choisis le moment et l'endroit où frapper juste.",
       },
       {
         letter: "C",
-        text: "Je cherche les autres — je construis des alliances, je crée du soutien autour de moi.",
+        text: "Je cherche les autres, je construis des alliances, je crée du soutien autour de moi.",
       },
       {
         letter: "D",
-        text: "Je rentre en moi-même — je cherche la réponse dans le silence avant de la chercher dehors.",
+        text: "Je rentre en moi-même, je cherche la réponse dans le silence avant de la chercher dehors.",
       },
     ],
     field: {
@@ -162,19 +162,19 @@ const QUESTIONS: Question[] = [
     choices: [
       {
         letter: "A",
-        text: "À l'aube — quand le monde est encore silence et que tout est possible — avant que les autres arrivent.",
+        text: "À l'aube, quand le monde est encore silence et que tout est possible, avant que les autres arrivent.",
       },
       {
         letter: "B",
-        text: "En plein jour — dans le feu de l'action, du mouvement, des rencontres, du bruit vivant.",
+        text: "En plein jour, dans le feu de l'action, du mouvement, des rencontres, du bruit vivant.",
       },
       {
         letter: "C",
-        text: "Au crépuscule — quand la lumière change, quand les frontières s'estompent, quand on peut réfléchir.",
+        text: "Au crépuscule, quand la lumière change, quand les frontières s'estompent, quand on peut réfléchir.",
       },
       {
         letter: "D",
-        text: "Dans la nuit — quand le monde dort et que je suis enfin seul(e) avec mes pensées les plus profondes.",
+        text: "Dans la nuit, quand le monde dort et que je suis enfin seul(e) avec mes pensées les plus profondes.",
       },
     ],
     field: {
@@ -190,24 +190,24 @@ const QUESTIONS: Question[] = [
     note: "Cette question est la seule que tu peux choisir de ne pas répondre.",
     canSkip: true,
     griot:
-      "Cette question est la seule que tu peux choisir de ne pas répondre. Mais si tu le fais — les ancêtres seront plus proches.",
-    question: "Quelle est l'origine de tes ancêtres — aussi loin que tu le sais ?",
+      "Cette question est la seule que tu peux choisir de ne pas répondre. Mais si tu le fais, les ancêtres seront plus proches.",
+    question: "Quelle est l'origine de tes ancêtres, aussi loin que tu le sais ?",
     choices: [
       {
         letter: "A",
-        text: "Afrique de l'Ouest — Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et environs.",
+        text: "Afrique de l'Ouest, Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et environs.",
       },
       {
         letter: "B",
-        text: "Afrique Centrale, de l'Est ou du Sud — Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et environs.",
+        text: "Afrique Centrale, de l'Est ou du Sud, Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et environs.",
       },
       {
         letter: "C",
-        text: "Caraïbes, Amériques ou diaspora africaine — une origine africaine probable mais indéterminée.",
+        text: "Caraïbes, Amériques ou diaspora africaine, une origine africaine probable mais indéterminée.",
       },
       {
         letter: "D",
-        text: "Europe, Asie, Océanie ou toute autre région — je suis ici pour découvrir mes racines africaines profondes.",
+        text: "Europe, Asie, Océanie ou toute autre région, je suis ici pour découvrir mes racines africaines profondes.",
       },
     ],
     field: {
@@ -223,7 +223,7 @@ const QUESTIONS: Question[] = [
     progress: 70,
     griot:
       "La colère est sacrée. Elle dit ce qui compte vraiment. Ce qui te met en colère révèle ce à quoi tu tiens le plus.",
-    question: "Ce qui met le feu en toi — ta colère la plus profonde ?",
+    question: "Ce qui met le feu en toi, ta colère la plus profonde ?",
     choices: [
       {
         letter: "A",
@@ -239,14 +239,14 @@ const QUESTIONS: Question[] = [
       },
       {
         letter: "D",
-        text: "La destruction — de la nature, de la beauté, de la mémoire, de ce qui a pris des siècles à construire.",
+        text: "La destruction, de la nature, de la beauté, de la mémoire, de ce qui a pris des siècles à construire.",
       },
     ],
     field: {
       level: "PRIORITAIRE",
       label: "Les ancêtres écoutent mieux ceux qui osent les mots qu'ils gardent pour eux.",
       placeholder:
-        "Ce qui te met vraiment hors de toi — ce contre quoi tu te bats intérieurement...",
+        "Ce qui te met vraiment hors de toi, ce contre quoi tu te bats intérieurement...",
       rows: 2,
     },
   },
@@ -262,7 +262,7 @@ const QUESTIONS: Question[] = [
       },
       {
         letter: "B",
-        text: "J'ai créé. J'ai bâti quelque chose qui durera — une œuvre, une entreprise, une idée, un héritage.",
+        text: "J'ai créé. J'ai bâti quelque chose qui durera, une œuvre, une entreprise, une idée, un héritage.",
       },
       {
         letter: "C",
@@ -276,7 +276,7 @@ const QUESTIONS: Question[] = [
     field: {
       level: "TERTIAIRE",
       label: "+ ajouter une nuance",
-      placeholder: "Ce que tu veux qu'on retienne de ta vie — en quelques mots...",
+      placeholder: "Ce que tu veux qu'on retienne de ta vie, en quelques mots...",
       rows: 1,
     },
   },
@@ -284,24 +284,24 @@ const QUESTIONS: Question[] = [
     n: 9,
     progress: 90,
     griot:
-      "Les rêves parlent. Pas littéralement — mais symboliquement. Qu'est-ce qui revient dans ton monde intérieur ?",
-    question: "Ton symbole intérieur — ce qui revient dans tes rêves ou ta vie ?",
+      "Les rêves parlent. Pas littéralement, mais symboliquement. Qu'est-ce qui revient dans ton monde intérieur ?",
+    question: "Ton symbole intérieur, ce qui revient dans tes rêves ou ta vie ?",
     choices: [
       {
         letter: "A",
-        text: "L'eau — une rivière, un océan, une pluie — quelque chose qui coule, qui emporte, qui purifie.",
+        text: "L'eau, une rivière, un océan, une pluie, quelque chose qui coule, qui emporte, qui purifie.",
       },
       {
         letter: "B",
-        text: "La hauteur — une falaise, un sommet, un vol — une vision d'en haut, une perspective que les autres n'ont pas.",
+        text: "La hauteur, une falaise, un sommet, un vol, une vision d'en haut, une perspective que les autres n'ont pas.",
       },
       {
         letter: "C",
-        text: "Le feu ou la lumière — une flamme, un soleil, un éclair — quelque chose qui brûle et qui illumine.",
+        text: "Le feu ou la lumière, une flamme, un soleil, un éclair, quelque chose qui brûle et qui illumine.",
       },
       {
         letter: "D",
-        text: "Les racines ou la forêt — des arbres, de la terre, des chemins anciens — quelque chose de profond et de durable.",
+        text: "Les racines ou la forêt, des arbres, de la terre, des chemins anciens, quelque chose de profond et de durable.",
       },
     ],
     field: {
@@ -315,8 +315,8 @@ const QUESTIONS: Question[] = [
     n: 10,
     progress: 100,
     griot:
-      "Dernière question. La plus importante. L'ancêtre te regarde. Il voit ta vie entière. Pas ce que tu as fait — mais ce que tu portes.",
-    question: "Si un ancêtre pouvait regarder ta vie — qu'est-ce qu'il verrait ?",
+      "Dernière question. La plus importante. L'ancêtre te regarde. Il voit ta vie entière. Pas ce que tu as fait, mais ce que tu portes.",
+    question: "Si un ancêtre pouvait regarder ta vie, qu'est-ce qu'il verrait ?",
     choices: [
       {
         letter: "A",
@@ -339,7 +339,7 @@ const QUESTIONS: Question[] = [
       level: "PRIORITAIRE",
       label: "Dis-lui maintenant ce que tu n'as jamais dit à voix haute.",
       placeholder:
-        "Une confidence, une vérité, un mot — quelque chose que tu n'as jamais dit à voix haute...",
+        "Une confidence, une vérité, un mot, quelque chose que tu n'as jamais dit à voix haute...",
       rows: 3,
     },
   },
@@ -473,7 +473,7 @@ export function ParcoursPage() {
         JSON.stringify({ answers, account, hasUnlockedRest, index, phase }),
       );
     } catch {
-      /* quota — ignore */
+      /* quota, ignore */
     }
   }, [answers, account, hasUnlockedRest, index, phase]);
 
@@ -541,7 +541,7 @@ export function ParcoursPage() {
     setLoadingOffer(offer.id);
 
     try {
-      const response = await fetch("/api/checkout", {
+      const response = await fetch(apiPath("checkout"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -788,8 +788,8 @@ function getJourneyLabel({
 }) {
   if (phase === "question") {
     return isFrench
-      ? `Question ${currentStep}/10 - ${progress}%`
-      : `Question ${currentStep}/10 - ${progress}%`;
+      ? `Question ${currentStep}/10 · ${progress}%`
+      : `Question ${currentStep}/10 · ${progress}%`;
   }
   if (phase === "paywall") return isFrench ? "Choix de l'offre" : "Offer selection";
   if (phase === "waiting") return isFrench ? "Composition en cours" : "Composition in progress";

@@ -8,7 +8,7 @@ import { ClientChrome } from "@/components/layout/ClientChrome";
 import { routing } from "@/i18n/routing";
 
 export const metadata: Metadata = {
-  title: "Totem Ancestral - Le portrait imaginaire de l'Africain que vous auriez pu être",
+  title: "Totem Ancestral · Le portrait imaginaire de l'Africain que vous auriez pu être",
   description:
     "Une œuvre numérique unique, assistée par intelligence artificielle, inspirée des cosmogonies africaines.",
 };

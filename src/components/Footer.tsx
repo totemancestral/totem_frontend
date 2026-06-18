@@ -10,7 +10,7 @@ export function Footer({ locale }: { locale: Locale }) {
 
   return (
     <footer
-      className="pt-24 pb-12 px-5 md:px-10"
+      className="px-5 pb-12 pt-20 md:px-10"
       style={{ background: "var(--nuit-profonde)", borderTop: "1px solid rgba(201,168,76,0.12)" }}
     >
       <div className="max-w-[1280px] mx-auto">
@@ -26,13 +26,13 @@ export function Footer({ locale }: { locale: Locale }) {
             <Link href={`/${locale}/#offres`} style={{ color: "var(--ivoire)" }}>
               {t("nav.offers")}
             </Link>
-            <Link href={`/${locale}/athenaeum_arc`} style={{ color: "var(--ivoire)" }}>
+            <Link href={`/${locale}/#maison`} style={{ color: "var(--ivoire)" }}>
               {t("nav.about")}
             </Link>
-            <Link href={`/${locale}/quaestio_sacra`} style={{ color: "var(--ivoire)" }}>
+            <Link href={`/${locale}/#faq`} style={{ color: "var(--ivoire)" }}>
               FAQ
             </Link>
-            <Link href={`/${locale}/scriba_mundi`} style={{ color: "var(--ivoire)" }}>
+            <Link href={`/${locale}/#contact`} style={{ color: "var(--ivoire)" }}>
               Contact
             </Link>
           </nav>

@@ -42,6 +42,21 @@ export function AmbientAudio({ active }: { active: boolean }) {
       });
   }, [active, muted, stopped]);
 
+  useEffect(() => {
+    if (!active || stopped || playing) return;
+
+    const startOnInteraction = () => startPlayback();
+    window.addEventListener("pointerdown", startOnInteraction, { once: true, passive: true });
+    window.addEventListener("keydown", startOnInteraction, { once: true });
+    window.addEventListener("totem:ambient-start", startOnInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", startOnInteraction);
+      window.removeEventListener("keydown", startOnInteraction);
+      window.removeEventListener("totem:ambient-start", startOnInteraction);
+    };
+  }, [active, playing, startPlayback, stopped]);
+
   // Start when active becomes true
   useEffect(() => {
     if (!active || stopped || playing) return;
@@ -151,7 +166,7 @@ export function AmbientAudio({ active }: { active: boolean }) {
           color: "var(--or-ancestral)",
         }}
       >
-        {!playing || !muted ? <Volume2 size={18} /> : <VolumeX size={18} />}
+        {playing && muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
       </button>
     </>
   );

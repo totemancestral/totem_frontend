@@ -41,6 +41,7 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
   const goToWelcome = () => setPhase("welcome");
 
   const enter = () => {
+    window.dispatchEvent(new Event("totem:ambient-start"));
     setPhase("done");
     setTimeout(onFinished, 900);
   };

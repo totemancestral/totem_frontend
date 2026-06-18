@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
 import { authenticateRequest, createServiceClient } from "@/lib/server-auth";
 import { rateLimit } from "@/lib/rate-limit";
+import { pagePath } from "@/lib/routes";
 import type { Json } from "@/integrations/supabase/types";
 
 const checkoutSchema = z.object({
@@ -41,8 +42,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const origin =
-    request.headers.get("origin") || env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const origin = (
+    request.headers.get("origin") ||
+    env.NEXT_PUBLIC_SITE_URL ||
+    "http://localhost:3000"
+  ).replace(/\/$/, "");
   const supabase = createServiceClient();
 
   // Récupérer le prénom de l'utilisateur
@@ -82,8 +86,12 @@ export async function POST(request: Request) {
       customer_email: auth.email,
       metadata,
       payment_intent_data: { metadata },
-      success_url: `${origin}/${parsed.data.locale}/via_sapientiae?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/${parsed.data.locale}/via_sapientiae?checkout=cancelled`,
+      success_url: `${origin}${pagePath(
+        parsed.data.locale,
+        "parcours",
+        "checkout=success&session_id={CHECKOUT_SESSION_ID}",
+      )}`,
+      cancel_url: `${origin}${pagePath(parsed.data.locale, "parcours", "checkout=cancelled")}`,
     });
 
     return NextResponse.json({ checkoutUrl: session.url, checkoutSessionId: session.id });
