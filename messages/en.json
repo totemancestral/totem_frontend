@@ -451,24 +451,25 @@
       ]
     },
     "instructions": {
-      "title": "Before the passage.",
-      "subtitle": "Four simple gestures to welcome the artwork.",
+      "eyebrow": "Read before entering",
+      "title": "Before crossing",
+      "subtitle": "Prepare your mind and your space to receive the words of the elders.",
       "items": [
         {
-          "title": "Posture",
-          "text": "In front of your screen, adopt a posture of deep connection with yourself."
+          "title": "Set the world down",
+          "text": "Sit as if before a fire at night, when the elders speak. Let the noise outside fall away before you begin."
         },
         {
-          "title": "Voice",
-          "text": "Make sure your volume is on to hear the imaginary ancestor."
+          "title": "Open your ears",
+          "text": "The ancestor has crossed sixty thousand years to speak to you. Turn up the volume, breathe, then listen to what arrives."
         },
         {
-          "title": "Heart",
-          "text": "Give answers that come from the heart and reflect who you are within."
+          "title": "Speak true",
+          "text": "The griot does not want the right answer. He wants yours, the one that comes from farther than memory."
         },
         {
-          "title": "Legacy",
-          "text": "Keep your TOTEM artwork like a legacy to preserve and guard closely."
+          "title": "Keep your Totem",
+          "text": "Once awakened, your Totem becomes a travelling companion: an ancestor held in matter and spirit."
         }
       ]
     },

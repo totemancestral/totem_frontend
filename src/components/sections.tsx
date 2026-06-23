@@ -1,263 +1,684 @@
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useState } from "react";
-import { ArrowRight, Minus, Plus } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Star } from "lucide-react";
 import { GoldParticles } from "./GoldParticles";
-import { Reveal, SectionDivider, Ornament } from "./Reveal";
+import { Reveal, Ornament } from "./Reveal";
 
 const totemLogo = "/assets/totem-logo.png";
 const oeuvreParchemin = "/assets/oeuvre-parchemin.jpg";
 const oeuvreVisuelle = "/assets/oeuvre-visuelle-voix.jpg";
+const traverserPose = "/assets/avant-traverser-1-posez-le-monde.png";
+const traverserEcoute = "/assets/avant-traverser-2-ouvrez-les-oreilles.png";
+const traverserParole = "/assets/avant-traverser-3-parlez-vrai.png";
+const traverserGarde = "/assets/avant-traverser-4-gardez-le-totem.png";
 
-type ManifestItem = {
+type Locale = "fr" | "en";
+
+const copy = {
+  fr: {
+    start: "Commencer",
+    question: "Une question",
+    hero: {
+      eyebrow: "Votre âme lointaine, africaine, réincarnée",
+      title: "TOTEM ANCESTRAL",
+      body: "Quatre questions. Une œuvre composée pour vous, nourrie des cosmogonies africaines et façonnée par l'intelligence artificielle.",
+    },
+    marquee: [
+      "Une âme",
+      "Traverse",
+      "Soixante mille ans",
+      "Pour vous parler",
+      "Écoutez",
+      "Totem Ancestral",
+    ],
+    who: {
+      eyebrow: "Avant la traversée",
+      title: "Qui étais-tu ?",
+      body: "Une exploration profonde de vos origines, là où la mémoire s'arrête et où l'âme commence à parler.",
+      items: [
+        {
+          title: "L'Origine",
+          body: "Le point de départ de votre lignée, là où tout a commencé.",
+          image: oeuvreParchemin,
+        },
+        {
+          title: "L'Écho",
+          body: "La résonance de vos ancêtres dans vos choix d'aujourd'hui.",
+          image: oeuvreVisuelle,
+        },
+        {
+          title: "Le Souffle",
+          body: "L'énergie vitale qui se transmet de génération en génération.",
+          image: traverserParole,
+        },
+      ],
+    },
+    manifest: {
+      eyebrow: "Notre démarche",
+      title: "Le manifeste en trois temps",
+      body: "Trois mouvements, un seul fil : transformer ce que vous portez en silence en une œuvre qui peut enfin se transmettre.",
+      items: [
+        {
+          title: "Écouter",
+          body: "Quatre questions, posées sans détour, pour faire remonter ce que les ancêtres murmurent déjà en vous.",
+          image: traverserEcoute,
+        },
+        {
+          title: "Composer",
+          body: "Le griot numérique tisse vos réponses avec les cosmogonies africaines pour façonner une fable unique.",
+          image: oeuvreParchemin,
+        },
+        {
+          title: "Transmettre",
+          body: "Votre Totem prend forme : texte, voix, image, prêt à être gardé, porté, et un jour partagé.",
+          image: oeuvreVisuelle,
+        },
+      ],
+    },
+    artwork: {
+      eyebrow: "Ce que vous recevez",
+      title: "Une œuvre. Plusieurs pièces.",
+      body: "Chaque coffret réunit une fable, un visage, une voix et un certificat numéroté.",
+      pieces: [
+        {
+          title: "Le Parchemin",
+          body: "Une chronique personnelle en cinq mouvements.",
+          image: oeuvreParchemin,
+        },
+        {
+          title: "La voix et le visage",
+          body: "Une image haute résolution et une parole à écouter.",
+          image: oeuvreVisuelle,
+        },
+      ],
+      note: "Certificat d'authenticité numéroté inclus selon l'offre choisie.",
+    },
+    experience: {
+      eyebrow: "La traversée",
+      title: "Une expérience en trois temps",
+      body: "Le parcours commence par une écoute simple, puis la maison compose et livre votre coffret.",
+      items: [
+        {
+          title: "Le griot interroge",
+          body: "Vous répondez à des questions courtes, intimes et ouvertes.",
+        },
+        {
+          title: "La maison compose",
+          body: "Vos réponses deviennent récit, image, voix et certificat.",
+        },
+        {
+          title: "Le Totem arrive",
+          body: "Votre coffret numérique est livré dans votre espace et par email.",
+        },
+      ],
+    },
+    assurances: {
+      eyebrow: "Garanties",
+      title: "Un coffret pensé pour durer",
+      body: "Chaque pièce est préparée pour être lue, écoutée, conservée et transmise.",
+      items: [
+        {
+          title: "Délai clair",
+          body: "La livraison cible est de quinze minutes après paiement validé.",
+        },
+        {
+          title: "Confidentialité",
+          body: "Vos réponses servent uniquement à composer votre œuvre.",
+        },
+        {
+          title: "Fichiers durables",
+          body: "Les pièces sont téléchargeables et faciles à archiver.",
+        },
+        { title: "Bilingue", body: "L'expérience est structurée pour le français et l'anglais." },
+      ],
+    },
+    offers: {
+      eyebrow: "Offrandes",
+      title: "Trois manières de recevoir l'œuvre",
+      body: "Choisissez le format qui convient le mieux à votre quête et à votre héritage.",
+      footnote: "Carte cadeau offerte a chaque commande",
+      items: [
+        {
+          name: "Totem Origine",
+          tag: "Origine",
+          badge: "",
+          featured: false,
+          body: "Le détail du contenu et des prix apparaît après les quatre premières questions.",
+          features: ["Une création personnalisée", "Un coffret numérique", "Accès à votre espace"],
+          cta: "Choisir Origine",
+        },
+        {
+          name: "Totem Ancestral",
+          tag: "Ancestral",
+          badge: "Le plus précieux",
+          featured: true,
+          body: "La création dans sa plénitude. Rien ne manque. Composé pour durer une vie.",
+          features: ["Une création complète", "Une voix rituelle", "Tirage Fine Art possible"],
+          cta: "Choisir Ancestral",
+        },
+        {
+          name: "Totem Famille",
+          tag: "Famille",
+          badge: "",
+          featured: false,
+          body: "Parce que certaines racines se partagent. Pour vos proches.",
+          features: ["Trois coffrets coordonnés", "Trois destinataires", "Livraison familiale"],
+          cta: "Choisir Famille",
+        },
+      ],
+    },
+    house: {
+      eyebrow: "Qui nous sommes",
+      title: "Une maison de création",
+      paragraphs: [
+        "TOTEM ANCESTRAL est une maison de création fondée à Paris, au carrefour de l'art numérique et des mémoires africaines.",
+        "Nous ne sommes ni archivistes, ni devins, ni généalogistes. Nous sommes des passeurs entre ce que vous êtes et ce que vous auriez pu être.",
+      ],
+    },
+    testimonials: {
+      eyebrow: "Ils ont traversé",
+      title: "Ce qu'ils en pensent",
+      body: "Découvrez les récits de ceux qui ont déjà éveillé leur Totem.",
+      rows: [
+        [
+          {
+            q: "J'ai pleuré en lisant le Parchemin. Ça ne ressemblait à rien d'autre. Une émotion brute.",
+            a: "Aïcha - Dakar",
+          },
+          {
+            q: "La Voix m'a donné des frissons. On dirait que mon ancêtre me connaissait vraiment.",
+            a: "Kwame - Accra",
+          },
+          {
+            q: "Le coffret Famille nous a réunis autour d'une histoire commune, enfin écrite.",
+            a: "Fatou - Bamako",
+          },
+        ],
+        [
+          {
+            q: "Pas un gadget. Une vraie expérience, posée et sincère, qui touche le cœur.",
+            a: "Yannick - Paris",
+          },
+          {
+            q: "Le Visage trône maintenant dans mon salon. C'est mon Totem, mon héritage.",
+            a: "Naomi - London",
+          },
+          {
+            q: "Quinze minutes comme promis, et un objet que je garderai toute ma vie.",
+            a: "Idris - Lagos",
+          },
+        ],
+      ],
+    },
+    faq: {
+      eyebrow: "Questions fréquentes",
+      title: "Éclaircir le mystère",
+      body: "Les réponses essentielles avant de confier votre matière au griot.",
+      items: [
+        {
+          q: "Chaque œuvre est-elle unique ?",
+          a: "Oui. Votre Totem est généré en temps réel à partir de vos réponses spécifiques. Il n'existe pas deux créations identiques dans le cosmos de Totem Ancestral.",
+        },
+        {
+          q: "Est-ce un test ADN ?",
+          a: "Non. Nous explorons la mémoire spirituelle et culturelle plutôt que biologique. C'est une quête artistique et symbolique de vos racines.",
+        },
+        {
+          q: "Comment recevoir mon Totem ?",
+          a: "Selon l'offre choisie, vous recevez un accès numérique, un coffret complet et les fichiers préparés dans votre espace personnel.",
+        },
+        {
+          q: "Mes données sont-elles protégées ?",
+          a: "Vos réponses servent uniquement à composer et livrer l'œuvre. Elles ne sont pas vendues à des tiers.",
+        },
+      ],
+    },
+    cta: {
+      title: "Votre ancêtre vous attend.",
+      body: "Quinze minutes pour l'éveiller. Une vie entière pour le porter.",
+      button: "Commencer mon voyage",
+    },
+  },
+  en: {
+    start: "Begin",
+    question: "A question",
+    hero: {
+      eyebrow: "Your distant African soul, reimagined",
+      title: "TOTEM ANCESTRAL",
+      body: "Four questions. A work composed for you, nourished by African cosmogonies and shaped with artificial intelligence.",
+    },
+    marquee: [
+      "A soul",
+      "Travels",
+      "Sixty thousand years",
+      "To speak to you",
+      "Listen",
+      "Totem Ancestral",
+    ],
+    who: {
+      eyebrow: "Before the passage",
+      title: "Who were you?",
+      body: "A deep exploration of your origins, where memory stops and the soul begins to speak.",
+      items: [
+        {
+          title: "The Origin",
+          body: "The starting point of your lineage, where everything began.",
+          image: oeuvreParchemin,
+        },
+        {
+          title: "The Echo",
+          body: "The resonance of your ancestors in today's choices.",
+          image: oeuvreVisuelle,
+        },
+        {
+          title: "The Breath",
+          body: "The vital energy passed from generation to generation.",
+          image: traverserParole,
+        },
+      ],
+    },
+    manifest: {
+      eyebrow: "Our approach",
+      title: "The manifesto in three movements",
+      body: "Three movements, one thread: turning what you carry in silence into a work that can be passed on.",
+      items: [
+        {
+          title: "Listen",
+          body: "Four direct questions to bring up what the ancestors already whisper within you.",
+          image: traverserEcoute,
+        },
+        {
+          title: "Compose",
+          body: "The digital griot weaves your answers with African cosmogonies into a unique fable.",
+          image: oeuvreParchemin,
+        },
+        {
+          title: "Transmit",
+          body: "Your Totem takes shape as text, voice and image, ready to be kept and shared.",
+          image: oeuvreVisuelle,
+        },
+      ],
+    },
+    artwork: {
+      eyebrow: "What you receive",
+      title: "One artwork. Several pieces.",
+      body: "Each box gathers a fable, a face, a voice and a numbered certificate.",
+      pieces: [
+        {
+          title: "The Parchment",
+          body: "A personal chronicle in five movements.",
+          image: oeuvreParchemin,
+        },
+        {
+          title: "The voice and face",
+          body: "A high-resolution image and a word to listen to.",
+          image: oeuvreVisuelle,
+        },
+      ],
+      note: "A numbered certificate of authenticity is included depending on the selected offer.",
+    },
+    experience: {
+      eyebrow: "The passage",
+      title: "An experience in three movements",
+      body: "The journey begins with simple listening, then the house composes and delivers your box.",
+      items: [
+        { title: "The griot asks", body: "You answer short, intimate and open questions." },
+        {
+          title: "The house composes",
+          body: "Your answers become story, image, voice and certificate.",
+        },
+        {
+          title: "The Totem arrives",
+          body: "Your digital box is delivered to your space and by email.",
+        },
+      ],
+    },
+    assurances: {
+      eyebrow: "Guarantees",
+      title: "A box designed to last",
+      body: "Each piece is prepared to be read, listened to, preserved and passed on.",
+      items: [
+        {
+          title: "Clear timing",
+          body: "Target delivery is fifteen minutes after confirmed payment.",
+        },
+        { title: "Confidentiality", body: "Your answers are only used to compose your artwork." },
+        { title: "Durable files", body: "The pieces are downloadable and easy to archive." },
+        { title: "Bilingual", body: "The experience supports French and English." },
+      ],
+    },
+    offers: {
+      eyebrow: "Offerings",
+      title: "Three ways to receive the work",
+      body: "Choose the format that best suits your quest and your legacy.",
+      footnote: "Gift card included with every order",
+      items: [
+        {
+          name: "Totem Origin",
+          tag: "Origin",
+          badge: "",
+          featured: false,
+          body: "Details and prices appear after the first four questions.",
+          features: ["A personalized creation", "A digital box", "Access to your space"],
+          cta: "Choose Origin",
+        },
+        {
+          name: "Totem Ancestral",
+          tag: "Ancestral",
+          badge: "Most precious",
+          featured: true,
+          body: "The creation in full. Nothing missing. Composed to last a lifetime.",
+          features: ["A complete creation", "A ritual voice", "Fine Art print possible"],
+          cta: "Choose Ancestral",
+        },
+        {
+          name: "Totem Family",
+          tag: "Family",
+          badge: "",
+          featured: false,
+          body: "Because some roots are shared. For your loved ones.",
+          features: ["Three coordinated boxes", "Three recipients", "Family delivery"],
+          cta: "Choose Family",
+        },
+      ],
+    },
+    house: {
+      eyebrow: "Who we are",
+      title: "A creation house",
+      paragraphs: [
+        "TOTEM ANCESTRAL is a creation house founded in Paris, at the crossroads of digital art and African memory.",
+        "We are not archivists, seers or genealogists. We are guides between who you are and who you could have been.",
+      ],
+    },
+    testimonials: {
+      eyebrow: "They crossed",
+      title: "What they think",
+      body: "Read the words of those who have already awakened their Totem.",
+      rows: [
+        [
+          {
+            q: "I cried while reading the Parchment. It felt like nothing else. A raw emotion.",
+            a: "Aicha - Dakar",
+          },
+          {
+            q: "The Voice gave me chills. It felt as if my ancestor truly knew me.",
+            a: "Kwame - Accra",
+          },
+          {
+            q: "The Family box brought us around a common story, finally written.",
+            a: "Fatou - Bamako",
+          },
+        ],
+        [
+          {
+            q: "Not a gimmick. A real, grounded, sincere experience that touched the heart.",
+            a: "Yannick - Paris",
+          },
+          {
+            q: "The Face now stands in my living room. It is my Totem, my legacy.",
+            a: "Naomi - London",
+          },
+          {
+            q: "Fifteen minutes as promised, and an object I will keep all my life.",
+            a: "Idris - Lagos",
+          },
+        ],
+      ],
+    },
+    faq: {
+      eyebrow: "Frequent questions",
+      title: "Clarify the mystery",
+      body: "The essentials before entrusting your matter to the griot.",
+      items: [
+        {
+          q: "Is every work unique?",
+          a: "Yes. Your Totem is generated from your specific answers. No two creations are identical.",
+        },
+        {
+          q: "Is this a DNA test?",
+          a: "No. We explore spiritual and cultural memory, not biology. This is an artistic and symbolic quest.",
+        },
+        {
+          q: "How do I receive my Totem?",
+          a: "Depending on the offer, you receive digital access, a complete box and files prepared in your personal space.",
+        },
+        {
+          q: "Is my data protected?",
+          a: "Your answers are only used to compose and deliver the artwork. They are not sold to third parties.",
+        },
+      ],
+    },
+    cta: {
+      title: "Your ancestor is waiting.",
+      body: "Fifteen minutes to awaken them. A lifetime to carry them.",
+      button: "Begin my journey",
+    },
+  },
+} as const;
+
+const galleryImages = [
+  totemLogo,
+  oeuvreParchemin,
+  oeuvreVisuelle,
+  traverserPose,
+  traverserEcoute,
+  traverserParole,
+  traverserGarde,
+  "/assets/consigne-1-posture.jpg",
+  "/assets/consigne-2-volume.jpg",
+  "/assets/consigne-3-coeur.jpg",
+  "/assets/consigne-4-heritage.jpg",
+];
+
+function useLandingCopy() {
+  const locale = useLocale();
+  const safeLocale: Locale = locale === "en" ? "en" : "fr";
+  return { locale: safeLocale, t: copy[safeLocale] };
+}
+
+function journeyHref(locale: Locale) {
+  return `/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`;
+}
+
+function SectionHeading({
+  eyebrow,
+  title,
+  body,
+}: {
+  eyebrow: string;
+  title: string;
+  body?: string;
+}) {
+  return (
+    <Reveal>
+      <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+        <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
+          {eyebrow}
+        </p>
+        <h2 className="h-display mt-5 text-5xl md:text-7xl" style={{ color: "var(--ivoire)" }}>
+          {title}
+        </h2>
+        {body && <p className="quote-italic mt-6 max-w-2xl text-lg md:text-xl">{body}</p>}
+      </div>
+    </Reveal>
+  );
+}
+
+function TriptychCard({
+  index,
+  title,
+  body,
+  image,
+  raised = false,
+}: {
+  index: number;
   title: string;
   body: string;
-};
-
-type StepText = {
-  title: string;
-  text: string;
-};
-
-type PieceText = {
-  title: string;
-  subtitle: string;
-  alt: string;
-};
-
-type OfferText = {
-  name: string;
-  price: string;
-  subtitle: string;
-  features: string[];
-  cta: string;
-  featured: boolean;
-  badge?: string;
-};
-
-type ProofItem = {
-  value: string;
-  label: string;
-};
-
-type AssuranceItem = {
-  title: string;
-  text: string;
-};
-
-type HousePillar = {
-  title: string;
-  text: string;
-};
-
-type TestimonialText = {
-  q: string;
-  a: string;
-  n: string;
-};
-
-type FAQCategory = {
-  title: string;
-  items: { q: string; a: string }[];
-};
+  image: string;
+  raised?: boolean;
+}) {
+  return (
+    <article
+      className={`totem-card relative flex min-h-[360px] flex-col overflow-hidden p-8 md:p-10 ${raised ? "md:-translate-y-8" : ""}`}
+      style={{ borderColor: raised ? "rgba(216,173,77,0.55)" : undefined }}
+    >
+      <span
+        className="h-display text-5xl"
+        style={{ color: raised ? "var(--or-ancestral)" : "rgba(216,173,77,0.35)" }}
+      >
+        {String(index + 1).padStart(2, "0")}
+      </span>
+      <div className="mt-auto pr-20">
+        <h3 className="h-display text-3xl md:text-4xl" style={{ color: "var(--ivoire)" }}>
+          {title}
+        </h3>
+        <p className="card-copy mt-5 text-[15px]" style={{ color: "rgba(226,225,238,0.78)" }}>
+          {body}
+        </p>
+      </div>
+      <img
+        src={image}
+        alt=""
+        loading="lazy"
+        className="absolute bottom-7 right-7 h-20 w-20 rounded-sm border object-cover grayscale"
+        style={{ borderColor: "rgba(216,173,77,0.28)", filter: "grayscale(1) brightness(0.72)" }}
+      />
+    </article>
+  );
+}
 
 /* ---------- HERO ---------- */
 export function Hero() {
-  const t = useTranslations("home.hero");
-  const brand = useTranslations("brand");
+  const { locale, t } = useLandingCopy();
+  const titleChars = t.hero.title.split("");
 
   return (
-    <section
-      className="relative flex min-h-[90svh] items-center justify-center overflow-hidden px-5 pb-12 pt-28 md:px-10 md:pb-14 md:pt-30"
-      style={{ background: "var(--nuit-profonde)" }}
-    >
-      <GoldParticles count={28} />
-
-      <div className="relative mx-auto grid w-full max-w-6xl items-center gap-10 md:grid-cols-[0.92fr_1.08fr] lg:gap-16">
-        <motion.div
-          initial={{ opacity: 0, x: -22, scale: 0.98 }}
-          animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ duration: 1.3, ease: "easeOut" }}
-          className="relative mx-auto flex w-full max-w-[500px] items-center justify-center md:mx-0"
+    <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-5 pb-16 pt-28 md:px-10">
+      <GoldParticles count={34} />
+      <div
+        className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-20"
+        aria-hidden="true"
+      >
+        <img
+          src={totemLogo}
+          alt=""
+          className="h-[78vh] max-h-[760px] w-auto object-contain grayscale"
+          style={{ filter: "grayscale(1) brightness(0.42)" }}
+        />
+      </div>
+      <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="eyebrow"
+          style={{ color: "var(--or-ancestral)" }}
         >
-          <div
-            className="relative flex aspect-square w-full items-center justify-center overflow-visible"
-            style={{
-              filter: "drop-shadow(0 28px 70px rgba(201,168,76,0.18))",
-            }}
+          {t.hero.eyebrow}
+        </motion.p>
+        <motion.h1
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: "easeOut", delay: 0.1 }}
+          className="h-display mt-8 text-6xl leading-[0.95] sm:text-7xl md:text-8xl lg:text-[112px]"
+          style={{ color: "var(--ivoire)" }}
+          aria-label={t.hero.title}
+        >
+          {titleChars.map((char, index) =>
+            char === " " ? (
+              " "
+            ) : (
+              <span
+                key={`${char}-${index}`}
+                className="hero-char inline-block"
+                style={{ animationDelay: `${index * 70}ms` }}
+                aria-hidden="true"
+              >
+                {char}
+              </span>
+            ),
+          )}
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.9, delay: 0.45 }}
+          className="body-copy mt-9 max-w-2xl text-lg md:text-xl"
+          style={{ color: "rgba(226,225,238,0.84)" }}
+        >
+          {t.hero.body}
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.7 }}
+          className="mt-12 flex w-full flex-col items-center justify-center gap-5 sm:w-auto sm:flex-row"
+        >
+          <Link
+            href={journeyHref(locale)}
+            className="btn-primary animate-pulse-glow w-full sm:w-auto"
           >
-            <div
-              className="pointer-events-none absolute inset-x-6 top-10 bottom-24 rounded-full"
-              style={{
-                background: "radial-gradient(circle, rgba(201,168,76,0.16), transparent 68%)",
-              }}
-            />
-            <img
-              src={totemLogo}
-              alt={t("logoAlt", { brand: brand("name") })}
-              className="relative z-10 h-auto w-full max-w-[380px] object-contain md:max-w-[460px]"
-            />
-          </div>
+            {t.start}
+            <ArrowRight size={16} strokeWidth={1.7} />
+          </Link>
+          <Link href={`/${locale}/#faq`} className="btn-secondary w-full sm:w-auto">
+            {t.question}
+          </Link>
         </motion.div>
-
-        <div className="flex flex-col items-center gap-7 text-center md:items-start md:text-left">
-          <Ornament />
-
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
-            className="h-display text-[36px] sm:text-5xl md:text-6xl lg:text-[68px]"
-            style={{ color: "var(--ivoire)" }}
-          >
-            {t("titleLine1")}
-            <br />
-            {t("titleLine2")}
-            <br />
-            <span style={{ color: "var(--or-ancestral)" }}>{t("titleHighlight")}</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, delay: 0.8 }}
-            className="quote-italic max-w-2xl text-xl md:text-2xl"
-          >
-            {t("question")}
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, delay: 1.1 }}
-            className="body-copy max-w-xl md:text-lg"
-            style={{ color: "rgba(254,252,240,0.8)" }}
-          >
-            {t("description")}
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 1.4 }}
-            className="mt-1 flex flex-col items-center gap-6 sm:flex-row md:items-start"
-          >
-            <a
-              href="#experience"
-              className="link-gold inline-flex items-center gap-2 text-sm uppercase tracking-[0.14em]"
-            >
-              {t("discover")}
-              <ArrowRight size={14} strokeWidth={1.5} />
-            </a>
-          </motion.div>
-        </div>
       </div>
     </section>
   );
 }
 
-/* ---------- PREUVES ---------- */
+/* ---------- PREUVES / MARQUEE ---------- */
 export function ProofBand() {
-  const t = useTranslations("home.proofBand");
-  const items = t.raw("items") as ProofItem[];
+  const { t } = useLandingCopy();
+  const items = [...t.marquee, ...t.marquee];
 
   return (
     <section
-      className="px-5 py-10 md:px-10"
-      style={{
-        background: "var(--indigo-ancestral)",
-        borderBlock: "1px solid rgba(201,168,76,0.12)",
-      }}
+      className="overflow-hidden border-y py-5"
+      style={{ borderColor: "rgba(216,173,77,0.18)", background: "#0c0e16" }}
     >
-      <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map((item) => (
-          <div key={item.label} className="text-center">
-            <p className="h-display text-3xl md:text-4xl" style={{ color: "var(--or-ancestral)" }}>
-              {item.value}
-            </p>
-            <p className="eyebrow mt-3" style={{ color: "rgba(254,252,240,0.72)" }}>
-              {item.label}
-            </p>
-          </div>
+      <div className="totem-marquee flex w-max items-center gap-14 whitespace-nowrap">
+        {[...items, ...items].map((item, index) => (
+          <span
+            key={`${item}-${index}`}
+            className="h-display flex items-center gap-10 text-2xl"
+            style={{ color: "rgba(209,197,177,0.82)" }}
+          >
+            {item}
+            <span style={{ color: "rgba(216,173,77,0.58)" }}>✦</span>
+          </span>
         ))}
       </div>
     </section>
   );
 }
 
-/* ---------- LE GESTE ---------- */
+/* ---------- QUI ETAIS-TU ---------- */
 export function LeGeste() {
-  const t = useTranslations("home.gesture");
+  const { t } = useLandingCopy();
 
   return (
-    <section className="px-5 py-24 md:px-10 bg-gradient-totem">
-      <div className="max-w-3xl mx-auto text-center">
-        <Reveal>
-          <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-            {t("titleLine1")}
-            <br />
-            {t("titleLine2")}
-          </h2>
-        </Reveal>
-
-        <Reveal delay={0.1}>
-          <div className="body-copy mt-12 space-y-5 md:text-lg" style={{ color: "var(--ivoire)" }}>
-            <p>{t("body1")}</p>
-            <p>{t("body2")}</p>
-          </div>
-        </Reveal>
-
-        <Reveal delay={0.2}>
-          <div className="mt-14">
-            <SectionDivider />
-            <p className="quote-italic text-xl md:text-2xl leading-relaxed">
-              {t("quoteLine1")}
-              <br />
-              {t("quoteLine2")}
-            </p>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- LE MANIFESTE (enriched landing block) ---------- */
-export function Manifeste() {
-  const t = useTranslations("home.manifest");
-  const manifesteLines = t.raw("items") as ManifestItem[];
-
-  return (
-    <section className="px-5 py-24 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
-      <div className="max-w-5xl mx-auto">
-        <Reveal>
-          <div className="text-center max-w-2xl mx-auto">
-            <Ornament />
-            <h2
-              className="h-display text-3xl md:text-5xl mt-6"
-              style={{ color: "var(--or-ancestral)" }}
-            >
-              {t("title")}
-            </h2>
-            <p className="quote-italic mt-6 text-lg md:text-xl">{t("subtitle")}</p>
-          </div>
-        </Reveal>
-
-        <div className="mt-14 grid gap-5 md:grid-cols-3">
-          {manifesteLines.map((m, i) => (
-            <Reveal key={m.title} delay={i * 0.1}>
-              <article className="card-totem h-full flex flex-col gap-4">
-                <span className="h-display text-5xl" style={{ color: "rgba(201,168,76,0.3)" }}>
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h3 className="h-display text-2xl" style={{ color: "var(--or-pale)" }}>
-                  {m.title}
-                </h3>
-                <p className="card-copy md:text-[17px]" style={{ color: "rgba(254,252,240,0.85)" }}>
-                  {m.body}
-                </p>
-              </article>
+    <section
+      className="px-5 py-28 md:px-10 md:py-36"
+      style={{ background: "var(--nuit-profonde)" }}
+    >
+      <div className="mx-auto max-w-6xl">
+        <SectionHeading eyebrow={t.who.eyebrow} title={t.who.title} body={t.who.body} />
+        <div className="mt-20 grid gap-0 md:grid-cols-3 md:pt-8">
+          {t.who.items.map((item, index) => (
+            <Reveal key={item.title} delay={index * 0.1}>
+              <TriptychCard
+                index={index}
+                title={item.title}
+                body={item.body}
+                image={item.image}
+                raised={index === 1}
+              />
             </Reveal>
           ))}
         </div>
@@ -266,46 +687,104 @@ export function Manifeste() {
   );
 }
 
-/* ---------- L'EXPÉRIENCE ---------- */
-export function Experience() {
-  const t = useTranslations("home.experience");
-  const steps = (t.raw("steps") as StepText[]).map((step, index) => ({
-    ...step,
-    n: String(index + 1).padStart(2, "0"),
-  }));
+/* ---------- LE MANIFESTE ---------- */
+export function Manifeste() {
+  const { t } = useLandingCopy();
 
   return (
     <section
       id="experience"
-      className="px-5 py-24 md:px-10"
-      style={{ background: "var(--indigo-ancestral)" }}
+      className="border-y px-5 py-28 md:px-10 md:py-32"
+      style={{ background: "rgba(12,14,22,0.72)", borderColor: "rgba(216,173,77,0.18)" }}
     >
-      <div className="max-w-6xl mx-auto">
-        <Reveal>
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-              {t("title")}
-            </h2>
-            <p className="quote-italic mt-6 text-lg md:text-xl">
-              {t("subtitleLine1")}
-              <br />
-              {t("subtitleLine2")}
-            </p>
-          </div>
-        </Reveal>
+      <div className="mx-auto max-w-6xl">
+        <SectionHeading
+          eyebrow={t.manifest.eyebrow}
+          title={t.manifest.title}
+          body={t.manifest.body}
+        />
+        <div className="mt-20 grid gap-0 md:grid-cols-3 md:pt-8">
+          {t.manifest.items.map((item, index) => (
+            <Reveal key={item.title} delay={index * 0.1}>
+              <TriptychCard
+                index={index}
+                title={item.title}
+                body={item.body}
+                image={item.image}
+                raised={index === 1}
+              />
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-        <div className="mt-14 grid gap-5 md:grid-cols-3">
-          {steps.map((s, i) => (
-            <Reveal key={s.n} delay={i * 0.12}>
-              <article className="card-totem h-full flex flex-col gap-6">
-                <span className="h-display text-5xl" style={{ color: "rgba(201,168,76,0.3)" }}>
-                  {s.n}
+/* ---------- L'OEUVRE ---------- */
+export function Oeuvre() {
+  const { t } = useLandingCopy();
+
+  return (
+    <section className="px-5 py-28 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
+      <div className="mx-auto max-w-6xl">
+        <SectionHeading eyebrow={t.artwork.eyebrow} title={t.artwork.title} body={t.artwork.body} />
+        <div className="mt-16 grid gap-6 md:grid-cols-2">
+          {t.artwork.pieces.map((piece, index) => (
+            <Reveal key={piece.title} delay={index * 0.1}>
+              <article className="totem-card overflow-hidden p-0">
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <img
+                    src={piece.image}
+                    alt=""
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover grayscale"
+                    style={{ filter: "grayscale(1) brightness(0.7)" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0c0e16] to-transparent" />
+                </div>
+                <div className="p-8">
+                  <h3 className="h-display text-3xl" style={{ color: "var(--ivoire)" }}>
+                    {piece.title}
+                  </h3>
+                  <p className="quote-italic mt-4 text-lg">{piece.body}</p>
+                </div>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal delay={0.2}>
+          <p className="caption mt-10 text-center">{t.artwork.note}</p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- L'EXPERIENCE ---------- */
+export function Experience() {
+  const { t } = useLandingCopy();
+
+  return (
+    <section className="px-5 py-28 md:px-10" style={{ background: "var(--indigo-ancestral)" }}>
+      <div className="mx-auto max-w-6xl">
+        <SectionHeading
+          eyebrow={t.experience.eyebrow}
+          title={t.experience.title}
+          body={t.experience.body}
+        />
+        <div className="mt-16 grid gap-5 md:grid-cols-3">
+          {t.experience.items.map((item, index) => (
+            <Reveal key={item.title} delay={index * 0.1}>
+              <article className="totem-card h-full p-8">
+                <span className="h-display text-5xl" style={{ color: "rgba(216,173,77,0.35)" }}>
+                  {String(index + 1).padStart(2, "0")}
                 </span>
-                <h3 className="h-display text-2xl" style={{ color: "var(--or-pale)" }}>
-                  {s.title}
+                <h3 className="h-display mt-8 text-3xl" style={{ color: "var(--ivoire)" }}>
+                  {item.title}
                 </h3>
-                <p className="card-copy md:text-[17px]" style={{ color: "rgba(254,252,240,0.85)" }}>
-                  {s.text}
+                <p className="card-copy mt-5" style={{ color: "rgba(226,225,238,0.82)" }}>
+                  {item.body}
                 </p>
               </article>
             </Reveal>
@@ -318,121 +797,36 @@ export function Experience() {
 
 /* ---------- GARANTIES ---------- */
 export function Assurances() {
-  const t = useTranslations("home.assurances");
-  const items = (t.raw("items") as AssuranceItem[]).map((item, index) => ({
-    ...item,
-    n: String(index + 1).padStart(2, "0"),
-  }));
+  const { t } = useLandingCopy();
 
   return (
-    <section className="px-5 py-24 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
+    <section className="px-5 py-28 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
       <div className="mx-auto max-w-6xl">
-        <Reveal>
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
-              {t("eyebrow")}
-            </p>
-            <h2 className="h-display mt-5 text-3xl md:text-5xl" style={{ color: "var(--ivoire)" }}>
-              {t("title")}
-            </h2>
-            <p className="quote-italic mx-auto mt-6 max-w-2xl text-lg md:text-xl">
-              {t("subtitle")}
-            </p>
-          </div>
-        </Reveal>
-
-        <div className="mt-14 grid gap-5 md:grid-cols-4">
-          {items.map((item, index) => (
+        <SectionHeading
+          eyebrow={t.assurances.eyebrow}
+          title={t.assurances.title}
+          body={t.assurances.body}
+        />
+        <div className="mt-16 grid gap-5 md:grid-cols-4">
+          {t.assurances.items.map((item, index) => (
             <Reveal key={item.title} delay={index * 0.08}>
-              <article className="card-totem flex h-full flex-col gap-5">
-                <span className="h-display text-4xl" style={{ color: "rgba(201,168,76,0.28)" }}>
-                  {item.n}
+              <article className="totem-card h-full p-7">
+                <span className="h-display text-4xl" style={{ color: "rgba(216,173,77,0.35)" }}>
+                  {String(index + 1).padStart(2, "0")}
                 </span>
-                <h3 className="h-display text-2xl" style={{ color: "var(--or-pale)" }}>
+                <h3 className="h-display mt-7 text-2xl" style={{ color: "var(--ivoire)" }}>
                   {item.title}
                 </h3>
-                <p className="card-copy" style={{ color: "rgba(254,252,240,0.84)" }}>
-                  {item.text}
+                <p
+                  className="card-copy mt-4 text-[15px]"
+                  style={{ color: "rgba(226,225,238,0.8)" }}
+                >
+                  {item.body}
                 </p>
               </article>
             </Reveal>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- L'ŒUVRE ---------- */
-export function Oeuvre() {
-  const t = useTranslations("home.artwork");
-  const pieceImages = [oeuvreParchemin, oeuvreVisuelle];
-  const pieces = (t.raw("pieces") as PieceText[]).map((piece, index) => ({
-    ...piece,
-    image: pieceImages[index] ?? oeuvreParchemin,
-  }));
-
-  return (
-    <section className="px-5 py-24 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
-      <div className="max-w-6xl mx-auto">
-        <Reveal>
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-              {t("title")}
-            </h2>
-            <p
-              className="mt-6 text-base md:text-lg leading-relaxed"
-              style={{ color: "var(--ivoire)" }}
-            >
-              {t("description")}
-            </p>
-          </div>
-        </Reveal>
-
-        <div className="mt-14 grid gap-6 md:grid-cols-2">
-          {pieces.map((p, i) => (
-            <Reveal key={p.title} delay={i * 0.12}>
-              <article
-                className="card-totem h-full flex flex-col overflow-hidden"
-                style={{ padding: 0 }}
-              >
-                <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4/3" }}>
-                  <img
-                    src={p.image}
-                    alt={p.alt}
-                    loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(180deg, transparent 50%, var(--nuit-profonde) 100%)",
-                    }}
-                  />
-                </div>
-                <div className="px-8 py-8 flex flex-col gap-3 flex-1">
-                  <h3 className="h-display text-2xl md:text-3xl" style={{ color: "var(--ivoire)" }}>
-                    {p.title}
-                  </h3>
-                  <p className="quote-italic text-lg">{p.subtitle}</p>
-                </div>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal delay={0.2}>
-          <div className="mt-12 text-center">
-            <SectionDivider />
-            <p
-              className="text-sm md:text-base italic"
-              style={{ color: "var(--or-pale)", fontFamily: "var(--font-subtext)" }}
-            >
-              {t("certificate")}
-            </p>
-          </div>
-        </Reveal>
       </div>
     </section>
   );
@@ -440,189 +834,93 @@ export function Oeuvre() {
 
 /* ---------- OFFRES ---------- */
 export function Offres() {
-  const locale = useLocale();
-  const t = useTranslations("home.offers");
-  const offers = t.raw("items") as OfferText[];
+  const { locale, t } = useLandingCopy();
 
   return (
-    <section
-      id="offres"
-      className="px-5 py-24 md:px-10"
-      style={{ background: "var(--indigo-ancestral)" }}
-    >
-      <div className="max-w-6xl mx-auto">
-        <Reveal>
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-              {t("title")}
-            </h2>
-            <p className="quote-italic mt-6 text-lg md:text-xl">{t("subtitle")}</p>
-          </div>
-        </Reveal>
-
-        <div className="mt-14 grid items-stretch gap-5 md:grid-cols-3">
-          {offers.map((o, i) => (
-            <Reveal
-              key={o.name}
-              delay={i * 0.12}
-              className={o.featured ? "md:-translate-y-4 order-first md:order-none" : ""}
-            >
-              <article
-                className="card-totem h-full flex flex-col text-left"
-                style={{
-                  borderColor: o.featured ? "var(--or-ancestral)" : "rgba(201,168,76,0.35)",
-                  boxShadow: o.featured ? "0 0 40px rgba(201,168,76,0.15)" : "none",
-                  background: o.featured
-                    ? "linear-gradient(180deg, #1A1A2E 0%, #14142a 100%)"
-                    : "var(--indigo-ancestral)",
-                  minHeight: 310,
-                }}
-              >
-                {o.featured && (
-                  <div className="mb-5 -mt-2 text-left">
-                    <span
-                      className="text-[10px] tracking-[0.28em] uppercase px-4 py-2 border"
-                      style={{
-                        color: "var(--or-ancestral)",
-                        borderColor: "var(--or-ancestral)",
-                      }}
-                    >
-                      {o.badge}
-                    </span>
-                  </div>
-                )}
-
-                <h3
-                  className="h-display text-2xl uppercase tracking-[0.08em]"
-                  style={{ color: "var(--ivoire)" }}
-                >
-                  {o.name}
-                </h3>
-
-                <p className="quote-italic mt-5 text-base">{o.subtitle}</p>
-                <p
-                  className="h-display mt-6 text-5xl"
-                  style={{ color: o.featured ? "var(--or-ancestral)" : "var(--ivoire)" }}
-                >
-                  {o.price}€
-                </p>
-                <ul className="my-7 flex flex-1 flex-col gap-3">
-                  {o.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="text-[14px] leading-relaxed"
-                      style={{ color: "rgba(254,252,240,0.84)" }}
-                    >
-                      <span style={{ color: "var(--or-ancestral)" }}>•</span> {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-auto">
-                  <Link
-                    href={`/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`}
-                    className={`${o.featured ? "btn-primary" : "btn-secondary"} w-full text-center justify-center`}
-                  >
-                    {o.cta}
-                  </Link>
-                </div>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal delay={0.2}>
-          <p className="caption mt-10 text-center">{t("footnote")}</p>
-        </Reveal>
-
-        <Reveal delay={0.25}>
-          <article
-            className="mx-auto mt-12 max-w-3xl border px-6 py-8 text-center md:px-10"
-            style={{ borderColor: "rgba(201,168,76,0.22)", background: "rgba(13,13,26,0.32)" }}
-          >
-            <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
-              {t("living.eyebrow")}
-            </p>
-            <h3 className="h-display mt-3 text-3xl md:text-4xl" style={{ color: "var(--ivoire)" }}>
-              {t("living.title")}
-            </h3>
-            <p className="quote-italic mx-auto mt-4 max-w-xl text-lg">{t("living.subtitle")}</p>
-            <p
-              className="body-copy mx-auto mt-5 max-w-2xl text-[15px]"
-              style={{ color: "rgba(254,252,240,0.78)" }}
-            >
-              {t("living.text")}
-            </p>
-            <p className="h-display mt-7 text-4xl" style={{ color: "var(--or-ancestral)" }}>
-              +9€ <span className="text-2xl">/ an</span>
-            </p>
-            <p className="caption mt-2">{t("living.note")}</p>
-          </article>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- LA MAISON ---------- */
-
-export function Maison() {
-  const t = useTranslations("home.house");
-  const paragraphs = t.raw("paragraphs") as string[];
-  const pillars = t.raw("pillars") as HousePillar[];
-
-  return (
-    <section
-      id="maison"
-      className="px-5 py-24 md:px-10"
-      style={{ background: "var(--nuit-profonde)" }}
-    >
+    <section id="offres" className="px-5 py-28 md:px-10 md:py-36" style={{ background: "#0c0e16" }}>
       <div className="mx-auto max-w-6xl">
-        <Reveal>
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-              {t("title")}
-            </h2>
-            <p className="quote-italic mt-5 text-lg md:text-xl">{t("subtitle")}</p>
-          </div>
-        </Reveal>
-
-        <Reveal delay={0.1}>
-          <div
-            className="mx-auto mt-12 max-w-3xl space-y-5 text-center text-base leading-[1.85] md:text-lg"
-            style={{ color: "var(--ivoire)" }}
-          >
-            {paragraphs.map((paragraph, index) => (
-              <p
-                key={paragraph}
-                style={
-                  index === paragraphs.length - 1 ? { color: "rgba(254,252,240,0.8)" } : undefined
-                }
+        <SectionHeading eyebrow={t.offers.eyebrow} title={t.offers.title} body={t.offers.body} />
+        <div className="mt-20 grid items-stretch gap-8 md:grid-cols-3">
+          {t.offers.items.map((offer, index) => {
+            const Icon = offer.featured ? Star : Check;
+            return (
+              <Reveal
+                key={offer.name}
+                delay={index * 0.1}
+                className={offer.featured ? "md:-translate-y-6" : ""}
               >
-                {paragraph}
-              </p>
-            ))}
-          </div>
-        </Reveal>
-
-        <Reveal delay={0.2}>
-          <div className="mt-12 grid gap-5 md:grid-cols-3">
-            {pillars.map((pillar) => (
-              <article key={pillar.title} className="card-totem h-full">
-                <h3 className="h-display text-2xl" style={{ color: "var(--or-pale)" }}>
-                  {pillar.title}
-                </h3>
-                <p className="card-copy mt-4" style={{ color: "rgba(254,252,240,0.84)" }}>
-                  {pillar.text}
-                </p>
-              </article>
-            ))}
-          </div>
-        </Reveal>
-
+                <article
+                  className="totem-card relative flex h-full flex-col p-8 md:p-10"
+                  style={{
+                    borderColor: offer.featured ? "var(--or-ancestral)" : "rgba(216,173,77,0.22)",
+                    background: offer.featured ? "#1e1f28" : "#1a1b24",
+                    boxShadow: offer.featured
+                      ? "0 34px 80px -28px rgba(216,173,77,0.34)"
+                      : undefined,
+                  }}
+                >
+                  {offer.badge && (
+                    <span
+                      className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 bg-or px-5 py-2 text-center text-[11px] font-semibold uppercase"
+                      style={{ color: "#0c0e16" }}
+                    >
+                      {offer.badge}
+                    </span>
+                  )}
+                  <p
+                    className="eyebrow text-center"
+                    style={{
+                      color: offer.featured ? "var(--or-ancestral)" : "rgba(216,173,77,0.64)",
+                    }}
+                  >
+                    {offer.tag}
+                  </p>
+                  <h3
+                    className="h-display mt-8 text-center text-4xl"
+                    style={{ color: "var(--ivoire)" }}
+                  >
+                    {offer.name}
+                  </h3>
+                  <p
+                    className="card-copy mt-8 text-center text-[15px]"
+                    style={{ color: "rgba(226,225,238,0.78)" }}
+                  >
+                    {offer.body}
+                  </p>
+                  <ul
+                    className="my-10 flex flex-1 flex-col gap-5 border-t pt-8"
+                    style={{ borderColor: "rgba(216,173,77,0.18)" }}
+                  >
+                    {offer.features.map((feature) => (
+                      <li
+                        key={feature}
+                        className="flex items-start gap-3 text-[15px] leading-relaxed"
+                        style={{ color: "rgba(226,225,238,0.84)" }}
+                      >
+                        <Icon
+                          className="mt-1 shrink-0"
+                          size={17}
+                          strokeWidth={1.8}
+                          style={{ color: "var(--or-ancestral)" }}
+                        />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={journeyHref(locale)}
+                    className={`${offer.featured ? "btn-primary" : "btn-secondary"} mt-auto w-full`}
+                  >
+                    {offer.cta}
+                  </Link>
+                </article>
+              </Reveal>
+            );
+          })}
+        </div>
         <Reveal delay={0.25}>
-          <p className="quote-italic mx-auto mt-12 max-w-2xl text-center text-xl md:text-2xl">
-            {t("quote")}
+          <p className="eyebrow mt-16 text-center" style={{ color: "rgba(216,173,77,0.72)" }}>
+            ✦ {t.offers.footnote} ✦
           </p>
         </Reveal>
       </div>
@@ -630,91 +928,126 @@ export function Maison() {
   );
 }
 
-/* ---------- AVIS ---------- */
-export function Avis() {
-  const t = useTranslations("home.testimonials");
-  const testimonials = t.raw("items") as TestimonialText[];
+/* ---------- LA MAISON ---------- */
+export function Maison() {
+  const { t } = useLandingCopy();
+  const columns = [0, 1, 2, 3, 4].map((column) =>
+    Array.from(
+      { length: 6 },
+      (_, index) => galleryImages[(column * 2 + index) % galleryImages.length],
+    ),
+  );
 
   return (
-    <section className="px-5 py-24 md:px-10" style={{ background: "var(--indigo-ancestral)" }}>
-      <div className="max-w-6xl mx-auto">
-        <Reveal>
-          <h2
-            className="h-display text-3xl md:text-5xl text-center"
-            style={{ color: "var(--or-ancestral)" }}
+    <section
+      id="maison"
+      className="overflow-hidden px-5 py-28 md:px-10 md:py-36"
+      style={{ background: "var(--nuit-profonde)" }}
+    >
+      <div className="mx-auto max-w-6xl">
+        <SectionHeading eyebrow={t.house.eyebrow} title={t.house.title} />
+        <Reveal delay={0.1}>
+          <div
+            className="mx-auto mt-10 max-w-3xl space-y-6 text-center text-lg leading-relaxed md:text-xl"
+            style={{ color: "rgba(226,225,238,0.8)" }}
           >
-            {t("title")}
-          </h2>
+            {t.house.paragraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
         </Reveal>
-
-        <div className="mt-14 grid gap-5 md:grid-cols-3">
-          {testimonials.map((t, i) => (
-            <Reveal key={t.a} delay={i * 0.12}>
-              <article className="card-totem h-full flex flex-col gap-6 relative">
-                <span
-                  className="h-display absolute top-4 left-6 leading-none"
-                  style={{ color: "rgba(201,168,76,0.2)", fontSize: "72px" }}
-                  aria-hidden="true"
-                >
-                  "
-                </span>
-                <p className="quote-italic text-lg leading-relaxed pt-8 relative">{t.q}</p>
-                <div
-                  className="mt-auto pt-4 border-t"
-                  style={{ borderColor: "rgba(201,168,76,0.15)" }}
-                >
-                  <p className="text-sm" style={{ color: "var(--ivoire)" }}>
-                    {t.a}
-                  </p>
-                  <p className="caption mt-1">{t.n}</p>
-                </div>
-              </article>
-            </Reveal>
+      </div>
+      <Reveal delay={0.2}>
+        <div
+          className="relative mx-auto mt-20 grid h-[560px] max-w-7xl grid-cols-2 gap-4 overflow-hidden md:grid-cols-5"
+          aria-hidden="true"
+        >
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-32 bg-gradient-to-b from-[#0c0e16] to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-32 bg-gradient-to-t from-[#0c0e16] to-transparent" />
+          {columns.map((images, column) => (
+            <div
+              key={column}
+              className={`flex flex-col gap-4 ${column % 2 === 0 ? "totem-grid-up" : "totem-grid-down"}`}
+            >
+              {[...images, ...images].map((image, index) => (
+                <img
+                  key={`${image}-${index}`}
+                  src={image}
+                  alt=""
+                  loading="lazy"
+                  className="h-40 w-full rounded-sm border object-cover grayscale transition-opacity duration-300 hover:opacity-100"
+                  style={{
+                    borderColor: "rgba(216,173,77,0.16)",
+                    opacity: 0.46,
+                    filter: "grayscale(1) brightness(0.72)",
+                  }}
+                />
+              ))}
+            </div>
           ))}
         </div>
+      </Reveal>
+    </section>
+  );
+}
+
+/* ---------- AVIS ---------- */
+export function Avis() {
+  const { t } = useLandingCopy();
+
+  return (
+    <section className="overflow-hidden px-5 py-28 md:px-10" style={{ background: "#0c0e16" }}>
+      <div className="mx-auto mb-16 max-w-6xl">
+        <SectionHeading
+          eyebrow={t.testimonials.eyebrow}
+          title={t.testimonials.title}
+          body={t.testimonials.body}
+        />
+      </div>
+      <div className="space-y-8">
+        {t.testimonials.rows.map((row, rowIndex) => (
+          <div
+            key={rowIndex}
+            className={`flex w-max gap-8 ${rowIndex === 0 ? "totem-marquee" : "totem-marquee-reverse"}`}
+          >
+            {[...row, ...row, ...row].map((item, index) => (
+              <article
+                key={`${item.a}-${index}`}
+                className="totem-card flex min-h-[250px] w-[330px] flex-col justify-center p-8 sm:w-[400px]"
+              >
+                <p
+                  className="quote-italic text-base leading-relaxed"
+                  style={{ color: "rgba(226,225,238,0.82)" }}
+                >
+                  "{item.q}"
+                </p>
+                <p className="eyebrow mt-8" style={{ color: "var(--or-ancestral)" }}>
+                  {item.a}
+                </p>
+              </article>
+            ))}
+          </div>
+        ))}
       </div>
     </section>
   );
 }
 
-/* ---------- CTA FINAL ---------- */
+/* ---------- FAQ ---------- */
 export function FAQ() {
-  const t = useTranslations("home.faq");
-  const categories = t.raw("categories") as FAQCategory[];
+  const { t } = useLandingCopy();
 
   return (
     <section
       id="faq"
-      className="px-5 py-24 md:px-10"
-      style={{ background: "var(--nuit-profonde)" }}
+      className="border-t px-5 py-28 md:px-10"
+      style={{ background: "var(--nuit-profonde)", borderColor: "rgba(216,173,77,0.18)" }}
     >
-      <div className="mx-auto max-w-5xl">
-        <Reveal>
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
-              {t("title")}
-            </h2>
-            <p className="quote-italic mt-5 text-lg md:text-xl">{t("subtitle")}</p>
-          </div>
-        </Reveal>
-
-        <div className="mt-12 grid gap-8 md:grid-cols-2">
-          {categories.map((category, categoryIndex) => (
-            <Reveal key={category.title} delay={categoryIndex * 0.08}>
-              <div>
-                <h3
-                  className="h-display border-b pb-4 text-2xl"
-                  style={{ color: "var(--or-pale)", borderColor: "rgba(201,168,76,0.24)" }}
-                >
-                  {category.title}
-                </h3>
-                <div>
-                  {category.items.map((item) => (
-                    <FAQItem key={item.q} q={item.q} a={item.a} />
-                  ))}
-                </div>
-              </div>
-            </Reveal>
+      <div className="mx-auto max-w-4xl">
+        <SectionHeading eyebrow={t.faq.eyebrow} title={t.faq.title} body={t.faq.body} />
+        <div className="mt-14 space-y-4">
+          {t.faq.items.map((item) => (
+            <FAQItem key={item.q} q={item.q} a={item.a} />
           ))}
         </div>
       </div>
@@ -726,26 +1059,26 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-b" style={{ borderColor: "rgba(201,168,76,0.16)" }}>
+    <div className="totem-card overflow-hidden p-0">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-center justify-between gap-5 py-5 text-left"
+        className="flex w-full items-center justify-between gap-5 p-6 text-left transition-colors hover:bg-ombre"
       >
-        <span
-          className="text-base font-semibold leading-relaxed"
-          style={{ color: "var(--ivoire)" }}
-        >
+        <span className="h-display text-xl md:text-2xl" style={{ color: "var(--ivoire)" }}>
           {q}
         </span>
-        <span className="shrink-0" style={{ color: "var(--or-ancestral)" }}>
-          {open ? <Minus size={18} strokeWidth={1.5} /> : <Plus size={18} strokeWidth={1.5} />}
-        </span>
+        <ChevronDown
+          className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+          size={22}
+          strokeWidth={1.8}
+          style={{ color: "var(--or-ancestral)" }}
+        />
       </button>
       {open && (
         <p
-          className="pb-5 pr-8 text-[15px] leading-[1.8]"
-          style={{ color: "rgba(254,252,240,0.82)" }}
+          className="body-copy px-6 pb-6 pt-0 text-[15px]"
+          style={{ color: "rgba(226,225,238,0.82)" }}
         >
           {a}
         </p>
@@ -754,42 +1087,41 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   );
 }
 
+/* ---------- CTA FINAL ---------- */
 export function CtaFinal() {
-  const locale = useLocale();
-  const t = useTranslations("home.ctaFinal");
-  const brand = useTranslations("brand");
+  const { locale, t } = useLandingCopy();
 
   return (
-    <section className="relative overflow-hidden px-5 py-24 md:px-10 bg-gradient-totem">
-      <GoldParticles count={14} />
-      <div className="max-w-3xl mx-auto text-center relative flex flex-col items-center gap-8">
-        <Reveal>
-          <img src={totemLogo} alt={brand("name")} className="w-[200px] md:w-[260px] h-auto" />
-        </Reveal>
+    <section
+      className="relative overflow-hidden px-5 py-32 text-center md:px-10 md:py-44"
+      style={{ background: "var(--nuit-profonde)" }}
+    >
+      <div
+        className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.16]"
+        aria-hidden="true"
+      >
+        <img
+          src={totemLogo}
+          alt=""
+          className="h-[620px] w-auto max-w-none grayscale blur-sm"
+          style={{ filter: "grayscale(1) brightness(0.48) blur(2px)" }}
+        />
+      </div>
+      <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center">
         <Ornament />
-        <Reveal delay={0.1}>
-          <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--ivoire)" }}>
-            {t("title")}
+        <Reveal>
+          <h2 className="h-display mt-7 text-5xl md:text-7xl" style={{ color: "var(--ivoire)" }}>
+            {t.cta.title}
           </h2>
         </Reveal>
+        <Reveal delay={0.1}>
+          <p className="quote-italic mt-8 text-xl md:text-2xl">{t.cta.body}</p>
+        </Reveal>
         <Reveal delay={0.2}>
-          <p className="quote-italic text-xl md:text-2xl">
-            {t("subtitleLine1")}
-            <br />
-            {t("subtitleLine2")}
-          </p>
-        </Reveal>
-        <Reveal delay={0.3}>
-          <Link
-            href={`/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`}
-            className="btn-primary animate-pulse-glow !px-14 !py-5"
-          >
-            {t("button")}
-            <ArrowRight size={16} strokeWidth={1.5} />
+          <Link href={journeyHref(locale)} className="btn-primary mt-12 !px-12 !py-6 text-base">
+            {t.cta.button}
+            <ArrowRight size={18} strokeWidth={1.7} />
           </Link>
-        </Reveal>
-        <Reveal delay={0.4}>
-          <p className="caption mt-2">{t("caption")}</p>
         </Reveal>
       </div>
     </section>

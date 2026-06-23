@@ -41,7 +41,7 @@ export function ContactForm() {
 
   if (status === "sent") {
     return (
-      <div className="card-totem text-center">
+      <div className="premium-panel-strong p-8 text-center">
         <p className="quote-italic mb-4 text-xl">Votre message est parti.</p>
         <p className="text-sm" style={{ color: "var(--ivoire)" }}>
           Nous vous répondrons sous 48 heures.
@@ -128,9 +128,12 @@ export function ContactSection({ compact = false }: { compact?: boolean }) {
   return (
     <section
       id="contact"
-      className={`${compact ? "px-5 py-24 md:px-10" : "pb-24 px-5 md:px-10"}`}
+      className={`premium-page ${compact ? "px-5 py-24 md:px-10" : "pb-24 px-5 md:px-10"}`}
       style={{ background: "var(--nuit-profonde)" }}
     >
+      <div className="premium-watermark" aria-hidden="true">
+        <img src="/assets/totem-logo.png" alt="" />
+      </div>
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[0.8fr_1.2fr] md:items-start">
         <div className="flex flex-col gap-6">
           <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
@@ -153,7 +156,9 @@ export function ContactSection({ compact = false }: { compact?: boolean }) {
             </p>
           </div>
         </div>
-        <ContactForm />
+        <div className="premium-panel-strong p-6 md:p-8">
+          <ContactForm />
+        </div>
       </div>
     </section>
   );

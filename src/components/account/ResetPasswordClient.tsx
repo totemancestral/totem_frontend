@@ -104,28 +104,27 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
 
   return (
     <section
-      className="flex min-h-[100svh] items-center justify-center px-5 pb-20 pt-32 md:px-10"
+      className="premium-page flex min-h-[100svh] items-center justify-center overflow-hidden px-5 pb-20 pt-32 md:px-10"
       style={{ background: "var(--nuit-profonde)" }}
     >
+      <div className="premium-watermark" aria-hidden="true">
+        <img src="/assets/totem-logo.png" alt="" />
+      </div>
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
-        className="mx-auto flex w-full max-w-[480px] flex-col gap-7 rounded-lg border p-6 md:p-8"
-        style={{ background: "rgba(26,26,46,0.78)", borderColor: "rgba(201,168,76,0.28)" }}
+        className="premium-panel-strong mx-auto flex w-full max-w-[480px] flex-col gap-7 p-6 md:p-8"
       >
         <div className="flex flex-col items-center gap-4 text-center">
-          <div
-            className="flex h-12 w-12 items-center justify-center rounded-full border"
-            style={{ borderColor: "rgba(201,168,76,0.35)", color: "var(--or-ancestral)" }}
-          >
+          <div className="premium-icon-box">
             {phase === "request" ? <Mail size={21} /> : <KeyRound size={21} />}
           </div>
           <div>
-            <h1 className="h-display text-4xl" style={{ color: "var(--or-ancestral)" }}>
+            <h1 className="h-display text-4xl" style={{ color: "var(--ivoire)" }}>
               {phase === "request" ? t.requestTitle : t.updateTitle}
             </h1>
-            <p className="body-copy mt-3" style={{ color: "rgba(254,252,240,0.72)" }}>
+            <p className="body-copy mt-3 premium-muted">
               {phase === "request" ? t.requestText : t.updateText}
             </p>
           </div>
@@ -208,7 +207,7 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="caption uppercase" style={{ color: "rgba(237,217,154,0.78)" }}>
+      <span className="caption uppercase" style={{ color: "rgba(246,200,101,0.78)" }}>
         {label}
       </span>
       <input

@@ -1,24 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExperienceConsignes } from "@/components/ExperienceConsignes";
 import { IntroExperience } from "@/components/IntroExperience";
 import { SiteTourModal } from "@/components/SiteTourModal";
-import { ContactSection } from "@/components/pages/ContactPage";
 import {
-  Assurances,
   Avis,
   CtaFinal,
-  Experience,
   FAQ,
   Hero,
   LeGeste,
   Manifeste,
   Maison,
-  Oeuvre,
   Offres,
   ProofBand,
 } from "@/components/sections";
+import { ExperienceConsignes } from "@/components/ExperienceConsignes";
 
 const INTRO_SESSION_KEY = "totem_intro_played";
 
@@ -52,15 +48,11 @@ export function HomePage() {
       <ProofBand />
       <LeGeste />
       <Manifeste />
-      <Oeuvre />
-      <Experience />
       <ExperienceConsignes />
-      <Assurances />
       <Offres />
       <Maison />
       <Avis />
       <FAQ />
-      <ContactSection compact />
       <CtaFinal />
     </>
   );

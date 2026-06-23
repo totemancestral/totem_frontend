@@ -577,13 +577,13 @@ export function ParcoursPage() {
 
   return (
     <div
-      className="fixed inset-0 z-[200] w-full max-w-full overflow-hidden"
+      className="premium-page fixed inset-0 z-[200] w-full max-w-full overflow-hidden"
       style={{ background: "var(--nuit-profonde)" }}
     >
       {/* Progress bar */}
       <div
         className="fixed top-0 left-0 right-0 z-[210]"
-        style={{ height: 3, background: "#1A1A2E" }}
+        style={{ height: 3, background: "#1e1f28" }}
       >
         <div
           style={{
@@ -598,6 +598,9 @@ export function ParcoursPage() {
       <JourneyNav locale={locale} phase={phase} currentStep={current?.n ?? 0} progress={progress} />
 
       <GoldParticles count={20} />
+      <div className="premium-watermark" aria-hidden="true">
+        <img src="/assets/totem-logo.png" alt="" />
+      </div>
 
       <AnimatePresence mode="wait">
         {phase === "intro" && <IntroScreen key="intro" onStart={() => setPhase("question")} />}
@@ -718,10 +721,10 @@ function JourneyNav({
       aria-label={isFrench ? "Navigation du parcours" : "Journey navigation"}
     >
       <div
-        className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 rounded-md border px-3 md:px-4"
+        className="premium-panel mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-3 md:px-4"
         style={{
           background: "rgba(13,13,26,0.88)",
-          borderColor: "rgba(201,168,76,0.24)",
+          borderColor: "rgba(216,173,77,0.24)",
           backdropFilter: "blur(14px)",
         }}
       >
@@ -746,8 +749,8 @@ function JourneyNav({
         </Link>
 
         <p
-          className="hidden min-w-0 truncate text-center text-[11px] uppercase tracking-[0.16em] md:block"
-          style={{ color: "rgba(237,217,154,0.72)" }}
+          className="hidden min-w-0 truncate text-center text-[11px] uppercase md:block"
+          style={{ color: "rgba(246,200,101,0.72)" }}
         >
           {label}
         </p>
@@ -756,15 +759,15 @@ function JourneyNav({
           <Link
             href={`/${locale}`}
             className="inline-flex h-9 w-9 items-center justify-center rounded-sm border transition-colors hover:bg-ombre"
-            style={{ borderColor: "rgba(201,168,76,0.24)", color: "var(--or-ancestral)" }}
+            style={{ borderColor: "rgba(216,173,77,0.24)", color: "var(--or-ancestral)" }}
             aria-label={isFrench ? "Accueil" : "Home"}
           >
             <Home size={16} />
           </Link>
           <Link
             href={`/${locale}/domus_animi`}
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-sm border px-3 text-[11px] uppercase tracking-[0.12em] transition-colors hover:bg-ombre"
-            style={{ borderColor: "rgba(201,168,76,0.28)", color: "var(--or-ancestral)" }}
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-sm border px-3 text-[11px] uppercase transition-colors hover:bg-ombre"
+            style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
           >
             <LayoutDashboard size={15} />
             <span className="hidden sm:inline">{isFrench ? "Dashboard" : "Dashboard"}</span>
@@ -853,7 +856,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
       className="relative flex min-h-0 items-center justify-center overflow-hidden px-5"
       style={{ height: "100svh" }}
     >
-      <div className="w-full max-w-[560px] text-center flex flex-col items-center gap-6">
+      <div className="premium-panel-strong flex w-full max-w-[560px] flex-col items-center gap-6 p-6 text-center md:p-10">
         <MaskLogo size={80} />
         <div className="section-divider" style={{ marginBottom: 0 }} />
         {lines.map((l, i) => (
@@ -971,26 +974,12 @@ function QuestionScreen({
                 <button
                   key={c.letter}
                   onClick={() => onChoice(c.letter)}
-                  className="text-left flex items-start gap-3 md:gap-4"
+                  className="premium-choice flex items-start gap-3 text-left md:gap-4"
+                  data-selected={selected ? "true" : "false"}
                   style={{
-                    background: selected ? "#2D2D1A" : "#1A1A2E",
-                    borderRadius: 8,
                     padding: "clamp(10px, 1.7vh, 16px) clamp(14px, 2vw, 20px)",
-                    border: `1px solid ${selected ? "#C9A84C" : "rgba(201,168,76,0.25)"}`,
-                    boxShadow: selected ? "0 0 16px rgba(201,168,76,0.15)" : "none",
-                    transition: "all 0.3s ease",
                     cursor: "pointer",
                     color: "var(--ivoire)",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selected) return;
-                    e.currentTarget.style.borderColor = "rgba(201,168,76,0.6)";
-                    e.currentTarget.style.background = "#1F1F35";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selected) return;
-                    e.currentTarget.style.borderColor = "rgba(201,168,76,0.25)";
-                    e.currentTarget.style.background = "#1A1A2E";
                   }}
                 >
                   <span
@@ -1058,8 +1047,8 @@ function QuestionScreen({
                 placeholder={q.field.placeholder}
                 rows={dynamicRows}
                 style={{
-                  background: "#1A1A2E",
-                  border: "1px solid #2D2D1A",
+                  background: "rgba(26,27,36,0.92)",
+                  border: "1px solid rgba(216,173,77,0.24)",
                   borderRadius: 6,
                   padding: "10px 14px",
                   color: "var(--ivoire)",
@@ -1072,8 +1061,8 @@ function QuestionScreen({
                   transition: "border-color 0.3s ease, height 0.4s ease",
                   outline: "none",
                 }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = "#C9A84C")}
-                onBlur={(e) => (e.currentTarget.style.borderColor = "#2D2D1A")}
+                onFocus={(e) => (e.currentTarget.style.borderColor = "#d8ad4d")}
+                onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(216,173,77,0.24)")}
               />
             </motion.div>
           )}
@@ -1170,29 +1159,14 @@ function AccountScreen({
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
             {(t.raw("checks") as string[]).map((item) => (
-              <div
-                key={item}
-                className="rounded-md border px-4 py-3"
-                style={{
-                  borderColor: "rgba(201,168,76,0.25)",
-                  background: "rgba(26,26,46,0.72)",
-                }}
-              >
-                <p className="caption" style={{ color: "rgba(254,252,240,0.72)" }}>
-                  {item}
-                </p>
+              <div key={item} className="premium-panel px-4 py-3">
+                <p className="caption premium-muted">{item}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div
-          className="flex flex-col gap-5 rounded-lg border p-5 md:p-8"
-          style={{
-            background: "rgba(26,26,46,0.86)",
-            borderColor: "rgba(201,168,76,0.35)",
-          }}
-        >
+        <div className="premium-panel-strong flex flex-col gap-5 p-5 md:p-8">
           <div>
             <p className="eyebrow" style={{ color: "rgba(237,217,154,0.8)" }}>
               {t("formEyebrow")}
@@ -1279,10 +1253,10 @@ function PaywallTransition() {
         transition={{ duration: 1.5 }}
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(circle at center, rgba(201,168,76,0.25), transparent 60%)",
+          background: "radial-gradient(circle at center, rgba(216,173,77,0.2), transparent 60%)",
         }}
       />
-      <div className="relative max-w-[560px] flex flex-col gap-4">
+      <div className="premium-panel-strong relative flex max-w-[560px] flex-col gap-4 p-8">
         <p className="quote-italic" style={{ fontSize: 22 }}>
           {t("title")}
         </p>
@@ -1390,11 +1364,12 @@ function Paywall({
           {translatedOffers.map((o) => (
             <div
               key={o.name}
-              className={`card-totem flex flex-col !p-4 md:!p-5 lg:!p-6 ${o.featured ? "md:col-span-2 lg:col-span-1 lg:-translate-y-2" : ""}`}
+              className={`premium-panel flex flex-col p-4 md:p-5 lg:p-6 ${o.featured ? "md:col-span-2 lg:col-span-1 lg:-translate-y-2" : ""}`}
               style={{
-                borderColor: o.featured ? "#C9A84C" : "rgba(201,168,76,0.35)",
+                borderColor: o.featured ? "#d8ad4d" : "rgba(216,173,77,0.28)",
                 borderWidth: o.featured ? 2 : 1,
                 position: "relative",
+                background: o.featured ? "rgba(30,31,40,0.96)" : undefined,
               }}
             >
               {o.featured && (
@@ -1402,13 +1377,13 @@ function Paywall({
                   <span
                     className="inline-flex max-w-full items-center justify-center text-center uppercase"
                     style={{
-                      background: "#C9A84C",
-                      color: "#1A1A2E",
+                      background: "#d8ad4d",
+                      color: "#0c0e16",
                       fontFamily: "var(--font-sans)",
                       fontWeight: 700,
                       fontSize: 10,
                       padding: "5px 10px",
-                      letterSpacing: "0.12em",
+                      letterSpacing: 0,
                       borderRadius: 2,
                       lineHeight: 1.25,
                     }}
@@ -1419,7 +1394,7 @@ function Paywall({
               )}
               <h3
                 className="h-display text-center uppercase text-[18px] leading-tight md:text-[20px]"
-                style={{ color: "var(--ivoire)", letterSpacing: "0.08em" }}
+                style={{ color: "var(--ivoire)", letterSpacing: 0 }}
               >
                 {o.name}
               </h3>
@@ -1442,7 +1417,7 @@ function Paywall({
                     key={label}
                     className="rounded border px-1.5 py-1.5 md:px-2 md:py-2"
                     style={{
-                      borderColor: "rgba(201,168,76,0.22)",
+                      borderColor: "rgba(216,173,77,0.22)",
                       background: "rgba(13,13,26,0.34)",
                     }}
                   >
@@ -1513,7 +1488,7 @@ function PostPayment({ onContinue }: { onContinue: () => void }) {
       className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 pt-24 text-center"
       style={{ height: "100svh" }}
     >
-      <div className="max-w-[560px] flex flex-col items-center gap-6">
+      <div className="premium-panel-strong flex max-w-[560px] flex-col items-center gap-6 p-8">
         <p className="h-display" style={{ fontSize: 26, color: "var(--ivoire)" }}>
           {t("title")}
         </p>
@@ -1543,7 +1518,7 @@ function FinalTransition() {
         transition={{ duration: 3 }}
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(circle at center, rgba(201,168,76,0.35), transparent 65%)",
+          background: "radial-gradient(circle at center, rgba(216,173,77,0.22), transparent 65%)",
         }}
       />
       <div className="relative flex max-w-[720px] flex-col items-center gap-6">
@@ -1583,7 +1558,7 @@ function WaitingScreen() {
       className="relative flex min-h-0 items-center justify-center overflow-hidden px-5 pt-24 text-center"
       style={{ height: "100svh" }}
     >
-      <div className="max-w-[560px] flex flex-col items-center gap-8">
+      <div className="premium-panel-strong flex max-w-[560px] flex-col items-center gap-8 p-8">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 8, repeat: Infinity, ease: "linear" as const }}
@@ -1591,7 +1566,7 @@ function WaitingScreen() {
             width: 80,
             height: 80,
             borderRadius: "50%",
-            border: "1px solid rgba(201,168,76,0.3)",
+            border: "1px solid rgba(216,173,77,0.3)",
             borderTopColor: "var(--or-ancestral)",
           }}
         />

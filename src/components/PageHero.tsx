@@ -12,12 +12,15 @@ export function PageHero({
 }) {
   return (
     <section
-      className="px-5 pb-12 pt-36 text-center md:px-10"
+      className="premium-page overflow-hidden px-5 pb-12 pt-36 text-center md:px-10"
       style={{ background: "var(--nuit-profonde)" }}
     >
+      <div className="premium-watermark" aria-hidden="true">
+        <img src="/assets/totem-logo.png" alt="" />
+      </div>
       <div className="max-w-3xl mx-auto flex flex-col items-center gap-6">
         <Ornament />
-        <h1 className="h-display text-4xl md:text-6xl" style={{ color: "var(--or-ancestral)" }}>
+        <h1 className="h-display text-4xl md:text-6xl" style={{ color: "var(--ivoire)" }}>
           {title}
         </h1>
         {subtitle && <p className="quote-italic text-lg md:text-xl">{subtitle}</p>}

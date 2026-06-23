@@ -451,24 +451,25 @@
       ]
     },
     "instructions": {
-      "title": "Avant de traverser.",
-      "subtitle": "Quatre gestes simples pour accueillir l'œuvre.",
+      "eyebrow": "À lire avant d'entrer",
+      "title": "Avant de traverser",
+      "subtitle": "Préparez votre esprit et votre environnement pour accueillir la parole des anciens.",
       "items": [
         {
-          "title": "La posture",
-          "text": "Devant votre écran, adoptez une posture de profonde connexion avec vous-même."
+          "title": "Posez le monde",
+          "text": "Installez-vous comme devant un feu, la nuit, quand les anciens parlent. Laissez le bruit du dehors s'éloigner avant de commencer."
         },
         {
-          "title": "La voix",
-          "text": "Assurez-vous de mettre votre volume pour écouter l'ancêtre imaginaire."
+          "title": "Ouvrez les oreilles",
+          "text": "L'ancêtre a traversé soixante mille ans pour vous parler. Montez le volume, respirez, puis écoutez ce qui arrive."
         },
         {
-          "title": "Le cœur",
-          "text": "Donnez des réponses qui viennent de votre cœur et qui reflètent qui vous êtes à l'intérieur."
+          "title": "Parlez vrai",
+          "text": "Le griot ne veut pas de bonne réponse. Il veut la vôtre, celle qui vient de plus loin que la mémoire et qui ne cherche pas à plaire."
         },
         {
-          "title": "L'héritage",
-          "text": "Gardez votre œuvre TOTEM tel un héritage à conserver et garder jalousement."
+          "title": "Gardez votre Totem",
+          "text": "Une fois éveillé, votre Totem devient un compagnon de route. Un ancêtre qui ne vous quitte plus, gravé dans la matière et l'esprit."
         }
       ]
     },

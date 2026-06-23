@@ -22,31 +22,38 @@ export function ExperienceConsignes() {
   }));
 
   return (
-    <section className="px-5 py-24 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
+    <section
+      className="px-5 py-28 md:px-10 md:py-40"
+      style={{ background: "var(--nuit-profonde)" }}
+    >
       <div className="max-w-6xl mx-auto">
         <Reveal>
-          <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-6">
+          <div className="text-center max-w-3xl mx-auto flex flex-col items-center gap-6">
             <Ornament />
-            <h2 className="h-display text-3xl md:text-5xl" style={{ color: "var(--or-ancestral)" }}>
+            <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
+              {t("eyebrow")}
+            </p>
+            <h2 className="h-display text-5xl md:text-7xl" style={{ color: "var(--ivoire)" }}>
               {t("title")}
             </h2>
             <p className="quote-italic mt-2 text-lg md:text-xl">{t("subtitle")}</p>
           </div>
         </Reveal>
 
-        <div className="mt-14 flex flex-col gap-10 md:gap-12">
+        <div className="mt-20 flex flex-col gap-24 md:gap-36">
           {consignes.map((c, i) => (
             <Reveal key={c.n} delay={i * 0.1}>
-              <article className="grid items-center gap-6 md:grid-cols-2 md:gap-10">
+              <article className="grid items-center gap-8 md:grid-cols-2 md:gap-16">
                 <div
-                  className={`relative overflow-hidden rounded-lg border ${i % 2 === 1 ? "md:order-2" : ""}`}
-                  style={{ aspectRatio: "4/3", borderColor: "rgba(201,168,76,0.24)" }}
+                  className={`relative overflow-hidden rounded-sm border shadow-2xl ${i % 2 === 1 ? "md:order-2" : ""}`}
+                  style={{ aspectRatio: "4/3", borderColor: "rgba(216,173,77,0.24)" }}
                 >
                   <img
                     src={c.img}
                     alt={c.title ?? c.text}
                     loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover grayscale transition-transform duration-700 hover:scale-105"
+                    style={{ filter: "grayscale(1) brightness(0.68)" }}
                   />
                   <div
                     className="absolute inset-0"
@@ -56,21 +63,21 @@ export function ExperienceConsignes() {
                     }}
                   />
                 </div>
-                <div className="flex flex-col gap-4">
-                  <span className="h-display text-4xl" style={{ color: "rgba(201,168,76,0.42)" }}>
+                <div className={`flex flex-col gap-5 ${i % 2 === 1 ? "md:text-right" : ""}`}>
+                  <span className="h-display text-6xl" style={{ color: "rgba(216,173,77,0.26)" }}>
                     {c.n}
                   </span>
                   {c.title && (
                     <h3
-                      className="h-display text-2xl md:text-3xl"
-                      style={{ color: "var(--or-pale)" }}
+                      className="h-display text-4xl md:text-5xl"
+                      style={{ color: "var(--ivoire)" }}
                     >
                       {c.title}
                     </h3>
                   )}
                   <p
-                    className="body-copy text-[15px] md:text-base"
-                    style={{ color: "rgba(254,252,240,0.9)" }}
+                    className="body-copy text-lg md:text-xl"
+                    style={{ color: "rgba(226,225,238,0.82)" }}
                   >
                     {c.text}
                   </p>

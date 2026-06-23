@@ -46,9 +46,12 @@ export function PrivacyPage() {
         title="Politique de confidentialité"
         subtitle="Comment Totem Ancestral protège les données liées à votre œuvre. Dernière mise à jour : 18 juin 2026."
       />
-      <section className="pb-24 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
+      <section
+        className="premium-page px-5 pb-24 md:px-10"
+        style={{ background: "var(--nuit-profonde)" }}
+      >
         <article
-          className="max-w-3xl mx-auto space-y-8 text-[15px] leading-[1.85]"
+          className="premium-panel mx-auto max-w-3xl space-y-8 p-6 text-[15px] leading-[1.85] md:p-8"
           style={{ color: "var(--ivoire)" }}
         >
           {sections.map((s) => (

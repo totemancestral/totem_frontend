@@ -32,7 +32,7 @@ export function SectionDivider() {
 export function Ornament({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`text-or-pale text-2xl tracking-[0.4em] text-center select-none ${className}`}
+      className={`text-or-pale text-2xl text-center select-none ${className}`}
       style={{ color: "var(--or-pale)" }}
       aria-hidden="true"
     >

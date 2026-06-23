@@ -238,13 +238,12 @@ export function DashboardClient({ locale }: { locale: Locale }) {
     }
 
     load();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [authLoading, session, token, authPath, locale, router, t.error]);
 
-  const name =
-    user?.user_metadata?.prenom ||
-    user?.email?.split("@")[0] ||
-    t.defaultName;
+  const name = user?.user_metadata?.prenom || user?.email?.split("@")[0] || t.defaultName;
   const deliveredCount = oeuvres.filter(
     (oeuvre) => oeuvre.statut === "livree" || oeuvre.image_url || oeuvre.pdf_url,
   ).length;
@@ -271,7 +270,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
   if (authLoading || loading) {
     return (
       <section
-        className="flex min-h-[100svh] items-center justify-center px-5 pt-28"
+        className="premium-page flex min-h-[100svh] items-center justify-center px-5 pt-28"
         style={{ background: "var(--nuit-profonde)" }}
       >
         <div className="flex items-center gap-3 text-sm" style={{ color: "var(--or-pale)" }}>
@@ -285,7 +284,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
   if (error) {
     return (
       <section
-        className="flex min-h-[100svh] items-center justify-center px-5 pt-28"
+        className="premium-page flex min-h-[100svh] items-center justify-center px-5 pt-28"
         style={{ background: "var(--nuit-profonde)" }}
       >
         <div className="mx-auto flex max-w-md flex-col items-center gap-5 text-center">
@@ -300,10 +299,17 @@ export function DashboardClient({ locale }: { locale: Locale }) {
   }
 
   const sidebar = (
-    <div className="flex h-full flex-col gap-6 p-6" style={{ background: "rgba(26,26,46,0.95)" }}>
+    <div className="premium-sidebar flex h-full flex-col gap-6 p-6">
       <div className="text-center">
-        <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>ESPACE</p>
-        <h2 className="logo-wordmark text-base mt-1">Totem Ancestral</h2>
+        <img
+          src="/assets/totem-logo.png"
+          alt=""
+          className="mx-auto mb-3 h-12 w-12 object-contain"
+        />
+        <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>
+          ESPACE
+        </p>
+        <h2 className="logo-wordmark mt-1 text-base">Totem Ancestral</h2>
       </div>
 
       <nav className="flex flex-col gap-1">
@@ -312,8 +318,8 @@ export function DashboardClient({ locale }: { locale: Locale }) {
             key={item.id}
             type="button"
             onClick={() => scrollTo(item.id)}
-            className="flex items-center gap-3 rounded px-4 py-3 text-left text-sm uppercase tracking-wider transition-colors"
-            style={{ color: "rgba(254,252,240,0.72)" }}
+            className="flex items-center gap-3 rounded-sm px-4 py-3 text-left text-sm uppercase transition-colors hover:bg-ombre"
+            style={{ color: "rgba(226,225,238,0.72)" }}
           >
             <span style={{ color: "var(--or-ancestral)" }}>{item.icon}</span>
             {item.label}
@@ -322,14 +328,11 @@ export function DashboardClient({ locale }: { locale: Locale }) {
       </nav>
 
       <div className="mt-auto flex flex-col gap-3">
-        <Link
-          href={`/${locale}/via_sapientiae`}
-          className="btn-primary w-full text-xs py-3"
-        >
+        <Link href={`/${locale}/via_sapientiae`} className="btn-primary w-full py-3 text-xs">
           <Plus size={14} />
           {t.compose}
         </Link>
-        <button type="button" onClick={signOut} className="btn-secondary w-full text-xs py-3">
+        <button type="button" onClick={signOut} className="btn-secondary w-full py-3 text-xs">
           <LogOut size={14} />
           {t.logout}
         </button>
@@ -338,32 +341,49 @@ export function DashboardClient({ locale }: { locale: Locale }) {
   );
 
   return (
-    <div className="flex min-h-[100svh]" style={{ background: "var(--nuit-profonde)" }}>
-      <aside className="fixed left-0 top-0 z-40 hidden h-full w-64 pt-20 lg:block" style={{ borderRight: "1px solid rgba(201,168,76,0.15)" }}>
+    <div
+      className="premium-page flex min-h-[100svh]"
+      style={{ background: "var(--nuit-profonde)" }}
+    >
+      <div className="premium-watermark" aria-hidden="true">
+        <img src="/assets/totem-logo.png" alt="" />
+      </div>
+      <aside
+        className="fixed left-0 top-0 z-40 hidden h-full w-64 pt-20 lg:block"
+        style={{ borderRight: "1px solid rgba(216,173,77,0.18)" }}
+      >
         {sidebar}
       </aside>
 
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
-          <aside className="relative h-full w-72 pt-20" style={{ borderRight: "1px solid rgba(201,168,76,0.15)" }}>
+          <aside
+            className="relative h-full w-72 pt-20"
+            style={{ borderRight: "1px solid rgba(216,173,77,0.18)" }}
+          >
             {sidebar}
           </aside>
         </div>
       )}
 
-      <main className="flex-1 overflow-y-auto px-5 py-6 md:px-8 md:py-10 lg:ml-64">
+      <main className="flex-1 overflow-y-auto px-5 pb-12 pt-24 md:px-8 md:pb-16 md:pt-28 lg:ml-64">
         <div className="mx-auto max-w-5xl flex flex-col gap-10">
-
           <div className="flex items-center justify-between lg:hidden">
-            <button type="button" onClick={() => setSidebarOpen(true)} className="btn-secondary text-xs px-4 py-2">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="btn-secondary px-4 py-2 text-xs"
+            >
               <Menu size={16} />
               Menu
             </button>
-            <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>ESPACE</p>
+            <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>
+              ESPACE
+            </p>
           </div>
 
-          <section id="dashboard-overview">
+          <section id="dashboard-overview" className="premium-panel-strong p-6 md:p-8">
             <motion.header
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -379,12 +399,10 @@ export function DashboardClient({ locale }: { locale: Locale }) {
               >
                 {t.title.replace("{name}", name)}
               </h1>
-              <p className="max-w-2xl" style={{ color: "rgba(254,252,240,0.72)" }}>
-                {t.subtitle}
-              </p>
+              <p className="max-w-2xl premium-muted">{t.subtitle}</p>
             </motion.header>
 
-            <div className="grid gap-4 mb-8 sm:grid-cols-2 md:grid-cols-3">
+            <div className="mb-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               <StatCard
                 icon={<PackageCheck size={20} />}
                 label={t.orders}
@@ -395,7 +413,11 @@ export function DashboardClient({ locale }: { locale: Locale }) {
                 label={t.delivered}
                 value={deliveredCount.toString()}
               />
-              <StatCard icon={<Clock3 size={20} />} label={t.active} value={activeCount.toString()} />
+              <StatCard
+                icon={<Clock3 size={20} />}
+                label={t.active}
+                value={activeCount.toString()}
+              />
             </div>
 
             <CompositionPanel composition={composition} locale={locale} />
@@ -432,10 +454,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
           </section>
 
           <section id="dashboard-profile">
-            <div
-              className="rounded-lg border p-6"
-              style={{ background: "rgba(26,26,46,0.72)", borderColor: "rgba(201,168,76,0.22)" }}
-            >
+            <div className="premium-panel p-6">
               <div className="mb-6 flex items-center gap-3">
                 <UserRound size={20} color="var(--or-ancestral)" />
                 <h2 className="h-display text-2xl" style={{ color: "var(--or-ancestral)" }}>
@@ -456,10 +475,7 @@ export function DashboardClient({ locale }: { locale: Locale }) {
 
 function StatCard({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
-    <article
-      className="rounded-lg border p-5"
-      style={{ background: "rgba(26,26,46,0.72)", borderColor: "rgba(201,168,76,0.22)" }}
-    >
+    <article className="premium-panel p-5">
       <div className="mb-4" style={{ color: "var(--or-ancestral)" }}>
         {icon}
       </div>
@@ -483,10 +499,7 @@ function CompositionPanel({
   const t = copy[locale];
 
   return (
-    <section
-      className="grid gap-5 rounded-lg border p-5 md:grid-cols-[0.82fr_1.18fr] md:p-6"
-      style={{ background: "rgba(26,26,46,0.72)", borderColor: "rgba(201,168,76,0.22)" }}
-    >
+    <section className="premium-panel grid gap-5 p-5 md:grid-cols-[0.82fr_1.18fr] md:p-6">
       <div className="flex flex-col gap-5">
         <div className="flex items-center gap-3">
           <Activity size={20} color="var(--or-ancestral)" />
@@ -530,9 +543,7 @@ function CompositionPanel({
           {t.events}
         </h3>
         {composition.events.length === 0 ? (
-          <p className="caption" style={{ color: "rgba(254,252,240,0.58)" }}>
-            {t.noEvents}
-          </p>
+          <p className="caption premium-soft">{t.noEvents}</p>
         ) : (
           <ol className="flex flex-col gap-3">
             {composition.events.map((event) => (
@@ -543,7 +554,7 @@ function CompositionPanel({
                 />
                 <span
                   className="text-sm leading-relaxed"
-                  style={{ color: "rgba(254,252,240,0.78)" }}
+                  style={{ color: "rgba(226,225,238,0.78)" }}
                 >
                   {event}
                 </span>
@@ -617,10 +628,7 @@ function OrderCard({ commande, locale }: { commande: Commande; locale: Locale })
   const t = copy[locale];
   const status = statusLabels[locale][commande.statut] ?? commande.statut;
   return (
-    <article
-      className="rounded-lg border p-5"
-      style={{ background: "rgba(26,26,46,0.72)", borderColor: "rgba(201,168,76,0.22)" }}
-    >
+    <article className="premium-panel p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="h-display text-2xl" style={{ color: "var(--ivoire)" }}>
@@ -629,7 +637,7 @@ function OrderCard({ commande, locale }: { commande: Commande; locale: Locale })
           <p className="caption mt-1">#{commande.id.slice(0, 8)}</p>
         </div>
         <span
-          className="w-fit rounded border px-3 py-1 text-xs uppercase tracking-[0.14em]"
+          className="w-fit rounded-sm border px-3 py-1 text-xs uppercase"
           style={statusStyle(commande.statut)}
         >
           {status}
@@ -660,15 +668,13 @@ function ArtworkCard({ oeuvre, locale }: { oeuvre: Oeuvre; locale: Locale }) {
   ].flatMap((link) => (link.href ? [{ ...link, href: link.href }] : []));
 
   return (
-    <article
-      className="overflow-hidden rounded-lg border"
-      style={{ background: "rgba(26,26,46,0.72)", borderColor: "rgba(201,168,76,0.22)" }}
-    >
+    <article className="premium-panel overflow-hidden">
       {oeuvre.image_url ? (
         <img
           src={oeuvre.image_url}
           alt={oeuvre.nom_totem || t.unnamed}
           className="aspect-square w-full object-cover"
+          style={{ filter: "saturate(0.82) contrast(1.04)" }}
         />
       ) : (
         <div
@@ -705,7 +711,7 @@ function ArtworkCard({ oeuvre, locale }: { oeuvre: Oeuvre; locale: Locale }) {
                 className="mt-4 max-h-80 overflow-y-auto rounded border p-4 text-sm leading-relaxed whitespace-pre-line"
                 style={{
                   background: "rgba(13,13,26,0.6)",
-                  borderColor: "rgba(201,168,76,0.18)",
+                  borderColor: "rgba(216,173,77,0.18)",
                   color: "var(--or-pale)",
                 }}
               >
@@ -732,9 +738,7 @@ function ArtworkCard({ oeuvre, locale }: { oeuvre: Oeuvre; locale: Locale }) {
             ))}
           </div>
         ) : (
-          <p className="caption" style={{ color: "rgba(254,252,240,0.58)" }}>
-            {t.waitingFiles}
-          </p>
+          <p className="caption premium-soft">{t.waitingFiles}</p>
         )}
       </div>
     </article>
@@ -743,10 +747,7 @@ function ArtworkCard({ oeuvre, locale }: { oeuvre: Oeuvre; locale: Locale }) {
 
 function EmptyState({ text, cta, href }: { text: string; cta: string; href: string }) {
   return (
-    <div
-      className="rounded-lg border px-6 py-10 text-center"
-      style={{ borderColor: "rgba(201,168,76,0.22)" }}
-    >
+    <div className="premium-panel px-6 py-10 text-center">
       <p className="quote-italic mb-6 text-lg">{text}</p>
       <Link href={href} className="btn-primary">
         {cta}
@@ -758,9 +759,9 @@ function EmptyState({ text, cta, href }: { text: string; cta: string; href: stri
 function statusStyle(status: string): CSSProperties {
   if (status === "livree") {
     return {
-      borderColor: "rgba(201,168,76,0.45)",
+      borderColor: "rgba(216,173,77,0.45)",
       color: "var(--or-ancestral)",
-      background: "rgba(45,45,26,0.58)",
+      background: "rgba(51,48,38,0.58)",
     };
   }
   if (status === "erreur" || status === "remboursee") {
@@ -771,9 +772,9 @@ function statusStyle(status: string): CSSProperties {
     };
   }
   return {
-    borderColor: "rgba(237,217,154,0.28)",
+    borderColor: "rgba(246,200,101,0.28)",
     color: "var(--or-pale)",
-    background: "rgba(26,26,46,0.86)",
+    background: "rgba(26,27,36,0.86)",
   };
 }
 

@@ -37,10 +37,13 @@ export function OffersPage() {
         subtitle="Trois manières de recevoir l'œuvre. Pour soi, pour offrir, pour partager."
       />
 
-      <section className="pb-20 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
+      <section
+        className="premium-page px-5 pb-20 md:px-10"
+        style={{ background: "var(--nuit-profonde)" }}
+      >
         <div className="max-w-5xl mx-auto">
           {/* Table */}
-          <div className="overflow-x-auto">
+          <div className="premium-panel overflow-x-auto p-4 md:p-6">
             <table className="w-full border-collapse">
               <thead>
                 <tr>
@@ -129,8 +132,11 @@ export function OffersPage() {
       </section>
 
       {/* Totem Vivant */}
-      <section className="pb-32 px-5 md:px-10" style={{ background: "var(--nuit-profonde)" }}>
-        <div className="max-w-3xl mx-auto card-totem text-center">
+      <section
+        className="premium-page px-5 pb-32 md:px-10"
+        style={{ background: "var(--nuit-profonde)" }}
+      >
+        <div className="premium-panel-strong mx-auto max-w-3xl p-8 text-center">
           <p className="caption uppercase mb-4" style={{ color: "var(--or-ancestral)" }}>
             Abonnement
           </p>

@@ -152,16 +152,20 @@ export function AuthClient({ locale }: { locale: Locale }) {
 
   return (
     <section
-      className="min-h-[100svh] px-5 pb-20 pt-32 md:px-10"
+      className="premium-page min-h-[100svh] overflow-hidden px-5 pb-20 pt-32 md:px-10"
       style={{ background: "var(--nuit-profonde)" }}
     >
-      <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[0.92fr_1.08fr] md:items-center">
+      <div className="premium-watermark" aria-hidden="true">
+        <img src="/assets/totem-logo.png" alt="" />
+      </div>
+      <div className="mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-[0.92fr_1.08fr] md:items-center">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="flex flex-col gap-6 text-left"
+          className="flex flex-col gap-7 text-left"
         >
+          <img src="/assets/totem-logo.png" alt="" className="h-14 w-14 object-contain" />
           <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
             {t.eyebrow}
           </p>
@@ -171,20 +175,14 @@ export function AuthClient({ locale }: { locale: Locale }) {
           >
             {mode === "signin" ? t.signinTitle : t.signupTitle}
           </h1>
-          <p className="body-copy max-w-xl" style={{ color: "rgba(254,252,240,0.76)" }}>
+          <p className="body-copy max-w-xl premium-muted">
             {mode === "signin" ? t.signinText : t.signupText}
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
             {t.checks.map((item) => (
-              <div
-                key={item}
-                className="rounded-md border px-4 py-3"
-                style={{ background: "rgba(26,26,46,0.72)", borderColor: "rgba(201,168,76,0.24)" }}
-              >
+              <div key={item} className="premium-panel px-4 py-4">
                 <ShieldCheck size={17} color="var(--or-ancestral)" />
-                <p className="caption mt-2" style={{ color: "rgba(254,252,240,0.72)" }}>
-                  {item}
-                </p>
+                <p className="caption mt-2 premium-muted">{item}</p>
               </div>
             ))}
           </div>
@@ -198,11 +196,11 @@ export function AuthClient({ locale }: { locale: Locale }) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="card-totem mx-auto flex w-full max-w-[520px] flex-col gap-6 !p-5 md:!p-8"
+          className="premium-panel-strong mx-auto flex w-full max-w-[520px] flex-col gap-6 p-5 md:p-8"
         >
           <div
-            className="grid grid-cols-2 gap-2 rounded-md border p-1"
-            style={{ borderColor: "rgba(201,168,76,0.22)" }}
+            className="grid grid-cols-2 gap-2 rounded-sm border p-1"
+            style={{ borderColor: "rgba(216,173,77,0.24)", background: "rgba(12,14,22,0.42)" }}
           >
             <button
               type="button"
@@ -301,9 +299,7 @@ export function AuthClient({ locale }: { locale: Locale }) {
             >
               {mode === "signin" ? t.switchSignup : t.switchSignin}
             </button>
-            <p className="caption max-w-sm" style={{ color: "rgba(254,252,240,0.52)" }}>
-              {t.legal}
-            </p>
+            <p className="caption max-w-sm premium-soft">{t.legal}</p>
           </div>
         </motion.div>
       </div>
@@ -332,7 +328,7 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="caption uppercase" style={{ color: "rgba(237,217,154,0.78)" }}>
+      <span className="caption uppercase" style={{ color: "rgba(246,200,101,0.78)" }}>
         {label}
       </span>
       <input
@@ -350,7 +346,7 @@ function Field({
 }
 
 function tabClass(active: boolean) {
-  return `rounded px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors ${
+  return `rounded-sm px-3 py-3 text-center text-[11px] font-semibold uppercase transition-colors ${
     active ? "bg-or text-indigo" : "text-or-pale hover:bg-ombre"
   }`;
 }
