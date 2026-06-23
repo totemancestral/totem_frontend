@@ -1,6 +1,3 @@
-import * as brevo from "@getbrevo/brevo";
-import { getBrevoClient } from "@/lib/clients/brevo";
-
 type Locale = "fr" | "en";
 type AuthEmailType = "confirmation" | "magic" | "recovery";
 
@@ -15,17 +12,33 @@ export async function sendAuthEmail({
   locale: Locale;
   type: AuthEmailType;
 }) {
-  const client = getBrevoClient();
-  const message = new brevo.SendSmtpEmail();
-  message.sender = {
-    email: process.env.BREVO_AUTH_SENDER_EMAIL || "livraison@totem-ancestral.com",
-    name: process.env.BREVO_SENDER_NAME || "TOTEM ANCESTRAL",
-  };
-  message.to = [{ email }];
-  message.subject = subjectFor(type, locale);
-  message.htmlContent = authHtml({ actionLink, locale, type });
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing BREVO_API_KEY");
+  }
 
-  await client.sendTransacEmail(message);
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      "api-key": apiKey,
+    },
+    body: JSON.stringify({
+      sender: {
+        email: process.env.BREVO_AUTH_SENDER_EMAIL || "livraison@totem-ancestral.com",
+        name: process.env.BREVO_SENDER_NAME || "TOTEM ANCESTRAL",
+      },
+      to: [{ email }],
+      subject: subjectFor(type, locale),
+      htmlContent: authHtml({ actionLink, locale, type }),
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    throw new Error(`Brevo email failed (${response.status}): ${body.slice(0, 500)}`);
+  }
 }
 
 function subjectFor(type: AuthEmailType, locale: Locale) {
