@@ -15,7 +15,10 @@ export async function authenticateRequest(
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.json({ error: "Configuration Supabase manquante" }, { status: 500 }) as NextResponse;
+    return NextResponse.json(
+      { error: "Configuration Supabase manquante" },
+      { status: 500 },
+    ) as NextResponse;
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -39,6 +42,19 @@ export function createServiceClient() {
 
   if (!url || !key) {
     throw new Error("Missing Supabase service credentials");
+  }
+
+  return createClient<Database>(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
+export function createPublicAuthClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error("Missing Supabase public credentials");
   }
 
   return createClient<Database>(url, key, {

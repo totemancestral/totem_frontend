@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/server-auth";
-import { sendAuthEmail } from "@/lib/services/auth-email";
+import { createPublicAuthClient } from "@/lib/server-auth";
 
 type RecoverPayload = {
   email?: string;
@@ -19,26 +18,19 @@ export async function POST(request: Request) {
   const origin = getRequestOrigin(request);
   const redirectTo = `${origin}/${locale}/renovare_clavis`;
 
-  const supabase = createServiceClient();
-  const { data, error } = await supabase.auth.admin.generateLink({
-    type: "recovery",
-    email,
-    options: { redirectTo },
-  });
+  const supabase = createPublicAuthClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
 
-  if (error) {
-    return NextResponse.json({ ok: true });
+  if (!error) return NextResponse.json({ ok: true });
+
+  if (error.status === 429 || /rate limit/i.test(error.message)) {
+    return NextResponse.json(
+      { error: "Trop de demandes. Reessayez dans quelques minutes." },
+      { status: 429 },
+    );
   }
 
-  const actionLink = data.properties?.action_link;
-  if (!actionLink) return NextResponse.json({ ok: true });
-
-  try {
-    await sendAuthEmail({ email, actionLink, locale, type: "recovery" });
-    return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: "Email impossible a envoyer" }, { status: 500 });
-  }
+  return NextResponse.json({ error: "Email impossible a envoyer" }, { status: 500 });
 }
 
 function getRequestOrigin(request: Request) {

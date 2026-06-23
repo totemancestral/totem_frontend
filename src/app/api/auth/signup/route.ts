@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/server-auth";
-import { sendAuthEmail } from "@/lib/services/auth-email";
+import { createPublicAuthClient } from "@/lib/server-auth";
 
 type SignupPayload = {
   email?: string;
@@ -27,13 +26,12 @@ export async function POST(request: Request) {
   const redirectTo = `${getRequestOrigin(request)}${safeRedirectPath(payload.redirectPath, locale)}`;
 
   try {
-    const supabase = createServiceClient();
-    const { data, error } = await supabase.auth.admin.generateLink({
-      type: "signup",
+    const supabase = createPublicAuthClient();
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        redirectTo,
+        emailRedirectTo: redirectTo,
         data: { prenom: payload.prenom?.trim() || email.split("@")[0], langue: locale },
       },
     });
@@ -41,13 +39,6 @@ export async function POST(request: Request) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-
-    const actionLink = data.properties?.action_link;
-    if (!actionLink) {
-      return NextResponse.json({ error: "Lien de confirmation indisponible" }, { status: 500 });
-    }
-
-    await sendAuthEmail({ email, actionLink, locale, type: "confirmation" });
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(
