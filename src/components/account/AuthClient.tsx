@@ -35,7 +35,6 @@ const copy = {
     site: "Entrer sur le site",
     switchSignup: "Je viens composer mon oeuvre",
     switchSignin: "J'ai deja un compte",
-    legal: "Tes donnees restent rattachees a ton compte et protegees par Supabase Auth.",
     magicSent: "Lien magique envoye. Verifie ta boite mail.",
     confirmSent: "Email de confirmation envoye. Verifie ta boite mail avant de continuer.",
     sessionReady: "Session ouverte. Redirection...",
@@ -63,7 +62,6 @@ const copy = {
     site: "Enter the site",
     switchSignup: "I came to compose",
     switchSignin: "I already have an account",
-    legal: "Your data stays attached to your account and protected by Supabase Auth.",
     magicSent: "Magic link sent. Check your inbox.",
     confirmSent: "Confirmation email sent. Check your inbox before continuing.",
     sessionReady: "Session opened. Redirecting...",
@@ -311,7 +309,6 @@ export function AuthClient({ locale }: { locale: Locale }) {
             >
               {mode === "signin" ? t.switchSignup : t.switchSignin}
             </button>
-            <p className="caption max-w-sm premium-soft">{t.legal}</p>
           </div>
         </motion.div>
       </div>

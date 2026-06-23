@@ -1,13 +1,12 @@
 import * as brevo from "@getbrevo/brevo";
-import { getServerEnv } from "@/lib/env";
 
 export function getBrevoClient() {
-  const env = getServerEnv();
-  if (!env.BREVO_API_KEY) {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
     throw new Error("Missing BREVO_API_KEY");
   }
 
   const client = new brevo.TransactionalEmailsApi();
-  client.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, env.BREVO_API_KEY);
+  client.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, apiKey);
   return client;
 }
