@@ -15,6 +15,7 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
+import { Menu, X } from "lucide-react";
 
 type Section = "apercu" | "commandes" | "utilisateurs" | "activite" | "evenements";
 
@@ -101,6 +102,15 @@ export default function AdminPage() {
     }
     loadAll(token);
   }, [token, session]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [mobileOpen]);
 
   async function loadAll(t: string) {
     setLoading(true);
@@ -223,7 +233,7 @@ export default function AdminPage() {
           setMobileOpen(false);
         }}
         mobileOpen={mobileOpen}
-        onToggle={() => setMobileOpen(!mobileOpen)}
+        onClose={() => setMobileOpen(false)}
         onLogout={handleLogout}
       />
 
@@ -235,7 +245,8 @@ export default function AdminPage() {
               onClick={() => setMobileOpen(true)}
               className="btn-secondary px-4 py-2 text-xs"
             >
-              ☰ Menu
+              <Menu size={16} />
+              Menu
             </button>
             <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>
               SENYCE PARTNERS
@@ -279,14 +290,14 @@ function Sidebar({
   active,
   onSelect,
   mobileOpen,
-  onToggle,
+  onClose,
   onLogout,
 }: {
   navItems: { id: Section; label: string }[];
   active: Section;
   onSelect: (s: Section) => void;
   mobileOpen: boolean;
-  onToggle: () => void;
+  onClose: () => void;
   onLogout: () => void;
 }) {
   const sidebar = (
@@ -340,12 +351,26 @@ function Sidebar({
       </aside>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/60" onClick={onToggle} />
+        <div className="fixed inset-0 z-[300] lg:hidden" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/70"
+            aria-label="Fermer le menu"
+            onClick={onClose}
+          />
           <aside
-            className="relative h-full w-72"
+            className="fixed inset-y-0 left-0 z-[310] w-[min(18rem,calc(100vw-1rem))] overflow-y-auto"
             style={{ borderRight: "1px solid rgba(216,173,77,0.18)" }}
           >
+            <button
+              type="button"
+              className="absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-sm border"
+              style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
+              aria-label="Fermer le menu"
+              onClick={onClose}
+            >
+              <X size={18} />
+            </button>
             {sidebar}
           </aside>
         </div>

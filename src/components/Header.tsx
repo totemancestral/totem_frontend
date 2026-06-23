@@ -71,6 +71,15 @@ export function Header({ locale }: { locale: Locale }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [open]);
+
   return (
     <header
       className="fixed left-0 right-0 top-0 z-50 border-b transition-all duration-500"
@@ -212,7 +221,7 @@ export function Header({ locale }: { locale: Locale }) {
 
       {open && (
         <div
-          className="border-t md:hidden"
+          className="max-h-[calc(100svh-72px)] overflow-y-auto border-t md:hidden"
           style={{ background: "var(--nuit-profonde)", borderColor: "rgba(216,173,77,0.18)" }}
         >
           <div className="px-6 py-6 flex flex-col gap-5">

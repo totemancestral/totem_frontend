@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GoldParticles } from "@/components/GoldParticles";
@@ -375,6 +375,12 @@ type Offer = {
 };
 
 type OfferId = "origine" | "ancestral" | "famille";
+type PendingCheckout = {
+  offerId: OfferId;
+  amountCents: number;
+  commandId?: string;
+  checkoutSessionId?: string;
+};
 
 export function ParcoursPage() {
   const router = useRouter();
@@ -388,11 +394,13 @@ export function ParcoursPage() {
   const [account, setAccount] = useState<AccountDraft>({ prenom: "", email: "" });
   const [session, setSession] = useState<Session | null>(null);
   const [hasUnlockedRest, setHasUnlockedRest] = useState(false);
+  const [paidCommandId, setPaidCommandId] = useState<string | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [loadingOffer, setLoadingOffer] = useState<OfferId | null>(null);
   const [nudgeCount, setNudgeCount] = useState(0);
   const [nudge, setNudge] = useState<string | null>(null);
   const filledRef = useRef<Set<number>>(new Set());
+  const completionStartedRef = useRef(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
@@ -421,8 +429,12 @@ export function ParcoursPage() {
     }
 
     if (checkout === "success") {
+      const pending = readPendingCheckout();
+      const commandId = searchParams.get("commande_id") || pending?.commandId || null;
+      if (commandId) setPaidCommandId(commandId);
       clearPendingCheckout();
       setHasUnlockedRest(true);
+      setIndex((currentIndex) => Math.max(currentIndex, 4));
       setPhase("post-payment");
       router.replace(`/${locale}/via_sapientiae`, { scroll: false });
     }
@@ -449,15 +461,25 @@ export function ParcoursPage() {
         answers?: Record<number, Answer>;
         account?: AccountDraft;
         hasUnlockedRest?: boolean;
+        paidCommandId?: string | null;
         index?: number;
         phase?: Phase;
       };
       if (saved.answers) setAnswers(saved.answers);
       if (saved.account) setAccount(saved.account);
       if (typeof saved.hasUnlockedRest === "boolean") setHasUnlockedRest(saved.hasUnlockedRest);
+      if (typeof saved.paidCommandId === "string") setPaidCommandId(saved.paidCommandId);
       if (typeof saved.index === "number") setIndex(saved.index);
       if (saved.phase && saved.phase !== "waiting") {
-        setPhase(saved.phase === "account" ? "paywall-transition" : saved.phase);
+        if (
+          saved.hasUnlockedRest &&
+          (saved.phase === "paywall" || saved.phase === "paywall-transition")
+        ) {
+          setPhase("question");
+          setIndex((currentIndex) => Math.max(currentIndex, 4));
+        } else {
+          setPhase(saved.phase === "account" ? "paywall-transition" : saved.phase);
+        }
       }
     } catch {
       /* ignore corrupted storage */
@@ -470,15 +492,44 @@ export function ParcoursPage() {
     try {
       localStorage.setItem(
         "totem_parcours_v1",
-        JSON.stringify({ answers, account, hasUnlockedRest, index, phase }),
+        JSON.stringify({ answers, account, hasUnlockedRest, paidCommandId, index, phase }),
       );
     } catch {
       /* quota, ignore */
     }
-  }, [answers, account, hasUnlockedRest, index, phase]);
+  }, [answers, account, hasUnlockedRest, paidCommandId, index, phase]);
 
   const current = questions[index] ?? QUESTIONS[index];
   const progress = phase === "intro" ? 0 : phase === "question" ? current.progress : 100;
+
+  const completePaidOrder = useCallback(async () => {
+    if (!session) return;
+
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    };
+
+    if (!paidCommandId) {
+      await fetch(apiPath("parcours", "/reponses"), {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ reponses: answers, termine: true, langue: locale }),
+      });
+      return;
+    }
+
+    const response = await fetch(apiPath("commandes", "/complete"), {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ commandeId: paidCommandId, answers, locale }),
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(payload?.error || "complete_order_failed");
+    }
+  }, [answers, locale, paidCommandId, session]);
 
   // Paywall auto-transition
   useEffect(() => {
@@ -487,10 +538,18 @@ export function ParcoursPage() {
       return () => clearTimeout(t);
     }
     if (phase === "final-transition") {
-      const t = setTimeout(() => setPhase("paywall"), 4000);
+      const t = setTimeout(() => setPhase("waiting"), 4000);
       return () => clearTimeout(t);
     }
   }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "final-transition" || !session || completionStartedRef.current) return;
+    completionStartedRef.current = true;
+    completePaidOrder().catch(() => {
+      completionStartedRef.current = false;
+    });
+  }, [completePaidOrder, phase, session]);
 
   function triggerNudge(qN: number, text: string) {
     if (filledRef.current.has(qN)) return;
@@ -517,6 +576,10 @@ export function ParcoursPage() {
   }
 
   function next() {
+    if (current.n === 4 && !hasUnlockedRest) {
+      setPhase("paywall-transition");
+      return;
+    }
     if (current.n === 10) {
       setPhase("final-transition");
       return;
@@ -555,6 +618,8 @@ export function ParcoursPage() {
       });
       const payload = (await response.json().catch(() => null)) as {
         checkoutUrl?: string;
+        checkoutSessionId?: string;
+        commandeId?: string;
         error?: string;
       } | null;
 
@@ -566,7 +631,13 @@ export function ParcoursPage() {
         throw new Error("URL de paiement non disponible");
       }
 
-      writePendingCheckout({ offerId: offer.id, amountCents: offer.amountCents });
+      if (payload.commandeId) setPaidCommandId(payload.commandeId);
+      writePendingCheckout({
+        offerId: offer.id,
+        amountCents: offer.amountCents,
+        commandId: payload.commandeId,
+        checkoutSessionId: payload.checkoutSessionId,
+      });
       window.location.href = payload.checkoutUrl;
     } catch (error) {
       setCheckoutError(error instanceof Error ? error.message : "checkout_failed");
@@ -657,7 +728,8 @@ export function ParcoursPage() {
           <PostPayment
             key="pp"
             onContinue={() => {
-              setPhase("waiting");
+              setIndex((currentIndex) => Math.max(currentIndex, 4));
+              setPhase("question");
             }}
           />
         )}
@@ -1605,7 +1677,7 @@ function toLocale(locale: string): "fr" | "en" {
   return locale === "en" ? "en" : "fr";
 }
 
-function writePendingCheckout(value: { offerId: OfferId; amountCents: number }) {
+function writePendingCheckout(value: PendingCheckout) {
   try {
     window.localStorage.setItem(PENDING_CHECKOUT_KEY, JSON.stringify(value));
   } catch {
@@ -1613,13 +1685,18 @@ function writePendingCheckout(value: { offerId: OfferId; amountCents: number }) 
   }
 }
 
-function readPendingCheckout(): { offerId: OfferId; amountCents: number } | null {
+function readPendingCheckout(): PendingCheckout | null {
   try {
     const raw = window.localStorage.getItem(PENDING_CHECKOUT_KEY);
     if (!raw) return null;
-    const value = JSON.parse(raw) as { offerId?: OfferId; amountCents?: number };
+    const value = JSON.parse(raw) as Partial<PendingCheckout>;
     if (!value.offerId || typeof value.amountCents !== "number") return null;
-    return { offerId: value.offerId, amountCents: value.amountCents };
+    return {
+      offerId: value.offerId,
+      amountCents: value.amountCents,
+      commandId: value.commandId,
+      checkoutSessionId: value.checkoutSessionId,
+    };
   } catch {
     return null;
   }

@@ -19,6 +19,12 @@ const offerConfig = {
   famille: { priceEnv: "STRIPE_PRICE_FAMILLE", amountCents: 19900 },
 } as const;
 
+const commandOfferMap = {
+  origine: "essentiel",
+  ancestral: "signature",
+  famille: "heritage",
+} as const;
+
 export async function POST(request: Request) {
   const auth = await authenticateRequest(request);
   if (auth instanceof NextResponse) return auth;
@@ -35,13 +41,6 @@ export async function POST(request: Request) {
   const config = offerConfig[parsed.data.offre];
   const priceId = env[config.priceEnv];
 
-  if (!env.STRIPE_SECRET_KEY || !priceId) {
-    return NextResponse.json(
-      { error: "Le paiement n'est pas configure. Contacte l'equipe technique." },
-      { status: 503 },
-    );
-  }
-
   const origin = (
     request.headers.get("origin") ||
     env.NEXT_PUBLIC_SITE_URL ||
@@ -57,19 +56,106 @@ export async function POST(request: Request) {
     .maybeSingle();
   const prenom = (profileResult?.data as { prenom?: string } | null)?.prenom ?? "";
 
-  const metadata = buildStripeMetadata(parsed.data, auth.userId, auth.email, prenom);
-
-  try {
-    await supabase.from("reponses_parcours").upsert(
+  const backendAnswers = toBackendAnswers(parsed.data.answers);
+  const { data: parcours, error: parcoursError } = await supabase
+    .from("reponses_parcours")
+    .upsert(
       {
         user_id: auth.userId,
         session_id: auth.userId,
         reponses: parsed.data.answers as unknown as Json,
-        termine: true,
+        termine: backendAnswers.length >= 10,
         langue: parsed.data.locale,
       },
       { onConflict: "user_id, session_id" },
+    )
+    .select("id")
+    .single();
+
+  if (parcoursError) {
+    return NextResponse.json({ error: parcoursError.message }, { status: 500 });
+  }
+
+  if (env.TOTEM_BACKEND_URL) {
+    if (backendAnswers.length < 4) {
+      return NextResponse.json({ error: "Reponses insuffisantes" }, { status: 422 });
+    }
+
+    const { data: commande, error: commandeError } = await supabase
+      .from("commandes")
+      .insert({
+        user_id: auth.userId,
+        reponses_id: parcours.id,
+        offre: commandOfferMap[parsed.data.offre],
+        statut: "en_attente_paiement",
+        montant_cents: config.amountCents,
+        devise: "EUR",
+        langue: parsed.data.locale,
+      })
+      .select("id")
+      .single();
+
+    if (commandeError) {
+      return NextResponse.json({ error: commandeError.message }, { status: 500 });
+    }
+
+    const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
+    const backendResponse = await fetch(`${backendUrl}/checkout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: request.headers.get("authorization") ?? "",
+      },
+      body: JSON.stringify({
+        offer: parsed.data.offre,
+        externalCommandId: commande.id,
+        answers: backendAnswers,
+        locale: parsed.data.locale,
+        customerName: prenom || undefined,
+        successUrl: `${origin}${pagePath(
+          parsed.data.locale,
+          "parcours",
+          `checkout=success&session_id={CHECKOUT_SESSION_ID}&commande_id=${commande.id}`,
+        )}`,
+        cancelUrl: `${origin}${pagePath(parsed.data.locale, "parcours", "checkout=cancelled")}`,
+      }),
+    });
+
+    const backendPayload = (await backendResponse.json().catch(() => null)) as {
+      id?: string;
+      url?: string | null;
+      message?: string;
+      error?: string;
+    } | null;
+
+    if (!backendResponse.ok || !backendPayload?.url) {
+      return NextResponse.json(
+        { error: backendPayload?.message || backendPayload?.error || "checkout_failed" },
+        { status: backendResponse.ok ? 502 : backendResponse.status },
+      );
+    }
+
+    return NextResponse.json({
+      checkoutUrl: backendPayload.url,
+      checkoutSessionId: backendPayload.id,
+      commandeId: commande.id,
+    });
+  }
+
+  if (!env.STRIPE_SECRET_KEY || !priceId) {
+    return NextResponse.json(
+      { error: "Le paiement n'est pas configure. Contacte l'equipe technique." },
+      { status: 503 },
     );
+  }
+
+  const metadata = buildStripeMetadata(parsed.data, auth.userId, auth.email, prenom);
+
+  try {
+    await supabase
+      .from("reponses_parcours")
+      .update({ termine: backendAnswers.length >= 10 })
+      .eq("id", parcours.id);
   } catch {
     // Non bloquant — le parcours continue meme si la sauvegarde echoue
   }
@@ -128,6 +214,14 @@ function formatAnswer(value: unknown) {
   const answer = value as { choice?: string; field?: string; skipped?: boolean };
   if (answer.skipped) return "skipped";
   return [answer.choice, answer.field?.trim()].filter(Boolean).join(" | ");
+}
+
+function toBackendAnswers(answers: Record<string, unknown>) {
+  return Array.from({ length: 10 }, (_, index) => {
+    const questionId = `q${index + 1}`;
+    const answer = formatAnswer(answers[String(index + 1)]).trim();
+    return answer ? { questionId, answer } : null;
+  }).filter((answer): answer is { questionId: string; answer: string } => Boolean(answer));
 }
 
 function trimMetadataValue(value: string) {

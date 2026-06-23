@@ -253,6 +253,15 @@ export function DashboardClient({ locale }: { locale: Locale }) {
   const composition = buildCompositionState({ commandes, oeuvres, copy: t });
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [sidebarOpen]);
+
   const scrollTo = (id: string) => {
     setSidebarOpen(false);
     setTimeout(() => {
@@ -356,12 +365,26 @@ export function DashboardClient({ locale }: { locale: Locale }) {
       </aside>
 
       {sidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 z-[300] lg:hidden" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/70"
+            aria-label="Fermer le menu"
+            onClick={() => setSidebarOpen(false)}
+          />
           <aside
-            className="relative h-full w-72 pt-20"
+            className="fixed inset-y-0 left-0 z-[310] w-[min(18rem,calc(100vw-1rem))] overflow-y-auto"
             style={{ borderRight: "1px solid rgba(216,173,77,0.18)" }}
           >
+            <button
+              type="button"
+              className="absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-sm border"
+              style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
+              aria-label="Fermer le menu"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <X size={18} />
+            </button>
             {sidebar}
           </aside>
         </div>
