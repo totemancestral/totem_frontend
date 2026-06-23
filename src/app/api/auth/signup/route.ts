@@ -41,7 +41,38 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      logAuthError("signup rejected", error);
+
+      if (isExistingAccountError(error.message)) {
+        const { error: resendError } = await supabase.auth.resend({
+          type: "signup",
+          email,
+          options: { emailRedirectTo: redirectTo },
+        });
+
+        if (!resendError) {
+          return NextResponse.json({ ok: true, resent: true });
+        }
+
+        logAuthError("confirmation resend rejected", resendError);
+
+        if (isAlreadyConfirmedError(resendError.message)) {
+          return NextResponse.json(
+            { error: "Un compte existe deja avec cet email. Connecte-toi." },
+            { status: 409 },
+          );
+        }
+
+        return NextResponse.json(
+          { error: normalizeAuthError(resendError.message), code: "confirmation_resend_failed" },
+          { status: statusFromAuthError(resendError) },
+        );
+      }
+
+      return NextResponse.json(
+        { error: normalizeAuthError(error.message) },
+        { status: statusFromAuthError(error) },
+      );
     }
     return NextResponse.json({ ok: true });
   } catch (error) {
@@ -50,6 +81,35 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+}
+
+function isExistingAccountError(message: string) {
+  return /already registered|already exists|user already|email.*exists/i.test(message);
+}
+
+function isAlreadyConfirmedError(message: string) {
+  return /already confirmed|confirmed already|user.*confirmed/i.test(message);
+}
+
+function normalizeAuthError(message: string) {
+  if (/rate limit/i.test(message)) return "Trop de tentatives. Reessayez dans quelques minutes.";
+  if (/password/i.test(message)) return "Mot de passe trop court, minimum 6 caracteres.";
+  if (/email/i.test(message)) return message;
+  return message || "Inscription impossible";
+}
+
+function statusFromAuthError(error: { status?: number; message?: string }) {
+  if (error.status === 429 || /rate limit/i.test(error.message ?? "")) return 429;
+  if (error.status && error.status >= 400 && error.status < 500) return error.status;
+  return 400;
+}
+
+function logAuthError(label: string, error: { status?: number; code?: string; message?: string }) {
+  console.warn(`[auth/signup] ${label}`, {
+    status: error.status,
+    code: error.code,
+    message: error.message,
+  });
 }
 
 function getRequestOrigin(request: Request) {
