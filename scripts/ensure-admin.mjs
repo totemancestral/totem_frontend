@@ -86,4 +86,12 @@ const { error: roleError } = await supabase
 
 if (roleError) throw roleError;
 
+const { error: userRoleError } = await supabase
+  .from("user_roles")
+  .delete()
+  .eq("user_id", user.id)
+  .eq("role", "user");
+
+if (userRoleError) throw userRoleError;
+
 console.log(JSON.stringify({ email: ADMIN_EMAIL, id: user.id, role: "admin" }, null, 2));

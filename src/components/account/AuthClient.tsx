@@ -11,6 +11,9 @@ import { useSupabaseSession } from "@/hooks/use-supabase-session";
 type Locale = "fr" | "en";
 type Mode = "signin" | "signup";
 
+const ADMIN_EMAIL = "contact@totem-ancestral.com";
+const ADMIN_PATH = "/fgh55_fh";
+
 const copy = {
   fr: {
     eyebrow: "Acces personnel",
@@ -88,8 +91,9 @@ export function AuthClient({ locale }: { locale: Locale }) {
   const redirectPath = searchParams.get("redirect") || dashboardPath;
 
   useEffect(() => {
-    if (existingSession) router.replace(redirectPath);
-  }, [existingSession, locale, redirectPath, router]);
+    if (!existingSession) return;
+    router.replace(redirectForEmail(existingSession.user.email, redirectPath));
+  }, [existingSession, redirectPath, router]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -122,7 +126,7 @@ export function AuthClient({ locale }: { locale: Locale }) {
       if (signInError) throw signInError;
 
       setNotice(t.sessionReady);
-      router.replace(redirectPath);
+      router.replace(redirectForEmail(email, redirectPath));
     } catch (authError) {
       setError(translateAuthError(authError, locale));
     } finally {
@@ -138,7 +142,11 @@ export function AuthClient({ locale }: { locale: Locale }) {
       const response = await fetch("/api/auth/magic-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, locale, redirectPath }),
+        body: JSON.stringify({
+          email,
+          locale,
+          redirectPath: redirectForEmail(email, redirectPath),
+        }),
       });
 
       if (!response.ok) {
@@ -347,6 +355,10 @@ function Field({
       />
     </label>
   );
+}
+
+function redirectForEmail(email: string | null | undefined, fallback: string) {
+  return email?.trim().toLowerCase() === ADMIN_EMAIL ? ADMIN_PATH : fallback;
 }
 
 function tabClass(active: boolean) {

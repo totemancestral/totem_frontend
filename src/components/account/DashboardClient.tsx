@@ -26,6 +26,9 @@ import { useSupabaseSession } from "@/hooks/use-supabase-session";
 type Locale = "fr" | "en";
 type DashboardSection = "overview" | "orders" | "artworks" | "profile";
 
+const ADMIN_EMAIL = "contact@totem-ancestral.com";
+const ADMIN_PATH = "/fgh55_fh";
+
 type Commande = {
   id: string;
   user_id: string;
@@ -223,6 +226,10 @@ export function DashboardClient({
     if (authLoading) return;
     if (!session) {
       router.replace(authPath);
+      return;
+    }
+    if (session.user.email?.trim().toLowerCase() === ADMIN_EMAIL) {
+      router.replace(ADMIN_PATH);
       return;
     }
 

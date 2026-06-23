@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Locale = "fr" | "en";
 
+const ADMIN_EMAIL = "contact@totem-ancestral.com";
+
 const nav = [
   { to: "/", hash: "#experience", labelKey: "experience" },
   { to: "/", hash: "#offres", labelKey: "offers" },
@@ -37,17 +39,21 @@ export function Header({ locale }: { locale: Locale }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [session, setSession] = useState<boolean | null>(null);
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   const isAccountArea = Boolean(pathname?.includes("/domus_animi"));
+  const isAdminSession = sessionEmail?.toLowerCase() === ADMIN_EMAIL;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(!!s);
+      setSessionEmail(s?.user.email ?? null);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(!!s);
+      setSessionEmail(s?.user.email ?? null);
     });
 
     return () => subscription.unsubscribe();
@@ -132,16 +138,26 @@ export function Header({ locale }: { locale: Locale }) {
           <>
             {!isAccountArea && (
               <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-10 md:flex">
-                {accountNav.map((item) => (
+                {isAdminSession ? (
                   <Link
-                    key={item.href}
-                    href={item.href}
+                    href="/fgh55_fh"
                     className="subtext text-[12px] uppercase transition-colors hover:text-or"
                     style={{ color: "rgba(209,197,177,0.92)" }}
                   >
-                    {item.label}
+                    Admin
                   </Link>
-                ))}
+                ) : (
+                  accountNav.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="subtext text-[12px] uppercase transition-colors hover:text-or"
+                      style={{ color: "rgba(209,197,177,0.92)" }}
+                    >
+                      {item.label}
+                    </Link>
+                  ))
+                )}
               </nav>
             )}
 
@@ -254,17 +270,28 @@ export function Header({ locale }: { locale: Locale }) {
           <div className="px-6 py-6 flex flex-col gap-5">
             {session ? (
               <>
-                {accountNav.map((item) => (
+                {isAdminSession ? (
                   <Link
-                    key={item.href}
-                    href={item.href}
+                    href="/fgh55_fh"
                     onClick={() => setOpen(false)}
                     className="subtext text-sm uppercase"
                     style={{ color: "var(--ivoire)" }}
                   >
-                    {item.label}
+                    Admin
                   </Link>
-                ))}
+                ) : (
+                  accountNav.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="subtext text-sm uppercase"
+                      style={{ color: "var(--ivoire)" }}
+                    >
+                      {item.label}
+                    </Link>
+                  ))
+                )}
               </>
             ) : (
               <>
