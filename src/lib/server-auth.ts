@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { readEnvValue } from "@/lib/env-values";
 
 export async function authenticateRequest(
   request: Request,
@@ -67,18 +68,18 @@ export function hasServiceAuthCredentials() {
 }
 
 function getSupabaseUrl() {
-  return process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  return readEnvValue("NEXT_PUBLIC_SUPABASE_URL") || readEnvValue("SUPABASE_URL");
 }
 
 function getSupabasePublicKey() {
   return (
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_PUBLISHABLE_KEY
+    readEnvValue("NEXT_PUBLIC_SUPABASE_ANON_KEY") ||
+    readEnvValue("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") ||
+    readEnvValue("SUPABASE_ANON_KEY") ||
+    readEnvValue("SUPABASE_PUBLISHABLE_KEY")
   );
 }
 
 function getSupabaseServiceKey() {
-  return process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  return readEnvValue("SUPABASE_SERVICE_KEY") || readEnvValue("SUPABASE_SERVICE_ROLE_KEY");
 }

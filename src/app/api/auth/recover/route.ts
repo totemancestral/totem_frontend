@@ -4,6 +4,7 @@ import {
   createServiceClient,
   hasServiceAuthCredentials,
 } from "@/lib/server-auth";
+import { readEnvValue } from "@/lib/env-values";
 import { sendAuthEmail } from "@/lib/services/auth-email";
 
 type RecoverPayload = {
@@ -88,11 +89,11 @@ async function sendManagedRecoveryEmail({
 }
 
 function canSendManagedRecovery() {
-  return hasServiceAuthCredentials() && Boolean(process.env.BREVO_API_KEY);
+  return hasServiceAuthCredentials() && Boolean(readEnvValue("BREVO_API_KEY"));
 }
 
 function getRequestOrigin(request: Request) {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  const configured = readEnvValue("NEXT_PUBLIC_SITE_URL")?.replace(/\/$/, "");
   if (configured) return configured;
 
   const url = new URL(request.url);

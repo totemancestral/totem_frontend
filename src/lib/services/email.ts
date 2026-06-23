@@ -1,4 +1,5 @@
 import { getBrevoClient } from "@/lib/clients/brevo";
+import { readEnvNumber, readEnvValue } from "@/lib/env-values";
 import * as brevo from "@getbrevo/brevo";
 
 export type EmailLocale = "fr" | "en";
@@ -10,7 +11,7 @@ type SendParams = {
 };
 
 async function sendTransactional(params: SendParams): Promise<void> {
-  const apiKey = process.env.BREVO_API_KEY;
+  const apiKey = readEnvValue("BREVO_API_KEY");
   if (!apiKey) return;
 
   const client = getBrevoClient();
@@ -31,8 +32,8 @@ export async function sendConfirmationEmail(
 ): Promise<void> {
   const templateId =
     locale === "fr"
-      ? Number(process.env.BREVO_TEMPLATE_CONFIRM_FR)
-      : Number(process.env.BREVO_TEMPLATE_CONFIRM_EN);
+      ? readEnvNumber("BREVO_TEMPLATE_CONFIRM_FR")
+      : readEnvNumber("BREVO_TEMPLATE_CONFIRM_EN");
 
   if (!templateId) return;
 
@@ -51,8 +52,8 @@ export async function sendDeliveryEmail(
 ): Promise<void> {
   const templateId =
     locale === "fr"
-      ? Number(process.env.BREVO_TEMPLATE_LIVRAISON_FR)
-      : Number(process.env.BREVO_TEMPLATE_LIVRAISON_EN);
+      ? readEnvNumber("BREVO_TEMPLATE_LIVRAISON_FR")
+      : readEnvNumber("BREVO_TEMPLATE_LIVRAISON_EN");
 
   if (!templateId) return;
 
@@ -70,8 +71,8 @@ export async function sendDeliveryEmail(
 }
 
 export async function sendAdminAlert(sujet: string, details: string): Promise<void> {
-  const templateId = Number(process.env.BREVO_TEMPLATE_ALERTE_ADMIN);
-  const adminEmail = process.env.ADMIN_EMAIL;
+  const templateId = readEnvNumber("BREVO_TEMPLATE_ALERTE_ADMIN");
+  const adminEmail = readEnvValue("ADMIN_EMAIL");
 
   if (!templateId || !adminEmail) return;
 

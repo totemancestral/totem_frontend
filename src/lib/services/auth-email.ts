@@ -1,3 +1,5 @@
+import { readEnvValue } from "@/lib/env-values";
+
 type Locale = "fr" | "en";
 type AuthEmailType = "confirmation" | "magic" | "recovery";
 
@@ -12,7 +14,7 @@ export async function sendAuthEmail({
   locale: Locale;
   type: AuthEmailType;
 }) {
-  const apiKey = process.env.BREVO_API_KEY;
+  const apiKey = readEnvValue("BREVO_API_KEY");
   if (!apiKey) {
     throw new Error("Missing BREVO_API_KEY");
   }
@@ -26,8 +28,8 @@ export async function sendAuthEmail({
     },
     body: JSON.stringify({
       sender: {
-        email: process.env.BREVO_AUTH_SENDER_EMAIL || "livraison@totem-ancestral.com",
-        name: process.env.BREVO_SENDER_NAME || "TOTEM ANCESTRAL",
+        email: readEnvValue("BREVO_AUTH_SENDER_EMAIL") || "livraison@totem-ancestral.com",
+        name: readEnvValue("BREVO_SENDER_NAME") || "TOTEM ANCESTRAL",
       },
       to: [{ email }],
       subject: subjectFor(type, locale),
