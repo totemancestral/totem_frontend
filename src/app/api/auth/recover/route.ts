@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { createPublicAuthClient } from "@/lib/server-auth";
+import {
+  createPublicAuthClient,
+  createServiceClient,
+  hasServiceAuthCredentials,
+} from "@/lib/server-auth";
+import { sendAuthEmail } from "@/lib/services/auth-email";
 
 type RecoverPayload = {
   email?: string;
@@ -18,6 +23,10 @@ export async function POST(request: Request) {
   const origin = getRequestOrigin(request);
   const redirectTo = `${origin}/${locale}/renovare_clavis`;
 
+  if (canSendManagedRecovery()) {
+    return sendManagedRecoveryEmail({ email, locale, redirectTo });
+  }
+
   const supabase = createPublicAuthClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
 
@@ -31,6 +40,55 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ error: "Email impossible a envoyer" }, { status: 500 });
+}
+
+async function sendManagedRecoveryEmail({
+  email,
+  locale,
+  redirectTo,
+}: {
+  email: string;
+  locale: "fr" | "en";
+  redirectTo: string;
+}) {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase.auth.admin.generateLink({
+    type: "recovery",
+    email,
+    options: { redirectTo },
+  });
+
+  if (error) {
+    console.warn("[auth/recover] managed recovery rejected", {
+      status: error.status,
+      code: error.code,
+      message: error.message,
+    });
+
+    if (/not found|does not exist/i.test(error.message)) {
+      return NextResponse.json({ ok: true });
+    }
+
+    return NextResponse.json({ error: "Email impossible a envoyer" }, { status: 500 });
+  }
+
+  const actionLink = data.properties?.action_link;
+  if (!actionLink) {
+    return NextResponse.json({ error: "Lien impossible a generer" }, { status: 500 });
+  }
+
+  try {
+    await sendAuthEmail({ email, actionLink, locale, type: "recovery" });
+  } catch (emailError) {
+    console.error("[auth/recover] recovery email failed", emailError);
+    return NextResponse.json({ error: "Email impossible a envoyer" }, { status: 502 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
+function canSendManagedRecovery() {
+  return hasServiceAuthCredentials() && Boolean(process.env.BREVO_API_KEY);
 }
 
 function getRequestOrigin(request: Request) {

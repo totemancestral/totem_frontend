@@ -18,7 +18,7 @@ export async function sendAuthEmail({
   const client = getBrevoClient();
   const message = new brevo.SendSmtpEmail();
   message.sender = {
-    email: process.env.BREVO_SENDER_EMAIL || "contact@totem-ancestral.com",
+    email: process.env.BREVO_AUTH_SENDER_EMAIL || "livraison@totem-ancestral.com",
     name: process.env.BREVO_SENDER_NAME || "TOTEM ANCESTRAL",
   };
   message.to = [{ email }];

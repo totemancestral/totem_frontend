@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { createPublicAuthClient } from "@/lib/server-auth";
+import {
+  createPublicAuthClient,
+  createServiceClient,
+  hasServiceAuthCredentials,
+} from "@/lib/server-auth";
+import { sendAuthEmail } from "@/lib/services/auth-email";
 
 type SignupPayload = {
   email?: string;
@@ -30,6 +35,10 @@ export async function POST(request: Request) {
   };
 
   try {
+    if (canSendManagedConfirmation()) {
+      return await signupWithManagedConfirmation({ email, password, locale, redirectTo, metadata });
+    }
+
     const supabase = createPublicAuthClient();
     const { error } = await supabase.auth.signUp({
       email,
@@ -81,6 +90,112 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+}
+
+async function signupWithManagedConfirmation({
+  email,
+  password,
+  locale,
+  redirectTo,
+  metadata,
+}: {
+  email: string;
+  password: string;
+  locale: "fr" | "en";
+  redirectTo: string;
+  metadata: { prenom: string; langue: "fr" | "en" };
+}) {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase.auth.admin.generateLink({
+    type: "signup",
+    email,
+    password,
+    options: {
+      redirectTo,
+      data: metadata,
+    },
+  });
+
+  if (error) {
+    logAuthError("managed signup rejected", error);
+
+    if (isExistingAccountError(error.message)) {
+      return sendManagedMagicLink({ email, locale, redirectTo });
+    }
+
+    return NextResponse.json(
+      { error: normalizeAuthError(error.message) },
+      { status: statusFromAuthError(error) },
+    );
+  }
+
+  const actionLink = data.properties?.action_link;
+  const userId = data.user?.id;
+
+  if (!actionLink || !userId) {
+    return NextResponse.json(
+      { error: "Lien de confirmation impossible a generer" },
+      { status: 500 },
+    );
+  }
+
+  try {
+    await sendAuthEmail({ email, actionLink, locale, type: "confirmation" });
+  } catch (emailError) {
+    console.error("[auth/signup] confirmation email failed", emailError);
+    await supabase.auth.admin.deleteUser(userId).catch((deleteError) => {
+      console.error("[auth/signup] created user cleanup failed", deleteError);
+    });
+    return NextResponse.json(
+      { error: "Email de confirmation impossible a envoyer" },
+      { status: 502 },
+    );
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
+async function sendManagedMagicLink({
+  email,
+  locale,
+  redirectTo,
+}: {
+  email: string;
+  locale: "fr" | "en";
+  redirectTo: string;
+}) {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+    options: { redirectTo },
+  });
+
+  if (error) {
+    logAuthError("managed existing account link rejected", error);
+    return NextResponse.json(
+      { error: "Un compte existe deja avec cet email. Connecte-toi." },
+      { status: 409 },
+    );
+  }
+
+  const actionLink = data.properties?.action_link;
+  if (!actionLink) {
+    return NextResponse.json({ error: "Lien impossible a generer" }, { status: 500 });
+  }
+
+  try {
+    await sendAuthEmail({ email, actionLink, locale, type: "magic" });
+  } catch (emailError) {
+    console.error("[auth/signup] existing account email failed", emailError);
+    return NextResponse.json({ error: "Email impossible a envoyer" }, { status: 502 });
+  }
+
+  return NextResponse.json({ ok: true, resent: true });
+}
+
+function canSendManagedConfirmation() {
+  return hasServiceAuthCredentials() && Boolean(process.env.BREVO_API_KEY);
 }
 
 function isExistingAccountError(message: string) {

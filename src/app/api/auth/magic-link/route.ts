@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { createPublicAuthClient } from "@/lib/server-auth";
+import {
+  createPublicAuthClient,
+  createServiceClient,
+  hasServiceAuthCredentials,
+} from "@/lib/server-auth";
+import { sendAuthEmail } from "@/lib/services/auth-email";
 
 type MagicPayload = {
   email?: string;
@@ -21,6 +26,10 @@ export async function POST(request: Request) {
 
   const redirectTo = `${getRequestOrigin(request)}${safeRedirectPath(payload.redirectPath, locale, email)}`;
 
+  if (canSendManagedMagicLink()) {
+    return sendManagedMagicLink({ email, locale, redirectTo });
+  }
+
   const supabase = createPublicAuthClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -37,6 +46,51 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ error: "Email impossible a envoyer" }, { status: 500 });
+}
+
+async function sendManagedMagicLink({
+  email,
+  locale,
+  redirectTo,
+}: {
+  email: string;
+  locale: "fr" | "en";
+  redirectTo: string;
+}) {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+    options: { redirectTo },
+  });
+
+  if (error) {
+    console.warn("[auth/magic-link] managed magic link rejected", {
+      status: error.status,
+      code: error.code,
+      message: error.message,
+    });
+
+    return NextResponse.json({ error: "Email impossible a envoyer" }, { status: 500 });
+  }
+
+  const actionLink = data.properties?.action_link;
+  if (!actionLink) {
+    return NextResponse.json({ error: "Lien impossible a generer" }, { status: 500 });
+  }
+
+  try {
+    await sendAuthEmail({ email, actionLink, locale, type: "magic" });
+  } catch (emailError) {
+    console.error("[auth/magic-link] email failed", emailError);
+    return NextResponse.json({ error: "Email impossible a envoyer" }, { status: 502 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
+function canSendManagedMagicLink() {
+  return hasServiceAuthCredentials() && Boolean(process.env.BREVO_API_KEY);
 }
 
 function getRequestOrigin(request: Request) {
