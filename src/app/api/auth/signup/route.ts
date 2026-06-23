@@ -1,10 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  createPublicAuthClient,
-  createServiceClient,
-  hasServiceAuthCredentials,
-} from "@/lib/server-auth";
-import { sendAuthEmail } from "@/lib/services/auth-email";
+import { createPublicAuthClient } from "@/lib/server-auth";
 
 type SignupPayload = {
   email?: string;
@@ -35,10 +30,6 @@ export async function POST(request: Request) {
   };
 
   try {
-    if (canSendManagedConfirmation()) {
-      return await signupWithManagedConfirmation({ email, password, locale, redirectTo, metadata });
-    }
-
     const supabase = createPublicAuthClient();
     const { error } = await supabase.auth.signUp({
       email,
@@ -59,64 +50,6 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
-}
-
-async function signupWithManagedConfirmation({
-  email,
-  password,
-  locale,
-  redirectTo,
-  metadata,
-}: {
-  email: string;
-  password: string;
-  locale: "fr" | "en";
-  redirectTo: string;
-  metadata: { prenom: string; langue: "fr" | "en" };
-}) {
-  const supabase = createServiceClient();
-  const { data, error } = await supabase.auth.admin.generateLink({
-    type: "signup",
-    email,
-    password,
-    options: {
-      redirectTo,
-      data: metadata,
-    },
-  });
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
-
-  const actionLink = data.properties?.action_link;
-  const userId = data.user?.id;
-
-  if (!actionLink || !userId) {
-    return NextResponse.json(
-      { error: "Lien de confirmation impossible a generer" },
-      { status: 500 },
-    );
-  }
-
-  try {
-    await sendAuthEmail({ email, actionLink, locale, type: "confirmation" });
-  } catch (emailError) {
-    console.error("[auth/signup] confirmation email failed", emailError);
-    await supabase.auth.admin.deleteUser(userId).catch((deleteError) => {
-      console.error("[auth/signup] created user cleanup failed", deleteError);
-    });
-    return NextResponse.json(
-      { error: "Email de confirmation impossible a envoyer" },
-      { status: 502 },
-    );
-  }
-
-  return NextResponse.json({ ok: true });
-}
-
-function canSendManagedConfirmation() {
-  return hasServiceAuthCredentials() && Boolean(process.env.BREVO_API_KEY);
 }
 
 function getRequestOrigin(request: Request) {
