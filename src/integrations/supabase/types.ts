@@ -61,6 +61,44 @@ export type Database = {
           },
         ];
       };
+      erreurs_pipeline: {
+        Row: {
+          commande_id: string;
+          created_at: string;
+          etape: string;
+          id: string;
+          message: string;
+          stack: string | null;
+          tentative: number;
+        };
+        Insert: {
+          commande_id: string;
+          created_at?: string;
+          etape: string;
+          id?: string;
+          message: string;
+          stack?: string | null;
+          tentative?: number;
+        };
+        Update: {
+          commande_id?: string;
+          created_at?: string;
+          etape?: string;
+          id?: string;
+          message?: string;
+          stack?: string | null;
+          tentative?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "erreurs_pipeline_commande_id_fkey";
+            columns: ["commande_id"];
+            isOneToOne: false;
+            referencedRelation: "commandes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       oeuvres: {
         Row: {
           audio_url: string | null;

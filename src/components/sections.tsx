@@ -21,9 +21,9 @@ const copy = {
     start: "Commencer",
     question: "Une question",
     hero: {
-      eyebrow: "Votre âme lointaine, africaine, réincarnée",
+      eyebrow: "Votre âme lointaine, africaine, réincarnée.",
       title: "TOTEM ANCESTRAL",
-      body: "Quatre questions. Une œuvre composée pour vous, nourrie des cosmogonies africaines et façonnée par l'intelligence artificielle.",
+      body: "Qui étiez-vous, avant d'être qui vous êtes ? Une œuvre tissée dans la langue des origines, qui vous ramène à la source. Une création numérique singulière, nourrie des cosmogonies africaines, aidée et née de l'IA.",
     },
     marquee: [
       "Une âme",
@@ -34,23 +34,23 @@ const copy = {
       "Totem Ancestral",
     ],
     who: {
-      eyebrow: "Avant la traversée",
-      title: "Qui étais-tu ?",
-      body: "Une exploration profonde de vos origines, là où la mémoire s'arrête et où l'âme commence à parler.",
+      eyebrow: "Avant d'être vous",
+      title: "Qui étiez-vous ?",
+      body: "Avant d'être vous, il y avait quelqu'un.",
       items: [
         {
-          title: "L'Origine",
-          body: "Le point de départ de votre lignée, là où tout a commencé.",
+          title: "Soixante mille ans",
+          body: "Il y a soixante mille ans, vos ancêtres ont quitté l'Afrique. D'autres sont restés, ont vécu sous d'autres cieux, murmuré d'autres langues, taillé d'autres masques.",
           image: oeuvreParchemin,
         },
         {
-          title: "L'Écho",
-          body: "La résonance de vos ancêtres dans vos choix d'aujourd'hui.",
+          title: "L'ancêtre resté",
+          body: "TOTEM ANCESTRAL réveille l'ancêtre que l'histoire n'a pas emporté. Celui qui est resté dans la terre rouge, dans le bruit du tam-tam, dans le regard du griot.",
           image: oeuvreVisuelle,
         },
         {
-          title: "Le Souffle",
-          body: "L'énergie vitale qui se transmet de génération en génération.",
+          title: "Le miroir",
+          body: "Un voyage à l'intérieur du temps. Un cadeau qui traverse les générations. Un miroir qui ne ment pas.",
           image: traverserParole,
         },
       ],
@@ -58,21 +58,21 @@ const copy = {
     manifest: {
       eyebrow: "Notre démarche",
       title: "Le manifeste en trois temps",
-      body: "Trois mouvements, un seul fil : transformer ce que vous portez en silence en une œuvre qui peut enfin se transmettre.",
+      body: "Pourquoi cette maison existe, et ce qu'elle refuse d'être.",
       items: [
         {
-          title: "Écouter",
-          body: "Quatre questions, posées sans détour, pour faire remonter ce que les ancêtres murmurent déjà en vous.",
+          title: "Une œuvre, pas un test",
+          body: "TOTEM ANCESTRAL est une œuvre, pas un test de personnalité. Chaque parole confiée au griot devient matière à une création narrative et visuelle.",
           image: traverserEcoute,
         },
         {
-          title: "Composer",
-          body: "Le griot numérique tisse vos réponses avec les cosmogonies africaines pour façonner une fable unique.",
+          title: "L'unicité, pas la série",
+          body: "Ce qui est fait ne sera jamais refait. Votre œuvre porte un numéro comme un nom propre gravé une seule fois, pour un seul vivant.",
           image: oeuvreParchemin,
         },
         {
-          title: "Transmettre",
-          body: "Votre Totem prend forme : texte, voix, image, prêt à être gardé, porté, et un jour partagé.",
+          title: "L'imaginaire, pas la science",
+          body: "Nous n'exhumons pas un arbre généalogique. Nous appelons l'ancêtre que personne n'a consigné, celui qui a continué à vivre là où le continent l'avait planté.",
           image: oeuvreVisuelle,
         },
       ],
@@ -136,25 +136,16 @@ const copy = {
     },
     offers: {
       eyebrow: "Offrandes",
-      title: "Trois manières de recevoir l'œuvre",
+      title: "Deux manières de recevoir l'œuvre",
       body: "Choisissez le format qui convient le mieux à votre quête et à votre héritage.",
-      footnote: "Carte cadeau offerte a chaque commande",
+      footnote: "Carte cadeau offerte à chaque commande",
       items: [
-        {
-          name: "Totem Origine",
-          tag: "Origine",
-          badge: "",
-          featured: false,
-          body: "Le détail du contenu et des prix apparaît après les quatre premières questions.",
-          features: ["Une création personnalisée", "Un coffret numérique", "Accès à votre espace"],
-          cta: "Choisir Origine",
-        },
         {
           name: "Totem Ancestral",
           tag: "Ancestral",
           badge: "Le plus précieux",
           featured: true,
-          body: "La création dans sa plénitude. Rien ne manque. Composé pour durer une vie.",
+          body: "La création dans sa plénitude. Rien ne manque.",
           features: ["Une création complète", "Une voix rituelle", "Tirage Fine Art possible"],
           cta: "Choisir Ancestral",
         },
@@ -163,7 +154,7 @@ const copy = {
           tag: "Famille",
           badge: "",
           featured: false,
-          body: "Parce que certaines racines se partagent. Pour vos proches.",
+          body: "Parce que certaines racines se partagent.",
           features: ["Trois coffrets coordonnés", "Trois destinataires", "Livraison familiale"],
           cta: "Choisir Famille",
         },
@@ -174,7 +165,7 @@ const copy = {
       title: "Une maison de création",
       paragraphs: [
         "TOTEM ANCESTRAL est une maison de création fondée à Paris, au carrefour de l'art numérique et des mémoires africaines.",
-        "Nous ne sommes ni archivistes, ni devins, ni généalogistes. Nous sommes des passeurs entre ce que vous êtes et ce que vous auriez pu être.",
+        "Nous ne sommes ni archivistes, ni devins, ni généalogistes. Nous sommes des passeurs entre ce que vous êtes et ce que vous auriez pu être. Entre aujourd'hui et les soixante mille ans qui vous précèdent.",
       ],
     },
     testimonials: {
@@ -479,7 +470,7 @@ function useLandingCopy() {
 }
 
 function journeyHref(locale: Locale) {
-  return `/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`;
+  return `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`;
 }
 
 function SectionHeading({
@@ -835,12 +826,14 @@ export function Assurances() {
 /* ---------- OFFRES ---------- */
 export function Offres() {
   const { locale, t } = useLandingCopy();
+  const offersGridClass =
+    t.offers.items.length === 2 ? "mx-auto max-w-4xl md:grid-cols-2" : "md:grid-cols-3";
 
   return (
     <section id="offres" className="px-5 py-28 md:px-10 md:py-36" style={{ background: "#0c0e16" }}>
       <div className="mx-auto max-w-6xl">
         <SectionHeading eyebrow={t.offers.eyebrow} title={t.offers.title} body={t.offers.body} />
-        <div className="mt-20 grid items-stretch gap-8 md:grid-cols-3">
+        <div className={`mt-20 grid items-stretch gap-8 ${offersGridClass}`}>
           {t.offers.items.map((offer, index) => {
             const Icon = offer.featured ? Star : Check;
             return (

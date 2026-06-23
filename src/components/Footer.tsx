@@ -6,6 +6,7 @@ type Locale = "fr" | "en";
 export function Footer({ locale }: { locale: Locale }) {
   const brand = useTranslations("brand");
   const t = useTranslations("footer");
+  const composeHref = `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`;
   const labels =
     locale === "en"
       ? { experience: "Experience", order: "Order", legal: "Legal" }
@@ -39,7 +40,7 @@ export function Footer({ locale }: { locale: Locale }) {
             </p>
             <Link
               className="block text-sm transition-colors hover:text-or"
-              href={`/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`}
+              href={composeHref}
               style={{ color: "rgba(226,225,238,0.76)" }}
             >
               {labels.order}

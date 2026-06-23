@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { LogOut, LayoutDashboard, Menu, UserRound, X } from "lucide-react";
+import { LogOut, Menu, UserRound, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type Locale = "fr" | "en";
@@ -15,6 +15,20 @@ const nav = [
   { to: "/", hash: "#faq", labelKey: "faq" },
 ];
 
+function getAccountNav(locale: Locale) {
+  const labels =
+    locale === "fr"
+      ? { home: "Accueil", orders: "Commandes", artworks: "Œuvres", profile: "Profil" }
+      : { home: "Home", orders: "Orders", artworks: "Artworks", profile: "Profile" };
+
+  return [
+    { href: `/${locale}/domus_animi`, label: labels.home },
+    { href: `/${locale}/domus_animi/commandes`, label: labels.orders },
+    { href: `/${locale}/domus_animi/oeuvres`, label: labels.artworks },
+    { href: `/${locale}/domus_animi/profil`, label: labels.profile },
+  ];
+}
+
 export function Header({ locale }: { locale: Locale }) {
   const t = useTranslations("header");
   const pathname = usePathname();
@@ -23,6 +37,7 @@ export function Header({ locale }: { locale: Locale }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [session, setSession] = useState<boolean | null>(null);
+  const isAccountArea = Boolean(pathname?.includes("/domus_animi"));
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -63,6 +78,9 @@ export function Header({ locale }: { locale: Locale }) {
     setOpen(false);
     router.push(`/${locale}`);
   };
+
+  const accountNav = getAccountNav(locale);
+  const composeHref = `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -112,25 +130,22 @@ export function Header({ locale }: { locale: Locale }) {
 
         {session ? (
           <>
-            <nav className="hidden items-center gap-3 lg:flex">
-              <Link
-                href={`/${locale}/domus_animi`}
-                className="subtext flex items-center gap-2 px-4 py-2 text-[12px] uppercase transition-colors hover:bg-ombre"
-                style={{ color: "var(--or-ancestral)" }}
-              >
-                <LayoutDashboard size={16} />
-                {t("dashboard")}
-              </Link>
-            </nav>
+            {!isAccountArea && (
+              <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-10 md:flex">
+                {accountNav.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="subtext text-[12px] uppercase transition-colors hover:text-or"
+                    style={{ color: "rgba(209,197,177,0.92)" }}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            )}
 
             <div className="flex items-center gap-3">
-              <Link
-                href={`/${locale}/domus_animi`}
-                className="btn-primary hidden !px-5 !py-2 !text-[11px] md:inline-flex"
-              >
-                <LayoutDashboard size={14} />
-                {t("dashboard")}
-              </Link>
               <button
                 type="button"
                 onClick={handleLogout}
@@ -140,13 +155,25 @@ export function Header({ locale }: { locale: Locale }) {
                 {t("logout")}
               </button>
               <button
-                className="md:hidden"
-                onClick={() => setOpen((v) => !v)}
-                aria-label={t("menu")}
-                style={{ color: "var(--or-ancestral)" }}
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex h-10 w-10 items-center justify-center border transition-colors hover:bg-ombre md:hidden"
+                aria-label={t("logout")}
+                title={t("logout")}
+                style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
               >
-                {open ? <X size={22} /> : <Menu size={22} />}
+                <LogOut size={17} />
               </button>
+              {!isAccountArea && (
+                <button
+                  className="md:hidden"
+                  onClick={() => setOpen((v) => !v)}
+                  aria-label={t("menu")}
+                  style={{ color: "var(--or-ancestral)" }}
+                >
+                  {open ? <X size={22} /> : <Menu size={22} />}
+                </button>
+              )}
             </div>
           </>
         ) : (
@@ -201,7 +228,7 @@ export function Header({ locale }: { locale: Locale }) {
                 <UserRound size={17} />
               </Link>
               <Link
-                href={`/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`}
+                href={composeHref}
                 className="btn-primary hidden !px-6 !py-2.5 !text-[11px] md:inline-flex"
               >
                 {t("compose")}
@@ -219,7 +246,7 @@ export function Header({ locale }: { locale: Locale }) {
         )}
       </div>
 
-      {open && (
+      {open && !isAccountArea && (
         <div
           className="max-h-[calc(100svh-72px)] overflow-y-auto border-t md:hidden"
           style={{ background: "var(--nuit-profonde)", borderColor: "rgba(216,173,77,0.18)" }}
@@ -227,24 +254,17 @@ export function Header({ locale }: { locale: Locale }) {
           <div className="px-6 py-6 flex flex-col gap-5">
             {session ? (
               <>
-                <Link
-                  href={`/${locale}/domus_animi`}
-                  onClick={() => setOpen(false)}
-                  className="subtext flex items-center gap-2 text-sm uppercase"
-                  style={{ color: "var(--or-ancestral)" }}
-                >
-                  <LayoutDashboard size={18} />
-                  {t("dashboard")}
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="subtext flex items-center gap-2 text-sm uppercase"
-                  style={{ color: "var(--ivoire)" }}
-                >
-                  <LogOut size={18} />
-                  {t("logout")}
-                </button>
+                {accountNav.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className="subtext text-sm uppercase"
+                    style={{ color: "var(--ivoire)" }}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </>
             ) : (
               <>
@@ -268,7 +288,7 @@ export function Header({ locale }: { locale: Locale }) {
                   {t("account")}
                 </Link>
                 <Link
-                  href={`/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`}
+                  href={composeHref}
                   onClick={() => setOpen(false)}
                   className="btn-primary w-full mt-2"
                 >

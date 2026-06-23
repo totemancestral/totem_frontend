@@ -68,11 +68,16 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
     setNotice(null);
 
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/${locale}/renovare_clavis`,
+      const response = await fetch("/api/auth/recover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, locale }),
       });
 
-      if (resetError) throw resetError;
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(data?.error || t.defaultError);
+      }
 
       setNotice(t.sent);
     } catch (err) {

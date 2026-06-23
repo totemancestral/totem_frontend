@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { motion } from "motion/react";
 import {
   Activity,
@@ -11,9 +11,8 @@ import {
   Download,
   FileText,
   Image as ImageIcon,
+  KeyRound,
   LayoutDashboard,
-  ListChecks,
-  LogOut,
   Menu,
   PackageCheck,
   Plus,
@@ -25,6 +24,7 @@ import {
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 
 type Locale = "fr" | "en";
+type DashboardSection = "overview" | "orders" | "artworks" | "profile";
 
 type Commande = {
   id: string;
@@ -74,6 +74,14 @@ const copy = {
     compose: "Composer une oeuvre",
     logout: "Se deconnecter",
     profile: "Profil",
+    overviewNav: "Accueil",
+    ordersNav: "Commandes",
+    artworksNav: "Oeuvres",
+    profileNav: "Profil",
+    firstName: "Prenom",
+    lastName: "Nom",
+    password: "Mot de passe",
+    changePassword: "Changer le mot de passe",
     email: "Email",
     language: "Langue",
     latestOrders: "Commandes recentes",
@@ -119,6 +127,14 @@ const copy = {
     compose: "Compose an artwork",
     logout: "Sign out",
     profile: "Profile",
+    overviewNav: "Home",
+    ordersNav: "Orders",
+    artworksNav: "Artworks",
+    profileNav: "Profile",
+    firstName: "First name",
+    lastName: "Last name",
+    password: "Password",
+    changePassword: "Change password",
     email: "Email",
     language: "Language",
     latestOrders: "Recent orders",
@@ -177,9 +193,19 @@ const offerLabels: Record<Locale, Record<string, string>> = {
   en: { essentiel: "Totem Origin", signature: "Totem Ancestral", heritage: "Totem Family" },
 };
 
-export function DashboardClient({ locale }: { locale: Locale }) {
+function newJourneyHref(locale: Locale) {
+  return `/${locale}/via_sapientiae?restart=1`;
+}
+
+export function DashboardClient({
+  locale,
+  section = "overview",
+}: {
+  locale: Locale;
+  section?: DashboardSection;
+}) {
   const router = useRouter();
-  const { session, user, loading: authLoading, signOut } = useSupabaseSession();
+  const { session, user, loading: authLoading } = useSupabaseSession();
   const t = copy[locale];
   const authPath = useMemo(
     () => `/${locale}/janua_vitae?redirect=${encodeURIComponent(`/${locale}/domus_animi`)}`,
@@ -243,7 +269,10 @@ export function DashboardClient({ locale }: { locale: Locale }) {
     };
   }, [authLoading, session, token, authPath, locale, router, t.error]);
 
-  const name = user?.user_metadata?.prenom || user?.email?.split("@")[0] || t.defaultName;
+  const metadata = user?.user_metadata ?? {};
+  const firstName = metadataValue(metadata, ["prenom", "first_name", "given_name"]);
+  const lastName = metadataValue(metadata, ["nom", "last_name", "family_name"]);
+  const name = firstName || user?.email?.split("@")[0] || t.defaultName;
   const deliveredCount = oeuvres.filter(
     (oeuvre) => oeuvre.statut === "livree" || oeuvre.image_url || oeuvre.pdf_url,
   ).length;
@@ -262,18 +291,36 @@ export function DashboardClient({ locale }: { locale: Locale }) {
     };
   }, [sidebarOpen]);
 
-  const scrollTo = (id: string) => {
-    setSidebarOpen(false);
-    setTimeout(() => {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
-  };
-
-  const sidebarItems: Array<{ id: string; label: string; icon: ReactNode }> = [
-    { id: "dashboard-overview", label: "Tableau de bord", icon: <LayoutDashboard size={18} /> },
-    { id: "dashboard-orders", label: "Mes commandes", icon: <PackageCheck size={18} /> },
-    { id: "dashboard-artworks", label: "Mes œuvres", icon: <Sparkles size={18} /> },
-    { id: "dashboard-profile", label: "Mon profil", icon: <UserRound size={18} /> },
+  const sidebarItems: Array<{
+    key: DashboardSection;
+    href: string;
+    label: string;
+    icon: ReactNode;
+  }> = [
+    {
+      key: "overview",
+      href: `/${locale}/domus_animi`,
+      label: t.overviewNav,
+      icon: <LayoutDashboard size={18} />,
+    },
+    {
+      key: "orders",
+      href: `/${locale}/domus_animi/commandes`,
+      label: t.ordersNav,
+      icon: <PackageCheck size={18} />,
+    },
+    {
+      key: "artworks",
+      href: `/${locale}/domus_animi/oeuvres`,
+      label: t.artworksNav,
+      icon: <Sparkles size={18} />,
+    },
+    {
+      key: "profile",
+      href: `/${locale}/domus_animi/profil`,
+      label: t.profileNav,
+      icon: <UserRound size={18} />,
+    },
   ];
 
   if (authLoading || loading) {
@@ -323,28 +370,27 @@ export function DashboardClient({ locale }: { locale: Locale }) {
 
       <nav className="flex flex-col gap-1">
         {sidebarItems.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => scrollTo(item.id)}
+          <Link
+            key={item.key}
+            href={item.href}
+            onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-3 rounded-sm px-4 py-3 text-left text-sm uppercase transition-colors hover:bg-ombre"
-            style={{ color: "rgba(226,225,238,0.72)" }}
+            style={{
+              color: item.key === section ? "var(--or-ancestral)" : "rgba(226,225,238,0.72)",
+              background: item.key === section ? "rgba(216,173,77,0.1)" : undefined,
+            }}
           >
             <span style={{ color: "var(--or-ancestral)" }}>{item.icon}</span>
             {item.label}
-          </button>
+          </Link>
         ))}
       </nav>
 
       <div className="mt-auto flex flex-col gap-3">
-        <Link href={`/${locale}/via_sapientiae`} className="btn-primary w-full py-3 text-xs">
+        <Link href={newJourneyHref(locale)} className="btn-primary w-full py-3 text-xs">
           <Plus size={14} />
           {t.compose}
         </Link>
-        <button type="button" onClick={signOut} className="btn-secondary w-full py-3 text-xs">
-          <LogOut size={14} />
-          {t.logout}
-        </button>
       </div>
     </div>
   );
@@ -406,90 +452,112 @@ export function DashboardClient({ locale }: { locale: Locale }) {
             </p>
           </div>
 
-          <section id="dashboard-overview" className="premium-panel-strong p-6 md:p-8">
-            <motion.header
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="grid gap-4 mb-6"
-            >
-              <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
-                {t.eyebrow}
-              </p>
-              <h1
-                className="h-display text-4xl leading-tight md:text-5xl"
-                style={{ color: "var(--ivoire)" }}
+          {section === "overview" && (
+            <section id="dashboard-overview" className="premium-panel-strong p-6 md:p-8">
+              <motion.header
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7 }}
+                className="mb-6 grid gap-4"
               >
-                {t.title.replace("{name}", name)}
+                <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
+                  {t.eyebrow}
+                </p>
+                <h1
+                  className="h-display text-4xl leading-tight md:text-5xl"
+                  style={{ color: "var(--ivoire)" }}
+                >
+                  {t.title.replace("{name}", name)}
+                </h1>
+                <p className="max-w-2xl premium-muted">{t.subtitle}</p>
+              </motion.header>
+
+              <div className="mb-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                <StatCard
+                  icon={<PackageCheck size={20} />}
+                  label={t.orders}
+                  value={commandes.length.toString()}
+                />
+                <StatCard
+                  icon={<Sparkles size={20} />}
+                  label={t.delivered}
+                  value={deliveredCount.toString()}
+                />
+                <StatCard
+                  icon={<Clock3 size={20} />}
+                  label={t.active}
+                  value={activeCount.toString()}
+                />
+              </div>
+
+              <CompositionPanel composition={composition} locale={locale} />
+            </section>
+          )}
+
+          {section === "orders" && (
+            <section id="dashboard-orders" className="flex flex-col gap-5">
+              <h1 className="h-display text-4xl" style={{ color: "var(--or-ancestral)" }}>
+                {t.latestOrders}
               </h1>
-              <p className="max-w-2xl premium-muted">{t.subtitle}</p>
-            </motion.header>
+              {commandes.length === 0 ? (
+                <EmptyState text={t.noOrders} cta={t.emptyCta} href={newJourneyHref(locale)} />
+              ) : (
+                <div className="grid gap-4">
+                  {commandes.map((commande) => (
+                    <OrderCard key={commande.id} commande={commande} locale={locale} />
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
-            <div className="mb-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-              <StatCard
-                icon={<PackageCheck size={20} />}
-                label={t.orders}
-                value={commandes.length.toString()}
-              />
-              <StatCard
-                icon={<Sparkles size={20} />}
-                label={t.delivered}
-                value={deliveredCount.toString()}
-              />
-              <StatCard
-                icon={<Clock3 size={20} />}
-                label={t.active}
-                value={activeCount.toString()}
-              />
-            </div>
+          {section === "artworks" && (
+            <section id="dashboard-artworks" className="flex flex-col gap-5">
+              <h1 className="h-display text-4xl" style={{ color: "var(--or-ancestral)" }}>
+                {t.artworks}
+              </h1>
+              {oeuvres.length === 0 ? (
+                <EmptyState text={t.noArtworks} cta={t.emptyCta} href={newJourneyHref(locale)} />
+              ) : (
+                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {oeuvres.map((oeuvre) => (
+                    <ArtworkCard key={oeuvre.id} oeuvre={oeuvre} locale={locale} />
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
-            <CompositionPanel composition={composition} locale={locale} />
-          </section>
-
-          <section id="dashboard-orders" className="flex flex-col gap-5">
-            <h2 className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
-              {t.latestOrders}
-            </h2>
-            {commandes.length === 0 ? (
-              <EmptyState text={t.noOrders} cta={t.emptyCta} href={`/${locale}/via_sapientiae`} />
-            ) : (
-              <div className="grid gap-4">
-                {commandes.map((commande) => (
-                  <OrderCard key={commande.id} commande={commande} locale={locale} />
-                ))}
+          {section === "profile" && (
+            <section id="dashboard-profile">
+              <div className="premium-panel p-6 md:p-8">
+                <div className="mb-6 flex items-center gap-3">
+                  <UserRound size={20} color="var(--or-ancestral)" />
+                  <h1 className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
+                    {t.profile}
+                  </h1>
+                </div>
+                <dl className="grid gap-5 md:grid-cols-2">
+                  <ProfileLine label={t.firstName} value={firstName || "-"} />
+                  <ProfileLine label={t.lastName} value={lastName || "-"} />
+                  <ProfileLine label={t.email} value={user?.email ?? "-"} />
+                  <ProfileLine label={t.language} value={locale.toUpperCase()} />
+                </dl>
+                <div
+                  className="mt-8 border-t pt-6"
+                  style={{ borderColor: "rgba(216,173,77,0.18)" }}
+                >
+                  <p className="caption uppercase" style={{ color: "rgba(237,217,154,0.7)" }}>
+                    {t.password}
+                  </p>
+                  <Link href={`/${locale}/renovare_clavis`} className="btn-secondary mt-3 w-fit">
+                    <KeyRound size={15} />
+                    {t.changePassword}
+                  </Link>
+                </div>
               </div>
-            )}
-          </section>
-
-          <section id="dashboard-artworks" className="flex flex-col gap-5">
-            <h2 className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
-              {t.artworks}
-            </h2>
-            {oeuvres.length === 0 ? (
-              <EmptyState text={t.noArtworks} cta={t.emptyCta} href={`/${locale}/via_sapientiae`} />
-            ) : (
-              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {oeuvres.map((oeuvre) => (
-                  <ArtworkCard key={oeuvre.id} oeuvre={oeuvre} locale={locale} />
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section id="dashboard-profile">
-            <div className="premium-panel p-6">
-              <div className="mb-6 flex items-center gap-3">
-                <UserRound size={20} color="var(--or-ancestral)" />
-                <h2 className="h-display text-2xl" style={{ color: "var(--or-ancestral)" }}>
-                  {t.profile}
-                </h2>
-              </div>
-              <dl className="flex flex-col gap-4">
-                <ProfileLine label={t.email} value={user?.email ?? "-"} />
-                <ProfileLine label={t.language} value={locale.toUpperCase()} />
-              </dl>
-            </div>
-          </section>
+            </section>
+          )}
         </div>
       </main>
     </div>
@@ -632,6 +700,14 @@ function buildCompositionState({
     events,
     hasComposition: true,
   };
+}
+
+function metadataValue(metadata: Record<string, unknown>, keys: string[]) {
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
 }
 
 function ProfileLine({ label, value }: { label: string; value: string }) {

@@ -451,34 +451,34 @@
       ]
     },
     "instructions": {
-      "eyebrow": "À lire avant d'entrer",
+      "eyebrow": "Avant de commencer",
       "title": "Avant de traverser",
-      "subtitle": "Préparez votre esprit et votre environnement pour accueillir la parole des anciens.",
+      "subtitle": "Quatre gestes pour recevoir ce qui vient.",
       "items": [
         {
           "title": "Posez le monde",
-          "text": "Installez-vous comme devant un feu, la nuit, quand les anciens parlent. Laissez le bruit du dehors s'éloigner avant de commencer."
+          "text": "Installez-vous comme devant un feu, la nuit, quand les anciens parlent."
         },
         {
           "title": "Ouvrez les oreilles",
-          "text": "L'ancêtre a traversé soixante mille ans pour vous parler. Montez le volume, respirez, puis écoutez ce qui arrive."
+          "text": "L'ancêtre a traversé soixante mille ans pour vous parler, entendez-le."
         },
         {
           "title": "Parlez vrai",
-          "text": "Le griot ne veut pas de bonne réponse. Il veut la vôtre, celle qui vient de plus loin que la mémoire et qui ne cherche pas à plaire."
+          "text": "Le griot ne veut pas de bonne réponse. Il veut la vôtre, celle qui vient de plus loin que la mémoire."
         },
         {
-          "title": "Gardez votre Totem",
-          "text": "Une fois éveillé, votre Totem devient un compagnon de route. Un ancêtre qui ne vous quitte plus, gravé dans la matière et l'esprit."
+          "title": "Gardez votre TOTEM",
+          "text": "Gardez votre TOTEM comme on garde un nom. Il n'existe qu'à travers vous."
         }
       ]
     },
     "ctaFinal": {
-      "title": "L'œuvre vous attend.",
-      "subtitleLine1": "Quinze minutes pour la composer.",
-      "subtitleLine2": "Toute une vie pour la garder.",
-      "button": "Composer mon œuvre",
-      "caption": "Œuvre numérique unique · Livrée sous 15 minutes · Certificat d'authenticité inclus"
+      "title": "Votre ancêtre vous attend.",
+      "subtitleLine1": "Quinze minutes pour l'éveiller.",
+      "subtitleLine2": "Une vie entière pour le porter.",
+      "button": "Commencer mon voyage",
+      "caption": ""
     }
   },
   "home_artwork": "home.artwork",

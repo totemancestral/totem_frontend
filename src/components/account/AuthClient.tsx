@@ -34,6 +34,7 @@ const copy = {
     switchSignin: "J'ai deja un compte",
     legal: "Tes donnees restent rattachees a ton compte et protegees par Supabase Auth.",
     magicSent: "Lien magique envoye. Verifie ta boite mail.",
+    confirmSent: "Email de confirmation envoye. Verifie ta boite mail avant de continuer.",
     sessionReady: "Session ouverte. Redirection...",
     authError: "Authentification impossible.",
     loading: "...",
@@ -61,6 +62,7 @@ const copy = {
     switchSignin: "I already have an account",
     legal: "Your data stays attached to your account and protected by Supabase Auth.",
     magicSent: "Magic link sent. Check your inbox.",
+    confirmSent: "Confirmation email sent. Check your inbox before continuing.",
     sessionReady: "Session opened. Redirecting...",
     authError: "Authentication failed.",
     loading: "...",
@@ -97,18 +99,18 @@ export function AuthClient({ locale }: { locale: Locale }) {
 
     try {
       if (mode === "signup") {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { prenom: prenom.trim() || email.split("@")[0] },
-          },
+        const response = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, prenom, locale, redirectPath }),
         });
 
-        if (signUpError) throw signUpError;
+        if (!response.ok) {
+          const data = (await response.json().catch(() => null)) as { error?: string } | null;
+          throw new Error(data?.error || t.authError);
+        }
 
-        setNotice(t.sessionReady);
-        router.replace(redirectPath);
+        setNotice(t.confirmSent);
         return;
       }
 
@@ -133,14 +135,16 @@ export function AuthClient({ locale }: { locale: Locale }) {
     setError(null);
     setNotice(null);
     try {
-      const { error: magicError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: mode === "signup",
-        },
+      const response = await fetch("/api/auth/magic-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, locale, redirectPath }),
       });
 
-      if (magicError) throw magicError;
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(data?.error || t.authError);
+      }
 
       setNotice(t.magicSent);
     } catch (authError) {

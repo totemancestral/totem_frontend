@@ -346,6 +346,7 @@ const QUESTIONS: Question[] = [
 ];
 
 const PENDING_CHECKOUT_KEY = "totem_pending_checkout_v1";
+const PARCOURS_STORAGE_KEY = "totem_parcours_v1";
 
 type Phase =
   | "intro"
@@ -401,11 +402,14 @@ export function ParcoursPage() {
   const [nudge, setNudge] = useState<string | null>(null);
   const filledRef = useRef<Set<number>>(new Set());
   const completionStartedRef = useRef(false);
+  const restartRequested = searchParams.get("restart") === "1";
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       if (!currentSession) {
-        router.replace(`/${locale}/janua_vitae?mode=signup&redirect=/${locale}/via_sapientiae`);
+        router.replace(
+          `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`,
+        );
         return;
       }
       setSession(currentSession);
@@ -451,11 +455,30 @@ export function ParcoursPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!restartRequested || typeof window === "undefined") return;
+    try {
+      localStorage.removeItem(PARCOURS_STORAGE_KEY);
+      clearPendingCheckout();
+    } catch {
+      /* ignore local storage errors */
+    }
+    setAnswers({});
+    setHasUnlockedRest(false);
+    setPaidCommandId(null);
+    setCheckoutError(null);
+    setLoadingOffer(null);
+    setIndex(0);
+    setPhase("intro");
+    completionStartedRef.current = false;
+    router.replace(`/${locale}/via_sapientiae`, { scroll: false });
+  }, [locale, restartRequested, router]);
+
   // Restore progress from localStorage on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const raw = localStorage.getItem("totem_parcours_v1");
+      const raw = localStorage.getItem(PARCOURS_STORAGE_KEY);
       if (!raw) return;
       const saved = JSON.parse(raw) as {
         answers?: Record<number, Answer>;
@@ -491,7 +514,7 @@ export function ParcoursPage() {
     if (typeof window === "undefined") return;
     try {
       localStorage.setItem(
-        "totem_parcours_v1",
+        PARCOURS_STORAGE_KEY,
         JSON.stringify({ answers, account, hasUnlockedRest, paidCommandId, index, phase }),
       );
     } catch {
@@ -1416,10 +1439,10 @@ function Paywall({
     <motion.section
       {...fadeSlide}
       data-paywall-scroll
-      className="relative min-h-[100svh] overflow-y-auto overflow-x-hidden px-4 pb-[calc(24px+env(safe-area-inset-bottom))] pt-28 md:px-6 md:pb-10 lg:flex lg:items-center lg:pb-12"
-      style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
+      className="relative h-[100svh] min-h-0 overflow-y-auto overflow-x-hidden px-4 pb-[calc(96px+env(safe-area-inset-bottom))] pt-28 md:px-6 md:pb-12 lg:flex lg:items-center"
+      style={{ WebkitOverflowScrolling: "touch", overscrollBehaviorY: "contain" }}
     >
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 pb-8 pt-2 md:gap-5 md:py-4 lg:min-h-full lg:justify-center lg:py-0">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 pb-10 pt-2 md:gap-5 md:py-4 lg:min-h-full lg:justify-center lg:py-8">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 text-center md:gap-3">
           <h2
             className="h-display text-[26px] leading-tight md:text-[42px]"

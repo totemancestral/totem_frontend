@@ -1,43 +1,15 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-auth";
 import { createServiceClient } from "@/lib/server-auth";
 import { generateCoffret } from "@/lib/services/pipeline";
 
 export async function POST(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return NextResponse.json({ error: "Non autorise" }, { status: 401 });
-  }
-
-  const token = authHeader.slice(7);
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.json({ error: "Configuration Supabase manquante" }, { status: 500 });
-  }
-
-  const { createClient } = await import("@supabase/supabase-js");
-  const auth = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-
-  const { data: { user }, error: authError } = await auth.auth.getUser(token);
-  if (authError || !user) {
-    return NextResponse.json({ error: "Session invalide" }, { status: 401 });
-  }
+  const admin = await requireAdmin(request);
+  if (admin instanceof NextResponse) return admin;
 
   const supabase = createServiceClient();
-  const { data: roles } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("role", "admin");
 
-  if (!roles || roles.length === 0) {
-    return NextResponse.json({ error: "Acces admin requis" }, { status: 403 });
-  }
-
-  const { commandeId } = await request.json() as { commandeId: string };
+  const { commandeId } = (await request.json()) as { commandeId: string };
   if (!commandeId) {
     return NextResponse.json({ error: "commandeId requis" }, { status: 400 });
   }
@@ -53,7 +25,10 @@ export async function POST(request: Request) {
   }
 
   if (commande.statut !== "erreur") {
-    return NextResponse.json({ error: "Seules les commandes en erreur peuvent etre relancees" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Seules les commandes en erreur peuvent etre relancees" },
+      { status: 400 },
+    );
   }
 
   await supabase.from("commandes").update({ statut: "en_generation" }).eq("id", commandeId);

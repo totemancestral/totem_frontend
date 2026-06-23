@@ -93,10 +93,10 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
           />
 
           {/* Skip the loading video */}
-          {phase === "loading" && (
+          {(phase === "ready" || phase === "loading") && (
             <button
               onClick={goToWelcome}
-              className="absolute bottom-6 right-6 z-20 text-[11px] tracking-[0.18em] uppercase opacity-70 hover:opacity-100 transition-opacity"
+              className="absolute right-5 top-[calc(1.25rem+env(safe-area-inset-top))] z-20 text-[11px] tracking-[0.18em] uppercase opacity-70 transition-opacity hover:opacity-100 md:right-6 md:top-[calc(1.5rem+env(safe-area-inset-top))]"
               style={{ color: "var(--or-ancestral)" }}
             >
               Passer →
@@ -131,17 +131,6 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
                   aria-label={t("startAria")}
                 >
                   {t("start")}
-                </motion.button>
-
-                <motion.button
-                  onClick={goToWelcome}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 0.72 }}
-                  transition={{ duration: 0.8, delay: 0.45 }}
-                  className="caption uppercase tracking-[0.18em] transition-opacity hover:opacity-100"
-                  style={{ color: "var(--or-ancestral)" }}
-                >
-                  {t("skip")}
                 </motion.button>
               </motion.div>
             )}
@@ -198,16 +187,6 @@ export function IntroExperience({ onFinished }: { onFinished: () => void }) {
                 >
                   {t("enter")}
                 </motion.button>
-
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 1, delay: 1.7 }}
-                  className="caption italic mt-1"
-                  style={{ color: "rgba(254,252,240,0.5)" }}
-                >
-                  {t("withSound")}
-                </motion.span>
               </motion.div>
             )}
           </AnimatePresence>
