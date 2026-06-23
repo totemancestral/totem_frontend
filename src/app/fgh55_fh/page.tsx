@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, useCallback } from "react";
+import { Children, useEffect, useState, type FormEvent, useCallback, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import {
@@ -19,7 +19,18 @@ import { Menu, X } from "lucide-react";
 
 const ADMIN_EMAIL = "contact@totem-ancestral.com";
 
-type Section = "apercu" | "commandes" | "utilisateurs" | "activite" | "evenements";
+type Section = "apercu" | "commandes" | "oeuvres" | "utilisateurs" | "activite" | "evenements";
+
+const COMMAND_STATUSES = [
+  "en_attente_paiement",
+  "paye",
+  "en_generation",
+  "livree",
+  "erreur",
+  "remboursee",
+];
+const OFFER_TYPES = ["essentiel", "signature", "heritage"];
+const OEUVRE_STATUSES = ["en_cours", "livree", "erreur"];
 
 type AdminStats = {
   totalCommandes: number;
@@ -27,6 +38,9 @@ type AdminStats = {
   revenuTotal: number;
   erreurs: number;
   aujourdHui: number;
+  totalUtilisateurs: number;
+  totalOeuvres: number;
+  oeuvresLivrees: number;
 };
 
 type CommandeRow = {
@@ -37,6 +51,27 @@ type CommandeRow = {
   montant_cents: number;
   devise: string;
   created_at: string;
+  updated_at: string;
+  client_email?: string | null;
+  client_prenom?: string | null;
+};
+
+type OeuvreRow = {
+  id: string;
+  user_id: string;
+  commande_id: string;
+  statut: string;
+  nom_totem: string | null;
+  numero_serie: string | null;
+  image_url: string | null;
+  audio_url: string | null;
+  pdf_url: string | null;
+  created_at: string;
+  updated_at: string;
+  client_email?: string | null;
+  client_prenom?: string | null;
+  commande_offre?: string | null;
+  commande_statut?: string | null;
 };
 
 type ProfileRow = {
@@ -73,6 +108,10 @@ type ChangementStatut = {
   user_id: string;
 };
 
+type CommandeFilters = { search: string; statut: string; offre: string };
+type UserFilters = { search: string; langue: string; activite: string };
+type OeuvreFilters = { search: string; statut: string; fichier: string };
+
 export default function AdminPage() {
   const { session } = useSupabaseSession();
   const [section, setSection] = useState<Section>("apercu");
@@ -80,13 +119,31 @@ export default function AdminPage() {
 
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [commandes, setCommandes] = useState<CommandeRow[]>([]);
+  const [oeuvres, setOeuvres] = useState<OeuvreRow[]>([]);
   const [utilisateurs, setUtilisateurs] = useState<ProfileRow[]>([]);
   const [activite, setActivite] = useState<ActivitePoint[]>([]);
   const [erreurs, setErreurs] = useState<EvenementErreur[]>([]);
   const [changements, setChangements] = useState<ChangementStatut[]>([]);
 
+  const [commandeFilters, setCommandeFilters] = useState<CommandeFilters>({
+    search: "",
+    statut: "",
+    offre: "",
+  });
+  const [userFilters, setUserFilters] = useState<UserFilters>({
+    search: "",
+    langue: "",
+    activite: "",
+  });
+  const [oeuvreFilters, setOeuvreFilters] = useState<OeuvreFilters>({
+    search: "",
+    statut: "",
+    fichier: "",
+  });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [listLoading, setListLoading] = useState<Partial<Record<Section, boolean>>>({});
 
   const [relanceLoading, setRelanceLoading] = useState<string | null>(null);
 
@@ -125,20 +182,31 @@ export default function AdminPage() {
     setLoading(true);
     setError(null);
     try {
-      const [statsRes, cmdRes, usersRes, actRes, evtRes] = await Promise.all([
+      const [statsRes, cmdRes, oeuvresRes, usersRes, actRes, evtRes] = await Promise.all([
         fetch("/api/fgh55_fh/stats", { headers: { authorization: `Bearer ${t}` } }),
-        fetch("/api/fgh55_fh/commandes?limit=20", { headers: { authorization: `Bearer ${t}` } }),
-        fetch("/api/fgh55_fh/utilisateurs?limit=20", { headers: { authorization: `Bearer ${t}` } }),
+        fetch("/api/fgh55_fh/commandes?limit=50", { headers: { authorization: `Bearer ${t}` } }),
+        fetch("/api/fgh55_fh/oeuvres?limit=50", { headers: { authorization: `Bearer ${t}` } }),
+        fetch("/api/fgh55_fh/utilisateurs?limit=50", {
+          headers: { authorization: `Bearer ${t}` },
+        }),
         fetch("/api/fgh55_fh/activite", { headers: { authorization: `Bearer ${t}` } }),
         fetch("/api/fgh55_fh/evenements", { headers: { authorization: `Bearer ${t}` } }),
       ]);
 
-      if (!statsRes.ok || !cmdRes.ok || !usersRes.ok || !actRes.ok || !evtRes.ok) {
+      if (
+        !statsRes.ok ||
+        !cmdRes.ok ||
+        !oeuvresRes.ok ||
+        !usersRes.ok ||
+        !actRes.ok ||
+        !evtRes.ok
+      ) {
         throw new Error("Acces refuse");
       }
 
       setStats(await statsRes.json());
       setCommandes(((await cmdRes.json()) as { commandes: CommandeRow[] }).commandes ?? []);
+      setOeuvres(((await oeuvresRes.json()) as { oeuvres: OeuvreRow[] }).oeuvres ?? []);
       setUtilisateurs(
         ((await usersRes.json()) as { utilisateurs: ProfileRow[] }).utilisateurs ?? [],
       );
@@ -153,6 +221,53 @@ export default function AdminPage() {
       setError(err instanceof Error ? err.message : "Erreur de chargement");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadCommandes(t: string, filters: CommandeFilters) {
+    setListLoading((current) => ({ ...current, commandes: true }));
+    try {
+      const response = await fetch(`/api/fgh55_fh/commandes?${buildQuery(filters)}`, {
+        headers: { authorization: `Bearer ${t}` },
+      });
+      if (!response.ok) throw new Error("Commandes indisponibles");
+      setCommandes(((await response.json()) as { commandes: CommandeRow[] }).commandes ?? []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur de chargement");
+    } finally {
+      setListLoading((current) => ({ ...current, commandes: false }));
+    }
+  }
+
+  async function loadUtilisateurs(t: string, filters: UserFilters) {
+    setListLoading((current) => ({ ...current, utilisateurs: true }));
+    try {
+      const response = await fetch(`/api/fgh55_fh/utilisateurs?${buildQuery(filters)}`, {
+        headers: { authorization: `Bearer ${t}` },
+      });
+      if (!response.ok) throw new Error("Utilisateurs indisponibles");
+      setUtilisateurs(
+        ((await response.json()) as { utilisateurs: ProfileRow[] }).utilisateurs ?? [],
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur de chargement");
+    } finally {
+      setListLoading((current) => ({ ...current, utilisateurs: false }));
+    }
+  }
+
+  async function loadOeuvres(t: string, filters: OeuvreFilters) {
+    setListLoading((current) => ({ ...current, oeuvres: true }));
+    try {
+      const response = await fetch(`/api/fgh55_fh/oeuvres?${buildQuery(filters)}`, {
+        headers: { authorization: `Bearer ${t}` },
+      });
+      if (!response.ok) throw new Error("Œuvres indisponibles");
+      setOeuvres(((await response.json()) as { oeuvres: OeuvreRow[] }).oeuvres ?? []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur de chargement");
+    } finally {
+      setListLoading((current) => ({ ...current, oeuvres: false }));
     }
   }
 
@@ -203,6 +318,7 @@ export default function AdminPage() {
     await supabase.auth.signOut();
     setStats(null);
     setCommandes([]);
+    setOeuvres([]);
     setUtilisateurs([]);
     setActivite([]);
     setErreurs([]);
@@ -228,6 +344,7 @@ export default function AdminPage() {
   const navItems: { id: Section; label: string }[] = [
     { id: "apercu", label: "Vue d'ensemble" },
     { id: "commandes", label: "Commandes" },
+    { id: "oeuvres", label: "Œuvres" },
     { id: "utilisateurs", label: "Utilisateurs" },
     { id: "activite", label: "Activité" },
     { id: "evenements", label: "Événements" },
@@ -279,9 +396,59 @@ export default function AdminPage() {
             </div>
           )}
 
-          {section === "apercu" && <OverviewSection stats={stats} />}
-          {section === "commandes" && <OrdersSection commandes={commandes} />}
-          {section === "utilisateurs" && <UsersSection utilisateurs={utilisateurs} />}
+          {section === "apercu" && (
+            <OverviewSection
+              stats={stats}
+              activite={activite}
+              commandes={commandes}
+              oeuvres={oeuvres}
+              utilisateurs={utilisateurs}
+              erreurs={erreurs}
+              changements={changements}
+            />
+          )}
+          {section === "commandes" && (
+            <OrdersSection
+              commandes={commandes}
+              filters={commandeFilters}
+              loading={Boolean(listLoading.commandes)}
+              onChange={setCommandeFilters}
+              onApply={() => token && loadCommandes(token, commandeFilters)}
+              onReset={() => {
+                const next = { search: "", statut: "", offre: "" };
+                setCommandeFilters(next);
+                if (token) loadCommandes(token, next);
+              }}
+            />
+          )}
+          {section === "oeuvres" && (
+            <ArtworksSection
+              oeuvres={oeuvres}
+              filters={oeuvreFilters}
+              loading={Boolean(listLoading.oeuvres)}
+              onChange={setOeuvreFilters}
+              onApply={() => token && loadOeuvres(token, oeuvreFilters)}
+              onReset={() => {
+                const next = { search: "", statut: "", fichier: "" };
+                setOeuvreFilters(next);
+                if (token) loadOeuvres(token, next);
+              }}
+            />
+          )}
+          {section === "utilisateurs" && (
+            <UsersSection
+              utilisateurs={utilisateurs}
+              filters={userFilters}
+              loading={Boolean(listLoading.utilisateurs)}
+              onChange={setUserFilters}
+              onApply={() => token && loadUtilisateurs(token, userFilters)}
+              onReset={() => {
+                const next = { search: "", langue: "", activite: "" };
+                setUserFilters(next);
+                if (token) loadUtilisateurs(token, next);
+              }}
+            />
+          )}
           {section === "activite" && <ActivitySection activite={activite} />}
           {section === "evenements" && (
             <EventsSection
@@ -296,6 +463,15 @@ export default function AdminPage() {
       </main>
     </div>
   );
+}
+
+function buildQuery(filters: CommandeFilters | UserFilters | OeuvreFilters) {
+  const params = new URLSearchParams({ limit: "100" });
+  Object.entries(filters).forEach(([key, value]) => {
+    const clean = value.trim();
+    if (clean) params.set(key, clean);
+  });
+  return params.toString();
 }
 
 /* ------------------------------------------------------------------ */
@@ -487,25 +663,48 @@ function LoginForm({
 /* ------------------------------------------------------------------ */
 /*  Overview Section                                                  */
 /* ------------------------------------------------------------------ */
-function OverviewSection({ stats }: { stats: AdminStats | null }) {
+function OverviewSection({
+  stats,
+  activite,
+  commandes,
+  oeuvres,
+  utilisateurs,
+  erreurs,
+  changements,
+}: {
+  stats: AdminStats | null;
+  activite: ActivitePoint[];
+  commandes: CommandeRow[];
+  oeuvres: OeuvreRow[];
+  utilisateurs: ProfileRow[];
+  erreurs: EvenementErreur[];
+  changements: ChangementStatut[];
+}) {
   if (!stats) return null;
 
   const cards = [
     { label: "Total commandes", value: stats.totalCommandes.toString() },
     { label: "Actives", value: stats.commandesActives.toString() },
     { label: "Revenu total", value: `${(stats.revenuTotal / 100).toFixed(0)} €` },
+    { label: "Utilisateurs", value: stats.totalUtilisateurs.toString() },
+    { label: "Œuvres", value: stats.totalOeuvres.toString() },
+    { label: "Œuvres livrées", value: stats.oeuvresLivrees.toString() },
     { label: "Erreurs", value: stats.erreurs.toString() },
     { label: "Aujourd'hui", value: stats.aujourdHui.toString() },
   ];
+
+  const recentActivity = activite.slice(-7);
 
   return (
     <section>
       <h1 className="h-display text-3xl mb-2" style={{ color: "var(--or-ancestral)" }}>
         Vue d'ensemble
       </h1>
-      <p className="quote-italic text-sm mb-8">Tableau de bord administratif — Totem Ancestral</p>
+      <p className="quote-italic text-sm mb-8">
+        Tableau de bord administratif — activité, commandes, œuvres et utilisateurs.
+      </p>
 
-      <div className="grid gap-4 mb-10 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid gap-4 mb-8 md:grid-cols-4">
         {cards.map((c) => (
           <article key={c.label} className="premium-panel p-5 text-center">
             <p
@@ -520,6 +719,114 @@ function OverviewSection({ stats }: { stats: AdminStats | null }) {
           </article>
         ))}
       </div>
+
+      <div className="grid gap-4 mb-8 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="premium-panel p-5">
+          <h3 className="mb-4 text-sm uppercase" style={{ color: "var(--or-pale)" }}>
+            Activité des 7 derniers jours
+          </h3>
+          {recentActivity.length === 0 ? (
+            <p className="quote-italic">Aucune donnée d'activité.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={recentActivity}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(216,173,77,0.08)" />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={shortDate}
+                  stroke="rgba(226,225,238,0.42)"
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  stroke="rgba(226,225,238,0.42)"
+                  tick={{ fontSize: 11 }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "#1e1f28",
+                    border: "1px solid rgba(216,173,77,0.3)",
+                    borderRadius: 6,
+                    color: "#e2e1ee",
+                  }}
+                  labelFormatter={(v) => new Date(v).toLocaleDateString("fr-FR")}
+                />
+                <Legend />
+                <Bar dataKey="commandes" name="Commandes" fill="#d8ad4d" radius={[3, 3, 0, 0]} />
+                <Bar
+                  dataKey="inscriptions"
+                  name="Inscriptions"
+                  fill="#f6c865"
+                  radius={[3, 3, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        <div className="premium-panel p-5">
+          <h3 className="mb-4 text-sm uppercase" style={{ color: "var(--or-pale)" }}>
+            Points de contrôle
+          </h3>
+          <div className="grid gap-3">
+            <ActivityLine label="Commandes chargées" value={commandes.length.toString()} />
+            <ActivityLine label="Œuvres chargées" value={oeuvres.length.toString()} />
+            <ActivityLine label="Utilisateurs chargés" value={utilisateurs.length.toString()} />
+            <ActivityLine label="Événements récents" value={changements.length.toString()} />
+            <ActivityLine
+              label="Erreurs pipeline"
+              value={erreurs.length.toString()}
+              tone="danger"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <OverviewList title="Dernières commandes">
+          {commandes.slice(0, 6).map((commande) => (
+            <MiniRow
+              key={commande.id}
+              title={commande.client_email ?? commande.user_id.slice(0, 12)}
+              meta={`${commande.offre} · ${(commande.montant_cents / 100).toFixed(2)} ${commande.devise.toUpperCase()}`}
+              date={commande.created_at}
+              status={commande.statut}
+            />
+          ))}
+        </OverviewList>
+        <OverviewList title="Dernières œuvres">
+          {oeuvres.slice(0, 6).map((oeuvre) => (
+            <MiniRow
+              key={oeuvre.id}
+              title={oeuvre.nom_totem || oeuvre.numero_serie || oeuvre.id.slice(0, 12)}
+              meta={oeuvre.client_email ?? oeuvre.user_id.slice(0, 12)}
+              date={oeuvre.created_at}
+              status={oeuvre.statut}
+            />
+          ))}
+        </OverviewList>
+        <OverviewList title="Derniers utilisateurs">
+          {utilisateurs.slice(0, 6).map((user) => (
+            <MiniRow
+              key={user.id}
+              title={user.email ?? user.id.slice(0, 12)}
+              meta={`${user.prenom ?? "—"} · ${user.total_commandes} commande(s)`}
+              date={user.created_at}
+            />
+          ))}
+        </OverviewList>
+        <OverviewList title="Événements récents">
+          {changements.slice(0, 6).map((event) => (
+            <MiniRow
+              key={event.id}
+              title={event.id.slice(0, 12)}
+              meta={`${event.offre} · ${event.user_id.slice(0, 12)}`}
+              date={event.updated_at}
+              status={event.statut}
+            />
+          ))}
+        </OverviewList>
+      </div>
     </section>
   );
 }
@@ -527,26 +834,64 @@ function OverviewSection({ stats }: { stats: AdminStats | null }) {
 /* ------------------------------------------------------------------ */
 /*  Orders Section                                                    */
 /* ------------------------------------------------------------------ */
-function OrdersSection({ commandes }: { commandes: CommandeRow[] }) {
+function OrdersSection({
+  commandes,
+  filters,
+  loading,
+  onChange,
+  onApply,
+  onReset,
+}: {
+  commandes: CommandeRow[];
+  filters: CommandeFilters;
+  loading: boolean;
+  onChange: (filters: CommandeFilters) => void;
+  onApply: () => void;
+  onReset: () => void;
+}) {
   return (
     <section>
-      <h2 className="h-display text-2xl mb-6" style={{ color: "var(--or-ancestral)" }}>
-        Commandes
-      </h2>
+      <SectionHeader title="Commandes" subtitle="Liste des commandes avec recherche et filtrage." />
+
+      <FilterPanel onApply={onApply} onReset={onReset} loading={loading}>
+        <FilterInput
+          label="Recherche"
+          value={filters.search}
+          placeholder="Email, prénom, session Stripe ou ID complet"
+          onChange={(search) => onChange({ ...filters, search })}
+        />
+        <FilterSelect
+          label="Statut"
+          value={filters.statut}
+          options={COMMAND_STATUSES}
+          onChange={(statut) => onChange({ ...filters, statut })}
+        />
+        <FilterSelect
+          label="Offre"
+          value={filters.offre}
+          options={OFFER_TYPES}
+          onChange={(offre) => onChange({ ...filters, offre })}
+        />
+      </FilterPanel>
 
       {commandes.length === 0 ? (
         <p className="quote-italic">Aucune commande.</p>
       ) : (
         <div className="grid gap-3">
           {commandes.map((cmd) => (
-            <div key={cmd.id} className="premium-row grid gap-3 p-4 md:grid-cols-5 md:items-center">
+            <div key={cmd.id} className="premium-row grid gap-3 p-4 md:grid-cols-6 md:items-center">
               <div>
                 <p className="caption uppercase text-xs">ID</p>
                 <p className="text-sm font-mono">{cmd.id.slice(0, 12)}…</p>
               </div>
               <div>
                 <p className="caption uppercase text-xs">Client</p>
-                <p className="text-sm font-mono">{cmd.user_id.slice(0, 12)}</p>
+                <p className="text-sm break-words">
+                  {cmd.client_email ?? cmd.user_id.slice(0, 12)}
+                </p>
+                {cmd.client_prenom && (
+                  <p className="premium-soft text-xs mt-1">{cmd.client_prenom}</p>
+                )}
               </div>
               <div>
                 <p className="caption uppercase text-xs">Offre</p>
@@ -562,6 +907,115 @@ function OrdersSection({ commandes }: { commandes: CommandeRow[] }) {
                 <p className="caption uppercase text-xs">Statut</p>
                 <StatusBadge statut={cmd.statut} />
               </div>
+              <div>
+                <p className="caption uppercase text-xs">Date</p>
+                <p className="text-sm">{new Date(cmd.created_at).toLocaleString("fr-FR")}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Artworks Section                                                  */
+/* ------------------------------------------------------------------ */
+function ArtworksSection({
+  oeuvres,
+  filters,
+  loading,
+  onChange,
+  onApply,
+  onReset,
+}: {
+  oeuvres: OeuvreRow[];
+  filters: OeuvreFilters;
+  loading: boolean;
+  onChange: (filters: OeuvreFilters) => void;
+  onApply: () => void;
+  onReset: () => void;
+}) {
+  return (
+    <section>
+      <SectionHeader title="Œuvres" subtitle="Suivi des œuvres générées et des fichiers livrés." />
+
+      <FilterPanel onApply={onApply} onReset={onReset} loading={loading}>
+        <FilterInput
+          label="Recherche"
+          value={filters.search}
+          placeholder="Email, prénom, nom Totem, série ou ID complet"
+          onChange={(search) => onChange({ ...filters, search })}
+        />
+        <FilterSelect
+          label="Statut"
+          value={filters.statut}
+          options={OEUVRE_STATUSES}
+          onChange={(statut) => onChange({ ...filters, statut })}
+        />
+        <FilterSelect
+          label="Fichiers"
+          value={filters.fichier}
+          options={[
+            { value: "image", label: "Image présente" },
+            { value: "audio", label: "Audio présent" },
+            { value: "pdf", label: "PDF présent" },
+            { value: "complete", label: "Complète" },
+            { value: "incomplete", label: "Incomplète" },
+          ]}
+          onChange={(fichier) => onChange({ ...filters, fichier })}
+        />
+      </FilterPanel>
+
+      {oeuvres.length === 0 ? (
+        <p className="quote-italic">Aucune œuvre.</p>
+      ) : (
+        <div className="grid gap-3">
+          {oeuvres.map((oeuvre) => (
+            <div
+              key={oeuvre.id}
+              className="premium-row grid gap-3 p-4 lg:grid-cols-6 lg:items-center"
+            >
+              <div>
+                <p className="caption uppercase text-xs">Œuvre</p>
+                <p className="text-sm">{oeuvre.nom_totem || "Sans nom"}</p>
+                <p className="premium-soft text-xs font-mono mt-1">
+                  {oeuvre.numero_serie ?? oeuvre.id.slice(0, 12)}
+                </p>
+              </div>
+              <div>
+                <p className="caption uppercase text-xs">Client</p>
+                <p className="text-sm break-words">
+                  {oeuvre.client_email ?? oeuvre.user_id.slice(0, 12)}
+                </p>
+                {oeuvre.client_prenom && (
+                  <p className="premium-soft text-xs mt-1">{oeuvre.client_prenom}</p>
+                )}
+              </div>
+              <div>
+                <p className="caption uppercase text-xs">Commande</p>
+                <p className="text-sm font-mono">{oeuvre.commande_id.slice(0, 12)}…</p>
+                {oeuvre.commande_offre && (
+                  <p className="premium-soft text-xs capitalize mt-1">{oeuvre.commande_offre}</p>
+                )}
+              </div>
+              <div>
+                <p className="caption uppercase text-xs">Fichiers</p>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  <FileBadge label="Image" active={Boolean(oeuvre.image_url)} />
+                  <FileBadge label="Audio" active={Boolean(oeuvre.audio_url)} />
+                  <FileBadge label="PDF" active={Boolean(oeuvre.pdf_url)} />
+                </div>
+              </div>
+              <div>
+                <p className="caption uppercase text-xs">Statut</p>
+                <StatusBadge statut={oeuvre.statut} />
+              </div>
+              <div>
+                <p className="caption uppercase text-xs">Date</p>
+                <p className="text-sm">{new Date(oeuvre.created_at).toLocaleString("fr-FR")}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -573,12 +1027,49 @@ function OrdersSection({ commandes }: { commandes: CommandeRow[] }) {
 /* ------------------------------------------------------------------ */
 /*  Users Section                                                     */
 /* ------------------------------------------------------------------ */
-function UsersSection({ utilisateurs }: { utilisateurs: ProfileRow[] }) {
+function UsersSection({
+  utilisateurs,
+  filters,
+  loading,
+  onChange,
+  onApply,
+  onReset,
+}: {
+  utilisateurs: ProfileRow[];
+  filters: UserFilters;
+  loading: boolean;
+  onChange: (filters: UserFilters) => void;
+  onApply: () => void;
+  onReset: () => void;
+}) {
   return (
     <section>
-      <h2 className="h-display text-2xl mb-6" style={{ color: "var(--or-ancestral)" }}>
-        Utilisateurs
-      </h2>
+      <SectionHeader title="Utilisateurs" subtitle="Liste des comptes avec filtres d'activité." />
+
+      <FilterPanel onApply={onApply} onReset={onReset} loading={loading}>
+        <FilterInput
+          label="Recherche"
+          value={filters.search}
+          placeholder="Email ou prénom"
+          onChange={(search) => onChange({ ...filters, search })}
+        />
+        <FilterSelect
+          label="Langue"
+          value={filters.langue}
+          options={["fr", "en"]}
+          onChange={(langue) => onChange({ ...filters, langue })}
+        />
+        <FilterSelect
+          label="Activité"
+          value={filters.activite}
+          options={[
+            { value: "avec_commandes", label: "Avec commandes" },
+            { value: "sans_commandes", label: "Sans commande" },
+            { value: "actifs", label: "Commandes actives" },
+          ]}
+          onChange={(activite) => onChange({ ...filters, activite })}
+        />
+      </FilterPanel>
 
       {utilisateurs.length === 0 ? (
         <p className="quote-italic">Aucun utilisateur.</p>
@@ -836,10 +1327,197 @@ function EventsSection({
 }
 
 /* ------------------------------------------------------------------ */
+/*  Shared Admin Components                                           */
+/* ------------------------------------------------------------------ */
+function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="mb-6">
+      <h2 className="h-display text-2xl" style={{ color: "var(--or-ancestral)" }}>
+        {title}
+      </h2>
+      <p className="quote-italic text-sm mt-1">{subtitle}</p>
+    </div>
+  );
+}
+
+function FilterPanel({
+  children,
+  loading,
+  onApply,
+  onReset,
+}: {
+  children: ReactNode;
+  loading: boolean;
+  onApply: () => void;
+  onReset: () => void;
+}) {
+  return (
+    <form
+      className="premium-panel mb-6 grid gap-3 p-4 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onApply();
+      }}
+    >
+      {children}
+      <div className="flex gap-2">
+        <button type="submit" disabled={loading} className="btn-primary !px-4 !py-3 !text-[11px]">
+          {loading ? "..." : "Filtrer"}
+        </button>
+        <button type="button" onClick={onReset} className="btn-secondary !px-4 !py-3 !text-[11px]">
+          Réinitialiser
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function FilterInput({
+  label,
+  value,
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-2">
+      <span className="caption uppercase text-xs" style={{ color: "rgba(237,217,154,0.78)" }}>
+        {label}
+      </span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="form-input !py-3 !text-sm"
+      />
+    </label>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: Array<string | { value: string; label: string }>;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-2">
+      <span className="caption uppercase text-xs" style={{ color: "rgba(237,217,154,0.78)" }}>
+        {label}
+      </span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="form-input !py-3 !text-sm"
+      >
+        <option value="">Tous</option>
+        {options.map((option) => {
+          const item = typeof option === "string" ? { value: option, label: option } : option;
+          return (
+            <option key={item.value} value={item.value}>
+              {item.label.replace(/_/g, " ")}
+            </option>
+          );
+        })}
+      </select>
+    </label>
+  );
+}
+
+function ActivityLine({ label, value, tone }: { label: string; value: string; tone?: "danger" }) {
+  return (
+    <div className="premium-row flex items-center justify-between gap-4 px-4 py-3">
+      <span className="text-sm" style={{ color: "rgba(254,252,240,0.72)" }}>
+        {label}
+      </span>
+      <span
+        className="font-mono text-sm"
+        style={{ color: tone === "danger" ? "#E07A6B" : "var(--or-ancestral)" }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function OverviewList({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="premium-panel p-5">
+      <h3 className="mb-4 text-sm uppercase" style={{ color: "var(--or-pale)" }}>
+        {title}
+      </h3>
+      <div className="grid gap-2">
+        {Children.count(children) > 0 ? children : <p className="quote-italic">Aucune donnée.</p>}
+      </div>
+    </div>
+  );
+}
+
+function MiniRow({
+  title,
+  meta,
+  date,
+  status,
+}: {
+  title: string;
+  meta: string;
+  date: string;
+  status?: string;
+}) {
+  return (
+    <div className="premium-row flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <p className="truncate text-sm">{title}</p>
+        <p className="premium-soft truncate text-xs">{meta}</p>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        {status && <StatusBadge statut={status} />}
+        <span className="premium-soft text-xs">{new Date(date).toLocaleDateString("fr-FR")}</span>
+      </div>
+    </div>
+  );
+}
+
+function FileBadge({ label, active }: { label: string; active: boolean }) {
+  return (
+    <span
+      className="rounded px-2 py-0.5 text-[10px] uppercase"
+      style={{
+        border: `1px solid ${active ? "rgba(216,173,77,0.35)" : "rgba(226,225,238,0.14)"}`,
+        color: active ? "var(--or-ancestral)" : "rgba(226,225,238,0.42)",
+        background: active ? "rgba(216,173,77,0.08)" : "rgba(26,27,36,0.7)",
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+function shortDate(value: string) {
+  const [year, month, day] = value.split("-");
+  void year;
+  return `${day}/${month}`;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Status Badge                                                      */
 /* ------------------------------------------------------------------ */
 function StatusBadge({ statut, className }: { statut: string; className?: string }) {
   const colors: Record<string, { border: string; color: string; bg: string }> = {
+    en_cours: {
+      border: "rgba(246,200,101,0.35)",
+      color: "var(--or-pale)",
+      bg: "rgba(26,27,36,0.86)",
+    },
     livree: {
       border: "rgba(216,173,77,0.45)",
       color: "var(--or-ancestral)",

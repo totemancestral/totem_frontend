@@ -10,24 +10,33 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const statut = url.searchParams.get("statut")?.trim();
-  const offre = url.searchParams.get("offre")?.trim();
+  const fichier = url.searchParams.get("fichier")?.trim();
   const search = sanitizeSearch(url.searchParams.get("search") ?? "");
   const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
   const limit = Math.min(100, Math.max(1, Number(url.searchParams.get("limit")) || 20));
   const offset = (page - 1) * limit;
 
   let query = supabase
-    .from("commandes")
+    .from("oeuvres")
     .select("*", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (statut) {
-    query = query.eq("statut", statut as never);
+    query = query.eq("statut", statut);
   }
 
-  if (offre) {
-    query = query.eq("offre", offre as never);
+  if (fichier === "image") query = query.not("image_url", "is", null);
+  if (fichier === "audio") query = query.not("audio_url", "is", null);
+  if (fichier === "pdf") query = query.not("pdf_url", "is", null);
+  if (fichier === "complete") {
+    query = query
+      .not("image_url", "is", null)
+      .not("audio_url", "is", null)
+      .not("pdf_url", "is", null);
+  }
+  if (fichier === "incomplete") {
+    query = query.or("image_url.is.null,audio_url.is.null,pdf_url.is.null");
   }
 
   if (search) {
@@ -35,31 +44,34 @@ export async function GET(request: Request) {
     if (matchingUsers.length > 0) {
       query = query.in("user_id", matchingUsers);
     } else {
-      const conditions = [
-        `stripe_session_id.ilike.%${search}%`,
-        `stripe_payment_intent_id.ilike.%${search}%`,
-      ];
+      const conditions = [`nom_totem.ilike.%${search}%`, `numero_serie.ilike.%${search}%`];
       if (isUuid(search)) {
-        conditions.push(`id.eq.${search}`, `user_id.eq.${search}`, `reponses_id.eq.${search}`);
+        conditions.push(`id.eq.${search}`, `user_id.eq.${search}`, `commande_id.eq.${search}`);
       }
       query = query.or(conditions.join(","));
     }
   }
 
-  const { data: commandes, error, count } = await query;
+  const { data: oeuvres, error, count } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const userIds = [...new Set((commandes ?? []).map((commande) => commande.user_id))];
-  const profilesById = await getProfilesById(supabase, userIds);
+  const userIds = [...new Set((oeuvres ?? []).map((oeuvre) => oeuvre.user_id))];
+  const commandeIds = [...new Set((oeuvres ?? []).map((oeuvre) => oeuvre.commande_id))];
+  const [profilesById, commandesById] = await Promise.all([
+    getProfilesById(supabase, userIds),
+    getCommandesById(supabase, commandeIds),
+  ]);
 
   return NextResponse.json({
-    commandes: (commandes ?? []).map((commande) => ({
-      ...commande,
-      client_email: profilesById.get(commande.user_id)?.email ?? null,
-      client_prenom: profilesById.get(commande.user_id)?.prenom ?? null,
+    oeuvres: (oeuvres ?? []).map((oeuvre) => ({
+      ...oeuvre,
+      client_email: profilesById.get(oeuvre.user_id)?.email ?? null,
+      client_prenom: profilesById.get(oeuvre.user_id)?.prenom ?? null,
+      commande_offre: commandesById.get(oeuvre.commande_id)?.offre ?? null,
+      commande_statut: commandesById.get(oeuvre.commande_id)?.statut ?? null,
     })),
     total: count ?? 0,
     page,
@@ -99,4 +111,16 @@ async function getProfilesById(supabase: ReturnType<typeof createServiceClient>,
   }
 
   return profiles;
+}
+
+async function getCommandesById(supabase: ReturnType<typeof createServiceClient>, ids: string[]) {
+  const commandes = new Map<string, { offre: string; statut: string }>();
+  if (ids.length === 0) return commandes;
+
+  const { data } = await supabase.from("commandes").select("id, offre, statut").in("id", ids);
+  for (const commande of data ?? []) {
+    commandes.set(commande.id, { offre: commande.offre, statut: commande.statut });
+  }
+
+  return commandes;
 }

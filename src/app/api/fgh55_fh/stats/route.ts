@@ -8,7 +8,16 @@ export async function GET(request: Request) {
 
   const supabase = createServiceClient();
 
-  const [totalRes, revenueRes, statusRes, errorRes, todayRes] = await Promise.all([
+  const [
+    totalRes,
+    revenueRes,
+    statusRes,
+    errorRes,
+    todayRes,
+    usersRes,
+    oeuvresRes,
+    oeuvresLivreesRes,
+  ] = await Promise.all([
     supabase.from("commandes").select("*", { count: "exact", head: true }),
     supabase
       .from("commandes")
@@ -23,6 +32,9 @@ export async function GET(request: Request) {
       .from("commandes")
       .select("*", { count: "exact", head: true })
       .gte("created_at", new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+    supabase.from("oeuvres").select("*", { count: "exact", head: true }),
+    supabase.from("oeuvres").select("*", { count: "exact", head: true }).eq("statut", "livree"),
   ]);
 
   const totalRevenue = revenueRes.data?.reduce((sum, c) => sum + (c.montant_cents ?? 0), 0) ?? 0;
@@ -33,5 +45,8 @@ export async function GET(request: Request) {
     revenuTotal: totalRevenue,
     erreurs: errorRes.count ?? 0,
     aujourdHui: todayRes.count ?? 0,
+    totalUtilisateurs: usersRes.count ?? 0,
+    totalOeuvres: oeuvresRes.count ?? 0,
+    oeuvresLivrees: oeuvresLivreesRes.count ?? 0,
   });
 }

@@ -10,6 +10,8 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const search = url.searchParams.get("search") ?? "";
+  const langue = url.searchParams.get("langue")?.trim();
+  const activite = url.searchParams.get("activite")?.trim();
   const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
   const limit = Math.min(100, Math.max(1, Number(url.searchParams.get("limit")) || 20));
   const offset = (page - 1) * limit;
@@ -22,6 +24,10 @@ export async function GET(request: Request) {
 
   if (search) {
     query = query.or(`email.ilike.%${search}%,prenom.ilike.%${search}%`);
+  }
+
+  if (langue) {
+    query = query.eq("langue", langue);
   }
 
   const { data: profiles, error: profilesError, count } = await query;
@@ -47,11 +53,22 @@ export async function GET(request: Request) {
     }),
   );
 
+  const filtered = enriched.filter((profile) => {
+    if (activite === "avec_commandes") return profile.total_commandes > 0;
+    if (activite === "sans_commandes") return profile.total_commandes === 0;
+    if (activite === "actifs") return profile.commandes_actives > 0;
+    return true;
+  });
+
   return NextResponse.json({
-    utilisateurs: enriched,
-    total: count ?? 0,
+    utilisateurs: filtered,
+    total: activite ? filtered.length : (count ?? 0),
     page,
     limit,
-    totalPages: count ? Math.ceil(count / limit) : 0,
+    totalPages: activite
+      ? Math.ceil(filtered.length / limit)
+      : count
+        ? Math.ceil(count / limit)
+        : 0,
   });
 }
