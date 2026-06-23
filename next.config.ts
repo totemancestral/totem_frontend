@@ -15,8 +15,6 @@ const cspDirectives = {
     "https://*.supabase.co",
     "https://api.stripe.com",
     "https://*.r2.cloudflarestorage.com",
-    "https://in-automate.sendinblue.com",
-    "https://api.brevo.com",
   ],
   "frame-src": ["'self'", "https://js.stripe.com"],
   "frame-ancestors": ["'none'"],
