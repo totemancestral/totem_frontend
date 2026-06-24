@@ -12,7 +12,6 @@ type Locale = "fr" | "en";
 export function ClientChrome({ children, locale }: { children: ReactNode; locale: Locale }) {
   const pathname = usePathname();
   const isDashboard = Boolean(pathname?.includes("/domus_animi"));
-  const ambientEnabled = !isDashboard;
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -34,7 +33,7 @@ export function ClientChrome({ children, locale }: { children: ReactNode; locale
       <Header locale={locale} />
       <main style={{ maxWidth: "100%", overflowX: "clip" }}>{children}</main>
       {!isDashboard && <Footer locale={locale} />}
-      <AmbientAudio active={ambientEnabled} />
+      <AmbientAudio active />
       <CookieConsent />
     </div>
   );

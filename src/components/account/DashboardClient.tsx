@@ -287,7 +287,12 @@ export function DashboardClient({
     ["en_attente_paiement", "paye", "en_generation"].includes(commande.statut),
   ).length;
   const composition = buildCompositionState({ commandes, oeuvres, copy: t });
+  const [activeSection, setActiveSection] = useState<DashboardSection>(section);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setActiveSection(section);
+  }, [section]);
 
   useEffect(() => {
     if (!sidebarOpen) return;
@@ -329,6 +334,15 @@ export function DashboardClient({
       icon: <UserRound size={18} />,
     },
   ];
+
+  const selectSection = (next: DashboardSection, href: string) => {
+    if (next !== activeSection) setActiveSection(next);
+    setSidebarOpen(false);
+
+    if (typeof window !== "undefined" && window.location.pathname !== href) {
+      window.history.replaceState(null, "", href);
+    }
+  };
 
   if (authLoading || loading) {
     return (
@@ -377,19 +391,19 @@ export function DashboardClient({
 
       <nav className="flex flex-col gap-1">
         {sidebarItems.map((item) => (
-          <Link
+          <button
             key={item.key}
-            href={item.href}
-            onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 rounded-sm px-4 py-3 text-left text-sm uppercase transition-colors hover:bg-ombre"
+            type="button"
+            onClick={() => selectSection(item.key, item.href)}
+            className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm uppercase transition-colors hover:bg-ombre"
             style={{
-              color: item.key === section ? "var(--or-ancestral)" : "rgba(226,225,238,0.72)",
-              background: item.key === section ? "rgba(216,173,77,0.1)" : undefined,
+              color: item.key === activeSection ? "var(--or-ancestral)" : "rgba(226,225,238,0.72)",
+              background: item.key === activeSection ? "rgba(216,173,77,0.1)" : undefined,
             }}
           >
             <span style={{ color: "var(--or-ancestral)" }}>{item.icon}</span>
             {item.label}
-          </Link>
+          </button>
         ))}
       </nav>
 
@@ -459,7 +473,7 @@ export function DashboardClient({
             </p>
           </div>
 
-          {section === "overview" && (
+          {activeSection === "overview" && (
             <section id="dashboard-overview" className="premium-panel-strong p-6 md:p-8">
               <motion.header
                 initial={{ opacity: 0, y: 16 }}
@@ -501,7 +515,7 @@ export function DashboardClient({
             </section>
           )}
 
-          {section === "orders" && (
+          {activeSection === "orders" && (
             <section id="dashboard-orders" className="flex flex-col gap-5">
               <h1 className="h-display text-4xl" style={{ color: "var(--or-ancestral)" }}>
                 {t.latestOrders}
@@ -518,7 +532,7 @@ export function DashboardClient({
             </section>
           )}
 
-          {section === "artworks" && (
+          {activeSection === "artworks" && (
             <section id="dashboard-artworks" className="flex flex-col gap-5">
               <h1 className="h-display text-4xl" style={{ color: "var(--or-ancestral)" }}>
                 {t.artworks}
@@ -535,7 +549,7 @@ export function DashboardClient({
             </section>
           )}
 
-          {section === "profile" && (
+          {activeSection === "profile" && (
             <section id="dashboard-profile">
               <div className="premium-panel p-6 md:p-8">
                 <div className="mb-6 flex items-center gap-3">

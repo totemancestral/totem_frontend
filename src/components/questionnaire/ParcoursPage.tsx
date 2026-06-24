@@ -757,7 +757,7 @@ export function ParcoursPage() {
           />
         )}
         {phase === "final-transition" && <FinalTransition key="ft" />}
-        {phase === "waiting" && <WaitingScreen key="ws" />}
+        {phase === "waiting" && <WaitingScreen key="ws" locale={locale} />}
       </AnimatePresence>
 
       {/* Nudge */}
@@ -812,39 +812,35 @@ function JourneyNav({
 
   return (
     <nav
-      className="fixed left-0 right-0 z-[230] px-4 pt-4 md:px-8"
+      className="fixed left-0 right-0 top-0 z-[230] border-b transition-all duration-500"
       aria-label={isFrench ? "Navigation du parcours" : "Journey navigation"}
+      style={{
+        background: "rgba(12,14,22,0.92)",
+        backdropFilter: "blur(16px)",
+        borderColor: "rgba(216,173,77,0.18)",
+      }}
     >
-      <div
-        className="premium-panel mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-3 md:px-4"
-        style={{
-          background: "rgba(13,13,26,0.88)",
-          borderColor: "rgba(216,173,77,0.24)",
-          backdropFilter: "blur(14px)",
-        }}
-      >
+      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-5 py-3 md:px-8 md:py-4">
         <Link
           href={`/${locale}`}
-          className="flex min-w-0 items-center gap-2"
+          className="group flex min-w-0 shrink-0 items-center gap-3 transition-colors"
           aria-label="Totem Ancestral"
         >
+          <img
+            src="/assets/totem-logo.png"
+            alt="Totem Ancestral"
+            className="h-8 w-auto transition-transform duration-300 group-hover:scale-105 md:h-9"
+          />
           <span
-            className="logo-wordmark text-[18px] leading-none"
-            style={{ color: "var(--ivoire)" }}
+            className="hidden text-[24px] uppercase leading-none sm:block"
+            style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
           >
-            T
-          </span>
-          <img src="/assets/totem-logo.png" alt="" aria-hidden="true" className="h-8 w-auto" />
-          <span
-            className="logo-wordmark text-[18px] leading-none"
-            style={{ color: "var(--ivoire)" }}
-          >
-            A
+            Totem Ancestral
           </span>
         </Link>
 
         <p
-          className="hidden min-w-0 truncate text-center text-[11px] uppercase md:block"
+          className="pointer-events-none absolute left-1/2 hidden max-w-[34rem] -translate-x-1/2 truncate text-center text-[11px] uppercase lg:block"
           style={{ color: "rgba(246,200,101,0.72)" }}
         >
           {label}
@@ -853,7 +849,7 @@ function JourneyNav({
         <div className="flex shrink-0 items-center gap-2">
           <Link
             href={`/${locale}`}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-sm border transition-colors hover:bg-ombre"
+            className="inline-flex h-10 w-10 items-center justify-center border transition-colors hover:bg-ombre"
             style={{ borderColor: "rgba(216,173,77,0.24)", color: "var(--or-ancestral)" }}
             aria-label={isFrench ? "Accueil" : "Home"}
           >
@@ -861,7 +857,7 @@ function JourneyNav({
           </Link>
           <Link
             href={`/${locale}/domus_animi`}
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-sm border px-3 text-[11px] uppercase transition-colors hover:bg-ombre"
+            className="inline-flex h-10 items-center justify-center gap-2 border px-3 text-[11px] uppercase transition-colors hover:bg-ombre"
             style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
           >
             <LayoutDashboard size={15} />
@@ -1639,7 +1635,7 @@ function FinalTransition() {
     </motion.section>
   );
 }
-function WaitingScreen() {
+function WaitingScreen({ locale }: { locale: "fr" | "en" }) {
   const t = useTranslations("parcours.waiting");
   const rotating = t.raw("rotating") as string[];
   const [idx, setIdx] = useState(0);
@@ -1691,6 +1687,10 @@ function WaitingScreen() {
         >
           {t("body")}
         </p>
+        <Link href={`/${locale}/domus_animi`} className="btn-primary mt-1">
+          <LayoutDashboard size={16} />
+          {locale === "fr" ? "Retour au dashboard" : "Back to dashboard"}
+        </Link>
       </div>
     </motion.section>
   );

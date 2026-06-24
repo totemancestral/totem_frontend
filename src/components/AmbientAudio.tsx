@@ -12,25 +12,72 @@ const music = "/assets/totem-music.mp3";
  */
 const CROSSFADE_S = 2.5;
 const TARGET_VOL = 0.55;
+const STORAGE_KEY = "totem_ambient_enabled";
 
 export function AmbientAudio({ active }: { active: boolean }) {
   const aRef = useRef<HTMLAudioElement>(null);
   const bRef = useRef<HTMLAudioElement>(null);
   const currentRef = useRef<"a" | "b">("a");
   const swappedAtRef = useRef<number>(-Infinity);
-  const [stopped, setStopped] = useState(false);
+  const fadeTokenRef = useRef(0);
+  const enabledRef = useRef(true);
+  const [enabled, setEnabled] = useState(true);
   const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
+
+  const fadeOutAndPause = useCallback(() => {
+    const token = ++fadeTokenRef.current;
+    const els = [aRef.current, bRef.current].filter(Boolean) as HTMLAudioElement[];
+    if (els.length === 0) {
+      setPlaying(false);
+      return;
+    }
+
+    let remaining = els.length;
+    els.forEach((el) =>
+      fadeTo(el, 0, 900, () => {
+        if (fadeTokenRef.current !== token) return;
+        try {
+          el.pause();
+        } catch {
+          /* noop */
+        }
+        remaining -= 1;
+        if (remaining <= 0) setPlaying(false);
+      }),
+    );
+  }, []);
+
+  const persistEnabled = useCallback((next: boolean) => {
+    enabledRef.current = next;
+    setEnabled(next);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next ? "true" : "false");
+    } catch {
+      /* noop */
+    }
+  }, []);
 
   const startPlayback = useCallback(() => {
-    if (!active || stopped) return;
+    if (!active || !enabledRef.current) return;
     const a = aRef.current;
     if (!a) return;
+    const b = bRef.current;
 
+    fadeTokenRef.current += 1;
     currentRef.current = "a";
     swappedAtRef.current = -Infinity;
-    a.muted = muted;
+    a.muted = false;
     a.volume = 0;
+    if (b) {
+      try {
+        b.pause();
+        b.currentTime = 0;
+        b.volume = 0;
+        b.muted = false;
+      } catch {
+        /* noop */
+      }
+    }
 
     a.play()
       .then(() => {
@@ -40,10 +87,22 @@ export function AmbientAudio({ active }: { active: boolean }) {
       .catch(() => {
         setPlaying(false);
       });
-  }, [active, muted, stopped]);
+  }, [active]);
 
   useEffect(() => {
-    if (!active || stopped || playing) return;
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved === "false") {
+        enabledRef.current = false;
+        setEnabled(false);
+      }
+    } catch {
+      /* noop */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!active || !enabled || playing) return;
 
     const startOnInteraction = () => startPlayback();
     window.addEventListener("pointerdown", startOnInteraction, { once: true, passive: true });
@@ -55,18 +114,23 @@ export function AmbientAudio({ active }: { active: boolean }) {
       window.removeEventListener("keydown", startOnInteraction);
       window.removeEventListener("totem:ambient-start", startOnInteraction);
     };
-  }, [active, playing, startPlayback, stopped]);
+  }, [active, enabled, playing, startPlayback]);
 
   // Start when active becomes true
   useEffect(() => {
-    if (!active || stopped || playing) return;
+    if (!active || !enabled || playing) return;
     startPlayback();
-  }, [active, playing, startPlayback, stopped]);
+  }, [active, enabled, playing, startPlayback]);
+
+  useEffect(() => {
+    if (active && enabled) return;
+    fadeOutAndPause();
+  }, [active, enabled, fadeOutAndPause]);
 
   // Seamless crossfade loop: poll the active element's time, when it nears the
   // end, start the other element from 0 and crossfade gains.
   useEffect(() => {
-    if (!active || stopped || !playing) return;
+    if (!active || !enabled || !playing) return;
     let raf = 0;
     const tick = () => {
       const cur = currentRef.current === "a" ? aRef.current : bRef.current;
@@ -79,7 +143,7 @@ export function AmbientAudio({ active }: { active: boolean }) {
           try {
             nxt.currentTime = 0;
             nxt.volume = 0;
-            nxt.muted = muted;
+            nxt.muted = false;
             void nxt.play();
             fadeTo(nxt, TARGET_VOL, CROSSFADE_S * 1000);
             fadeTo(cur, 0, CROSSFADE_S * 1000, () => {
@@ -99,74 +163,41 @@ export function AmbientAudio({ active }: { active: boolean }) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [active, playing, stopped, muted]);
+  }, [active, enabled, playing]);
 
-  // Only explicit controls should stop the ambient sound.
-  useEffect(() => {
-    if (!active || stopped) return;
-    const onClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (!target) return;
-      const el = target.closest("[data-stop-ambient]");
-      if (el) fadeOutAndStop();
-    };
-    document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
-  }, [active, stopped]);
-
-  const fadeOutAndStop = () => {
-    const els = [aRef.current, bRef.current].filter(Boolean) as HTMLAudioElement[];
-    if (els.length === 0) {
-      setStopped(true);
-      return;
-    }
-    let remaining = els.length;
-    els.forEach((el) =>
-      fadeTo(el, 0, 900, () => {
-        try {
-          el.pause();
-        } catch {
-          /* noop */
-        }
-        remaining -= 1;
-        if (remaining <= 0) {
-          setPlaying(false);
-          setStopped(true);
-        }
-      }),
-    );
-  };
-
-  if (!active || stopped) return null;
+  if (!active) return null;
 
   return (
     <>
-      <audio ref={aRef} src={music} preload="auto" />
-      <audio ref={bRef} src={music} preload="auto" />
+      <audio ref={aRef} src={music} preload={enabled ? "auto" : "none"} />
+      <audio ref={bRef} src={music} preload={enabled ? "auto" : "none"} />
       <button
         type="button"
         onClick={() => {
+          if (!enabled) {
+            persistEnabled(true);
+            startPlayback();
+            return;
+          }
+
           if (!playing) {
             startPlayback();
             return;
           }
 
-          const next = !muted;
-          setMuted(next);
-          [aRef.current, bRef.current].forEach((el) => {
-            if (el) el.muted = next;
-          });
+          persistEnabled(false);
+          fadeOutAndPause();
         }}
-        aria-label={!playing ? "Lancer l'audio" : muted ? "Activer le son" : "Couper le son"}
-        title={!playing ? "Lancer l'audio" : muted ? "Activer le son" : "Couper le son"}
+        aria-label={!enabled ? "Activer l'audio" : playing ? "Couper l'audio" : "Lancer l'audio"}
+        title={!enabled ? "Activer l'audio" : playing ? "Couper l'audio" : "Lancer l'audio"}
         className="fixed bottom-6 right-6 z-[190] flex h-11 w-11 items-center justify-center rounded-full border backdrop-blur transition-all hover:scale-105"
         style={{
           borderColor: "rgba(212,175,55,0.4)",
           background: "rgba(11,11,15,0.55)",
-          color: "var(--or-ancestral)",
+          color: enabled && playing ? "var(--or-ancestral)" : "rgba(254,252,240,0.78)",
         }}
       >
-        {playing && muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+        {enabled && playing ? <Volume2 size={18} /> : <VolumeX size={18} />}
       </button>
     </>
   );

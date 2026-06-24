@@ -362,7 +362,7 @@ export default function AdminPage() {
         navItems={navItems}
         active={section}
         onSelect={(s) => {
-          setSection(s);
+          if (s !== section) setSection(s);
           setMobileOpen(false);
         }}
         mobileOpen={mobileOpen}
