@@ -15,11 +15,13 @@ export function createPublicSupabaseClient() {
 
 export function createServiceSupabaseClient() {
   const env = getServerEnv();
-  if (!env.NEXT_PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) {
+  const serviceKey = env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!env.NEXT_PUBLIC_SUPABASE_URL || !serviceKey) {
     throw new Error("Missing Supabase service credentials");
   }
 
-  return createClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_KEY, {
+  return createClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

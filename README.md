@@ -4,7 +4,7 @@ Plateforme digitale SENYCE PARTNERS — Générateur de coffrets numériques per
 
 ## Stack
 
-Next.js 16, React 19, TypeScript, Tailwind 4, Supabase, Stripe, @react-pdf/renderer, Cloudflare R2, Brevo.
+Next.js 16, React 19, TypeScript, Tailwind 4, Supabase, Stripe, @react-pdf/renderer, Cloudflare R2, Resend.
 
 ## Démarrage
 
@@ -16,13 +16,13 @@ npm run dev                   # http://localhost:3000/fr
 
 ## Scripts
 
-| Commande | Description |
-|----------|-------------|
-| `npm run dev` | Développement |
-| `npm run build` | Build production |
-| `npm run type-check` | TypeScript |
-| `npm run lint` | ESLint + Prettier |
-| `npm run i18n:sync` | Synchronisation traductions |
+| Commande             | Description                 |
+| -------------------- | --------------------------- |
+| `npm run dev`        | Développement               |
+| `npm run build`      | Build production            |
+| `npm run type-check` | TypeScript                  |
+| `npm run lint`       | ESLint + Prettier           |
+| `npm run i18n:sync`  | Synchronisation traductions |
 
 ## Architecture
 
@@ -30,7 +30,7 @@ npm run dev                   # http://localhost:3000/fr
 - `src/app/api/` — API Routes (Stripe, Supabase, Pipeline)
 - `src/components/` — Composants React
 - `src/lib/services/` — Pipeline IA, PDF, Stockage, Email
-- `src/lib/clients/` — Clients Stripe, Supabase, R2, Brevo
+- `src/lib/clients/` — Clients Stripe, Supabase, R2, Resend
 - `supabase/migrations/` — Schéma et RLS
 
 ## Flux principal

@@ -20,7 +20,7 @@ export function PrivacyPage() {
     },
     {
       title: "Prestataires",
-      body: "Le service peut s'appuyer sur Supabase pour l'authentification et la base de données, Stripe pour le paiement, Brevo pour les emails, Cloudflare R2 pour le stockage de fichiers, OpenAI ou les APIs SENYCE pour la génération assistée par IA. Seules les données nécessaires sont transmises à chaque prestataire.",
+      body: "Le service peut s'appuyer sur Supabase pour l'authentification et la base de données, Stripe pour le paiement, Resend pour les emails, Cloudflare R2 pour le stockage de fichiers, OpenAI ou les APIs SENYCE pour la génération assistée par IA. Seules les données nécessaires sont transmises à chaque prestataire.",
     },
     {
       title: "Conservation",

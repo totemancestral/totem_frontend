@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getBrevoClient } from "@/lib/clients/brevo";
-import * as brevo from "@getbrevo/brevo";
+import { sendResendEmail } from "@/lib/clients/resend";
+import { readEnvValue } from "@/lib/env-values";
+import { escapeHtml } from "@/lib/services/email";
 
 const contactSchema = z.object({
   prenom: z.string().min(1),
@@ -18,23 +19,30 @@ export async function POST(request: Request) {
   }
 
   const { prenom, email, sujet, message } = parsed.data;
+  const safeSubject = sujet.replace(/[\r\n]+/g, " ").trim();
 
   try {
-    const brevoClient = getBrevoClient();
-    const sendSmtpEmail = new brevo.SendSmtpEmail();
-    sendSmtpEmail.to = [{ email: process.env.ADMIN_EMAIL || "contact@totemancestral.com", name: "SENYCE Partners" }];
-    sendSmtpEmail.replyTo = { email, name: prenom };
-    sendSmtpEmail.subject = `[Contact Totem] ${sujet}`;
-    sendSmtpEmail.htmlContent = `
-      <h3>Nouveau message depuis le formulaire contact</h3>
-      <p><strong>Prénom :</strong> ${prenom}</p>
-      <p><strong>Email :</strong> ${email}</p>
-      <p><strong>Sujet :</strong> ${sujet}</p>
-      <hr />
-      <p>${message.replace(/\n/g, "<br />")}</p>
-    `;
+    if (!readEnvValue("RESEND_API_KEY")) {
+      return NextResponse.json({ error: "Email service not configured" }, { status: 503 });
+    }
 
-    await brevoClient.sendTransacEmail(sendSmtpEmail);
+    await sendResendEmail({
+      to: {
+        email: readEnvValue("ADMIN_EMAIL") || "contact@totemancestral.com",
+        name: "SENYCE Partners",
+      },
+      replyTo: { email, name: prenom },
+      subject: `[Contact Totem] ${safeSubject}`,
+      html: `
+      <h3>Nouveau message depuis le formulaire contact</h3>
+      <p><strong>Prenom :</strong> ${escapeHtml(prenom)}</p>
+      <p><strong>Email :</strong> ${escapeHtml(email)}</p>
+      <p><strong>Sujet :</strong> ${escapeHtml(sujet)}</p>
+      <hr />
+      <p>${escapeHtml(message).replace(/\n/g, "<br />")}</p>
+    `,
+      text: `${prenom} <${email}>\n${sujet}\n\n${message}`,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

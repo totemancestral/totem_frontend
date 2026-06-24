@@ -88,11 +88,11 @@ Etat actuel : non implemente; seul un squelette de retry existe.
 - Convention cible : `commandes/{commandeId}/image.png`, `audio.mp3`, `parchemin.pdf`, `certificat.pdf`.
 - Les PDFs doivent utiliser des URLs signees expirees a 30 jours.
 - Les PNG et MP3 peuvent utiliser des URLs permanentes selon la politique R2 retenue.
-- Les emails transactionnels doivent etre envoyes via Brevo avec templates FR/EN.
+- Les emails transactionnels doivent etre envoyes via Resend avec templates FR/EN geres cote code.
 - La commande ne doit passer a `done`/`livree` que lorsque toutes les URLs necessaires sont persistées.
 - La mise a jour finale doit etre atomique autant que possible.
 
-Etat actuel : clients R2/Brevo presents; logique d'upload/livraison non implementee.
+Etat actuel : clients R2/Resend presents; logique d'upload/livraison implementee progressivement.
 
 ## 9. Regles d'authentification et d'autorisation
 
@@ -176,12 +176,9 @@ Etat actuel : deploiements production effectues sur demande explicite; CI/branch
 - `R2_SECRET_ACCESS_KEY`
 - `R2_BUCKET_NAME`
 - `R2_PUBLIC_URL`
-- `BREVO_API_KEY`
-- `BREVO_TEMPLATE_CONFIRM_FR`
-- `BREVO_TEMPLATE_CONFIRM_EN`
-- `BREVO_TEMPLATE_LIVRAISON_FR`
-- `BREVO_TEMPLATE_LIVRAISON_EN`
-- `BREVO_TEMPLATE_ALERTE_ADMIN`
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`
+- `RESEND_FROM_NAME`
 - `SENYCE_API_TEXTE`
 - `SENYCE_API_IMAGE`
 - `SENYCE_API_AUDIO`

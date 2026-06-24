@@ -20,7 +20,7 @@ npm run dev
 ## Variables d'environnement
 
 Les variables publiques doivent utiliser le préfixe `NEXT_PUBLIC_`.
-Les secrets Stripe, Supabase service, Cloudflare R2, Brevo et SENYCE APIs doivent rester côté serveur uniquement.
+Les secrets Stripe, Supabase service, Cloudflare R2, Resend et SENYCE APIs doivent rester côté serveur uniquement.
 
 Voir `src/lib/env.ts` pour le schéma typé de référence.
 

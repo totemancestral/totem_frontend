@@ -114,7 +114,10 @@ function logAuthError(label: string, error: { status?: number; code?: string; me
 }
 
 function getRequestOrigin(request: Request) {
-  const configured = readEnvValue("NEXT_PUBLIC_SITE_URL")?.replace(/\/$/, "");
+  const configured = (readEnvValue("NEXT_PUBLIC_SITE_URL") || readEnvValue("SITE_URL"))?.replace(
+    /\/$/,
+    "",
+  );
   if (configured) return configured;
 
   const url = new URL(request.url);

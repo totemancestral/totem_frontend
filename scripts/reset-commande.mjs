@@ -1,9 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import WebSocket from "ws";
+import { requireEnv } from "./env.mjs";
 
 const supabase = createClient(
-  "https://mjiealkqjcqvlfrxdcif.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qaWVhbGtxamNxdmxmcnhkY2lmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTM1MjA2MiwiZXhwIjoyMDk2OTI4MDYyfQ.uuLoOmJJNrAysyXEsjdo_Vyw5jMe46VrAUttIYdw8N0",
+  requireEnv("NEXT_PUBLIC_SUPABASE_URL", ["SUPABASE_URL"]),
+  requireEnv("SUPABASE_SERVICE_KEY", ["SUPABASE_SERVICE_ROLE_KEY"]),
   { auth: { persistSession: false, autoRefreshToken: false }, realtime: { transport: WebSocket } },
 );
 

@@ -1,8 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import WebSocket from "ws";
+import { requireEnv } from "./env.mjs";
 
-const SUPABASE_URL = "https://mjiealkqjcqvlfrxdcif.supabase.co";
-const SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qaWVhbGtxamNxdmxmcnhkY2lmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTM1MjA2MiwiZXhwIjoyMDk2OTI4MDYyfQ.uuLoOmJJNrAysyXEsjdo_Vyw5jMe46VrAUttIYdw8N0";
+const SUPABASE_URL = requireEnv("NEXT_PUBLIC_SUPABASE_URL", ["SUPABASE_URL"]);
+const SUPABASE_SERVICE_KEY = requireEnv("SUPABASE_SERVICE_KEY", ["SUPABASE_SERVICE_ROLE_KEY"]);
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -18,8 +19,14 @@ async function main() {
     .select("id, prenom, email, langue")
     .eq("email", email);
 
-  if (pErr) { console.error("❌ Profile query error:", pErr); return; }
-  if (!profiles?.length) { console.log("❌ User not found in profiles"); return; }
+  if (pErr) {
+    console.error("❌ Profile query error:", pErr);
+    return;
+  }
+  if (!profiles?.length) {
+    console.log("❌ User not found in profiles");
+    return;
+  }
 
   const user = profiles[0];
   console.log(`✅ User found: ${user.prenom} (${user.email}) id=${user.id} langue=${user.langue}`);
@@ -37,7 +44,9 @@ async function main() {
 
   console.log(`   Commandes: ${commandes?.length ?? 0}`);
   for (const c of commandes ?? []) {
-    console.log(`     - ${c.id.slice(0,8)}… ${c.offre} ${c.statut} ${(c.montant_cents/100).toFixed(2)}${c.devise}`);
+    console.log(
+      `     - ${c.id.slice(0, 8)}… ${c.offre} ${c.statut} ${(c.montant_cents / 100).toFixed(2)}${c.devise}`,
+    );
   }
 
   // 4. Check existing oeuvres
@@ -48,7 +57,9 @@ async function main() {
 
   console.log(`   Oeuvres: ${oeuvres?.length ?? 0}`);
   for (const o of oeuvres ?? []) {
-    console.log(`     - ${o.id.slice(0,8)}… commande=${o.commande_id.slice(0,8)}… statut=${o.statut} totem=${o.nom_totem ?? "-"}`);
+    console.log(
+      `     - ${o.id.slice(0, 8)}… commande=${o.commande_id.slice(0, 8)}… statut=${o.statut} totem=${o.nom_totem ?? "-"}`,
+    );
   }
 
   // 5. Check reponses_parcours

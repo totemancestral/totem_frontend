@@ -23,7 +23,7 @@ export function MentionsPage() {
     },
     {
       title: "Hébergement et infrastructure",
-      body: "Le site est exploité sur une infrastructure cloud sécurisée. Les services techniques du projet peuvent inclure Next.js ou Vercel pour l'application, Supabase pour l'authentification et la base de données, Cloudflare R2 pour le stockage, Stripe pour les paiements et Brevo pour les emails transactionnels.",
+      body: "Le site est exploité sur une infrastructure cloud sécurisée. Les services techniques du projet peuvent inclure Next.js ou Vercel pour l'application, Supabase pour l'authentification et la base de données, Cloudflare R2 pour le stockage, Stripe pour les paiements et Resend pour les emails transactionnels.",
     },
     {
       title: "Propriété intellectuelle",

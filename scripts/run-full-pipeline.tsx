@@ -2,16 +2,20 @@ import { createClient } from "@supabase/supabase-js";
 import WebSocket from "ws";
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { getSupabaseRef, requireEnv } from "./env.mjs";
 
 // ====== Configuration ======
-const SUPABASE_URL = "https://mjiealkqjcqvlfrxdcif.supabase.co";
-const SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qaWVhbGtxamNxdmxmcnhkY2lmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTM1MjA2MiwiZXhwIjoyMDk2OTI4MDYyfQ.uuLoOmJJNrAysyXEsjdo_Vyw5jMe46VrAUttIYdw8N0";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qaWVhbGtxamNxdmxmcnhkY2lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNTIwNjIsImV4cCI6MjA5NjkyODA2Mn0.vSeeQcfaTNc1IMsIAZmlZMpbeM4o-OD6S1tRuxT42WM";
-const R2_ACCOUNT_ID = "52217c714e4feae8afbe8b6ac629281a";
-const R2_ACCESS_KEY_ID = "722d1760e18a0d64a070a4f3711b456c";
-const R2_SECRET_ACCESS_KEY = "89542afa2ea9f1bc23237ec9843cfacdcab34fa87d602e0b762faf15f31c30b4";
-const R2_BUCKET = "totem-ancestral";
-const SUPABASE_REF = "mjiealkqjcqvlfrxdcif";
+const SUPABASE_URL = requireEnv("NEXT_PUBLIC_SUPABASE_URL", ["SUPABASE_URL"]);
+const SUPABASE_SERVICE_KEY = requireEnv("SUPABASE_SERVICE_KEY", ["SUPABASE_SERVICE_ROLE_KEY"]);
+const SUPABASE_ANON_KEY = requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", [
+  "SUPABASE_ANON_KEY",
+  "SUPABASE_PUBLISHABLE_KEY",
+]);
+const R2_ACCOUNT_ID = requireEnv("R2_ACCOUNT_ID");
+const R2_ACCESS_KEY_ID = requireEnv("R2_ACCESS_KEY_ID");
+const R2_SECRET_ACCESS_KEY = requireEnv("R2_SECRET_ACCESS_KEY");
+const R2_BUCKET = requireEnv("R2_BUCKET_NAME", ["R2_BUCKET"]);
+const SUPABASE_REF = getSupabaseRef(SUPABASE_URL);
 const EDGE_FUNCTION_URL = `https://${SUPABASE_REF}.supabase.co/functions/v1`;
 const COMMANDE_ID = "2e7a681b-d721-4149-8314-80ab795fbdd6";
 
@@ -57,9 +61,19 @@ async function callEdge<T>(slug: string, payload: unknown): Promise<T | null> {
   }
 }
 
-async function generateTexte(prenom: string, reponses: any, archetypeId: string, langue: string): Promise<string> {
+async function generateTexte(
+  prenom: string,
+  reponses: any,
+  archetypeId: string,
+  langue: string,
+): Promise<string> {
   console.log("  📝 Step 1: Generating text...");
-  const result = await callEdge<{ texte?: string }>("generate-texte", { prenom, reponses, archetypeId, langue });
+  const result = await callEdge<{ texte?: string }>("generate-texte", {
+    prenom,
+    reponses,
+    archetypeId,
+    langue,
+  });
   if (result?.texte) {
     console.log(`  ✅ Text generated (${result.texte.length} chars)`);
     return result.texte;
@@ -68,9 +82,19 @@ async function generateTexte(prenom: string, reponses: any, archetypeId: string,
   return "";
 }
 
-async function generateImage(prenom: string, texte: string, archetypeId: string, langue: string): Promise<string> {
+async function generateImage(
+  prenom: string,
+  texte: string,
+  archetypeId: string,
+  langue: string,
+): Promise<string> {
   console.log("  🖼️ Step 2a: Generating image...");
-  const result = await callEdge<{ imageUrl?: string }>("generate-image", { prenom, texte, archetypeId, langue });
+  const result = await callEdge<{ imageUrl?: string }>("generate-image", {
+    prenom,
+    texte,
+    archetypeId,
+    langue,
+  });
   if (result?.imageUrl) {
     console.log(`  ✅ Image generated`);
     return result.imageUrl;
@@ -78,9 +102,19 @@ async function generateImage(prenom: string, texte: string, archetypeId: string,
   return "";
 }
 
-async function generateAudio(prenom: string, texte: string, archetypeId: string, langue: string): Promise<string> {
+async function generateAudio(
+  prenom: string,
+  texte: string,
+  archetypeId: string,
+  langue: string,
+): Promise<string> {
   console.log("  🔊 Step 2b: Generating audio...");
-  const result = await callEdge<{ audioUrl?: string }>("generate-audio", { prenom, texte, archetypeId, langue });
+  const result = await callEdge<{ audioUrl?: string }>("generate-audio", {
+    prenom,
+    texte,
+    archetypeId,
+    langue,
+  });
   if (result?.audioUrl) {
     console.log(`  ✅ Audio generated`);
     return result.audioUrl;
@@ -101,9 +135,14 @@ async function uploadToR2(commandeId: string, type: string, buffer: Buffer, mime
   const fileName = `${type}_${commandeId}.${ext}`;
   const key = `totems/${commandeId}/${type}/${fileName}`;
 
-  await r2.send(new PutObjectCommand({
-    Bucket: R2_BUCKET, Key: key, Body: buffer, ContentType: mimeType,
-  }));
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: mimeType,
+    }),
+  );
 
   const publicUrl = `https://${R2_BUCKET}.r2.cloudflarestorage.com/${key}`;
   const signedUrl = await getSignedUrl(r2, new GetObjectCommand({ Bucket: R2_BUCKET, Key: key }), {
@@ -123,7 +162,10 @@ function hashCode(str: string): number {
 }
 
 function generateSimplePDF(text: string, title: string, isCertificat = false): Buffer {
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
   const wrapped: string[] = [];
   for (const line of lines) {
     let remaining = line;
@@ -142,7 +184,8 @@ function generateSimplePDF(text: string, title: string, isCertificat = false): B
   ╚══════════════════════════════════════════════════════════════════════════════╝
   `.trim();
 
-  const content = isCertificat ? `
+  const content = isCertificat
+    ? `
 
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃                   CERTIFICAT D'AUTHENTICITÉ                          ┃
@@ -157,14 +200,18 @@ function generateSimplePDF(text: string, title: string, isCertificat = false): B
     Collection Digitale — ${new Date().getFullYear()}
     TOTEM ANCESTRAL — SENYCE PARTNERS
 
-  ` : `
+  `
+    : `
 
     ╔══════════════════════════════════════════════════════════════════════╗
     ║                        P A R C H E M I N                            ║
     ║                          ${title.padEnd(40).slice(0, 40)}           ║
     ╚══════════════════════════════════════════════════════════════════════╝
 
-${body.split("\n").map((l) => `  ${l}`).join("\n")}
+${body
+  .split("\n")
+  .map((l) => `  ${l}`)
+  .join("\n")}
 
     ═══════════════════════════════════════════════════════════════════════
     TOTEM ANCESTRAL — Édition Digitale — SENYCE PARTNERS
@@ -190,7 +237,11 @@ async function main() {
   const langue = cmd.langue || "fr";
 
   // 2. Profile
-  const { data: profile } = await supabase.from("profiles").select("prenom, email").eq("id", userId).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("prenom, email")
+    .eq("id", userId)
+    .single();
   const prenom = profile?.prenom ?? "Voyageur";
   const email = profile?.email ?? "";
   console.log(`👤 ${prenom} (${email})`);
@@ -198,7 +249,11 @@ async function main() {
   // 3. Reponses
   let reponses: any = {};
   if (cmd.reponses_id) {
-    const { data: rep } = await supabase.from("reponses_parcours").select("reponses").eq("id", cmd.reponses_id).single();
+    const { data: rep } = await supabase
+      .from("reponses_parcours")
+      .select("reponses")
+      .eq("id", cmd.reponses_id)
+      .single();
     reponses = rep?.reponses ?? {};
   }
   console.log(`📋 ${Object.keys(reponses).length} questions`);
@@ -253,7 +308,9 @@ ${imageUrl ? "\n[Image intégrée dans le PDF via React-PDF en production]" : ""
   const parcheminText = `${meta}\n${texte}`;
   const parcheminBuffer = generateSimplePDF(texte, `${prenom} — ${archetypeName}`);
   const certificatBuffer = generateSimplePDF("", `N° ${numeroSerie} — ${nomTotem}`, true);
-  console.log(`  ✅ PDFs: parchemin (${(parcheminBuffer.length / 1024).toFixed(1)} KB), certificat (${(certificatBuffer.length / 1024).toFixed(1)} KB)`);
+  console.log(
+    `  ✅ PDFs: parchemin (${(parcheminBuffer.length / 1024).toFixed(1)} KB), certificat (${(certificatBuffer.length / 1024).toFixed(1)} KB)`,
+  );
 
   // 8. Upload all to R2
   console.log("  ☁️ Uploading to R2...");
@@ -290,21 +347,24 @@ ${imageUrl ? "\n[Image intégrée dans le PDF via React-PDF en production]" : ""
   console.log("  💾 Updating database...");
   await Promise.all([
     supabase.from("commandes").update({ statut: "livree" }).eq("id", COMMANDE_ID),
-    supabase.from("oeuvres").update({
-      statut: "livree",
-      image_url: r2ImageUrl || imageUrl || null,
-      audio_url: r2AudioUrl || audioUrl || null,
-      pdf_url: parchRes.signedUrl,
-      nom_totem: nomTotem,
-      numero_serie: numeroSerie,
-      recit: texte,
-      metadata: {
-        certificatUrl: certRes.signedUrl,
-        archetypeId,
-        langue,
-        offre: cmd.offre,
-      },
-    }).eq("commande_id", COMMANDE_ID),
+    supabase
+      .from("oeuvres")
+      .update({
+        statut: "livree",
+        image_url: r2ImageUrl || imageUrl || null,
+        audio_url: r2AudioUrl || audioUrl || null,
+        pdf_url: parchRes.signedUrl,
+        nom_totem: nomTotem,
+        numero_serie: numeroSerie,
+        recit: texte,
+        metadata: {
+          certificatUrl: certRes.signedUrl,
+          archetypeId,
+          langue,
+          offre: cmd.offre,
+        },
+      })
+      .eq("commande_id", COMMANDE_ID),
   ]);
 
   console.log(`\n✅ PIPELINE COMPLETE!`);

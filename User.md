@@ -4,16 +4,16 @@ Ce fichier decrit les acteurs du systeme, leurs profils, leurs interventions et 
 
 ## 1. Acteurs principaux
 
-| Acteur | Type | Role | Actions principales | Etat actuel |
-| --- | --- | --- | --- | --- |
-| Visiteur public | Humain externe | Decouvre la marque et les offres | Landing page, FAQ, pages legales, contact, changement de langue | Partiellement implemente |
-| Utilisateur final / acheteur | Humain externe | Repond au parcours, paie, recoit son coffret | Questionnaire, choix offre, paiement, reception email, espace personnel | Parcours implemente; paiement/livraison non branches |
-| Utilisateur authentifie | Humain externe | Consulte ses commandes et livrables | Connexion, espace personnel, telechargements | Placeholder |
-| Admin SENYCE PARTNERS | Humain interne | Supervise la plateforme | Commandes, revenus, erreurs, relances, exports | Placeholder |
-| Stripe | Systeme externe | Paiement, taxes, webhooks | Checkout, payment events, refunds | SDK present; non branche |
-| APIs SENYCE | Systeme externe | Generation texte, image, audio | Recoit reponses et retourne artefacts/metadata | Non branche |
-| Cloudflare R2 | Systeme externe | Stockage fichiers | Upload, URLs publiques/signees | Client present; non branche |
-| Brevo | Systeme externe | Emails transactionnels | Confirmation, livraison, alerte admin | Client present; non branche |
+| Acteur                       | Type            | Role                                         | Actions principales                                                     | Etat actuel                                          |
+| ---------------------------- | --------------- | -------------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------- |
+| Visiteur public              | Humain externe  | Decouvre la marque et les offres             | Landing page, FAQ, pages legales, contact, changement de langue         | Partiellement implemente                             |
+| Utilisateur final / acheteur | Humain externe  | Repond au parcours, paie, recoit son coffret | Questionnaire, choix offre, paiement, reception email, espace personnel | Parcours implemente; paiement/livraison non branches |
+| Utilisateur authentifie      | Humain externe  | Consulte ses commandes et livrables          | Connexion, espace personnel, telechargements                            | Placeholder                                          |
+| Admin SENYCE PARTNERS        | Humain interne  | Supervise la plateforme                      | Commandes, revenus, erreurs, relances, exports                          | Placeholder                                          |
+| Stripe                       | Systeme externe | Paiement, taxes, webhooks                    | Checkout, payment events, refunds                                       | SDK present; non branche                             |
+| APIs SENYCE                  | Systeme externe | Generation texte, image, audio               | Recoit reponses et retourne artefacts/metadata                          | Non branche                                          |
+| Cloudflare R2                | Systeme externe | Stockage fichiers                            | Upload, URLs publiques/signees                                          | Client present; non branche                          |
+| Resend                       | Systeme externe | Emails transactionnels                       | Confirmation, livraison, alerte admin                                   | Client present                                       |
 
 ## 2. Profils humains
 
@@ -140,7 +140,7 @@ Interventions cible :
 
 Etat actuel : client present, logique non branchee.
 
-### Brevo
+### Resend
 
 Interventions cible :
 
@@ -187,7 +187,7 @@ Etat actuel : page placeholder; pas de protection effective.
 2. Retry 1s, 3s, 9s.
 3. Si echec final, statut erreur.
 4. Insertion erreur pipeline.
-5. Alerte admin Brevo.
+5. Alerte admin Resend.
 6. Admin relance depuis back-office.
 
 Etat actuel : non implemente.
@@ -203,27 +203,27 @@ Etat actuel : placeholder.
 
 ## 5. User stories techniques
 
-| ID | Acteur | Story | Statut actuel |
-| --- | --- | --- | --- |
+| ID    | Acteur      | Story                                              | Statut actuel  |
+| ----- | ----------- | -------------------------------------------------- | -------------- |
 | US-01 | Utilisateur | Consulter le site en FR/EN selon langue navigateur | Partiel avance |
-| US-02 | Utilisateur | Repondre au questionnaire mobile fluide et anime | Partiel avance |
-| US-03 | Utilisateur | Payer en devise locale sans friction | Non implemente |
-| US-04 | Utilisateur | Recevoir le coffret en moins de 15 minutes | Non implemente |
-| US-05 | Utilisateur | Acceder aux livrables depuis espace personnel | Non implemente |
-| US-06 | Admin | Consulter commandes du jour et statuts | Non implemente |
-| US-07 | Admin | Recevoir alerte echec pipeline | Non implemente |
-| US-08 | Systeme | Traiter commandes simultanees | Non implemente |
-| US-09 | Systeme | Eviter double traitement webhook | Non implemente |
-| US-10 | Developpeur | Ajouter une langue sans refonte | Partiel |
+| US-02 | Utilisateur | Repondre au questionnaire mobile fluide et anime   | Partiel avance |
+| US-03 | Utilisateur | Payer en devise locale sans friction               | Non implemente |
+| US-04 | Utilisateur | Recevoir le coffret en moins de 15 minutes         | Non implemente |
+| US-05 | Utilisateur | Acceder aux livrables depuis espace personnel      | Non implemente |
+| US-06 | Admin       | Consulter commandes du jour et statuts             | Non implemente |
+| US-07 | Admin       | Recevoir alerte echec pipeline                     | Non implemente |
+| US-08 | Systeme     | Traiter commandes simultanees                      | Non implemente |
+| US-09 | Systeme     | Eviter double traitement webhook                   | Non implemente |
+| US-10 | Developpeur | Ajouter une langue sans refonte                    | Partiel        |
 
 ## 6. Droits et acces attendus
 
-| Niveau | Acces | Donnees visibles | Protection attendue | Etat actuel |
-| --- | --- | --- | --- | --- |
-| Public | Landing, FAQ, contact, legal | Contenu public | Aucune session | Partiel |
-| User | Espace personnel | Ses commandes et livrables | Supabase Auth + RLS | Non branche |
-| Admin | `/admin` et `/api/admin/*` | Toutes commandes/statistiques/erreurs | Supabase Auth + role admin + API 403 | Non branche |
-| Service role | Traitements serveur | Toutes tables necessaires | Server only, jamais client | Clients presents |
+| Niveau       | Acces                        | Donnees visibles                      | Protection attendue                  | Etat actuel      |
+| ------------ | ---------------------------- | ------------------------------------- | ------------------------------------ | ---------------- |
+| Public       | Landing, FAQ, contact, legal | Contenu public                        | Aucune session                       | Partiel          |
+| User         | Espace personnel             | Ses commandes et livrables            | Supabase Auth + RLS                  | Non branche      |
+| Admin        | `/admin` et `/api/admin/*`   | Toutes commandes/statistiques/erreurs | Supabase Auth + role admin + API 403 | Non branche      |
+| Service role | Traitements serveur          | Toutes tables necessaires             | Server only, jamais client           | Clients presents |
 
 ## 7. Donnees utilisateur manipulees
 

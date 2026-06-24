@@ -1,9 +1,15 @@
-import { S3Client, ListBucketsCommand, PutObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  ListBucketsCommand,
+  PutObjectCommand,
+  ListObjectsV2Command,
+} from "@aws-sdk/client-s3";
+import { requireEnv } from "./env.mjs";
 
-const R2_ACCOUNT_ID = "52217c714e4feae8afbe8b6ac629281a";
-const R2_ACCESS_KEY_ID = "722d1760e18a0d64a070a4f3711b456c";
-const R2_SECRET_ACCESS_KEY = "89542afa2ea9f1bc23237ec9843cfacdcab34fa87d602e0b762faf15f31c30b4";
-const R2_BUCKET_NAME = "totem-ancestral";
+const R2_ACCOUNT_ID = requireEnv("R2_ACCOUNT_ID");
+const R2_ACCESS_KEY_ID = requireEnv("R2_ACCESS_KEY_ID");
+const R2_SECRET_ACCESS_KEY = requireEnv("R2_SECRET_ACCESS_KEY");
+const R2_BUCKET_NAME = requireEnv("R2_BUCKET_NAME", ["R2_BUCKET"]);
 
 const client = new S3Client({
   region: "auto",
@@ -19,7 +25,7 @@ async function main() {
   console.log("🔍 Testing R2 connection...");
   try {
     const buckets = await client.send(new ListBucketsCommand({}));
-    console.log(`✅ Connected! Buckets: ${buckets.Buckets?.map(b => b.Name).join(", ")}`);
+    console.log(`✅ Connected! Buckets: ${buckets.Buckets?.map((b) => b.Name).join(", ")}`);
   } catch (err) {
     console.error("❌ ListBuckets failed:", err.message);
     return;
@@ -27,10 +33,12 @@ async function main() {
 
   // Test 2: Check if bucket exists and list objects
   try {
-    const objects = await client.send(new ListObjectsV2Command({
-      Bucket: R2_BUCKET_NAME,
-      MaxKeys: 10,
-    }));
+    const objects = await client.send(
+      new ListObjectsV2Command({
+        Bucket: R2_BUCKET_NAME,
+        MaxKeys: 10,
+      }),
+    );
     console.log(`✅ Bucket "${R2_BUCKET_NAME}" exists. Keys: ${objects.KeyCount ?? 0}`);
     if (objects.Contents?.length) {
       for (const obj of objects.Contents) {
@@ -44,12 +52,14 @@ async function main() {
   // Test 3: Upload a tiny test file
   try {
     const testKey = "test-connection.txt";
-    await client.send(new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: testKey,
-      Body: Buffer.from(`R2 connection test - ${new Date().toISOString()}`),
-      ContentType: "text/plain",
-    }));
+    await client.send(
+      new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: testKey,
+        Body: Buffer.from(`R2 connection test - ${new Date().toISOString()}`),
+        ContentType: "text/plain",
+      }),
+    );
     console.log(`✅ Successfully uploaded test file: ${testKey}`);
   } catch (err) {
     console.error("❌ Upload test failed:", err.message);

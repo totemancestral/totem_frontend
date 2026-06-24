@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
 import { authenticateRequest, createServiceClient } from "@/lib/server-auth";
+import { generateCoffret } from "@/lib/services/pipeline";
 import type { Json } from "@/integrations/supabase/types";
 
 const completeSchema = z.object({
@@ -58,7 +59,11 @@ export async function POST(request: Request) {
 
   const env = getServerEnv();
   if (!env.TOTEM_BACKEND_URL) {
-    return NextResponse.json({ completed: true, backend: false }, { status: 202 });
+    generateCoffret(parsed.data.commandeId).catch(() => undefined);
+    return NextResponse.json(
+      { completed: true, backend: false, generation: "started" },
+      { status: 202 },
+    );
   }
 
   const authorization = request.headers.get("authorization") ?? "";

@@ -29,7 +29,7 @@ Navigateur React
   -> Vercel Edge Network + middleware i18n/auth
   -> Next.js App Router /[locale]
   -> API Routes /api/*
-  -> Supabase, Stripe, APIs SENYCE, Cloudflare R2, Brevo
+  -> Supabase, Stripe, APIs SENYCE, Cloudflare R2, Resend
 ```
 
 Principe fondamental : toute logique manipulant des secrets, prompts, cles API, acces base ou appels aux services tiers s'execute exclusivement cote serveur.
@@ -45,7 +45,7 @@ Etat observe au 2026-06-08 :
 - Parcours : 10 questions presentes, etat local persiste dans `localStorage`, parcours actuel en 4 questions -> creation compte -> choix offre -> questions restantes.
 - Paiement : route `/api/checkout` presente mais retourne encore `501`; Stripe Checkout non branche.
 - Webhook Stripe : route presente, lecture signature, mais verification HMAC et traitement commande non branches.
-- Pipeline : services et route presents, mais `generateCoffret`, PDF, R2, Brevo sont encore placeholders.
+- Pipeline : services et route presents, avec generation, R2 et livraison email via Resend en cours d'integration.
 - Supabase : clients et migrations existent, RLS existe dans les migrations, mais le schema actuel diverge du schema cible du document.
 - Espace personnel et admin : pages et routes API presentes, mais interfaces encore placeholders.
 - Deploiement : Vercel configure et production deja deployee.
@@ -63,13 +63,13 @@ Exigences principales :
 - Header avec changement de langue sans rechargement complet.
 - Intro jouee une fois par session.
 - Sections narratives, offres, FAQ, contact, pages legales.
-- Formulaire contact valide par Zod et transmis a Brevo.
+- Formulaire contact valide par Zod et transmis a Resend.
 
 Etat actuel : partiellement conforme.
 
 - Conforme : routes localisees, next-intl, header FR/EN, intro sessionStorage, landing page, assets, pages principales.
 - Partiel : plusieurs pages secondaires restent avec textes et metadonnees en francais en dur.
-- Non conforme : formulaire contact ne transmet pas encore a Brevo; cookies/RGPD et journalisation consentement non verifies; GSAP ScrollTrigger pas confirme comme mecanisme principal.
+- Non conforme : cookies/RGPD et journalisation consentement non verifies; GSAP ScrollTrigger pas confirme comme mecanisme principal.
 
 ### M2 - Questionnaire conversationnel
 
@@ -109,12 +109,12 @@ Etat actuel : non conforme / squelette.
 
 ### M5 - Stockage et livraison
 
-Responsabilite cible : upload R2, URLs signees 30 jours pour PDFs, emails Brevo, mise a jour commande `done`.
+Responsabilite cible : upload R2, URLs signees 30 jours pour PDFs, emails Resend, mise a jour commande `done`.
 
 Etat actuel : non conforme / squelette.
 
-- Present : clients R2 et Brevo, dependances AWS SDK et Brevo, fichiers service `storage.ts`, `email.ts`, `pdf.ts`.
-- Manquant : upload R2, presigned URLs, generation PDF, templates Brevo, livraison email, update atomique commande.
+- Present : clients R2 et Resend, dependances AWS SDK, fichiers service `storage.ts`, `email.ts`, `pdf.ts`.
+- Manquant : finaliser les templates HTML Resend et l'update atomique commande selon l'environnement de production.
 
 ### M6 - Authentification et espace personnel
 
@@ -157,19 +157,19 @@ Conclusion : RLS et logique de roles existent dans le socle actuel, mais le sche
 
 Technologies cible et etat :
 
-| Domaine | Cible document | Etat actuel |
-| --- | --- | --- |
-| Framework | Next.js 14+ App Router | Next.js 16 App Router, conforme en pratique |
-| Styling | Tailwind CSS v3 | Tailwind CSS v4, deviation acceptable mais a documenter |
-| UI | shadcn/Radix | Radix/shadcn presents |
-| Animations | Framer Motion + GSAP | Motion + GSAP presents |
-| i18n | next-intl | Present |
-| Paiement | Stripe | SDK present, integration non branchee |
-| DB/Auth | Supabase | Socle present, integration incomplete |
-| Stockage | Cloudflare R2 | Client present, service non branche |
-| Emails | Brevo | Client present, service non branche |
-| PDF | @react-pdf/renderer | Dependance presente, generation non branchee |
-| Monitoring | Vercel Analytics + Sentry | Non observe dans le code |
+| Domaine    | Cible document            | Etat actuel                                             |
+| ---------- | ------------------------- | ------------------------------------------------------- |
+| Framework  | Next.js 14+ App Router    | Next.js 16 App Router, conforme en pratique             |
+| Styling    | Tailwind CSS v3           | Tailwind CSS v4, deviation acceptable mais a documenter |
+| UI         | shadcn/Radix              | Radix/shadcn presents                                   |
+| Animations | Framer Motion + GSAP      | Motion + GSAP presents                                  |
+| i18n       | next-intl                 | Present                                                 |
+| Paiement   | Stripe                    | SDK present, integration non branchee                   |
+| DB/Auth    | Supabase                  | Socle present, integration incomplete                   |
+| Stockage   | Cloudflare R2             | Client present, service non branche                     |
+| Emails     | Resend                    | Client present, service branche                         |
+| PDF        | @react-pdf/renderer       | Dependance presente, generation non branchee            |
+| Monitoring | Vercel Analytics + Sentry | Non observe dans le code                                |
 
 ## 7. Securite et qualites techniques
 
@@ -195,18 +195,18 @@ Ecart avec le document : la strategie `staging`, PR obligatoire, CI GitHub Actio
 
 ## 9. Recapitulatif de conformite
 
-| Bloc | Statut | Commentaire |
-| --- | --- | --- |
-| Presentation & navigation | Partiel avance | Landing et i18n avances; pages secondaires et contact a finaliser |
-| Questionnaire | Partiel avance | UX fonctionnelle; paiement non connecte; flux modifie apres Q4 |
-| Paiement Stripe | Non conforme | Routes placeholders |
-| Pipeline generation | Non conforme | Services placeholders |
-| Stockage & livraison | Non conforme | Clients presents, logique non implementee |
-| Espace personnel | Non conforme/partiel | Socle Supabase, UI/API placeholders |
-| Administration | Non conforme/partiel | Page placeholder, pas de donnees reelles |
-| Securite | Partiel | Headers et RLS partiels; webhook et env stricts manquants |
-| i18n | Partiel avance | Home/parcours/header/footer avances; pages secondaires a traduire completement |
-| Tests/CI | Non conforme | Pas de suite de tests observee |
+| Bloc                      | Statut               | Commentaire                                                                    |
+| ------------------------- | -------------------- | ------------------------------------------------------------------------------ |
+| Presentation & navigation | Partiel avance       | Landing et i18n avances; pages secondaires et contact a finaliser              |
+| Questionnaire             | Partiel avance       | UX fonctionnelle; paiement non connecte; flux modifie apres Q4                 |
+| Paiement Stripe           | Non conforme         | Routes placeholders                                                            |
+| Pipeline generation       | Non conforme         | Services placeholders                                                          |
+| Stockage & livraison      | Non conforme         | Clients presents, logique non implementee                                      |
+| Espace personnel          | Non conforme/partiel | Socle Supabase, UI/API placeholders                                            |
+| Administration            | Non conforme/partiel | Page placeholder, pas de donnees reelles                                       |
+| Securite                  | Partiel              | Headers et RLS partiels; webhook et env stricts manquants                      |
+| i18n                      | Partiel avance       | Home/parcours/header/footer avances; pages secondaires a traduire completement |
+| Tests/CI                  | Non conforme         | Pas de suite de tests observee                                                 |
 
 ## 10. Priorites techniques recommandees
 
@@ -214,7 +214,7 @@ Ecart avec le document : la strategie `staging`, PR obligatoire, CI GitHub Actio
 2. Brancher Stripe Checkout et Stripe Tax avec metadata compactes.
 3. Implementer la verification webhook Stripe et l'idempotence commande.
 4. Aligner le schema Supabase avec le modele cible ou mettre a jour l'architecture cible.
-5. Implementer pipeline SENYCE + R2 + PDF + Brevo.
+5. Implementer pipeline SENYCE + R2 + PDF + Resend.
 6. Proteger `/admin` et `/espace-personnel` par Supabase Auth.
 7. Ajouter tests E2E critiques : i18n, parcours, pricing mobile, checkout mock, webhook mock.
 8. Completer CSP/HSTS et validation stricte des variables de production.

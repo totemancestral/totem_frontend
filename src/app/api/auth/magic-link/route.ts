@@ -41,7 +41,10 @@ export async function POST(request: Request) {
 }
 
 function getRequestOrigin(request: Request) {
-  const configured = readEnvValue("NEXT_PUBLIC_SITE_URL")?.replace(/\/$/, "");
+  const configured = (readEnvValue("NEXT_PUBLIC_SITE_URL") || readEnvValue("SITE_URL"))?.replace(
+    /\/$/,
+    "",
+  );
   if (configured) return configured;
 
   const url = new URL(request.url);

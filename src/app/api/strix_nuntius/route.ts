@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getServerEnv } from "@/lib/env";
 import { createServiceClient } from "@/lib/server-auth";
-import { apiPath } from "@/lib/routes";
 import { sendConfirmationEmail } from "@/lib/services/email";
 
 type Locale = "fr" | "en";
@@ -134,13 +133,6 @@ async function handlePaidCheckoutSession(request: Request, session: Stripe.Check
   sendConfirmationEmail(email, metadata.prenom ?? "", offreLabel, locale, commande.id).catch(
     () => {},
   );
-
-  const origin = new URL(request.url).origin;
-  fetch(`${origin}${apiPath("generate_coffret")}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ commandeId: commande.id }),
-  }).catch(() => {});
 
   return NextResponse.json({ received: true, commandeId: commande.id }, { status: 202 });
 }

@@ -3,18 +3,22 @@ import WebSocket from "ws";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSupabaseRef, requireEnv } from "./env.mjs";
 
 // ====== Configuration ======
-const SUPABASE_URL = "https://mjiealkqjcqvlfrxdcif.supabase.co";
-const SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qaWVhbGtxamNxdmxmcnhkY2lmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTM1MjA2MiwiZXhwIjoyMDk2OTI4MDYyfQ.uuLoOmJJNrAysyXEsjdo_Vyw5jMe46VrAUttIYdw8N0";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qaWVhbGtxamNxdmxmcnhkY2lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNTIwNjIsImV4cCI6MjA5NjkyODA2Mn0.vSeeQcfaTNc1IMsIAZmlZMpbeM4o-OD6S1tRuxT42WM";
+const SUPABASE_URL = requireEnv("NEXT_PUBLIC_SUPABASE_URL", ["SUPABASE_URL"]);
+const SUPABASE_SERVICE_KEY = requireEnv("SUPABASE_SERVICE_KEY", ["SUPABASE_SERVICE_ROLE_KEY"]);
+const SUPABASE_ANON_KEY = requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", [
+  "SUPABASE_ANON_KEY",
+  "SUPABASE_PUBLISHABLE_KEY",
+]);
 
-const R2_ACCOUNT_ID = "52217c714e4feae8afbe8b6ac629281a";
-const R2_ACCESS_KEY_ID = "722d1760e18a0d64a070a4f3711b456c";
-const R2_SECRET_ACCESS_KEY = "89542afa2ea9f1bc23237ec9843cfacdcab34fa87d602e0b762faf15f31c30b4";
-const R2_BUCKET = "totem-ancestral";
+const R2_ACCOUNT_ID = requireEnv("R2_ACCOUNT_ID");
+const R2_ACCESS_KEY_ID = requireEnv("R2_ACCESS_KEY_ID");
+const R2_SECRET_ACCESS_KEY = requireEnv("R2_SECRET_ACCESS_KEY");
+const R2_BUCKET = requireEnv("R2_BUCKET_NAME", ["R2_BUCKET"]);
 
-const SUPABASE_REF = "mjiealkqjcqvlfrxdcif";
+const SUPABASE_REF = getSupabaseRef(SUPABASE_URL);
 const EDGE_FUNCTION_URL = `https://${SUPABASE_REF}.supabase.co/functions/v1`;
 
 const ARCHETYPE_LABELS = {
@@ -39,7 +43,7 @@ const r2 = new S3Client({
   },
 });
 
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ====== Edge Function calls ======
 async function callEdge(slug, payload) {
@@ -86,9 +90,8 @@ async function generateTexte(prenom, reponses, archetypeId, langue) {
     if (answer.field?.trim()) lines.push(answer.field.trim());
   }
 
-  const texte = lines.length > 0
-    ? lines.join("\n\n")
-    : `Totem Ancestral de ${prenom} — ${archetype}`;
+  const texte =
+    lines.length > 0 ? lines.join("\n\n") : `Totem Ancestral de ${prenom} — ${archetype}`;
 
   console.log(`  ✅ Text generated locally (${texte.length} chars)`);
   return texte;
@@ -122,12 +125,14 @@ async function uploadToR2(commandeId, type, buffer, mimeType) {
   const fileName = `${type}_${commandeId}.${ext}`;
   const key = `totems/${commandeId}/${type}/${fileName}`;
 
-  await r2.send(new PutObjectCommand({
-    Bucket: R2_BUCKET,
-    Key: key,
-    Body: buffer,
-    ContentType: mimeType,
-  }));
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: mimeType,
+    }),
+  );
 
   const publicUrl = `https://${R2_BUCKET}.r2.cloudflarestorage.com/${key}`;
 
@@ -141,7 +146,10 @@ async function uploadToR2(commandeId, type, buffer, mimeType) {
 
 // ====== PDF Generation (inline - no React-PDF) ======
 function generateSimplePDF(text, title, isCertificat = false) {
-  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
   const wrapped = [];
   for (const line of lines) {
     let remaining = line;
@@ -153,7 +161,8 @@ function generateSimplePDF(text, title, isCertificat = false) {
   }
   const body = wrapped.length ? wrapped.join("\n") : "Texte du parchemin";
 
-  const content = isCertificat ? `
+  const content = isCertificat
+    ? `
 CERTIFICAT D'AUTHENTICITÉ
 ${"=".repeat(50)}
 
@@ -166,7 +175,8 @@ originale, unique et numérotée.
 Collection Digitale — ${new Date().getFullYear()}
 TOTEM ANCESTRAL
 SENYCE PARTNERS
-` : `
+`
+    : `
 ${"=".repeat(50)}
 ${title}
 ${"=".repeat(50)}
@@ -188,7 +198,9 @@ async function generateCoffret(commandeId) {
   // 1. Get commande
   const { data: cmd } = await supabase.from("commandes").select("*").eq("id", commandeId).single();
   if (!cmd) throw new Error("Commande not found");
-  console.log(`📦 Commande: ${cmd.offre} | ${cmd.statut} | ${(cmd.montant_cents / 100).toFixed(2)}${cmd.devise}`);
+  console.log(
+    `📦 Commande: ${cmd.offre} | ${cmd.statut} | ${(cmd.montant_cents / 100).toFixed(2)}${cmd.devise}`,
+  );
 
   await supabase.from("commandes").update({ statut: "en_generation" }).eq("id", commandeId);
   await supabase.from("oeuvres").update({ statut: "en_generation" }).eq("commande_id", commandeId);
@@ -197,7 +209,11 @@ async function generateCoffret(commandeId) {
   const langue = cmd.langue || "fr";
 
   // 2. Get profile
-  const { data: profile } = await supabase.from("profiles").select("prenom, email").eq("id", userId).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("prenom, email")
+    .eq("id", userId)
+    .single();
   const prenom = profile?.prenom ?? "Voyageur";
   const email = profile?.email ?? "";
   console.log(`👤 User: ${prenom} (${email})`);
@@ -205,17 +221,28 @@ async function generateCoffret(commandeId) {
   // 3. Get reponses
   let reponses = {};
   if (cmd.reponses_id) {
-    const { data: rep } = await supabase.from("reponses_parcours").select("reponses").eq("id", cmd.reponses_id).single();
+    const { data: rep } = await supabase
+      .from("reponses_parcours")
+      .select("reponses")
+      .eq("id", cmd.reponses_id)
+      .single();
     reponses = rep?.reponses ?? {};
   } else {
-    const { data: reps } = await supabase.from("reponses_parcours")
-      .select("reponses").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).single();
+    const { data: reps } = await supabase
+      .from("reponses_parcours")
+      .select("reponses")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
     reponses = reps?.reponses ?? {};
   }
   console.log(`📋 Reponses: ${Object.keys(reponses).length} questions`);
 
   // Determine archetype
-  const firstAnswer = Object.values(reponses).find(a => a && typeof a === "object" && "choice" in a);
+  const firstAnswer = Object.values(reponses).find(
+    (a) => a && typeof a === "object" && "choice" in a,
+  );
   const archetypeId = firstAnswer?.choice ?? "A";
   const archetypeName = ARCHETYPE_LABELS[archetypeId]?.[langue] ?? "Griot";
   const nomTotem = `${prenom} ${archetypeName}`;
@@ -236,7 +263,9 @@ async function generateCoffret(commandeId) {
 
   const parcheminBuffer = generateSimplePDF(texte, `Parchemin de ${prenom} — ${archetypeName}`);
   const certificatBuffer = generateSimplePDF("", `N° ${numeroSerie} — ${nomTotem}`, true);
-  console.log(`  ✅ PDFs generated: parchemin (${(parcheminBuffer.length/1024).toFixed(1)} KB), certificat (${(certificatBuffer.length/1024).toFixed(1)} KB)`);
+  console.log(
+    `  ✅ PDFs generated: parchemin (${(parcheminBuffer.length / 1024).toFixed(1)} KB), certificat (${(certificatBuffer.length / 1024).toFixed(1)} KB)`,
+  );
 
   // 7. Upload to R2
   console.log("  ☁️ Step 5: Uploading to R2...");
@@ -250,7 +279,10 @@ async function generateCoffret(commandeId) {
 
   function dataUrlToBuffer(dataUrl) {
     const [header, b64] = dataUrl.split(",");
-    return { buffer: Buffer.from(b64, "base64"), mimeType: header.match(/:(.*?);/)?.[1] ?? "application/octet-stream" };
+    return {
+      buffer: Buffer.from(b64, "base64"),
+      mimeType: header.match(/:(.*?);/)?.[1] ?? "application/octet-stream",
+    };
   }
 
   if (imageUrl) {
@@ -291,21 +323,24 @@ async function generateCoffret(commandeId) {
   console.log("  💾 Step 6: Updating database...");
   await Promise.all([
     supabase.from("commandes").update({ statut: "livree" }).eq("id", commandeId),
-    supabase.from("oeuvres").update({
-      statut: "livree",
-      image_url: r2ImageUrl || imageUrl || null,
-      audio_url: r2AudioUrl || audioUrl || null,
-      pdf_url: parcheminResult.signedUrl,
-      nom_totem: nomTotem,
-      numero_serie: numeroSerie,
-      recit: texte,
-      metadata: {
-        certificatUrl: certificatResult.signedUrl,
-        archetypeId,
-        langue,
-        offre: cmd.offre,
-      },
-    }).eq("commande_id", commandeId),
+    supabase
+      .from("oeuvres")
+      .update({
+        statut: "livree",
+        image_url: r2ImageUrl || imageUrl || null,
+        audio_url: r2AudioUrl || audioUrl || null,
+        pdf_url: parcheminResult.signedUrl,
+        nom_totem: nomTotem,
+        numero_serie: numeroSerie,
+        recit: texte,
+        metadata: {
+          certificatUrl: certificatResult.signedUrl,
+          archetypeId,
+          langue,
+          offre: cmd.offre,
+        },
+      })
+      .eq("commande_id", commandeId),
   ]);
 
   console.log(`\n✅ Pipeline complete!`);

@@ -44,6 +44,7 @@ export async function POST(request: Request) {
   const origin = (
     request.headers.get("origin") ||
     env.NEXT_PUBLIC_SITE_URL ||
+    env.SITE_URL ||
     "http://localhost:3000"
   ).replace(/\/$/, "");
   const supabase = createServiceClient();
@@ -107,6 +108,8 @@ export async function POST(request: Request) {
         Authorization: request.headers.get("authorization") ?? "",
       },
       body: JSON.stringify({
+        userId: auth.userId,
+        email: auth.email,
         offer: parsed.data.offre,
         externalCommandId: commande.id,
         answers: backendAnswers,

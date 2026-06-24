@@ -1,13 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 import WebSocket from "ws";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { requireEnv } from "./env.mjs";
 
-const SUPABASE_URL = "https://mjiealkqjcqvlfrxdcif.supabase.co";
-const SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qaWVhbGtxamNxdmxmcnhkY2lmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTM1MjA2MiwiZXhwIjoyMDk2OTI4MDYyfQ.uuLoOmJJNrAysyXEsjdo_Vyw5jMe46VrAUttIYdw8N0";
-const R2_ACCOUNT_ID = "52217c714e4feae8afbe8b6ac629281a";
-const R2_ACCESS_KEY_ID = "722d1760e18a0d64a070a4f3711b456c";
-const R2_SECRET_ACCESS_KEY = "89542afa2ea9f1bc23237ec9843cfacdcab34fa87d602e0b762faf15f31c30b4";
-const R2_BUCKET = "totem-ancestral";
+const SUPABASE_URL = requireEnv("NEXT_PUBLIC_SUPABASE_URL", ["SUPABASE_URL"]);
+const SUPABASE_SERVICE_KEY = requireEnv("SUPABASE_SERVICE_KEY", ["SUPABASE_SERVICE_ROLE_KEY"]);
+const R2_ACCOUNT_ID = requireEnv("R2_ACCOUNT_ID");
+const R2_ACCESS_KEY_ID = requireEnv("R2_ACCESS_KEY_ID");
+const R2_SECRET_ACCESS_KEY = requireEnv("R2_SECRET_ACCESS_KEY");
+const R2_BUCKET = requireEnv("R2_BUCKET_NAME", ["R2_BUCKET"]);
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -26,10 +27,16 @@ async function main() {
   // 1. Check Supabase commande
   console.log("=== SUPABASE ===");
   const { data: cmd } = await supabase.from("commandes").select("*").eq("id", cmdId).single();
-  console.log(`Commande: ${cmd?.statut} | ${cmd?.offre} | ${(cmd?.montant_cents ?? 0) / 100}${cmd?.devise}`);
+  console.log(
+    `Commande: ${cmd?.statut} | ${cmd?.offre} | ${(cmd?.montant_cents ?? 0) / 100}${cmd?.devise}`,
+  );
 
   // 2. Check oeuvre
-  const { data: oeuvre } = await supabase.from("oeuvres").select("*").eq("commande_id", cmdId).single();
+  const { data: oeuvre } = await supabase
+    .from("oeuvres")
+    .select("*")
+    .eq("commande_id", cmdId)
+    .single();
   console.log(`Oeuvre: statut=${oeuvre?.statut} totem=${oeuvre?.nom_totem}`);
   console.log(`  image_url: ${oeuvre?.image_url ? "✅" : "❌"}`);
   console.log(`  audio_url: ${oeuvre?.audio_url ? "✅" : "❌"}`);
@@ -38,10 +45,12 @@ async function main() {
 
   // 3. Check R2 objects
   console.log("\n=== CLOUDFLARE R2 ===");
-  const objects = await r2.send(new ListObjectsV2Command({
-    Bucket: R2_BUCKET,
-    Prefix: `totems/${cmdId}/`,
-  }));
+  const objects = await r2.send(
+    new ListObjectsV2Command({
+      Bucket: R2_BUCKET,
+      Prefix: `totems/${cmdId}/`,
+    }),
+  );
 
   console.log(`Files in R2: ${objects.KeyCount ?? 0}`);
   for (const obj of objects.Contents ?? []) {
