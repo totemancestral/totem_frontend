@@ -52,6 +52,26 @@ The parchment must be:
 Write only the parchment text, no title, no signature.`;
 }
 
+function extractJson(raw: string): Record<string, unknown> | null {
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return null;
+
+  try {
+    return JSON.parse(raw.slice(start, end + 1)) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function extractParchmentText(raw: string): string {
+  const parsed = extractJson(raw);
+  if (typeof parsed?.parchment_text === "string" && parsed.parchment_text.trim()) {
+    return parsed.parchment_text.trim();
+  }
+  return raw.trim();
+}
+
 async function callClaude(apiKey: string, prompt: string): Promise<string> {
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -62,7 +82,7 @@ async function callClaude(apiKey: string, prompt: string): Promise<string> {
     },
     body: JSON.stringify({
       model: "claude-opus-4-8",
-      max_tokens: 1024,
+      max_tokens: 2500,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -113,14 +133,12 @@ function fallbackLocal(
       lines.push(answer.field.trim());
     }
   }
-  return lines.length > 0
-    ? lines.join("\n\n")
-    : `Totem Ancestral de ${prenom} — ${archetype}`;
+  return lines.length > 0 ? lines.join("\n\n") : `Totem Ancestral de ${prenom} — ${archetype}`;
 }
 
 Deno.serve(async (req) => {
   try {
-    const { prenom, reponses = {}, archetypeId, langue = "fr" } = await req.json();
+    const { prenom, reponses = {}, archetypeId, langue = "fr", prompt } = await req.json();
 
     if (!prenom) {
       return new Response(JSON.stringify({ error: "prenom requis" }), {
@@ -132,14 +150,17 @@ Deno.serve(async (req) => {
     const l = (langue === "en" ? "en" : "fr") as "fr" | "en";
     const archetype = ARCHETYPE_LABELS[archetypeId as string]?.[l] ?? "Griot";
     const champsLibres = extractChampsLibres(reponses as Record<string, unknown>);
-    const prompt = buildPrompt(prenom, archetype, champsLibres, l);
+    const finalPrompt =
+      typeof prompt === "string" && prompt.trim()
+        ? prompt
+        : buildPrompt(prenom, archetype, champsLibres, l);
 
     let texte = "";
 
     const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
     if (anthropicKey) {
       try {
-        texte = await callClaude(anthropicKey, prompt);
+        texte = extractParchmentText(await callClaude(anthropicKey, finalPrompt));
       } catch (e) {
         console.error("Claude error:", e);
       }
@@ -155,7 +176,9 @@ Deno.serve(async (req) => {
             reponses,
             archetype: archetypeId,
             langue: l,
+            prompt: finalPrompt,
           });
+          texte = extractParchmentText(texte);
         } catch (e) {
           console.error("SENYCE texte error:", e);
         }

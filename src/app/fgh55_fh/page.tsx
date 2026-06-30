@@ -17,8 +17,6 @@ import {
 } from "recharts";
 import { Menu, X } from "lucide-react";
 
-const ADMIN_EMAIL = "contact@totem-ancestral.com";
-
 type Section = "apercu" | "commandes" | "oeuvres" | "utilisateurs" | "activite" | "evenements";
 
 const COMMAND_STATUSES = [
@@ -153,21 +151,14 @@ export default function AdminPage() {
   const [loginLoading, setLoginLoading] = useState(false);
 
   const token = session?.access_token;
-  const isAdminSession = session?.user.email?.toLowerCase() === ADMIN_EMAIL;
 
   useEffect(() => {
-    if (!session || !token || !isAdminSession) {
+    if (!session || !token) {
       setLoading(false);
       return;
     }
     loadAll(token);
-  }, [token, session, isAdminSession]);
-
-  useEffect(() => {
-    if (!session || isAdminSession) return;
-    setLoginError("Compte admin requis. Utilise contact@totem-ancestral.com.");
-    supabase.auth.signOut().catch(() => {});
-  }, [session, isAdminSession]);
+  }, [token, session]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -275,12 +266,6 @@ export default function AdminPage() {
     e.preventDefault();
     setLoginError(null);
     setLoginLoading(true);
-
-    if (email.trim().toLowerCase() !== ADMIN_EMAIL) {
-      setLoginError("Compte admin requis. Utilise contact@totem-ancestral.com.");
-      setLoginLoading(false);
-      return;
-    }
 
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
@@ -627,7 +612,7 @@ function LoginForm({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder={ADMIN_EMAIL}
+            placeholder="admin@totem-ancestral.com"
             required
             className="form-input"
             autoComplete="email"

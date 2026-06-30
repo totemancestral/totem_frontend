@@ -22,7 +22,7 @@
   "acces_totem_ancestral": "Directions · Ancestral Totem",
   "account": "account",
   "admin_totem_ancestral": "Admin · Ancestral Totem",
-  "afrique_centrale_de_l_est_ou_du_sud_congo_kenya_tanzanie": "Central, East, or Southern Africa, Congo, Kenya, Tanzania, Ethiopia, South Africa, and surrounding areas.",
+  "afrique_centrale_de_l_est_ou_du_sud_congo_kenya_tanzanie": "Central or Southern Africa, Congo, Cameroon, Angola, South Africa, and surrounding areas.",
   "afrique_de_l_ouest_senegal_mali_guinee_cote_d_ivoire": "West Africa, Senegal, Mali, Guinea, Ivory Coast, Nigeria, Ghana, Benin, and surrounding areas.",
   "ajouter_une_nuance": "+ add a shade",
   "an": "/year",
@@ -40,7 +40,7 @@
   "brand_2": "brand",
   "btn_primary_btn_secondary_data_stop_ambient": ".btn-primary, .btn-secondary, [data-stop-ambient]",
   "c": "C",
-  "caraibes_ameriques_ou_diaspora_africaine_une_origine": "The Caribbean, the Americas, or the African diaspora, a probable but undetermined African origin.",
+  "caraibes_ameriques_ou_diaspora_africaine_une_origine": "East Africa, Kenya, Tanzania, Ethiopia, Somalia, and surrounding areas.",
   "carte_cadeau_gratuite": "Free gift card",
   "ce_que_les_autres_voient_en_toi_sans_que_tu_le_leur_demandes": "What do others see in you, without you even asking?",
   "ce_que_nous_croyons": "What We Believe",
@@ -110,7 +110,7 @@
   "error": "error",
   "espace_personnel": "My Account",
   "espace_personnel_totem_ancestral": "My Account · Ancestral Totem",
-  "europe_asie_oceanie_ou_toute_autre_region_je_suis_ici_pour": "Europe, Asia, Oceania, or any other region, I’m here to discover my deep African roots.",
+  "europe_asie_oceanie_ou_toute_autre_region_je_suis_ici_pour": "Undetermined origin, the whole of Africa calls me.",
   "experience": "#experience",
   "experience_2": "experience",
   "face_a_une_epreuve_comment_reagis_tu_vraiment": "When faced with a challenge, how do you really react?",
@@ -124,6 +124,7 @@
     "tagline": "The imaginary portrait of the African you could have been.",
     "nav": {
       "experience": "The experience",
+      "junior": "Junior",
       "offers": "Offers",
       "about": "About"
     },
@@ -146,6 +147,7 @@
     "logout": "Sign out",
     "nav": {
       "experience": "The experience",
+      "junior": "Junior",
       "offers": "Offers",
       "house": "The house",
       "faq": "FAQ",
@@ -1053,15 +1055,15 @@
           },
           {
             "letter": "B",
-            "text": "Central, East or Southern Africa, Congo, Kenya, Tanzania, Ethiopia, South Africa and surrounding areas."
+            "text": "Central or Southern Africa, Congo, Cameroon, Angola, South Africa and surrounding areas."
           },
           {
             "letter": "C",
-            "text": "Caribbean, Americas or African diaspora, a probable but undetermined African origin."
+            "text": "East Africa, Kenya, Tanzania, Ethiopia, Somalia and surrounding areas."
           },
           {
             "letter": "D",
-            "text": "Europe, Asia, Oceania or another region, I am here to discover my deep African roots."
+            "text": "Undetermined origin, the whole of Africa calls me."
           }
         ],
         "field": {

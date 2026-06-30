@@ -1,220 +1,105 @@
-# TOTEM ANCESTRAL - Architecture Logicielle MVP
+# TOTEM ANCESTRAL — Architecture Logicielle
 
-Document interne de reference pour le projet TOTEM ANCESTRAL, client SENYCE PARTNERS. Ce fichier reprend les exigences du document d'architecture fourni et les rapproche de l'etat actuel du depot.
+Document interne. Reflete l'état réel du code au 2026-06-30.
 
-Confidentialite : strictement confidentiel, usage interne uniquement.
+## Stack
 
-## 1. Contexte et objectifs
+| Domaine   | Technologie                                                |
+| --------- | ---------------------------------------------------------- |
+| Framework | Next.js 16 App Router, React 19                            |
+| Langue    | TypeScript strict                                          |
+| i18n      | next-intl (fr/en, préfixe `/fr`, `/en`)                    |
+| UI        | Tailwind CSS v4, Radix/shadcn, Motion, GSAP                |
+| Auth/DB   | Supabase (Auth + PostgreSQL + RLS)                         |
+| Paiement  | Stripe Checkout + Stripe Tax + Webhook                     |
+| Stockage  | Cloudflare R2 (S3-compatible)                              |
+| Emails    | Resend                                                     |
+| PDF       | @react-pdf/renderer                                        |
+| IA        | Claude (Anthropic) + Edge Functions Supabase + APIs SENYCE |
+| Backend   | NestJS orchestrateur optionnel dans `backend/TOTEM`        |
 
-TOTEM ANCESTRAL est une plateforme web internationale d'experience artistique digitale. Elle propose une oeuvre d'art numerique identitaire assistee par intelligence artificielle : coffret unique, numerote, signe, livre apres paiement.
+## Flux utilisateur
 
-Objectifs cibles du systeme :
-
-- Orchestrer un pipeline texte -> image -> audio -> PDF apres webhook Stripe, avec livraison sous 15 minutes.
-- Exposer une interface immersive, animee, premium et multilingue.
-- Integrer Stripe Checkout international, Stripe Tax et conversion devise.
-- Stocker les livrables PNG, MP3 et PDF sur Cloudflare R2 avec URLs signees pour les PDFs.
-- Proteger les prompts, secrets, cles API et logique proprietaire SENYCE PARTNERS.
-- Fournir un espace personnel utilisateur et un tableau de bord admin SENYCE PARTNERS.
-- Garder une architecture extensible vers d'autres langues, offres, video et abonnement.
-
-## 2. Architecture globale cible
-
-Style architectural : monolithe modulaire Next.js App Router deploye sur Vercel.
-
-Flux cible :
-
-```text
-Navigateur React
-  -> Vercel Edge Network + middleware i18n/auth
-  -> Next.js App Router /[locale]
-  -> API Routes /api/*
-  -> Supabase, Stripe, APIs SENYCE, Cloudflare R2, Resend
+```
+Landing → Parcours (4 questions) → Compte → Choix offre → Checkout Stripe
+→ Reprise questions (6 restantes) → Webhook → Pipeline IA → R2 → Email livraison
+→ Dashboard espace personnel
 ```
 
-Principe fondamental : toute logique manipulant des secrets, prompts, cles API, acces base ou appels aux services tiers s'execute exclusivement cote serveur.
+```
+Junior → 5 choix visuels → Scoring FETA Junior → Révélation immédiate
+→ Textes de partage → Défi ami
+```
 
-## 3. Etat actuel du depot
+## Modules — état réel
 
-Etat observe au 2026-06-08 :
+| Module               | Statut | Notes                                                                                                                                  |
+| -------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Présentation         | Fait   | Landing immersive, intro, audio ambiant, header FR/EN, footer, pages légales, contact (Resend), FAQ, SEO localisé                      |
+| Questionnaire        | Fait   | 10 questions, transitions Motion, localStorage, reprise après compte                                                                   |
+| Paiement Stripe      | Fait   | `/api/checkout` (alias `solvens_porta`), Stripe Tax, metadata, webhook HMAC + idempotence                                              |
+| Pipeline IA          | Fait   | Scoring FETA V3, prompts adultes A1-A5, texte Claude/Edge/SENYCE, image + audio, PDF, Upload R2, Email livraison, erreurs pipeline     |
+| Formule Junior       | Fait   | Route `/[locale]/iuvenis_signum`, API `/api/iuvenis_signum`, Edge Function `generate-junior`, endpoint backend `POST /junior`           |
+| Stockage & livraison | Fait   | Upload R2, URLs signées PDF (7j max R2), templates email FR/EN                                                                         |
+| Auth & espace        | Fait   | Supabase Auth, magic link, signup/signin/reset, dashboard commandes/oeuvres/profil, RLS                                                |
+| Administration       | Fait   | Route obfusquée `/fgh55_fh`, rôles Supabase `user_roles`, stats, commandes, oeuvres, utilisateurs, activité, erreurs, relance pipeline |
+| i18n                 | Fait   | FR/EN, catalogues à jour selon `npm run i18n:check`                                                                                    |
 
-- Framework : Next.js 16 App Router, React 19, TypeScript strict.
-- i18n : `next-intl` avec locales `fr` et `en`, prefixe obligatoire `/fr` et `/en`.
-- UI : Tailwind CSS v4, Radix/shadcn disponibles, Motion, GSAP installe.
-- Landing page : refonte avancee, intro video, audio ambiant, modal de visite, sections narratives, navigation FR/EN sans rechargement complet.
-- Parcours : 10 questions presentes, etat local persiste dans `localStorage`, parcours actuel en 4 questions -> creation compte -> choix offre -> questions restantes.
-- Paiement : route `/api/checkout` presente mais retourne encore `501`; Stripe Checkout non branche.
-- Webhook Stripe : route presente, lecture signature, mais verification HMAC et traitement commande non branches.
-- Pipeline : services et route presents, avec generation, R2 et livraison email via Resend en cours d'integration.
-- Supabase : clients et migrations existent, RLS existe dans les migrations, mais le schema actuel diverge du schema cible du document.
-- Espace personnel et admin : pages et routes API presentes, mais interfaces encore placeholders.
-- Deploiement : Vercel configure et production deja deployee.
+## Sécurité
 
-## 4. Modules applicatifs
+- Secrets : `.env*` ignorés, validation Zod stricte en production (Stripe, Supabase, R2, Resend, ADMIN_EMAIL requis)
+- Webhook : HMAC vérifié via `stripe.webhooks.constructEvent`
+- RLS : actif sur toutes les tables
+- Headers : HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+- Admin : contrôle serveur par rôle Supabase `user_roles.role = admin`
+- Auth : Bearer token JWT Supabase sur toutes les API sensibles
 
-### M1 - Presentation
+## Structure API
 
-Responsabilite cible : site vitrine, navigation, internationalisation, animations, SEO, pages legales, contact.
+| Route                                  | Rôle                                     |
+| -------------------------------------- | ---------------------------------------- |
+| `POST /api/solvens_porta`              | Création session Stripe Checkout         |
+| `POST /api/checkout`                   | Alias de solvens_porta                   |
+| `POST /api/webhook-stripe`             | Webhook Stripe (commande + email)        |
+| `POST /api/strix_nuntius`              | Webhook Stripe (nom latin, même logique) |
+| `POST /api/arca_generatrix`            | Relance pipeline (admin)                 |
+| `POST /api/personae_nota`              | Profil utilisateur                       |
+| `GET/POST /api/iter_animarum/reponses` | Réponses parcours                        |
+| `POST /api/ordo_tabulae/complete`      | Finalisation commande                    |
+| `GET /api/ordo_tabulae`                | Commandes utilisateur                    |
+| `GET /api/ordo_tabulae/[id]`           | Commande détail                          |
+| `GET /api/opera_artificis`             | Oeuvres utilisateur                      |
+| `POST /api/epistula_missa`             | Contact form                             |
+| `POST /api/iuvenis_signum`             | Révélation Junior immédiate              |
+| `POST /api/fgh55_fh/stats`             | Stats admin                              |
+| `GET /api/fgh55_fh/commandes`          | Toutes commandes (admin)                 |
+| `GET /api/fgh55_fh/oeuvres`            | Toutes oeuvres (admin)                   |
+| `GET /api/fgh55_fh/utilisateurs`       | Tous utilisateurs (admin)                |
+| `GET /api/fgh55_fh/activite`           | Activité (admin)                         |
+| `GET /api/fgh55_fh/evenements`         | Événements (admin)                       |
+| `POST /api/fgh55_fh/relancer`          | Relance pipeline (admin)                 |
 
-Exigences principales :
+## Pipeline de génération
 
-- Routes localisees `/fr/*` et `/en/*`.
-- Detection locale par middleware avec fallback `fr`.
-- Header avec changement de langue sans rechargement complet.
-- Intro jouee une fois par session.
-- Sections narratives, offres, FAQ, contact, pages legales.
-- Formulaire contact valide par Zod et transmis a Resend.
+1. **Profil V3** : scoring FETA adulte, archétype parmi 12, nom ancestral composé, titre d'oeuvre, variantes narrative/visuelle
+2. **Texte** : prompt A2 V3 via Claude direct → Edge Function Supabase → SENYCE API → fallback local
+3. **Image + Audio** : parallélisés, prompt visuel A4 + script audio A3, Edge Functions → SENYCE API
+4. **PDF** : Parchemin + Certificat via @react-pdf/renderer
+5. **Upload R2** : PDF → signed URL, image/audio → URL publique
+6. **Mise à jour** : statut `livree` seulement si PDF uploadé
+7. **Email** : confirmation + livraison via Resend (FR/EN)
 
-Etat actuel : partiellement conforme.
+## Pipeline Junior
 
-- Conforme : routes localisees, next-intl, header FR/EN, intro sessionStorage, landing page, assets, pages principales.
-- Partiel : plusieurs pages secondaires restent avec textes et metadonnees en francais en dur.
-- Non conforme : cookies/RGPD et journalisation consentement non verifies; GSAP ScrollTrigger pas confirme comme mecanisme principal.
+1. **Entrée** : cinq réponses A/B/C/D, prénom optionnel non stocké
+2. **Scoring** : matrice FETA Junior locale, attribution parmi 12 totems
+3. **Identité** : nom ancestral composé, phrase d'identité, attribut, message Clan et textes de partage
+4. **IA optionnelle** : cascade Claude J1-J4 si `ANTHROPIC_API_KEY` est disponible
+5. **Fallback** : génération déterministe locale si l'IA est absente ou indisponible
+6. **Déploiement alternatif** : Edge Function Supabase `generate-junior` et backend Nest `POST /junior`
 
-### M2 - Questionnaire conversationnel
+## Dette technique connue
 
-Responsabilite cible : collecte des 10 reponses, validation, progression, persistance session, transmission au paiement.
-
-Exigences principales :
-
-- 10 questions avec transitions animees.
-- Navigation precedent/suivant sans perte.
-- Persistance navigateur.
-- Validation avant passage a l'etape suivante.
-- Transmission des reponses au module paiement.
-
-Etat actuel : partiellement conforme.
-
-- Conforme : 10 questions, transitions, progression, persistance navigateur, responsive mobile corrige, FR/EN integre dans les messages.
-- Difference produit : le flux actuel demande le choix d'offre apres la 4e question, puis reprend les questions restantes. Le document initial place le choix d'offre apres la 10e question. Cette deviation correspond a une demande produit recente et doit etre actee dans l'architecture cible si elle devient definitive.
-- Non conforme : pas encore de POST reel vers `/api/checkout`; pas de serialisation Stripe active; usage `localStorage` courant `totem_parcours_v1`, alors que le document mentionne `sessionStorage` et `totem_questionnaire_state`.
-
-### M3 - Paiement
-
-Responsabilite cible : Stripe Checkout, Stripe Tax, webhook signe, idempotence, creation commande, email confirmation, lancement pipeline.
-
-Etat actuel : non conforme / placeholder.
-
-- Present : dependance `stripe`, client serveur, route `/api/checkout`, route `/api/webhook-stripe`, validation Zod du payload checkout.
-- Manquant : creation session Checkout, Price IDs, Stripe Tax, metadata, verification `stripe.webhooks.constructEvent`, idempotence base, creation commande Supabase, email confirmation, declenchement asynchrone pipeline.
-
-### M4 - Pipeline de generation
-
-Responsabilite cible : API Texte -> API Image + API Audio -> PDF -> M5, retries exponentiels, timeouts, erreurs pipeline.
-
-Etat actuel : non conforme / squelette.
-
-- Present : fichier `src/lib/services/pipeline.ts`, type des etapes, utilitaire `retryWithBackoff` de base.
-- Manquant : appels APIs SENYCE, timeouts, journalisation Supabase, statut commande, alerte admin, parallelisation image/audio, orchestration complete.
-
-### M5 - Stockage et livraison
-
-Responsabilite cible : upload R2, URLs signees 30 jours pour PDFs, emails Resend, mise a jour commande `done`.
-
-Etat actuel : non conforme / squelette.
-
-- Present : clients R2 et Resend, dependances AWS SDK, fichiers service `storage.ts`, `email.ts`, `pdf.ts`.
-- Manquant : finaliser les templates HTML Resend et l'update atomique commande selon l'environnement de production.
-
-### M6 - Authentification et espace personnel
-
-Responsabilite cible : Supabase Auth, magic link, JWT cookies, RLS, routes protegees, affichage commandes et livrables.
-
-Etat actuel : partiel / placeholder.
-
-- Present : dependance Supabase, clients, migrations avec tables `profiles`, `user_roles`, `reponses_parcours`, `commandes`, `oeuvres`, RLS.
-- Manquant : integration UI auth complete, middleware de protection routes, magic link route, API commandes authentifiee, affichage livrables R2.
-- Difference schema : le document cible parle de tables `utilisateurs`, `commandes`, `erreurs_pipeline`; la migration actuelle utilise `profiles`, `user_roles`, `reponses_parcours`, `commandes`, `oeuvres`, et ne contient pas `erreurs_pipeline`.
-
-### M7 - Administration
-
-Responsabilite cible : dashboard admin, commandes, revenus, erreurs, relance pipeline.
-
-Etat actuel : placeholder.
-
-- Present : page `/admin`, routes `/api/admin/commandes` et `/api/admin/stats`, dependance Recharts.
-- Manquant : verification role admin dans middleware/API, donnees Supabase reelles, filtres, graphiques, exports, relance pipeline.
-
-## 5. Modele d'information
-
-Modele cible du document :
-
-- `utilisateurs` : profil utilisateur, role user/admin.
-- `commandes` : commande centrale avec Stripe, reponses, URLs, statut `pending|done|error`.
-- `erreurs_pipeline` : erreurs detaillees par etape.
-
-Modele actuel observe dans les migrations Supabase :
-
-- `profiles` : profil lie a `auth.users`.
-- `user_roles` : roles `admin|user`.
-- `reponses_parcours` : reponses stockees par session.
-- `commandes` : commandes avec statut `en_attente_paiement|paye|en_generation|livree|erreur|remboursee` et offres `essentiel|signature|heritage`.
-- `oeuvres` : livrables associes a une commande.
-
-Conclusion : RLS et logique de roles existent dans le socle actuel, mais le schema ne respecte pas exactement le modele cible. Il faut soit migrer vers le schema cible, soit mettre a jour le document d'architecture pour adopter le schema courant.
-
-## 6. Technologies
-
-Technologies cible et etat :
-
-| Domaine    | Cible document            | Etat actuel                                             |
-| ---------- | ------------------------- | ------------------------------------------------------- |
-| Framework  | Next.js 14+ App Router    | Next.js 16 App Router, conforme en pratique             |
-| Styling    | Tailwind CSS v3           | Tailwind CSS v4, deviation acceptable mais a documenter |
-| UI         | shadcn/Radix              | Radix/shadcn presents                                   |
-| Animations | Framer Motion + GSAP      | Motion + GSAP presents                                  |
-| i18n       | next-intl                 | Present                                                 |
-| Paiement   | Stripe                    | SDK present, integration non branchee                   |
-| DB/Auth    | Supabase                  | Socle present, integration incomplete                   |
-| Stockage   | Cloudflare R2             | Client present, service non branche                     |
-| Emails     | Resend                    | Client present, service branche                         |
-| PDF        | @react-pdf/renderer       | Dependance presente, generation non branchee            |
-| Monitoring | Vercel Analytics + Sentry | Non observe dans le code                                |
-
-## 7. Securite et qualites techniques
-
-Etat actuel :
-
-- Secrets : `.env` et `.env.local` ne sont pas suivis par Git; aucun secret evident suivi dans Git.
-- Validation env : Zod present, mais la plupart des variables sont optionnelles. Pour production MVP, le schema doit devenir strict sur les variables obligatoires.
-- Headers securite : presents partiellement (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`). Manquent `Strict-Transport-Security` et CSP explicite dans `next.config.ts`.
-- Webhook Stripe : signature non verifiee actuellement.
-- RLS : present dans migrations, mais pas encore relie aux routes applicatives finales.
-- Tests : pas de tests unitaires, integration ou E2E observes.
-
-## 8. Deploiement
-
-Etat actuel :
-
-- Remote GitHub : `https://github.com/REBCDR07/totem-project.git`.
-- Branche de travail : `main`.
-- Vercel CLI configure via `.vercel/project.json` local, fichier non suivi par Git.
-- Production actuelle : `https://totemancestrale.vercel.app`.
-
-Ecart avec le document : la strategie `staging`, PR obligatoire, CI GitHub Actions et protection de branche ne sont pas verifiees dans le depot local.
-
-## 9. Recapitulatif de conformite
-
-| Bloc                      | Statut               | Commentaire                                                                    |
-| ------------------------- | -------------------- | ------------------------------------------------------------------------------ |
-| Presentation & navigation | Partiel avance       | Landing et i18n avances; pages secondaires et contact a finaliser              |
-| Questionnaire             | Partiel avance       | UX fonctionnelle; paiement non connecte; flux modifie apres Q4                 |
-| Paiement Stripe           | Non conforme         | Routes placeholders                                                            |
-| Pipeline generation       | Non conforme         | Services placeholders                                                          |
-| Stockage & livraison      | Non conforme         | Clients presents, logique non implementee                                      |
-| Espace personnel          | Non conforme/partiel | Socle Supabase, UI/API placeholders                                            |
-| Administration            | Non conforme/partiel | Page placeholder, pas de donnees reelles                                       |
-| Securite                  | Partiel              | Headers et RLS partiels; webhook et env stricts manquants                      |
-| i18n                      | Partiel avance       | Home/parcours/header/footer avances; pages secondaires a traduire completement |
-| Tests/CI                  | Non conforme         | Pas de suite de tests observee                                                 |
-
-## 10. Priorites techniques recommandees
-
-1. Decider officiellement si le flux produit est choix d'offre apres Q4 ou apres Q10, puis aligner les documents et le code.
-2. Brancher Stripe Checkout et Stripe Tax avec metadata compactes.
-3. Implementer la verification webhook Stripe et l'idempotence commande.
-4. Aligner le schema Supabase avec le modele cible ou mettre a jour l'architecture cible.
-5. Implementer pipeline SENYCE + R2 + PDF + Resend.
-6. Proteger `/admin` et `/espace-personnel` par Supabase Auth.
-7. Ajouter tests E2E critiques : i18n, parcours, pricing mobile, checkout mock, webhook mock.
-8. Completer CSP/HSTS et validation stricte des variables de production.
+- Code legacy TanStack/Vite dans `src/routes/`, `src/router.tsx` — exclu du build via tsconfig
+- Assets dupliqués entre `src/assets/` et `public/assets/`
+- Variables d'environnement optionnelles en dev (stricte en prod)

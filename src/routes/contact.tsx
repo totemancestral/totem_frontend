@@ -8,7 +8,10 @@ export const Route = createFileRoute("/contact")({
       { title: "Contact — Totem Ancestral" },
       { name: "description", content: "Écrivez à la maison Totem Ancestral. Réponse sous 48h." },
       { property: "og:title", content: "Contact — Totem Ancestral" },
-      { property: "og:description", content: "Écrivez à la maison Totem Ancestral. Réponse sous 48h." },
+      {
+        property: "og:description",
+        content: "Écrivez à la maison Totem Ancestral. Réponse sous 48h.",
+      },
     ],
   }),
   component: ContactPage,
@@ -46,7 +49,12 @@ function ContactPage() {
                 </div>
                 <div>
                   <label className="caption uppercase mb-2 block">Email</label>
-                  <input required type="email" className="form-input" placeholder="vous@exemple.com" />
+                  <input
+                    required
+                    type="email"
+                    className="form-input"
+                    placeholder="vous@exemple.com"
+                  />
                 </div>
               </div>
               <div>
@@ -61,7 +69,9 @@ function ContactPage() {
                 <label className="caption uppercase mb-2 block">Message</label>
                 <textarea required rows={6} className="form-input" placeholder="Écrivez-nous…" />
               </div>
-              <button type="submit" className="btn-primary mt-4">Envoyer</button>
+              <button type="submit" className="btn-primary mt-4">
+                Envoyer
+              </button>
               <p className="caption text-center mt-4">
                 Ou écrivez directement à{" "}
                 <a href="mailto:contact@totemancestral.com" className="link-gold">

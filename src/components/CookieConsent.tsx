@@ -28,10 +28,13 @@ export function CookieConsent() {
     >
       <div className="mx-auto flex max-w-5xl flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
         <p className="text-sm leading-relaxed" style={{ color: "var(--ivoire)" }}>
-          Ce site utilise des cookies techniques et analytiques pour votre expérience.
-          En poursuivant votre navigation, vous acceptez leur utilisation.
-          {" "}
-          <a href="/fr/arcanum_privata" className="underline" style={{ color: "var(--or-ancestral)" }}>
+          Ce site utilise des cookies techniques et analytiques pour votre expérience. En
+          poursuivant votre navigation, vous acceptez leur utilisation.{" "}
+          <a
+            href="/fr/arcanum_privata"
+            className="underline"
+            style={{ color: "var(--or-ancestral)" }}
+          >
             En savoir plus
           </a>
         </p>

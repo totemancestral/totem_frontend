@@ -41,7 +41,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   return (
-    <div className="flex min-h-screen items-center justify-center px-4" style={{ background: "var(--nuit-profonde)" }}>
+    <div
+      className="flex min-h-screen items-center justify-center px-4"
+      style={{ background: "var(--nuit-profonde)" }}
+    >
       <div className="max-w-md text-center flex flex-col items-center gap-6">
         <h1 className="h-display text-3xl" style={{ color: "var(--or-ancestral)" }}>
           Cette page n'a pas pu être composée.
@@ -59,7 +62,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             Réessayer
           </button>
-          <a href="/" className="btn-secondary">Accueil</a>
+          <a href="/" className="btn-secondary">
+            Accueil
+          </a>
         </div>
       </div>
     </div>
@@ -136,7 +141,9 @@ function AuthSync() {
   const router = useRouter();
   const queryClient = useQueryClient();
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
       router.invalidate();
       queryClient.invalidateQueries();
     });

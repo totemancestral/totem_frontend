@@ -4,6 +4,15 @@ import { generatePDFs } from "./pdf";
 import { uploadAndDeliver, uploadFile, type GeneratedFile } from "./storage";
 import { sendDeliveryEmail, sendAdminAlert } from "./email";
 import type { Database, Json } from "@/integrations/supabase/types";
+import {
+  buildAdultFallbackParchment,
+  buildAdultPromptBundle,
+  createAdultTotemProfile,
+  extractAudioScript,
+  extractParchmentText,
+  type AdultPromptBundle,
+  type AdultTotemProfile,
+} from "@/lib/totem-v3";
 
 const SUPABASE_PROJECT_REF = "mjiealkqjcqvlfrxdcif";
 const EDGE_FUNCTION_URL = `https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1`;
@@ -27,6 +36,18 @@ function hashCode(str: string): number {
     hash |= 0;
   }
   return Math.abs(hash);
+}
+
+function countCompletedAnswers(reponses: Record<string, unknown>): number {
+  return Array.from({ length: 10 }, (_, index) => reponses[String(index + 1)]).filter((answer) => {
+    if (typeof answer === "string") return answer.trim().length > 0;
+    if (!answer || typeof answer !== "object") return false;
+
+    const record = answer as { choice?: unknown; field?: unknown; skipped?: unknown };
+    if (record.skipped === true) return true;
+    if (typeof record.choice === "string" && record.choice.trim()) return true;
+    return typeof record.field === "string" && record.field.trim().length > 0;
+  }).length;
 }
 
 async function logPipelineError(
@@ -65,13 +86,6 @@ export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOp
   throw new Error(`Pipeline step ${options.etape} failed for ${options.commandeId}`);
 }
 
-const ARCHETYPE_LABELS: Record<string, { fr: string; en: string }> = {
-  A: { fr: "Guerrier", en: "Warrior" },
-  B: { fr: "Sage", en: "Sage" },
-  C: { fr: "Gardien", en: "Guardian" },
-  D: { fr: "Visionnaire", en: "Visionary" },
-};
-
 async function callEdgeFunction<T>(
   slug: string,
   payload: unknown,
@@ -108,7 +122,7 @@ async function callClaudeDirect(apiKey: string, prompt: string): Promise<string>
     },
     body: JSON.stringify({
       model: "claude-opus-4-8",
-      max_tokens: 1024,
+      max_tokens: 2500,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -124,91 +138,41 @@ async function callClaudeDirect(apiKey: string, prompt: string): Promise<string>
   return result.content?.[0]?.text?.trim() ?? "";
 }
 
-function buildPrompt(
-  prenom: string,
-  archetype: string,
-  champsLibres: string,
-  langue: "fr" | "en",
-): string {
-  if (langue === "fr") {
-    return `Tu es un griot africain ancestral, un conteur des temps anciens. Rédige un parchemin mystique et poétique pour ${prenom}, dont l'archétype ancestral est "${archetype}".
-
-Voici les réponses de son parcours initiatique (champs libres) :
-${champsLibres || "Le voyageur n'a pas laissé de paroles."}
-
-Le parchemin doit être :
-- Mystérieux et envoûtant, comme une prophétie ancestrale
-- Rédigé dans un français poétique et soutenu
-- Personnel, adressé directement à ${prenom}
-- Environ 200-300 mots
-- Parler de son archétype ${archetype}, de sa lignée, de son destin
-- Ne pas mentionner que c'est une IA qui écrit
-
-Écris uniquement le texte du parchemin, sans titre, sans signature.`;
-  }
-
-  return `You are an ancestral African griot, a storyteller from ancient times. Write a mystical and poetic parchment for ${prenom}, whose ancestral archetype is "${archetype}".
-
-Here are their initiatory journey answers (free text fields):
-${champsLibres || "The traveler left no words."}
-
-The parchment must be:
-- Mysterious and enchanting, like an ancestral prophecy
-- Written in poetic, elevated English
-- Personal, addressed directly to ${prenom}
-- About 200-300 words
-- Speak of their ${archetype} archetype, their lineage, their destiny
-- Do not mention it's an AI writing
-
-Write only the parchment text, no title, no signature.`;
-}
-
-function extractChampsLibres(reponses: Record<string, unknown>): string {
-  return Object.values(reponses)
-    .filter((a): a is Record<string, unknown> => !!a && typeof a === "object")
-    .map((a) => (a as { field?: string }).field ?? "")
-    .filter(Boolean)
-    .join("\n");
-}
-
 async function generateTexte(
   apiKey: string | undefined,
   anonKey: string | undefined,
-  prenom: string,
+  profile: AdultTotemProfile,
+  prompts: AdultPromptBundle,
   reponses: Record<string, unknown>,
-  archetypeId: string,
-  langue: "fr" | "en",
 ): Promise<string> {
-  // Tentative 1 : Edge Function Supabase (clés stockées dans les secrets Supabase)
+  // Tentative 1 : Claude direct avec prompt A2 V3.
+  if (apiKey) {
+    try {
+      const raw = await callClaudeDirect(apiKey, prompts.promptA2);
+      const texte = extractParchmentText(raw);
+      if (texte) return texte;
+    } catch {
+      // Le fallback Edge Function / SENYCE reste disponible.
+    }
+  }
+
+  // Tentative 2 : Edge Function Supabase (clés stockées dans les secrets Supabase).
   if (anonKey) {
-    const result = await callEdgeFunction<{ texte?: string }>(
+    const result = await callEdgeFunction<{ texte?: string; parchment_text?: string }>(
       "generate-texte",
       {
-        prenom,
+        prenom: profile.firstName,
         reponses,
-        archetypeId,
-        langue,
+        archetypeId: profile.archetype.id,
+        langue: profile.language,
+        prompt: prompts.promptA2,
+        profile,
       },
       anonKey,
     );
 
-    if (result?.texte) return result.texte;
-  }
-
-  // Tentative 2 : Appel direct Claude (fallback si edge function non déployée)
-  if (apiKey) {
-    const l = (langue === "en" ? "en" : "fr") as "fr" | "en";
-    const archetype = ARCHETYPE_LABELS[archetypeId]?.[l] ?? "Griot";
-    const champsLibres = extractChampsLibres(reponses);
-    const prompt = buildPrompt(prenom, archetype, champsLibres, l);
-
-    try {
-      const texte = await callClaudeDirect(apiKey, prompt);
-      if (texte) return texte;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Erreur generation texte Claude";
-      throw new Error(message);
-    }
+    const texte = result?.parchment_text ?? result?.texte;
+    if (texte) return extractParchmentText(texte);
   }
 
   return "";
@@ -216,19 +180,20 @@ async function generateTexte(
 
 async function generateImage(
   anonKey: string | undefined,
-  prenom: string,
+  profile: AdultTotemProfile,
   texte: string,
-  archetypeId: string,
-  langue: "fr" | "en",
+  prompts: AdultPromptBundle,
 ): Promise<string> {
   if (anonKey) {
     const result = await callEdgeFunction<{ imageUrl?: string }>(
       "generate-image",
       {
-        prenom,
+        prenom: profile.firstName,
         texte,
-        archetypeId,
-        langue,
+        archetypeId: profile.archetype.id,
+        langue: profile.language,
+        prompt: prompts.imagePrompt,
+        visualPrompt: prompts.promptA4,
       },
       anonKey,
     );
@@ -241,19 +206,20 @@ async function generateImage(
 
 async function generateAudio(
   anonKey: string | undefined,
-  prenom: string,
-  texte: string,
-  archetypeId: string,
-  langue: "fr" | "en",
+  profile: AdultTotemProfile,
+  script: string,
+  prompts: AdultPromptBundle,
 ): Promise<string> {
   if (anonKey) {
     const result = await callEdgeFunction<{ audioUrl?: string }>(
       "generate-audio",
       {
-        prenom,
-        texte,
-        archetypeId,
-        langue,
+        prenom: profile.firstName,
+        texte: script,
+        script,
+        archetypeId: profile.archetype.id,
+        langue: profile.language,
+        audioPrompt: prompts.promptA3,
       },
       anonKey,
     );
@@ -262,6 +228,40 @@ async function generateAudio(
   }
 
   return "";
+}
+
+async function generateAudioScript(
+  apiKey: string | undefined,
+  prompts: AdultPromptBundle,
+): Promise<string> {
+  if (!apiKey) return prompts.audioScriptFallback;
+
+  try {
+    const raw = await callClaudeDirect(apiKey, prompts.promptA3);
+    const script = extractAudioScript(raw);
+    return script || prompts.audioScriptFallback;
+  } catch {
+    return prompts.audioScriptFallback;
+  }
+}
+
+async function countClanMembers(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  archetypeId: string,
+): Promise<number> {
+  try {
+    const { count, error } = await supabase
+      .from("oeuvres")
+      .select("id", { count: "exact", head: true })
+      .eq("statut", "livree")
+      .contains("metadata", { archetypeId });
+
+    if (error) return 0;
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
 }
 
 async function callSenyceApi(
@@ -315,35 +315,7 @@ async function downloadAndUploadToR2(
   return uploadedUrl;
 }
 
-type CommandeData = {
-  id: string;
-  user_id: string;
-  offre: string;
-  langue: string;
-  montant_cents: number;
-};
-
-type OeuvreData = {
-  id: string;
-};
-
-type ProfileData = {
-  prenom: string;
-  email: string;
-};
-
-type ReponsesData = {
-  reponses: Record<string, unknown>;
-};
-
 type OeuvreUpdate = Database["public"]["Tables"]["oeuvres"]["Update"];
-
-const ARCHETYPE_NAMES: Record<string, { fr: string; en: string }> = {
-  A: { fr: "Guerrier", en: "Warrior" },
-  B: { fr: "Sage", en: "Sage" },
-  C: { fr: "Gardien", en: "Guardian" },
-  D: { fr: "Visionnaire", en: "Visionary" },
-};
 
 export async function generateCoffret(commandeId: string): Promise<void> {
   const env = getServerEnv();
@@ -407,21 +379,32 @@ export async function generateCoffret(commandeId: string): Promise<void> {
       .from("reponses_parcours")
       .select("reponses")
       .eq("user_id", userId)
+      .eq("termine", true)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
 
     const reponses = reponsesResult.data?.reponses ?? {};
+    if (countCompletedAnswers(reponses) !== 10) {
+      throw new Error("Reponses parcours incompletes");
+    }
 
-    const firstAnswer = Object.values(reponses).find((a) => {
-      if (!a || typeof a !== "object") return false;
-      return "choice" in (a as Record<string, unknown>);
-    }) as { choice?: string } | undefined;
-
-    const archetypeId = firstAnswer?.choice ?? "A";
-    const archetypeName = ARCHETYPE_NAMES[archetypeId]?.[langue] ?? "Griot";
     const numeroSerie = (hashCode(commandeId) % 999999) + 1;
-    const nomTotem = `${prenom} ${archetypeName}`;
+    const adultProfile = createAdultTotemProfile({
+      firstName: prenom,
+      language: langue,
+      answers: reponses,
+      seed: commandeId,
+      orderNumber: numeroSerie,
+    });
+    const clanCount = await countClanMembers(supabaseAny, adultProfile.archetype.id);
+    let promptBundle = buildAdultPromptBundle({
+      profile: adultProfile,
+      answers: reponses,
+      clanCount,
+    });
+    const archetypeId = adultProfile.archetype.id;
+    const nomTotem = adultProfile.nomComplet;
 
     // Étape 1 : Texte du parchemin via Edge Function ou Claude direct
     await updateOeuvreStep("generation_texte");
@@ -431,10 +414,9 @@ export async function generateCoffret(commandeId: string): Promise<void> {
       texteParchemin = await generateTexte(
         env.ANTHROPIC_API_KEY,
         env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        prenom,
+        adultProfile,
+        promptBundle,
         reponses,
-        archetypeId,
-        langue,
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erreur generation texte";
@@ -457,8 +439,12 @@ export async function generateCoffret(commandeId: string): Promise<void> {
               reponses,
               archetype: archetypeId,
               langue,
+              prompt: promptBundle.promptA2,
+              profile: adultProfile,
             });
-            texteParchemin = (result?.texte as string) ?? "";
+            texteParchemin = extractParchmentText(
+              (result?.parchment_text as string) ?? (result?.texte as string) ?? "",
+            );
           },
           { retries: 2, delays: [1000, 3000], etape: "texte", commandeId },
         );
@@ -476,17 +462,16 @@ export async function generateCoffret(commandeId: string): Promise<void> {
 
     // Fallback local si aucun service disponible
     if (!texteParchemin) {
-      const lines: string[] = [];
-      for (const [, val] of Object.entries(reponses)) {
-        if (!val || typeof val !== "object") continue;
-        const answer = val as { choice?: string; field?: string };
-        if (answer.field?.trim()) {
-          lines.push(answer.field.trim());
-        }
-      }
-      texteParchemin =
-        lines.length > 0 ? lines.join("\n\n") : `Totem Ancestral de ${prenom} — ${archetypeName}`;
+      texteParchemin = buildAdultFallbackParchment(adultProfile, reponses);
     }
+
+    promptBundle = buildAdultPromptBundle({
+      profile: adultProfile,
+      answers: reponses,
+      clanCount,
+      parchmentText: texteParchemin,
+    });
+    const audioScript = await generateAudioScript(env.ANTHROPIC_API_KEY, promptBundle);
 
     // Étape 2 : Image et Audio via Edge Functions ou SENYCE (en parallèle)
     await updateOeuvreStep("generation_image_audio");
@@ -494,8 +479,8 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     let senyceAudioUrl = "";
     let imageBufferForPdf: Buffer | null = null;
 
-    const [imageResult, audioResult] = await Promise.all([
-      generateImage(env.NEXT_PUBLIC_SUPABASE_ANON_KEY, prenom, texteParchemin, archetypeId, langue)
+    await Promise.all([
+      generateImage(env.NEXT_PUBLIC_SUPABASE_ANON_KEY, adultProfile, texteParchemin, promptBundle)
         .then((url) => {
           senyceImageUrl = url || "";
         })
@@ -503,7 +488,7 @@ export async function generateCoffret(commandeId: string): Promise<void> {
           const message = error instanceof Error ? error.message : "Erreur generation image";
           await logPipelineError(commandeId, "image", message, undefined, 1);
         }),
-      generateAudio(env.NEXT_PUBLIC_SUPABASE_ANON_KEY, prenom, texteParchemin, archetypeId, langue)
+      generateAudio(env.NEXT_PUBLIC_SUPABASE_ANON_KEY, adultProfile, audioScript, promptBundle)
         .then((url) => {
           senyceAudioUrl = url || "";
         })
@@ -521,6 +506,9 @@ export async function generateCoffret(commandeId: string): Promise<void> {
           texte: texteParchemin,
           archetype: archetypeId,
           langue,
+          prompt: promptBundle.imagePrompt,
+          visualPrompt: promptBundle.promptA4,
+          profile: adultProfile,
         });
         senyceImageUrl = (result?.imageUrl as string) ?? (result?.url as string) ?? "";
       } catch {
@@ -532,9 +520,12 @@ export async function generateCoffret(commandeId: string): Promise<void> {
       try {
         const result = await callSenyceApi(env.SENYCE_API_AUDIO, env.SENYCE_API_KEY, {
           prenom,
-          texte: texteParchemin,
+          texte: audioScript,
+          script: audioScript,
           archetype: archetypeId,
           langue,
+          audioPrompt: promptBundle.promptA3,
+          profile: adultProfile,
         });
         senyceAudioUrl = (result?.audioUrl as string) ?? (result?.url as string) ?? "";
       } catch {
@@ -674,17 +665,20 @@ export async function generateCoffret(commandeId: string): Promise<void> {
       certificat_url: certUrl || null,
     };
 
+    const hasRequiredAssets = pdfUrl !== "";
+    const livreeStatus = hasRequiredAssets ? "livree" : "erreur";
+
     await Promise.all([
       supabase
         .from("commandes")
         .update({
-          statut: "livree",
+          statut: livreeStatus,
         })
         .eq("id", commandeId),
       supabase
         .from("oeuvres")
         .update({
-          statut: "livree",
+          statut: livreeStatus,
           image_url: urls.image_url,
           audio_url: urls.audio_url,
           pdf_url: urls.pdf_url,
@@ -694,12 +688,33 @@ export async function generateCoffret(commandeId: string): Promise<void> {
           metadata: {
             certificatUrl: urls.certificat_url,
             archetypeId,
+            archetypeFrench: adultProfile.archetype.french,
+            archetypeEnglish: adultProfile.archetype.english,
+            people: adultProfile.archetype.people,
+            region: adultProfile.archetype.region,
+            nomComplet: adultProfile.nomComplet,
+            workTitleFr: adultProfile.workTitleFr,
+            workTitleEn: adultProfile.workTitleEn,
+            scores: adultProfile.scores,
+            dominant: adultProfile.dominant,
+            secondary: adultProfile.secondary,
+            clanCount,
+            narrativeVariant: promptBundle.narrativeVariant,
+            visualFrame: promptBundle.visualFrame,
+            share: promptBundle.shareFallback,
             langue,
             offre,
           },
         })
         .eq("commande_id", commandeId),
     ]);
+
+    if (!hasRequiredAssets) {
+      const message = "Livrable PDF manquant apres upload R2";
+      await logPipelineError(commandeId, "upload", message, undefined, 1);
+      await sendAdminAlert("Erreur livraison Totem", message).catch(() => {});
+      return;
+    }
 
     // Étape 6 : Email de livraison
     if (email) {
@@ -753,12 +768,15 @@ export async function finalizeCoffret(
 ): Promise<void> {
   const supabase = createServiceClient();
 
+  const hasRequiredAssets = (assets.pdfUrl ?? "") !== "";
+  const statut = hasRequiredAssets ? "livree" : "erreur";
+
   await Promise.all([
-    supabase.from("commandes").update({ statut: "livree" }).eq("id", commandeId),
+    supabase.from("commandes").update({ statut }).eq("id", commandeId),
     supabase
       .from("oeuvres")
       .update({
-        statut: "livree",
+        statut,
         image_url: assets.imageUrl ?? null,
         audio_url: assets.audioUrl ?? null,
         pdf_url: assets.pdfUrl ?? null,

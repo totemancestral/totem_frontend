@@ -114,7 +114,11 @@ function MonCompte() {
                   }}
                 >
                   {o.image_url ? (
-                    <img src={o.image_url} alt={o.nom_totem ?? "Œuvre"} className="w-full aspect-square object-cover" />
+                    <img
+                      src={o.image_url}
+                      alt={o.nom_totem ?? "Œuvre"}
+                      className="w-full aspect-square object-cover"
+                    />
                   ) : (
                     <div
                       className="w-full aspect-square flex items-center justify-center"
@@ -130,7 +134,10 @@ function MonCompte() {
                       {o.nom_totem ?? "Œuvre sans nom"}
                     </h2>
                     {o.numero_serie && (
-                      <span className="text-xs tracking-[0.2em] uppercase" style={{ color: "var(--or-pale)" }}>
+                      <span
+                        className="text-xs tracking-[0.2em] uppercase"
+                        style={{ color: "var(--or-pale)" }}
+                      >
                         № {o.numero_serie}
                       </span>
                     )}

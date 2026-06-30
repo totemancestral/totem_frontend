@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/server-auth";
 
 export const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "contact@totem-ancestral.com").toLowerCase();
 
@@ -29,7 +30,28 @@ export async function requireAdmin(request: Request) {
     return NextResponse.json({ error: "Session invalide" }, { status: 401 });
   }
 
-  if ((user.email ?? "").toLowerCase() !== ADMIN_EMAIL) {
+  let isAdmin = false;
+  try {
+    const { data: role, error: roleError } = await createServiceClient()
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (roleError) {
+      return NextResponse.json({ error: "Verification du role admin impossible" }, { status: 500 });
+    }
+
+    isAdmin = Boolean(role);
+  } catch {
+    return NextResponse.json(
+      { error: "Configuration Supabase service manquante" },
+      { status: 500 },
+    );
+  }
+
+  if (!isAdmin) {
     return NextResponse.json({ error: "Acces admin requis" }, { status: 403 });
   }
 

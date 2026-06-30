@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdmin } from "@/lib/admin-auth";
 import { generateCoffret } from "@/lib/services/pipeline";
 
 const generateSchema = z.object({
@@ -7,6 +8,9 @@ const generateSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const admin = await requireAdmin(request);
+  if (admin instanceof NextResponse) return admin;
+
   const parsed = generateSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "Payload de generation invalide" }, { status: 422 });

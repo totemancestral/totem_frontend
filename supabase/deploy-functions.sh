@@ -29,6 +29,9 @@ $supabase functions deploy generate-image
 echo "📦 Déploiement de generate-audio..."
 $supabase functions deploy generate-audio
 
+echo "📦 Déploiement de generate-junior..."
+$supabase functions deploy generate-junior
+
 echo ""
 echo "🔐 Configuration des secrets (si pas déjà fait)..."
 $supabase secrets set ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY"
@@ -40,3 +43,4 @@ echo "Les fonctions sont accessibles sur:"
 echo "  https://mjiealkqjcqvlfrxdcif.supabase.co/functions/v1/generate-texte"
 echo "  https://mjiealkqjcqvlfrxdcif.supabase.co/functions/v1/generate-image"
 echo "  https://mjiealkqjcqvlfrxdcif.supabase.co/functions/v1/generate-audio"
+echo "  https://mjiealkqjcqvlfrxdcif.supabase.co/functions/v1/generate-junior"

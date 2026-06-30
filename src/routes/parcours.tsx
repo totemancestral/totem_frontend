@@ -50,10 +50,22 @@ const QUESTIONS: Question[] = [
       "Ferme les yeux un instant. Pense à la nature — à ce qui t'attire sans que tu puisses l'expliquer.",
     question: "Quel élément naturel t'appelle le plus profondément ?",
     choices: [
-      { letter: "A", text: "Le feu qui danse dans la nuit — je suis attiré par sa lumière, sa chaleur imprévisible, sa façon de tout transformer." },
-      { letter: "B", text: "L'eau qui coule sans jamais s'arrêter — rivière, océan, pluie — je reviens toujours vers elle." },
-      { letter: "C", text: "La terre sous mes pieds — les racines, les pierres, les forêts épaisses — ce qui dure et qui tient." },
-      { letter: "D", text: "Le vent qui emporte tout — l'espace ouvert, les hauteurs, l'horizon qu'on ne peut pas attraper." },
+      {
+        letter: "A",
+        text: "Le feu qui danse dans la nuit — je suis attiré par sa lumière, sa chaleur imprévisible, sa façon de tout transformer.",
+      },
+      {
+        letter: "B",
+        text: "L'eau qui coule sans jamais s'arrêter — rivière, océan, pluie — je reviens toujours vers elle.",
+      },
+      {
+        letter: "C",
+        text: "La terre sous mes pieds — les racines, les pierres, les forêts épaisses — ce qui dure et qui tient.",
+      },
+      {
+        letter: "D",
+        text: "Le vent qui emporte tout — l'espace ouvert, les hauteurs, l'horizon qu'on ne peut pas attraper.",
+      },
     ],
     field: {
       level: "SECONDAIRE",
@@ -68,10 +80,22 @@ const QUESTIONS: Question[] = [
     griot: "",
     question: "Dans quel moment te sens-tu le plus vivant(e) ?",
     choices: [
-      { letter: "A", text: "Quand je protège quelqu'un — quand je me bats pour ce qui est juste — quand je suis au cœur de l'action." },
-      { letter: "B", text: "Quand je crée quelque chose — une idée, une œuvre, un projet — quand mes mains donnent vie à ma vision." },
-      { letter: "C", text: "Quand je suis entouré(e) de ceux que j'aime — dans le rire, dans le partage, dans le lien." },
-      { letter: "D", text: "Quand je suis seul(e) dans la nature ou dans le silence — quand j'observe, quand je comprends, quand je vois loin." },
+      {
+        letter: "A",
+        text: "Quand je protège quelqu'un — quand je me bats pour ce qui est juste — quand je suis au cœur de l'action.",
+      },
+      {
+        letter: "B",
+        text: "Quand je crée quelque chose — une idée, une œuvre, un projet — quand mes mains donnent vie à ma vision.",
+      },
+      {
+        letter: "C",
+        text: "Quand je suis entouré(e) de ceux que j'aime — dans le rire, dans le partage, dans le lien.",
+      },
+      {
+        letter: "D",
+        text: "Quand je suis seul(e) dans la nature ou dans le silence — quand j'observe, quand je comprends, quand je vois loin.",
+      },
     ],
     field: {
       level: "TERTIAIRE",
@@ -87,15 +111,28 @@ const QUESTIONS: Question[] = [
       "Écoute bien. Ce que les autres voient en toi — sans que tu le demandes — c'est souvent ce que tu refuses de voir toi-même.",
     question: "Ce que les autres voient en toi — sans que tu le leur demandes ?",
     choices: [
-      { letter: "A", text: "Une force. Une présence. Quelqu'un vers qui on se tourne quand ça va mal — ou quand il faut décider." },
-      { letter: "B", text: "Une sagesse. Un regard différent. Quelqu'un qui dit les choses que les autres n'osent pas formuler." },
-      { letter: "C", text: "Une douceur. Une chaleur. Quelqu'un qui accueille, qui écoute, qui rend les gens meilleurs." },
-      { letter: "D", text: "Une liberté. Une originalité. Quelqu'un qu'on n'arrive pas vraiment à enfermer dans une case." },
+      {
+        letter: "A",
+        text: "Une force. Une présence. Quelqu'un vers qui on se tourne quand ça va mal — ou quand il faut décider.",
+      },
+      {
+        letter: "B",
+        text: "Une sagesse. Un regard différent. Quelqu'un qui dit les choses que les autres n'osent pas formuler.",
+      },
+      {
+        letter: "C",
+        text: "Une douceur. Une chaleur. Quelqu'un qui accueille, qui écoute, qui rend les gens meilleurs.",
+      },
+      {
+        letter: "D",
+        text: "Une liberté. Une originalité. Quelqu'un qu'on n'arrive pas vraiment à enfermer dans une case.",
+      },
     ],
     field: {
       level: "PRIORITAIRE",
       label: "Le griot t'a écouté. Si tu veux lui souffler une nuance, il l'entendra.",
-      placeholder: "Une phrase qu'on te dit souvent, que tu aimes ou que tu n'aimes pas entendre...",
+      placeholder:
+        "Une phrase qu'on te dit souvent, que tu aimes ou que tu n'aimes pas entendre...",
       rows: 2,
     },
   },
@@ -105,10 +142,22 @@ const QUESTIONS: Question[] = [
     griot: "L'épreuve révèle. Pas ce qu'on dit qu'on ferait — ce qu'on fait vraiment.",
     question: "Face à une épreuve — comment réagis-tu vraiment ?",
     choices: [
-      { letter: "A", text: "Je fonce. J'agis. Je préfère me tromper dans l'action que rester immobile dans le doute." },
-      { letter: "B", text: "Je recule, j'observe, j'analyse — puis je choisis le moment et l'endroit où frapper juste." },
-      { letter: "C", text: "Je cherche les autres — je construis des alliances, je crée du soutien autour de moi." },
-      { letter: "D", text: "Je rentre en moi-même — je cherche la réponse dans le silence avant de la chercher dehors." },
+      {
+        letter: "A",
+        text: "Je fonce. J'agis. Je préfère me tromper dans l'action que rester immobile dans le doute.",
+      },
+      {
+        letter: "B",
+        text: "Je recule, j'observe, j'analyse — puis je choisis le moment et l'endroit où frapper juste.",
+      },
+      {
+        letter: "C",
+        text: "Je cherche les autres — je construis des alliances, je crée du soutien autour de moi.",
+      },
+      {
+        letter: "D",
+        text: "Je rentre en moi-même — je cherche la réponse dans le silence avant de la chercher dehors.",
+      },
     ],
     field: {
       level: "TERTIAIRE",
@@ -120,13 +169,26 @@ const QUESTIONS: Question[] = [
   {
     n: 5,
     progress: 50,
-    griot: "Il y a une heure dans la journée où tout semble plus clair. Une heure où tu es vraiment toi.",
+    griot:
+      "Il y a une heure dans la journée où tout semble plus clair. Une heure où tu es vraiment toi.",
     question: "À quelle heure ton âme se réveille-t-elle vraiment ?",
     choices: [
-      { letter: "A", text: "À l'aube — quand le monde est encore silence et que tout est possible — avant que les autres arrivent." },
-      { letter: "B", text: "En plein jour — dans le feu de l'action, du mouvement, des rencontres, du bruit vivant." },
-      { letter: "C", text: "Au crépuscule — quand la lumière change, quand les frontières s'estompent, quand on peut réfléchir." },
-      { letter: "D", text: "Dans la nuit — quand le monde dort et que je suis enfin seul(e) avec mes pensées les plus profondes." },
+      {
+        letter: "A",
+        text: "À l'aube — quand le monde est encore silence et que tout est possible — avant que les autres arrivent.",
+      },
+      {
+        letter: "B",
+        text: "En plein jour — dans le feu de l'action, du mouvement, des rencontres, du bruit vivant.",
+      },
+      {
+        letter: "C",
+        text: "Au crépuscule — quand la lumière change, quand les frontières s'estompent, quand on peut réfléchir.",
+      },
+      {
+        letter: "D",
+        text: "Dans la nuit — quand le monde dort et que je suis enfin seul(e) avec mes pensées les plus profondes.",
+      },
     ],
     field: {
       level: "SECONDAIRE",
@@ -144,15 +206,28 @@ const QUESTIONS: Question[] = [
       "Cette question est la seule que tu peux choisir de ne pas répondre. Mais si tu le fais — les ancêtres seront plus proches.",
     question: "Quelle est l'origine de tes ancêtres — aussi loin que tu le sais ?",
     choices: [
-      { letter: "A", text: "Afrique de l'Ouest — Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et environs." },
-      { letter: "B", text: "Afrique Centrale, de l'Est ou du Sud — Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et environs." },
-      { letter: "C", text: "Caraïbes, Amériques ou diaspora africaine — une origine africaine probable mais indéterminée." },
-      { letter: "D", text: "Europe, Asie, Océanie ou toute autre région — je suis ici pour découvrir mes racines africaines profondes." },
+      {
+        letter: "A",
+        text: "Afrique de l'Ouest — Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et environs.",
+      },
+      {
+        letter: "B",
+        text: "Afrique Centrale, de l'Est ou du Sud — Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et environs.",
+      },
+      {
+        letter: "C",
+        text: "Caraïbes, Amériques ou diaspora africaine — une origine africaine probable mais indéterminée.",
+      },
+      {
+        letter: "D",
+        text: "Europe, Asie, Océanie ou toute autre région — je suis ici pour découvrir mes racines africaines profondes.",
+      },
     ],
     field: {
       level: "SPECIAL",
       label: "Tu sais quelque chose de précis ?",
-      placeholder: "Un pays, une ethnie, une région que tu connais ou que tu as envie d'explorer...",
+      placeholder:
+        "Un pays, une ethnie, une région que tu connais ou que tu as envie d'explorer...",
       rows: 2,
     },
   },
@@ -163,15 +238,28 @@ const QUESTIONS: Question[] = [
       "La colère est sacrée. Elle dit ce qui compte vraiment. Ce qui te met en colère révèle ce à quoi tu tiens le plus.",
     question: "Ce qui met le feu en toi — ta colère la plus profonde ?",
     choices: [
-      { letter: "A", text: "L'injustice. Voir les faibles écrasés par les puissants. Voir la vérité bafouée. Voir les droits piétinés." },
-      { letter: "B", text: "La médiocrité acceptée. Les gens qui se contentent de peu. Le gâchis de potentiel. L'abandon des rêves." },
-      { letter: "C", text: "La trahison et le mensonge. L'hypocrisie. Les gens qui jouent un rôle plutôt que d'être vrais." },
-      { letter: "D", text: "La destruction — de la nature, de la beauté, de la mémoire, de ce qui a pris des siècles à construire." },
+      {
+        letter: "A",
+        text: "L'injustice. Voir les faibles écrasés par les puissants. Voir la vérité bafouée. Voir les droits piétinés.",
+      },
+      {
+        letter: "B",
+        text: "La médiocrité acceptée. Les gens qui se contentent de peu. Le gâchis de potentiel. L'abandon des rêves.",
+      },
+      {
+        letter: "C",
+        text: "La trahison et le mensonge. L'hypocrisie. Les gens qui jouent un rôle plutôt que d'être vrais.",
+      },
+      {
+        letter: "D",
+        text: "La destruction — de la nature, de la beauté, de la mémoire, de ce qui a pris des siècles à construire.",
+      },
     ],
     field: {
       level: "PRIORITAIRE",
       label: "Les ancêtres écoutent mieux ceux qui osent les mots qu'ils gardent pour eux.",
-      placeholder: "Ce qui te met vraiment hors de toi — ce contre quoi tu te bats intérieurement...",
+      placeholder:
+        "Ce qui te met vraiment hors de toi — ce contre quoi tu te bats intérieurement...",
       rows: 2,
     },
   },
@@ -181,10 +269,22 @@ const QUESTIONS: Question[] = [
     griot: "Imagine que dans cent ans, quelqu'un parle de toi. Qu'est-ce qu'il dit ?",
     question: "La trace que tu veux laisser dans le monde ?",
     choices: [
-      { letter: "A", text: "J'ai protégé. J'ai défendu. J'ai rendu le monde plus juste pour ceux qui viendront après moi." },
-      { letter: "B", text: "J'ai créé. J'ai bâti quelque chose qui durera — une œuvre, une entreprise, une idée, un héritage." },
-      { letter: "C", text: "J'ai connecté. J'ai rassemblé les gens. J'ai créé des liens là où il n'y en avait pas." },
-      { letter: "D", text: "J'ai révélé. J'ai dit des vérités que personne n'osait dire. J'ai ouvert des yeux." },
+      {
+        letter: "A",
+        text: "J'ai protégé. J'ai défendu. J'ai rendu le monde plus juste pour ceux qui viendront après moi.",
+      },
+      {
+        letter: "B",
+        text: "J'ai créé. J'ai bâti quelque chose qui durera — une œuvre, une entreprise, une idée, un héritage.",
+      },
+      {
+        letter: "C",
+        text: "J'ai connecté. J'ai rassemblé les gens. J'ai créé des liens là où il n'y en avait pas.",
+      },
+      {
+        letter: "D",
+        text: "J'ai révélé. J'ai dit des vérités que personne n'osait dire. J'ai ouvert des yeux.",
+      },
     ],
     field: {
       level: "TERTIAIRE",
@@ -200,10 +300,22 @@ const QUESTIONS: Question[] = [
       "Les rêves parlent. Pas littéralement — mais symboliquement. Qu'est-ce qui revient dans ton monde intérieur ?",
     question: "Ton symbole intérieur — ce qui revient dans tes rêves ou ta vie ?",
     choices: [
-      { letter: "A", text: "L'eau — une rivière, un océan, une pluie — quelque chose qui coule, qui emporte, qui purifie." },
-      { letter: "B", text: "La hauteur — une falaise, un sommet, un vol — une vision d'en haut, une perspective que les autres n'ont pas." },
-      { letter: "C", text: "Le feu ou la lumière — une flamme, un soleil, un éclair — quelque chose qui brûle et qui illumine." },
-      { letter: "D", text: "Les racines ou la forêt — des arbres, de la terre, des chemins anciens — quelque chose de profond et de durable." },
+      {
+        letter: "A",
+        text: "L'eau — une rivière, un océan, une pluie — quelque chose qui coule, qui emporte, qui purifie.",
+      },
+      {
+        letter: "B",
+        text: "La hauteur — une falaise, un sommet, un vol — une vision d'en haut, une perspective que les autres n'ont pas.",
+      },
+      {
+        letter: "C",
+        text: "Le feu ou la lumière — une flamme, un soleil, un éclair — quelque chose qui brûle et qui illumine.",
+      },
+      {
+        letter: "D",
+        text: "Les racines ou la forêt — des arbres, de la terre, des chemins anciens — quelque chose de profond et de durable.",
+      },
     ],
     field: {
       level: "SECONDAIRE",
@@ -219,15 +331,28 @@ const QUESTIONS: Question[] = [
       "Dernière question. La plus importante. L'ancêtre te regarde. Il voit ta vie entière. Pas ce que tu as fait — mais ce que tu portes.",
     question: "Si un ancêtre pouvait regarder ta vie — qu'est-ce qu'il verrait ?",
     choices: [
-      { letter: "A", text: "Un guerrier qui n'a pas encore trouvé sa vraie bataille. Une force immense qui attend le bon moment." },
-      { letter: "B", text: "Un sage qui parle trop peu. Une sagesse profonde que le monde a besoin d'entendre davantage." },
-      { letter: "C", text: "Un cœur qui aime trop fort et pas assez lui-même. Une générosité qui parfois s'oublie." },
-      { letter: "D", text: "Un esprit libre dans un corps qui essaie de rentrer dans des cases. Une âme trop grande pour les limites qu'on lui impose." },
+      {
+        letter: "A",
+        text: "Un guerrier qui n'a pas encore trouvé sa vraie bataille. Une force immense qui attend le bon moment.",
+      },
+      {
+        letter: "B",
+        text: "Un sage qui parle trop peu. Une sagesse profonde que le monde a besoin d'entendre davantage.",
+      },
+      {
+        letter: "C",
+        text: "Un cœur qui aime trop fort et pas assez lui-même. Une générosité qui parfois s'oublie.",
+      },
+      {
+        letter: "D",
+        text: "Un esprit libre dans un corps qui essaie de rentrer dans des cases. Une âme trop grande pour les limites qu'on lui impose.",
+      },
     ],
     field: {
       level: "PRIORITAIRE",
       label: "Dis-lui maintenant ce que tu n'as jamais dit à voix haute.",
-      placeholder: "Une confidence, une vérité, un mot — quelque chose que tu n'as jamais dit à voix haute...",
+      placeholder:
+        "Une confidence, une vérité, un mot — quelque chose que tu n'as jamais dit à voix haute...",
       rows: 3,
     },
   },
@@ -275,10 +400,7 @@ function ParcoursPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      localStorage.setItem(
-        "totem_parcours_v1",
-        JSON.stringify({ answers, index, phase })
-      );
+      localStorage.setItem("totem_parcours_v1", JSON.stringify({ answers, index, phase }));
     } catch {
       /* quota — ignore */
     }
@@ -351,13 +473,13 @@ function ParcoursPage() {
   }
 
   const a = answers[current?.n ?? 1];
-  const canContinue =
-    phase !== "question"
-      ? true
-      : !!a?.choice || (current.canSkip && a?.skipped);
+  const canContinue = phase !== "question" ? true : !!a?.choice || (current.canSkip && a?.skipped);
 
   return (
-    <div className="fixed inset-0 z-[200] overflow-y-auto" style={{ background: "var(--nuit-profonde)" }}>
+    <div
+      className="fixed inset-0 z-[200] overflow-y-auto"
+      style={{ background: "var(--nuit-profonde)" }}
+    >
       {/* Progress bar */}
       <div
         className="fixed top-0 left-0 right-0 z-[210]"
@@ -394,9 +516,7 @@ function ParcoursPage() {
           />
         )}
         {phase === "paywall-transition" && <PaywallTransition key="pt" />}
-        {phase === "paywall" && (
-          <Paywall key="pw" onPaid={() => setPhase("post-payment")} />
-        )}
+        {phase === "paywall" && <Paywall key="pw" onPaid={() => setPhase("post-payment")} />}
         {phase === "post-payment" && (
           <PostPayment
             key="pp"
@@ -448,27 +568,52 @@ const fadeSlide = {
 
 function IntroScreen({ onStart }: { onStart: () => void }) {
   const lines = [
-    { delay: 0.3, render: () => (
-      <motion.p
-        animate={{ scale: [1, 1.12, 1] }}
-        transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
-        style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--ivoire)", letterSpacing: "0.08em", display: "inline-block", transformOrigin: "center" }}
-      >
-        Le Griot parle.
-      </motion.p>
-    )},
-    { delay: 0.6, render: () => (
-      <p className="quote-italic" style={{ fontSize: 18 }}>
-        Il n'y a pas de bonnes ou de mauvaises réponses ici. Il y a ta vérité — et celle que tu t'autorises à voir.
-      </p>
-    )},
-    { delay: 0.9, render: () => (
-      <p style={{ fontFamily: "var(--font-sans)", fontSize: 15, color: "rgba(254,252,240,0.8)", lineHeight: 1.7 }}>
-        Réponds avec ce que tu ressens. Pas avec ce que tu crois devoir répondre.
-        <br /><br />
-        Le temps n'existe pas ici. L'ancêtre attend.
-      </p>
-    )},
+    {
+      delay: 0.3,
+      render: () => (
+        <motion.p
+          animate={{ scale: [1, 1.12, 1] }}
+          transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: 28,
+            color: "var(--ivoire)",
+            letterSpacing: "0.08em",
+            display: "inline-block",
+            transformOrigin: "center",
+          }}
+        >
+          Le Griot parle.
+        </motion.p>
+      ),
+    },
+    {
+      delay: 0.6,
+      render: () => (
+        <p className="quote-italic" style={{ fontSize: 18 }}>
+          Il n'y a pas de bonnes ou de mauvaises réponses ici. Il y a ta vérité — et celle que tu
+          t'autorises à voir.
+        </p>
+      ),
+    },
+    {
+      delay: 0.9,
+      render: () => (
+        <p
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: 15,
+            color: "rgba(254,252,240,0.8)",
+            lineHeight: 1.7,
+          }}
+        >
+          Réponds avec ce que tu ressens. Pas avec ce que tu crois devoir répondre.
+          <br />
+          <br />
+          Le temps n'existe pas ici. L'ancêtre attend.
+        </p>
+      ),
+    },
   ];
 
   return (
@@ -505,7 +650,15 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
 }
 
 function QuestionScreen({
-  q, answer, onChoice, onField, onSkip, onNext, onPrev, canContinue, isFirst,
+  q,
+  answer,
+  onChoice,
+  onField,
+  onSkip,
+  onNext,
+  onPrev,
+  canContinue,
+  isFirst,
 }: {
   q: Question;
   answer?: Answer;
@@ -540,7 +693,14 @@ function QuestionScreen({
     >
       <div className="w-full max-w-[640px] flex flex-col items-center gap-6 text-center">
         <div style={{ color: "var(--or-pale)", fontSize: 18, letterSpacing: "0.3em" }}>✦</div>
-        <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "#888", letterSpacing: "0.18em" }}>
+        <p
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: 13,
+            color: "#888",
+            letterSpacing: "0.18em",
+          }}
+        >
           QUESTION {q.n} SUR 10
         </p>
         {q.note && (
@@ -587,7 +747,13 @@ function QuestionScreen({
                   e.currentTarget.style.background = "#1A1A2E";
                 }}
               >
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--or-ancestral)" }}>
+                <span
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: 20,
+                    color: "var(--or-ancestral)",
+                  }}
+                >
                   {c.letter}
                 </span>
                 <span style={{ fontFamily: "var(--font-sans)", fontSize: 15, lineHeight: 1.6 }}>
@@ -629,7 +795,12 @@ function QuestionScreen({
               className="block mb-2"
               style={
                 q.field.level === "PRIORITAIRE" || isD || q.field.level === "SPECIAL"
-                  ? { fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 15, color: "var(--or-pale)" }
+                  ? {
+                      fontFamily: "var(--font-display)",
+                      fontStyle: "italic",
+                      fontSize: 15,
+                      color: "var(--or-pale)",
+                    }
                   : { fontFamily: "var(--font-sans)", fontSize: 13, color: "#888" }
               }
             >
@@ -724,8 +895,7 @@ function PaywallTransition() {
         transition={{ duration: 1.5 }}
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            "radial-gradient(circle at center, rgba(201,168,76,0.25), transparent 60%)",
+          background: "radial-gradient(circle at center, rgba(201,168,76,0.25), transparent 60%)",
         }}
       />
       <div className="relative max-w-[560px] flex flex-col gap-4">
@@ -785,10 +955,7 @@ const offers = [
 
 function Paywall({ onPaid }: { onPaid: () => void }) {
   return (
-    <motion.section
-      {...fadeSlide}
-      className="relative min-h-screen px-5 md:px-10 py-24"
-    >
+    <motion.section {...fadeSlide} className="relative min-h-screen px-5 md:px-10 py-24">
       <div className="max-w-6xl mx-auto text-center flex flex-col items-center gap-4 mb-16">
         <h2 className="h-display" style={{ fontSize: 42, color: "var(--or-ancestral)" }}>
           Choisis ton offre pour continuer.
@@ -844,7 +1011,11 @@ function Paywall({ onPaid }: { onPaid: () => void }) {
             </p>
             <ul className="flex flex-col gap-3 mt-8 mb-8 flex-1">
               {o.features.map((f) => (
-                <li key={f} className="flex gap-3 items-start" style={{ color: "var(--ivoire)", fontSize: 14 }}>
+                <li
+                  key={f}
+                  className="flex gap-3 items-start"
+                  style={{ color: "var(--ivoire)", fontSize: 14 }}
+                >
                   <Check size={16} color="var(--or-ancestral)" className="mt-1 shrink-0" />
                   <span>{f}</span>
                 </li>
@@ -910,8 +1081,7 @@ function FinalTransition() {
         transition={{ duration: 3 }}
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            "radial-gradient(circle at center, rgba(201,168,76,0.35), transparent 65%)",
+          background: "radial-gradient(circle at center, rgba(201,168,76,0.35), transparent 65%)",
         }}
       />
       <div className="relative flex flex-col gap-6 max-w-[600px]">
@@ -988,7 +1158,14 @@ function WaitingScreen() {
             {ROTATING[idx]}
           </motion.p>
         </AnimatePresence>
-        <p style={{ fontFamily: "var(--font-sans)", fontSize: 15, color: "rgba(254,252,240,0.7)", lineHeight: 1.7 }}>
+        <p
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: 15,
+            color: "rgba(254,252,240,0.7)",
+            lineHeight: 1.7,
+          }}
+        >
           Tu peux fermer cette fenêtre. Les ancêtres terminent leur travail.
         </p>
       </div>

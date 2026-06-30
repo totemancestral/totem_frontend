@@ -77,11 +77,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parcoursError.message }, { status: 500 });
   }
 
-  if (env.TOTEM_BACKEND_URL) {
-    if (backendAnswers.length < 4) {
-      return NextResponse.json({ error: "Reponses insuffisantes" }, { status: 422 });
-    }
+  if (backendAnswers.length < 4) {
+    return NextResponse.json({ error: "Reponses insuffisantes" }, { status: 422 });
+  }
 
+  if (env.TOTEM_BACKEND_URL) {
     const { data: commande, error: commandeError } = await supabase
       .from("commandes")
       .insert({
@@ -152,8 +152,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const metadata = buildStripeMetadata(parsed.data, auth.userId, auth.email, prenom);
-
   try {
     await supabase
       .from("reponses_parcours")
@@ -168,6 +166,26 @@ export async function POST(request: Request) {
   });
 
   try {
+    const { data: commande, error: commandeError } = await supabase
+      .from("commandes")
+      .insert({
+        user_id: auth.userId,
+        reponses_id: parcours.id,
+        offre: commandOfferMap[parsed.data.offre],
+        statut: "en_attente_paiement",
+        montant_cents: config.amountCents,
+        devise: "EUR",
+        langue: parsed.data.locale,
+      })
+      .select("id")
+      .single();
+
+    if (commandeError) {
+      return NextResponse.json({ error: commandeError.message }, { status: 500 });
+    }
+
+    const metadata = buildStripeMetadata(parsed.data, auth.userId, auth.email, prenom, commande.id);
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [{ price: priceId, quantity: 1 }],
@@ -178,12 +196,21 @@ export async function POST(request: Request) {
       success_url: `${origin}${pagePath(
         parsed.data.locale,
         "parcours",
-        "checkout=success&session_id={CHECKOUT_SESSION_ID}",
+        `checkout=success&session_id={CHECKOUT_SESSION_ID}&commande_id=${commande.id}`,
       )}`,
       cancel_url: `${origin}${pagePath(parsed.data.locale, "parcours", "checkout=cancelled")}`,
     });
 
-    return NextResponse.json({ checkoutUrl: session.url, checkoutSessionId: session.id });
+    await supabase
+      .from("commandes")
+      .update({ stripe_session_id: session.id })
+      .eq("id", commande.id);
+
+    return NextResponse.json({
+      checkoutUrl: session.url,
+      checkoutSessionId: session.id,
+      commandeId: commande.id,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur de paiement";
     return NextResponse.json({ error: message }, { status: 500 });
@@ -195,11 +222,13 @@ function buildStripeMetadata(
   userId: string,
   email: string,
   prenom: string,
+  commandeId: string,
 ) {
   const metadata: Record<string, string> = {
     userId,
     email,
     prenom,
+    commandeId,
     locale: data.locale,
     offre: data.offre,
     reponses: trimMetadataValue(JSON.stringify(data.answers)),

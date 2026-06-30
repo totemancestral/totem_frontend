@@ -3,6 +3,8 @@ import Stripe from "stripe";
 import { getServerEnv } from "@/lib/env";
 import { createServiceClient } from "@/lib/server-auth";
 import { sendConfirmationEmail } from "@/lib/services/email";
+import { generateCoffret } from "@/lib/services/pipeline";
+import type { Json } from "@/integrations/supabase/types";
 
 type Locale = "fr" | "en";
 type Offre = "essentiel" | "signature" | "heritage";
@@ -82,7 +84,7 @@ export async function POST(request: Request) {
         );
       }
 
-      return await handlePaidCheckoutSession(request, session);
+      return await handlePaidCheckoutSession(session);
     }
 
     if (event.type === "charge.refunded") {
@@ -96,13 +98,14 @@ export async function POST(request: Request) {
   }
 }
 
-async function handlePaidCheckoutSession(request: Request, session: Stripe.Checkout.Session) {
+async function handlePaidCheckoutSession(session: Stripe.Checkout.Session) {
   const metadata = session.metadata ?? {};
   const userId = metadata.userId;
   const locale = toLocale(metadata.locale);
   const email = metadata.email || session.customer_details?.email || "";
   const offre = OFFER_MAP[metadata.offre ?? ""] ?? "essentiel";
   const paymentIntentId = getStripeObjectId(session.payment_intent);
+  const commandeId = isUuid(metadata.commandeId ?? "") ? metadata.commandeId : null;
 
   if (!userId) {
     return NextResponse.json({ error: "userId manquant dans les metadata" }, { status: 422 });
@@ -117,6 +120,7 @@ async function handlePaidCheckoutSession(request: Request, session: Stripe.Check
     session,
     paymentIntentId,
     reponsesId,
+    commandeId,
   });
 
   if (commande.alreadyProcessed) {
@@ -127,7 +131,20 @@ async function handlePaidCheckoutSession(request: Request, session: Stripe.Check
   }
 
   await ensureOeuvrePlaceholder(supabase, userId, commande.id);
-  await upsertReponsesFromMetadata(supabase, userId, session.id, metadata, locale);
+  const metadataComplete = await upsertReponsesFromMetadata(
+    supabase,
+    userId,
+    session.id,
+    metadata,
+    locale,
+  );
+  const storedParcoursComplete = reponsesId
+    ? await hasCompleteParcours(supabase, reponsesId)
+    : false;
+
+  if (metadataComplete || storedParcoursComplete) {
+    generateCoffret(commande.id).catch(() => undefined);
+  }
 
   const offreLabel = OFFER_LABELS[offre][locale];
   sendConfirmationEmail(email, metadata.prenom ?? "", offreLabel, locale, commande.id).catch(
@@ -146,6 +163,7 @@ async function upsertPaidCommande(
     session: Stripe.Checkout.Session;
     paymentIntentId: string | null;
     reponsesId: string | null;
+    commandeId: string | null;
   },
 ): Promise<{ id: string; alreadyProcessed: boolean }> {
   const { data: existing, error: existingError } = await supabase
@@ -159,29 +177,24 @@ async function upsertPaidCommande(
   }
 
   if (existing) {
-    if ((existing.statut as CommandeStatut) !== "en_attente_paiement") {
-      return { id: existing.id, alreadyProcessed: true };
-    }
+    return updateExistingCommande(supabase, existing, input);
+  }
 
-    const { data: updated, error: updateError } = await supabase
+  if (input.commandeId) {
+    const { data: existingById, error: existingByIdError } = await supabase
       .from("commandes")
-      .update({
-        statut: "paye",
-        montant_cents: input.session.amount_total ?? 0,
-        devise: input.session.currency?.toUpperCase() ?? "EUR",
-        stripe_payment_intent_id: input.paymentIntentId,
-        reponses_id: input.reponsesId,
-        langue: input.locale,
-      })
-      .eq("id", existing.id)
-      .select("id")
-      .single();
+      .select("id, statut")
+      .eq("id", input.commandeId)
+      .eq("user_id", input.userId)
+      .maybeSingle();
 
-    if (updateError) {
-      throw new Error(`Erreur mise a jour commande: ${updateError.message}`);
+    if (existingByIdError) {
+      throw new Error(`Erreur lecture commande: ${existingByIdError.message}`);
     }
 
-    return { id: updated.id, alreadyProcessed: false };
+    if (existingById) {
+      return updateExistingCommande(supabase, existingById, input);
+    }
   }
 
   const { data: inserted, error: insertError } = await supabase
@@ -215,6 +228,42 @@ async function upsertPaidCommande(
   }
 
   return { id: inserted.id, alreadyProcessed: false };
+}
+
+async function updateExistingCommande(
+  supabase: SupabaseServiceClient,
+  existing: { id: string; statut: string },
+  input: {
+    locale: Locale;
+    session: Stripe.Checkout.Session;
+    paymentIntentId: string | null;
+    reponsesId: string | null;
+  },
+): Promise<{ id: string; alreadyProcessed: boolean }> {
+  if ((existing.statut as CommandeStatut) !== "en_attente_paiement") {
+    return { id: existing.id, alreadyProcessed: true };
+  }
+
+  const { data: updated, error: updateError } = await supabase
+    .from("commandes")
+    .update({
+      statut: "paye",
+      montant_cents: input.session.amount_total ?? 0,
+      devise: input.session.currency?.toUpperCase() ?? "EUR",
+      stripe_session_id: input.session.id,
+      stripe_payment_intent_id: input.paymentIntentId,
+      reponses_id: input.reponsesId,
+      langue: input.locale,
+    })
+    .eq("id", existing.id)
+    .select("id")
+    .single();
+
+  if (updateError) {
+    throw new Error(`Erreur mise a jour commande: ${updateError.message}`);
+  }
+
+  return { id: updated.id, alreadyProcessed: false };
 }
 
 async function ensureOeuvrePlaceholder(
@@ -294,25 +343,54 @@ async function upsertReponsesFromMetadata(
   stripeSessionId: string,
   metadata: Stripe.Metadata,
   locale: Locale,
-) {
+): Promise<boolean> {
   const reponsesRaw = metadata.reponses;
-  if (!reponsesRaw) return;
+  if (!reponsesRaw) return false;
 
   try {
-    const reponses = JSON.parse(reponsesRaw);
+    const reponses = JSON.parse(reponsesRaw) as Record<string, unknown>;
+    const complete = countCompletedAnswers(reponses) === 10;
     await supabase.from("reponses_parcours").upsert(
       {
         user_id: userId,
         session_id: `stripe_${stripeSessionId}`,
-        reponses,
+        reponses: reponses as Json,
         langue: locale,
-        termine: true,
+        termine: complete,
       },
       { onConflict: "user_id, session_id" },
     );
+    return complete;
   } catch {
     // Les metadata Stripe peuvent être tronquées, la sauvegarde checkout reste la source fiable.
+    return false;
   }
+}
+
+async function hasCompleteParcours(
+  supabase: SupabaseServiceClient,
+  reponsesId: string,
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("reponses_parcours")
+    .select("reponses, termine")
+    .eq("id", reponsesId)
+    .maybeSingle();
+
+  if (error || !data?.termine) return false;
+  return countCompletedAnswers(data.reponses as Record<string, unknown>) === 10;
+}
+
+function countCompletedAnswers(reponses: Record<string, unknown>): number {
+  return Array.from({ length: 10 }, (_, index) => reponses[String(index + 1)]).filter((answer) => {
+    if (typeof answer === "string") return answer.trim().length > 0;
+    if (!answer || typeof answer !== "object") return false;
+
+    const record = answer as { choice?: unknown; field?: unknown; skipped?: unknown };
+    if (record.skipped === true) return true;
+    if (typeof record.choice === "string" && record.choice.trim()) return true;
+    return typeof record.field === "string" && record.field.trim().length > 0;
+  }).length;
 }
 
 function toLocale(value: string | undefined): Locale {
@@ -323,4 +401,8 @@ function getStripeObjectId(value: string | { id?: string } | null | undefined): 
   if (!value) return null;
   if (typeof value === "string") return value;
   return value.id ?? null;
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }

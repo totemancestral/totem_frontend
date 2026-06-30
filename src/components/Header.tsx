@@ -4,15 +4,16 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { LogOut, Menu, UserRound, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { hasAdminRole } from "@/lib/admin-client";
 
 type Locale = "fr" | "en";
 
-const ADMIN_EMAIL = "contact@totem-ancestral.com";
-
 const nav = [
   { to: "/", hash: "#experience", labelKey: "experience" },
+  { to: "/iuvenis_signum", hash: "", labelKey: "junior" },
   { to: "/", hash: "#offres", labelKey: "offers" },
   { to: "/", hash: "#faq", labelKey: "faq" },
 ];
@@ -39,24 +40,39 @@ export function Header({ locale }: { locale: Locale }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [session, setSession] = useState<boolean | null>(null);
-  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
+  const [isAdminSession, setIsAdminSession] = useState(false);
   const isAccountArea = Boolean(pathname?.includes("/domus_animi"));
-  const isAdminSession = sessionEmail?.toLowerCase() === ADMIN_EMAIL;
 
   useEffect(() => {
+    let alive = true;
+
+    async function applySession(nextSession: Session | null) {
+      if (!alive) return;
+      setSession(Boolean(nextSession));
+
+      if (!nextSession) {
+        setIsAdminSession(false);
+        return;
+      }
+
+      const nextIsAdmin = await hasAdminRole(nextSession.user.id);
+      if (alive) setIsAdminSession(nextIsAdmin);
+    }
+
     supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(!!s);
-      setSessionEmail(s?.user.email ?? null);
+      applySession(s);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(!!s);
-      setSessionEmail(s?.user.email ?? null);
+      applySession(s);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      alive = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const buildLocaleHref = (nextLocale: Locale) => {

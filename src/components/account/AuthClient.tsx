@@ -7,11 +7,11 @@ import { motion } from "motion/react";
 import { ArrowRight, Mail, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
+import { hasAdminRole } from "@/lib/admin-client";
 
 type Locale = "fr" | "en";
 type Mode = "signin" | "signup";
 
-const ADMIN_EMAIL = "contact@totem-ancestral.com";
 const ADMIN_PATH = "/fgh55_fh";
 
 const copy = {
@@ -89,8 +89,20 @@ export function AuthClient({ locale }: { locale: Locale }) {
   const redirectPath = searchParams.get("redirect") || dashboardPath;
 
   useEffect(() => {
-    if (!existingSession) return;
-    router.replace(redirectForEmail(existingSession.user.email, redirectPath));
+    const sessionToRedirect = existingSession;
+    if (!sessionToRedirect) return;
+    const userId = sessionToRedirect.user.id;
+    let alive = true;
+
+    async function redirectExistingSession() {
+      const isAdmin = await hasAdminRole(userId);
+      if (alive) router.replace(isAdmin ? ADMIN_PATH : redirectPath);
+    }
+
+    redirectExistingSession();
+    return () => {
+      alive = false;
+    };
   }, [existingSession, redirectPath, router]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -116,7 +128,7 @@ export function AuthClient({ locale }: { locale: Locale }) {
         return;
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -124,7 +136,8 @@ export function AuthClient({ locale }: { locale: Locale }) {
       if (signInError) throw signInError;
 
       setNotice(t.sessionReady);
-      router.replace(redirectForEmail(email, redirectPath));
+      const isAdmin = await hasAdminRole(signInData.user?.id);
+      router.replace(isAdmin ? ADMIN_PATH : redirectPath);
     } catch (authError) {
       setError(translateAuthError(authError, locale));
     } finally {
@@ -143,7 +156,7 @@ export function AuthClient({ locale }: { locale: Locale }) {
         body: JSON.stringify({
           email,
           locale,
-          redirectPath: redirectForEmail(email, redirectPath),
+          redirectPath,
         }),
       });
 
@@ -352,10 +365,6 @@ function Field({
       />
     </label>
   );
-}
-
-function redirectForEmail(email: string | null | undefined, fallback: string) {
-  return email?.trim().toLowerCase() === ADMIN_EMAIL ? ADMIN_PATH : fallback;
 }
 
 function tabClass(active: boolean) {

@@ -33,12 +33,15 @@ export function rateLimit(
 
 // Cleanup stale entries every 5 minutes
 if (typeof setInterval !== "undefined") {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [ip, entry] of requestCounts) {
-      if (now > entry.resetAt) {
-        requestCounts.delete(ip);
+  setInterval(
+    () => {
+      const now = Date.now();
+      for (const [ip, entry] of requestCounts) {
+        if (now > entry.resetAt) {
+          requestCounts.delete(ip);
+        }
       }
-    }
-  }, 5 * 60 * 1000).unref();
+    },
+    5 * 60 * 1000,
+  ).unref();
 }

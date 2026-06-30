@@ -22,7 +22,7 @@
   "acces_totem_ancestral": "Accès · Totem Ancestral",
   "account": "account",
   "admin_totem_ancestral": "Admin · Totem Ancestral",
-  "afrique_centrale_de_l_est_ou_du_sud_congo_kenya_tanzanie": "Afrique Centrale, de l'Est ou du Sud, Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et environs.",
+  "afrique_centrale_de_l_est_ou_du_sud_congo_kenya_tanzanie": "Afrique centrale ou australe, Congo, Cameroun, Angola, Afrique du Sud et environs.",
   "afrique_de_l_ouest_senegal_mali_guinee_cote_d_ivoire": "Afrique de l'Ouest, Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et environs.",
   "ajouter_une_nuance": "+ ajouter une nuance",
   "an": "/ an",
@@ -40,7 +40,7 @@
   "brand_2": "brand",
   "btn_primary_btn_secondary_data_stop_ambient": ".btn-primary, .btn-secondary, [data-stop-ambient]",
   "c": "C",
-  "caraibes_ameriques_ou_diaspora_africaine_une_origine": "Caraïbes, Amériques ou diaspora africaine, une origine africaine probable mais indéterminée.",
+  "caraibes_ameriques_ou_diaspora_africaine_une_origine": "Afrique de l'Est, Kenya, Tanzanie, Éthiopie, Somalie et environs.",
   "carte_cadeau_gratuite": "Carte cadeau gratuite",
   "ce_que_les_autres_voient_en_toi_sans_que_tu_le_leur_demandes": "Ce que les autres voient en toi, sans que tu le leur demandes ?",
   "ce_que_nous_croyons": "Ce que nous croyons",
@@ -110,7 +110,7 @@
   "error": "error",
   "espace_personnel": "Espace personnel",
   "espace_personnel_totem_ancestral": "Espace personnel · Totem Ancestral",
-  "europe_asie_oceanie_ou_toute_autre_region_je_suis_ici_pour": "Europe, Asie, Océanie ou toute autre région, je suis ici pour découvrir mes racines africaines profondes.",
+  "europe_asie_oceanie_ou_toute_autre_region_je_suis_ici_pour": "Origine indéterminée, l'Afrique entière m'appelle.",
   "experience": "#experience",
   "experience_2": "experience",
   "face_a_une_epreuve_comment_reagis_tu_vraiment": "Face à une épreuve, comment réagis-tu vraiment ?",
@@ -124,6 +124,7 @@
     "tagline": "Le portrait imaginaire de l'Africain que vous auriez pu être.",
     "nav": {
       "experience": "L'expérience",
+      "junior": "Junior",
       "offers": "Les offres",
       "about": "À propos"
     },
@@ -146,6 +147,7 @@
     "logout": "Déconnexion",
     "nav": {
       "experience": "L'expérience",
+      "junior": "Junior",
       "offers": "Les offres",
       "house": "La maison",
       "faq": "FAQ",
@@ -1053,15 +1055,15 @@
           },
           {
             "letter": "B",
-            "text": "Afrique Centrale, de l'Est ou du Sud, Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et environs."
+            "text": "Afrique centrale ou australe, Congo, Cameroun, Angola, Afrique du Sud et environs."
           },
           {
             "letter": "C",
-            "text": "Caraïbes, Amériques ou diaspora africaine, une origine africaine probable mais indéterminée."
+            "text": "Afrique de l'Est, Kenya, Tanzanie, Éthiopie, Somalie et environs."
           },
           {
             "letter": "D",
-            "text": "Europe, Asie, Océanie ou toute autre région, je suis ici pour découvrir mes racines africaines profondes."
+            "text": "Origine indéterminée, l'Afrique entière m'appelle."
           }
         ],
         "field": {

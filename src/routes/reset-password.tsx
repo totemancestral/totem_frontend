@@ -96,7 +96,11 @@ function ResetPasswordPage() {
           </button>
         </form>
 
-        <Link to="/auth" className="text-xs tracking-[0.18em] uppercase" style={{ color: "var(--or-ancestral)" }}>
+        <Link
+          to="/auth"
+          className="text-xs tracking-[0.18em] uppercase"
+          style={{ color: "var(--or-ancestral)" }}
+        >
           Retour à la connexion
         </Link>
       </motion.div>

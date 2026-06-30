@@ -63,6 +63,7 @@ async function callEdge<T>(slug: string, payload: unknown): Promise<T | null> {
 
 async function generateTexte(
   prenom: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reponses: any,
   archetypeId: string,
   langue: string,
@@ -247,6 +248,7 @@ async function main() {
   console.log(`👤 ${prenom} (${email})`);
 
   // 3. Reponses
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let reponses: any = {};
   if (cmd.reponses_id) {
     const { data: rep } = await supabase
@@ -258,8 +260,9 @@ async function main() {
   }
   console.log(`📋 ${Object.keys(reponses).length} questions`);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const firstAnswer = Object.values(reponses).find((a: any) => a?.choice);
-  const archetypeId = (firstAnswer as any)?.choice ?? "A";
+  const archetypeId = (firstAnswer as { choice?: string })?.choice ?? "A";
   const archetypeName = ARCHETYPE_LABELS[archetypeId]?.[langue as "fr" | "en"] ?? "Griot";
   const nomTotem = `${prenom} ${archetypeName}`;
 

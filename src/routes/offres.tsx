@@ -6,9 +6,15 @@ export const Route = createFileRoute("/offres")({
   head: () => ({
     meta: [
       { title: "Les offres — Totem Ancestral" },
-      { name: "description", content: "Trois manières de recevoir l'œuvre Totem Ancestral, comparées en détail." },
+      {
+        name: "description",
+        content: "Trois manières de recevoir l'œuvre Totem Ancestral, comparées en détail.",
+      },
       { property: "og:title", content: "Les offres — Totem Ancestral" },
-      { property: "og:description", content: "Comparatif détaillé des trois offres Totem Ancestral." },
+      {
+        property: "og:description",
+        content: "Comparatif détaillé des trois offres Totem Ancestral.",
+      },
     ],
   }),
   component: OffersPage,
@@ -67,14 +73,23 @@ function OffersPage() {
                         borderBottom: "1px solid rgba(201,168,76,0.3)",
                       }}
                     >
-                      <div className="h-display text-2xl tracking-[0.08em] uppercase" style={{ color: "var(--ivoire)" }}>
+                      <div
+                        className="h-display text-2xl tracking-[0.08em] uppercase"
+                        style={{ color: "var(--ivoire)" }}
+                      >
                         {o.name}
                       </div>
-                      <div className="h-display text-3xl mt-2" style={{ color: o.featured ? "var(--or-ancestral)" : "var(--ivoire)" }}>
+                      <div
+                        className="h-display text-3xl mt-2"
+                        style={{ color: o.featured ? "var(--or-ancestral)" : "var(--ivoire)" }}
+                      >
                         {o.price}
                       </div>
                       {o.featured && (
-                        <div className="caption uppercase mt-2" style={{ color: "var(--or-ancestral)" }}>
+                        <div
+                          className="caption uppercase mt-2"
+                          style={{ color: "var(--or-ancestral)" }}
+                        >
                           Le cœur de la collection
                         </div>
                       )}
@@ -84,8 +99,15 @@ function OffersPage() {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.label} className="border-b" style={{ borderColor: "rgba(201,168,76,0.12)" }}>
-                    <td className="py-5 pr-4 text-sm md:text-base" style={{ color: "var(--ivoire)" }}>
+                  <tr
+                    key={r.label}
+                    className="border-b"
+                    style={{ borderColor: "rgba(201,168,76,0.12)" }}
+                  >
+                    <td
+                      className="py-5 pr-4 text-sm md:text-base"
+                      style={{ color: "var(--ivoire)" }}
+                    >
                       {r.label}
                     </td>
                     {r.values.map((v, i) => (
@@ -106,10 +128,14 @@ function OffersPage() {
                 <tr>
                   <td />
                   {offers.map((o) => (
-                    <td key={o.name} className="pt-8 px-4 text-center"
+                    <td
+                      key={o.name}
+                      className="pt-8 px-4 text-center"
                       style={{ background: o.featured ? "rgba(201,168,76,0.04)" : "transparent" }}
                     >
-                      <button className={o.featured ? "btn-primary w-full" : "btn-secondary w-full"}>
+                      <button
+                        className={o.featured ? "btn-primary w-full" : "btn-secondary w-full"}
+                      >
                         Choisir
                       </button>
                     </td>
@@ -130,12 +156,10 @@ function OffersPage() {
           <h2 className="h-display text-3xl md:text-4xl" style={{ color: "var(--ivoire)" }}>
             Totem Vivant
           </h2>
-          <p className="quote-italic text-lg mt-4">
-            Pour que votre œuvre continue de respirer.
-          </p>
+          <p className="quote-italic text-lg mt-4">Pour que votre œuvre continue de respirer.</p>
           <p className="text-[15px] leading-[1.8] mt-6" style={{ color: "rgba(254,252,240,0.85)" }}>
-            Un message audio inédit de votre ancêtre, livré chaque saison.
-            Quatre fois par an, votre œuvre s'enrichit d'une nouvelle parole.
+            Un message audio inédit de votre ancêtre, livré chaque saison. Quatre fois par an, votre
+            œuvre s'enrichit d'une nouvelle parole.
           </p>
           <div className="h-display text-4xl mt-8" style={{ color: "var(--or-ancestral)" }}>
             +9€<span className="text-2xl"> / an</span>

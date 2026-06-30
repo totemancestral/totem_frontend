@@ -9,7 +9,10 @@ export const Route = createFileRoute("/faq")({
       { title: "FAQ — Totem Ancestral" },
       { name: "description", content: "Questions fréquentes sur l'expérience Totem Ancestral." },
       { property: "og:title", content: "FAQ — Totem Ancestral" },
-      { property: "og:description", content: "Questions fréquentes sur l'expérience Totem Ancestral." },
+      {
+        property: "og:description",
+        content: "Questions fréquentes sur l'expérience Totem Ancestral.",
+      },
     ],
   }),
   component: FAQPage,

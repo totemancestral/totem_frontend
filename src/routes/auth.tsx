@@ -30,7 +30,9 @@ function AuthPage() {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/mon-compte", replace: true });
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_e, s) => {
       if (s) navigate({ to: "/mon-compte", replace: true });
     });
     return () => subscription.unsubscribe();
@@ -97,9 +99,7 @@ function AuthPage() {
         </Link>
 
         <p className="quote-italic text-base" style={{ color: "var(--ivoire)" }}>
-          {mode === "signin"
-            ? "L'ancêtre reconnaît ton retour."
-            : "Le seuil s'ouvre à toi."}
+          {mode === "signin" ? "L'ancêtre reconnaît ton retour." : "Le seuil s'ouvre à toi."}
         </p>
 
         <button
@@ -115,17 +115,32 @@ function AuthPage() {
           }}
         >
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden>
-            <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.08-1.79 2.72v2.26h2.9c1.7-1.56 2.69-3.86 2.69-6.62z"/>
-            <path fill="#34A853" d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.9-2.26c-.81.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.71H.96v2.33A8.997 8.997 0 0 0 9 18z"/>
-            <path fill="#FBBC05" d="M3.95 10.71A5.41 5.41 0 0 1 3.66 9c0-.59.1-1.17.29-1.71V4.96H.96A8.996 8.996 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.99-2.33z"/>
-            <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A8.997 8.997 0 0 0 .96 4.96l2.99 2.33C4.66 5.17 6.65 3.58 9 3.58z"/>
+            <path
+              fill="#4285F4"
+              d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.08-1.79 2.72v2.26h2.9c1.7-1.56 2.69-3.86 2.69-6.62z"
+            />
+            <path
+              fill="#34A853"
+              d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.9-2.26c-.81.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.71H.96v2.33A8.997 8.997 0 0 0 9 18z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M3.95 10.71A5.41 5.41 0 0 1 3.66 9c0-.59.1-1.17.29-1.71V4.96H.96A8.996 8.996 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.99-2.33z"
+            />
+            <path
+              fill="#EA4335"
+              d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A8.997 8.997 0 0 0 .96 4.96l2.99 2.33C4.66 5.17 6.65 3.58 9 3.58z"
+            />
           </svg>
           Continuer avec Google
         </button>
 
         <div className="w-full flex items-center gap-4">
           <div className="flex-1 h-px" style={{ background: "rgba(201,168,76,0.2)" }} />
-          <span className="text-[11px] tracking-[0.24em] uppercase" style={{ color: "var(--or-pale)" }}>
+          <span
+            className="text-[11px] tracking-[0.24em] uppercase"
+            style={{ color: "var(--or-pale)" }}
+          >
             ou
           </span>
           <div className="flex-1 h-px" style={{ background: "rgba(201,168,76,0.2)" }} />
@@ -135,7 +150,14 @@ function AuthPage() {
           {mode === "signup" && (
             <Field label="Prénom" value={prenom} onChange={setPrenom} type="text" />
           )}
-          <Field label="Email" value={email} onChange={setEmail} type="email" required autoComplete="email" />
+          <Field
+            label="Email"
+            value={email}
+            onChange={setEmail}
+            type="email"
+            required
+            autoComplete="email"
+          />
           <Field
             label="Mot de passe"
             value={password}
@@ -146,12 +168,19 @@ function AuthPage() {
           />
 
           {error && (
-            <p className="text-sm text-center" style={{ color: "#E07A6B", fontFamily: "var(--font-sans)" }}>
+            <p
+              className="text-sm text-center"
+              style={{ color: "#E07A6B", fontFamily: "var(--font-sans)" }}
+            >
               {error}
             </p>
           )}
 
-          <button type="submit" disabled={loading} className="btn-primary w-full justify-center mt-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full justify-center mt-2"
+          >
             {loading ? "..." : mode === "signin" ? "Entrer" : "Composer mon compte"}
           </button>
 
@@ -175,9 +204,7 @@ function AuthPage() {
           className="text-xs tracking-[0.18em] uppercase transition-colors"
           style={{ color: "var(--or-ancestral)" }}
         >
-          {mode === "signin"
-            ? "Je n'ai pas encore de compte"
-            : "J'ai déjà un compte"}
+          {mode === "signin" ? "Je n'ai pas encore de compte" : "J'ai déjà un compte"}
         </button>
       </motion.div>
     </div>
@@ -194,10 +221,7 @@ function Field(props: {
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span
-        className="text-[11px] tracking-[0.24em] uppercase"
-        style={{ color: "var(--or-pale)" }}
-      >
+      <span className="text-[11px] tracking-[0.24em] uppercase" style={{ color: "var(--or-pale)" }}>
         {props.label}
       </span>
       <input
@@ -225,7 +249,9 @@ function Field(props: {
 
 function translate(msg: string): string {
   if (msg.toLowerCase().includes("invalid login")) return "Email ou mot de passe incorrect.";
-  if (msg.toLowerCase().includes("already registered")) return "Un compte existe déjà avec cet email.";
-  if (msg.toLowerCase().includes("password")) return "Mot de passe trop court (minimum 6 caractères).";
+  if (msg.toLowerCase().includes("already registered"))
+    return "Un compte existe déjà avec cet email.";
+  if (msg.toLowerCase().includes("password"))
+    return "Mot de passe trop court (minimum 6 caractères).";
   return msg;
 }

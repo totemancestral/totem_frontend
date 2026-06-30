@@ -9,7 +9,8 @@ const styles = StyleSheet.create({
   text: { fontSize: 11, lineHeight: 1.8, textAlign: "justify", color: "#1E0A00" },
 });
 
-const imgUrl = "https://totem-ancestral.r2.cloudflarestorage.com/totems/2e7a681b-d721-4149-8314-80ab795fbdd6/image/image_2e7a681b-d721-4149-8314-80ab795fbdd6.png";
+const imgUrl =
+  "https://totem-ancestral.r2.cloudflarestorage.com/totems/2e7a681b-d721-4149-8314-80ab795fbdd6/image/image_2e7a681b-d721-4149-8314-80ab795fbdd6.png";
 
 function TestDoc() {
   return (
@@ -18,8 +19,8 @@ function TestDoc() {
         <Text style={styles.title}>✦ TOTEM ANCESTRAL ✦</Text>
         <Image style={styles.image} src={imgUrl} />
         <Text style={styles.text}>
-          Ceci est un test d'intégration d'image dans le PDF généré par React-PDF.
-          L'image ci-dessus provient de Cloudflare R2.
+          Ceci est un test d'intégration d'image dans le PDF généré par React-PDF. L'image ci-dessus
+          provient de Cloudflare R2.
         </Text>
       </Page>
     </Document>

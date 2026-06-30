@@ -54,8 +54,8 @@ export async function uploadAndDeliver(
   const results: Record<string, string> = {};
 
   for (const file of files) {
-    const { url } = await uploadFile(commandeId, file);
-    results[file.type] = url;
+    const { url, signedUrl } = await uploadFile(commandeId, file);
+    results[file.type] = file.type === "parchemin" || file.type === "certificat" ? signedUrl : url;
   }
 
   return results;

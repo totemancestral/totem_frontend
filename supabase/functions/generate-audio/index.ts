@@ -7,9 +7,11 @@ const VOICE_MAP: Record<string, string> = {
 
 Deno.serve(async (req) => {
   try {
-    const { prenom, texte, archetypeId, langue = "fr" } = await req.json();
+    const { prenom, texte, script, archetypeId, langue = "fr" } = await req.json();
 
-    if (!texte) {
+    const finalText = typeof script === "string" && script.trim() ? script.trim() : texte;
+
+    if (!finalText) {
       return new Response(JSON.stringify({ error: "texte requis" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
@@ -26,11 +28,12 @@ Deno.serve(async (req) => {
 
     const voice = VOICE_MAP[archetypeId as string] ?? "nova";
 
-    const intro = langue === "fr"
-      ? `Message ancestral pour ${prenom}. Écoute la voix des ancêtres.`
-      : `Ancestral message for ${prenom}. Listen to the voice of the ancestors.`;
+    const intro =
+      langue === "fr"
+        ? `Message ancestral pour ${prenom}. Écoute la voix des ancêtres.`
+        : `Ancestral message for ${prenom}. Listen to the voice of the ancestors.`;
 
-    const fullText = `${intro}\n\n${texte}`;
+    const fullText = `${intro}\n\n${finalText}`;
     const maxLen = 4096;
 
     const response = await fetch("https://api.openai.com/v1/audio/speech", {

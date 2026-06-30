@@ -22,11 +22,11 @@ import {
   X,
 } from "lucide-react";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
+import { hasAdminRole } from "@/lib/admin-client";
 
 type Locale = "fr" | "en";
 type DashboardSection = "overview" | "orders" | "artworks" | "profile";
 
-const ADMIN_EMAIL = "contact@totem-ancestral.com";
 const ADMIN_PATH = "/fgh55_fh";
 
 type Commande = {
@@ -223,16 +223,15 @@ export function DashboardClient({
   const token = session?.access_token;
 
   useEffect(() => {
+    const currentSession = session;
+    const currentToken = token;
+
     if (authLoading) return;
-    if (!session) {
+    if (!currentSession || !currentToken) {
       router.replace(authPath);
       return;
     }
-    if (session.user.email?.trim().toLowerCase() === ADMIN_EMAIL) {
-      router.replace(ADMIN_PATH);
-      return;
-    }
-
+    const userId = currentSession.user.id;
     let alive = true;
 
     async function load() {
@@ -240,12 +239,20 @@ export function DashboardClient({
       setError(null);
 
       try {
+        const isAdmin = await hasAdminRole(userId);
+        if (!alive) return;
+
+        if (isAdmin) {
+          router.replace(ADMIN_PATH);
+          return;
+        }
+
         const [commandesRes, oeuvresRes] = await Promise.all([
           fetch("/api/ordo_tabulae", {
-            headers: { authorization: `Bearer ${token}` },
+            headers: { authorization: `Bearer ${currentToken}` },
           }),
           fetch("/api/opera_artificis", {
-            headers: { authorization: `Bearer ${token}` },
+            headers: { authorization: `Bearer ${currentToken}` },
           }),
         ]);
 

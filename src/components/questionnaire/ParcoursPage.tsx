@@ -199,15 +199,15 @@ const QUESTIONS: Question[] = [
       },
       {
         letter: "B",
-        text: "Afrique Centrale, de l'Est ou du Sud, Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et environs.",
+        text: "Afrique centrale ou australe, Congo, Cameroun, Angola, Afrique du Sud et environs.",
       },
       {
         letter: "C",
-        text: "Caraïbes, Amériques ou diaspora africaine, une origine africaine probable mais indéterminée.",
+        text: "Afrique de l'Est, Kenya, Tanzanie, Éthiopie, Somalie et environs.",
       },
       {
         letter: "D",
-        text: "Europe, Asie, Océanie ou toute autre région, je suis ici pour découvrir mes racines africaines profondes.",
+        text: "Origine indéterminée, l'Afrique entière m'appelle.",
       },
     ],
     field: {
@@ -722,7 +722,7 @@ export function ParcoursPage() {
             onBack={() => setPhase("question")}
             onContinue={() => {
               if (session) {
-                fetch("/api/profiles", {
+                fetch(apiPath("profiles"), {
                   method: "PATCH",
                   headers: {
                     "Content-Type": "application/json",

@@ -50,7 +50,7 @@ Style:
 
 Deno.serve(async (req) => {
   try {
-    const { prenom, texte, archetypeId, langue = "fr" } = await req.json();
+    const { prenom, texte, archetypeId, langue = "fr", prompt } = await req.json();
 
     if (!texte) {
       return new Response(JSON.stringify({ error: "texte requis" }), {
@@ -69,7 +69,10 @@ Deno.serve(async (req) => {
 
     const l = (langue === "en" ? "en" : "fr") as "fr" | "en";
     const archetype = ARCHETYPE_LABELS[archetypeId as string]?.[l] ?? "Griot";
-    const prompt = buildImagePrompt(prenom, texte, archetype, l);
+    const finalPrompt =
+      typeof prompt === "string" && prompt.trim()
+        ? prompt
+        : buildImagePrompt(prenom, texte, archetype, l);
 
     const response = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
@@ -79,7 +82,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: "gpt-image-2",
-        prompt,
+        prompt: finalPrompt,
         n: 1,
         size: "1024x1024",
       }),
@@ -105,10 +108,13 @@ Deno.serve(async (req) => {
 
     const finalUrl = imageUrl || `data:image/${format};base64,${b64}`;
 
-    return new Response(JSON.stringify({ imageUrl: finalUrl, revisedPrompt: result.data?.[0]?.revised_prompt }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ imageUrl: finalUrl, revisedPrompt: result.data?.[0]?.revised_prompt }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
     return new Response(JSON.stringify({ error: message }), {

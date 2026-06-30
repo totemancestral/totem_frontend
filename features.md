@@ -45,6 +45,19 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 | Choix offre              | Fait | Pricing dedie mobile              |
 | Checkout Stripe          | Fait | `/api/checkout` avec Bearer token |
 
+## 3bis. Totem Junior
+
+| Fonctionnalite             | Etat | Notes                                                       |
+| -------------------------- | ---- | ----------------------------------------------------------- |
+| Parcours Junior public     | Fait | `/[locale]/iuvenis_signum`, 5 questions visuelles           |
+| Scoring FETA Junior        | Fait | 5 questions, 4 dimensions, attribution 12 totems            |
+| Prompts Junior J1-J4       | Fait | Générés côté serveur, cascade Claude optionnelle            |
+| Fallback déterministe      | Fait | Nom, phrase, attribut, Clan et partage sans dépendance IA   |
+| API Next Junior            | Fait | `POST /api/iuvenis_signum` avec validation Zod/rate limit   |
+| Edge Function Junior       | Fait | `supabase/functions/generate-junior`                        |
+| Backend Junior             | Fait | `backend/TOTEM`, endpoint `POST /junior`                    |
+| Stockage Junior            | N/A  | Prénom optionnel en session; pas de persistance dédiée      |
+
 ## 4. Offres et pricing
 
 | Fonctionnalite                    | Etat    | Notes                                    |
@@ -89,7 +102,7 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 | --------------------------- | ---- | --------------------------- |
 | Client R2                   | Fait | `getR2Client` S3 compatible |
 | Upload fichiers             | Fait | PNG, MP3, PDF vers R2       |
-| URLs signees PDF            | Fait | 30 jours expiration         |
+| URLs signees PDF            | Fait | 7 jours expiration R2       |
 | Mise a jour commande/oeuvre | Fait | URLs + statut livree        |
 | Client Resend               | Fait | Client HTTP Resend          |
 | Email livraison             | Fait | Template FR/EN              |
@@ -107,7 +120,7 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 | Espace personnel                  | Fait | Dashboard avec commandes/oeuvres/profil |
 | API commandes                     | Fait | `/api/commandes`                        |
 | API oeuvres                       | Fait | `/api/oeuvres`                          |
-| API profiles                      | Fait | `/api/profiles`                         |
+| API profil utilisateur            | Fait | `/api/personae_nota`                    |
 | Protection route admin            | Fait | Garde client-side + redirect            |
 | Protection route espace-personnel | Fait | Garde client-side + redirect            |
 
@@ -116,12 +129,12 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 | Fonctionnalite      | Etat     | Notes                                                |
 | ------------------- | -------- | ---------------------------------------------------- |
 | Page admin          | Fait     | Route obfusquée `/fgh55_fh` (sécurité par obscurité) |
-| API commandes admin | Fait     | `/api/admin/commandes`                               |
+| API commandes admin | Fait     | `/api/fgh55_fh/commandes`                            |
 | API stats admin     | Fait     | `/api/fgh55_fh/stats`                                |
 | Role admin API      | Fait     | 403 si non admin                                     |
 | Garde admin page    | Fait     | Redirect /fr/auth si non connecte                    |
 | Graphiques Recharts | Installe | Non utilise (dette technique)                        |
-| Relance pipeline    | A faire  | Phase 2                                              |
+| Relance pipeline    | Fait     | `/api/fgh55_fh/relancer` + bouton admin              |
 
 ## 10. Securite
 
@@ -149,7 +162,7 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 | Element                                        | Etat                                 |
 | ---------------------------------------------- | ------------------------------------ |
 | Documentation features.md                      | A jour                               |
-| Documentation Architecture.md                  | A mettre a jour                      |
+| Documentation Architecture.md                  | A jour                               |
 | Code legacy TanStack src/routes/               | Present (exclu du build)             |
 | local-auth.ts                                  | Present (non importe dans flux prod) |
 | Double lockfile (package-lock.json + bun.lock) | Present                              |
