@@ -10,16 +10,7 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "src/routes/**",
-    "src/router.tsx",
-    "src/routeTree.gen.ts",
-    "src/start.ts",
-    "src/server.ts",
-    "src/integrations/lovable/**",
-    "src/integrations/supabase/auth-attacher.ts",
-    "src/integrations/supabase/auth-middleware.ts",
-    "vite.config.ts"
+    "node_modules"
   ],
   "compilerOptions": {
     "target": "ES2022",

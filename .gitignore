@@ -25,6 +25,25 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Legacy TanStack routes (removed)
+src/routes/
+src/router.tsx
+src/routeTree.gen.ts
+src/start.ts
+src/server.ts
+vite.config.ts
+
+# Legacy auth (unused in production)
+src/lib/local-auth.ts
+
+# Legacy integrations (unused)
+src/integrations/lovable/
+src/integrations/supabase/auth-attacher.ts
+src/integrations/supabase/auth-middleware.ts
+
+# Duplicated assets (all served from public/assets/)
+src/assets/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
