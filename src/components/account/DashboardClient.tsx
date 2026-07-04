@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { motion } from "motion/react";
 import {
   Activity,
@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { hasAdminRole } from "@/lib/admin-client";
+import { extractParchmentSections, type StorySection } from "@/lib/totem-v3";
+import { TotemRevealClient } from "@/components/totem/TotemRevealClient";
 
 type Locale = "fr" | "en";
 type DashboardSection = "overview" | "orders" | "artworks" | "profile";
@@ -219,6 +221,7 @@ export function DashboardClient({
   const [oeuvres, setOeuvres] = useState<Oeuvre[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedOeuvre, setSelectedOeuvre] = useState<Oeuvre | null>(null);
 
   const token = session?.access_token;
 
@@ -549,7 +552,12 @@ export function DashboardClient({
               ) : (
                 <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                   {oeuvres.map((oeuvre) => (
-                    <ArtworkCard key={oeuvre.id} oeuvre={oeuvre} locale={locale} />
+                    <ArtworkCard
+                      key={oeuvre.id}
+                      oeuvre={oeuvre}
+                      locale={locale}
+                      onReveal={setSelectedOeuvre}
+                    />
                   ))}
                 </div>
               )}
@@ -588,6 +596,24 @@ export function DashboardClient({
           )}
         </div>
       </main>
+
+      {selectedOeuvre && (
+        <TotemRevealClient
+          userName={firstName || ""}
+          totemName={selectedOeuvre.nom_totem || ""}
+          totemImage={selectedOeuvre.image_url || ""}
+          subtitle={
+            locale === "fr"
+              ? "Décret royal de révélation symbolique"
+              : "Royal decree of symbolic revelation"
+          }
+          sections={extractParchmentSections(selectedOeuvre.recit || "")}
+          numeroSerie={selectedOeuvre.numero_serie || undefined}
+          audioUrl={selectedOeuvre.audio_url || undefined}
+          pdfUrl={selectedOeuvre.pdf_url || undefined}
+          onBack={() => setSelectedOeuvre(null)}
+        />
+      )}
     </div>
   );
 }
@@ -785,9 +811,18 @@ function OrderCard({ commande, locale }: { commande: Commande; locale: Locale })
   );
 }
 
-function ArtworkCard({ oeuvre, locale }: { oeuvre: Oeuvre; locale: Locale }) {
+function ArtworkCard({
+  oeuvre,
+  locale,
+  onReveal,
+}: {
+  oeuvre: Oeuvre;
+  locale: Locale;
+  onReveal?: (oeuvre: Oeuvre) => void;
+}) {
   const t = copy[locale];
   const [showRecit, setShowRecit] = useState(false);
+  const isReady = oeuvre.statut === "livree" || oeuvre.image_url || oeuvre.pdf_url;
   const links: Array<{ label: string; href: string; icon: ReactNode }> = [
     { label: t.image, href: oeuvre.image_url, icon: <ImageIcon size={15} /> },
     { label: t.audio, href: oeuvre.audio_url, icon: <Volume2 size={15} /> },
@@ -796,26 +831,40 @@ function ArtworkCard({ oeuvre, locale }: { oeuvre: Oeuvre; locale: Locale }) {
 
   return (
     <article className="premium-panel overflow-hidden">
-      {oeuvre.image_url ? (
-        <img
-          src={oeuvre.image_url}
-          alt={oeuvre.nom_totem || t.unnamed}
-          className="aspect-square w-full object-cover"
-          style={{ filter: "saturate(0.82) contrast(1.04)" }}
-        />
-      ) : (
-        <div
-          className="flex aspect-square items-center justify-center"
-          style={{ background: "var(--ombre-doree)" }}
-        >
-          <Sparkles size={34} color="var(--or-ancestral)" />
-        </div>
-      )}
+      <button
+        type="button"
+        className="w-full text-left"
+        onClick={() => onReveal?.(oeuvre)}
+        disabled={!isReady}
+      >
+        {oeuvre.image_url ? (
+          <img
+            src={oeuvre.image_url}
+            alt={oeuvre.nom_totem || t.unnamed}
+            className="aspect-square w-full object-cover"
+            style={{ filter: "saturate(0.82) contrast(1.04)" }}
+          />
+        ) : (
+          <div
+            className="flex aspect-square items-center justify-center"
+            style={{ background: "var(--ombre-doree)" }}
+          >
+            <Sparkles size={34} color="var(--or-ancestral)" />
+          </div>
+        )}
+      </button>
       <div className="flex flex-col gap-4 p-5">
         <div>
-          <h3 className="h-display text-2xl" style={{ color: "var(--or-ancestral)" }}>
-            {oeuvre.nom_totem || t.unnamed}
-          </h3>
+          <button
+            type="button"
+            onClick={() => onReveal?.(oeuvre)}
+            disabled={!isReady}
+            className="w-full text-left"
+          >
+            <h3 className="h-display text-2xl" style={{ color: "var(--or-ancestral)" }}>
+              {oeuvre.nom_totem || t.unnamed}
+            </h3>
+          </button>
           <p className="caption mt-1">
             {oeuvre.numero_serie
               ? `No ${oeuvre.numero_serie}`

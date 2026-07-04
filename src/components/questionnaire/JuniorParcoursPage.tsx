@@ -308,9 +308,7 @@ export function JuniorParcoursPage() {
         body: JSON.stringify({ firstName, answers: apiAnswers, locale }),
       });
       const payload = (await response.json().catch(() => null)) as
-        | JuniorResult
-        | { error?: string }
-        | null;
+        JuniorResult | { error?: string } | null;
       if (!response.ok || !payload || !isJuniorResult(payload)) {
         throw new Error((payload as { error?: string } | null)?.error || t.error);
       }

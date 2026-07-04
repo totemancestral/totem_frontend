@@ -10,8 +10,10 @@ import {
   createAdultTotemProfile,
   extractAudioScript,
   extractParchmentText,
+  extractParchmentSections,
   type AdultPromptBundle,
   type AdultTotemProfile,
+  type StorySection,
 } from "@/lib/totem-v3";
 
 const SUPABASE_PROJECT_REF = "mjiealkqjcqvlfrxdcif";
@@ -121,7 +123,7 @@ async function callClaudeDirect(apiKey: string, prompt: string): Promise<string>
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-opus-4-8",
+      model: process.env.ANTHROPIC_MODEL || "claude-opus-4-5",
       max_tokens: 2500,
       messages: [{ role: "user", content: prompt }],
     }),
@@ -144,13 +146,14 @@ async function generateTexte(
   profile: AdultTotemProfile,
   prompts: AdultPromptBundle,
   reponses: Record<string, unknown>,
-): Promise<string> {
+): Promise<{ texte: string; sections: StorySection[] }> {
   // Tentative 1 : Claude direct avec prompt A2 V3.
   if (apiKey) {
     try {
       const raw = await callClaudeDirect(apiKey, prompts.promptA2);
       const texte = extractParchmentText(raw);
-      if (texte) return texte;
+      const sections = extractParchmentSections(raw);
+      if (texte) return { texte, sections };
     } catch {
       // Le fallback Edge Function / SENYCE reste disponible.
     }
@@ -158,7 +161,11 @@ async function generateTexte(
 
   // Tentative 2 : Edge Function Supabase (clés stockées dans les secrets Supabase).
   if (anonKey) {
-    const result = await callEdgeFunction<{ texte?: string; parchment_text?: string }>(
+    const result = await callEdgeFunction<{
+      texte?: string;
+      parchment_text?: string;
+      sections?: { title: string; text: string }[];
+    }>(
       "generate-texte",
       {
         prenom: profile.firstName,
@@ -171,11 +178,26 @@ async function generateTexte(
       anonKey,
     );
 
-    const texte = result?.parchment_text ?? result?.texte;
-    if (texte) return extractParchmentText(texte);
+    const text = result?.parchment_text ?? result?.texte;
+    if (text) {
+      const texte = extractParchmentText(text);
+      let sections: StorySection[] = extractParchmentSections(text);
+
+      // Use structured sections from edge function if available (new format)
+      if (result?.sections && result.sections.length > 0) {
+        sections = result.sections
+          .filter((s) => s.text?.trim().length > 0)
+          .map((s) => ({
+            title: s.title ?? "",
+            paragraphs: [s.text.trim()],
+          }));
+      }
+
+      return { texte, sections };
+    }
   }
 
-  return "";
+  return { texte: "", sections: [] };
 }
 
 async function generateImage(
@@ -194,6 +216,7 @@ async function generateImage(
         langue: profile.language,
         prompt: prompts.imagePrompt,
         visualPrompt: prompts.promptA4,
+        seed: profile.seed,
       },
       anonKey,
     );
@@ -409,15 +432,18 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     // Étape 1 : Texte du parchemin via Edge Function ou Claude direct
     await updateOeuvreStep("generation_texte");
     let texteParchemin = "";
+    let sectionsParchemin: StorySection[] = [];
 
     try {
-      texteParchemin = await generateTexte(
+      const result = await generateTexte(
         env.ANTHROPIC_API_KEY,
         env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         adultProfile,
         promptBundle,
         reponses,
       );
+      texteParchemin = result.texte;
+      sectionsParchemin = result.sections;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erreur generation texte";
       await logPipelineError(
@@ -442,9 +468,9 @@ export async function generateCoffret(commandeId: string): Promise<void> {
               prompt: promptBundle.promptA2,
               profile: adultProfile,
             });
-            texteParchemin = extractParchmentText(
-              (result?.parchment_text as string) ?? (result?.texte as string) ?? "",
-            );
+            const raw = (result?.parchment_text as string) ?? (result?.texte as string) ?? "";
+            texteParchemin = extractParchmentText(raw);
+            sectionsParchemin = extractParchmentSections(raw);
           },
           { retries: 2, delays: [1000, 3000], etape: "texte", commandeId },
         );
@@ -463,6 +489,7 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     // Fallback local si aucun service disponible
     if (!texteParchemin) {
       texteParchemin = buildAdultFallbackParchment(adultProfile, reponses);
+      sectionsParchemin = extractParchmentSections(texteParchemin);
     }
 
     promptBundle = buildAdultPromptBundle({
@@ -558,6 +585,11 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     let parcheminBuffer: Buffer;
     let certificatBuffer: Buffer;
 
+    const subtitle =
+      langue === "fr"
+        ? "Décret royal de révélation symbolique"
+        : "Royal decree of symbolic revelation";
+
     try {
       const pdfPayload = {
         prenom,
@@ -568,6 +600,8 @@ export async function generateCoffret(commandeId: string): Promise<void> {
         langue,
         imageUrl: senyceImageUrl || undefined,
         imageDataUrl: imageDataUrl || undefined,
+        sections: sectionsParchemin.length > 0 ? sectionsParchemin : undefined,
+        subtitle,
       };
 
       ({ parcheminBuffer, certificatBuffer } = await generatePDFs(pdfPayload));

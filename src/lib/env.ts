@@ -43,6 +43,7 @@ export const serverEnvSchema = z
 
     // Anthropic / Claude
     ANTHROPIC_API_KEY: z.string().optional(),
+    ANTHROPIC_MODEL: z.string().optional(),
     ANTHROPIC_MODEL_JUNIOR: z.string().optional(),
 
     // Admin

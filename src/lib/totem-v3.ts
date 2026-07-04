@@ -674,6 +674,11 @@ export function buildAdultPromptBundle(input: {
   };
 }
 
+export type StorySection = {
+  title: string;
+  paragraphs: string[];
+};
+
 export function extractParchmentText(raw: string): string {
   const parsed = extractJson(raw) as { parchment_text?: unknown } | null;
   if (typeof parsed?.parchment_text === "string" && parsed.parchment_text.trim()) {
@@ -681,6 +686,81 @@ export function extractParchmentText(raw: string): string {
   }
 
   return raw.trim();
+}
+
+function buildSectionsFromText(text: string): StorySection[] {
+  const paragraphs = text.split("\n").filter((p) => p.trim().length > 0);
+  if (paragraphs.length <= 2) {
+    return [{ title: "", paragraphs }];
+  }
+  const mid = Math.ceil(paragraphs.length / 2);
+  return [
+    { title: "", paragraphs: paragraphs.slice(0, mid) },
+    { title: "", paragraphs: paragraphs.slice(mid) },
+  ];
+}
+
+export function extractParchmentSections(raw: string): StorySection[] {
+  const parsed = extractJson(raw) as Record<string, unknown> | null;
+
+  if (parsed) {
+    // Nouveau format: sections array avec title + text
+    if (Array.isArray(parsed.sections)) {
+      const items = parsed.sections as { title?: string; text?: string; paragraphs?: string[] }[];
+      if (items.length > 0) {
+        return items
+          .filter((s) => {
+            const txt = s.text ?? s.paragraphs?.join("\n") ?? "";
+            return txt.trim().length > 0;
+          })
+          .map((s) => ({
+            title: s.title ?? "",
+            paragraphs: s.text ? [s.text.trim()] : (s.paragraphs ?? []),
+          }));
+      }
+    }
+
+    // Legacy format: individual movement keys
+    const movementKeys = ["opening", "portrait", "trial", "transmission", "passage"] as const;
+    const movementTitles: Record<string, string> = {
+      opening: "L'Ouverture",
+      portrait: "Le Portrait",
+      trial: "L'Épreuve",
+      transmission: "La Transmission",
+      passage: "Le Passage",
+    };
+
+    const hasMovements = movementKeys.some(
+      (k) => typeof parsed[k] === "string" && (parsed[k] as string).trim().length > 0,
+    );
+
+    if (hasMovements) {
+      return movementKeys
+        .filter((k) => typeof parsed[k] === "string" && (parsed[k] as string).trim().length > 0)
+        .map((k) => ({
+          title: movementTitles[k],
+          paragraphs: [(parsed[k] as string).trim()],
+        }));
+    }
+
+    if (typeof parsed.parchment_text === "string" && parsed.parchment_text.trim()) {
+      return buildSectionsFromText(parsed.parchment_text.trim());
+    }
+  }
+
+  // Réponse brute, parser manuellement pour fallback
+  const text = raw.trim();
+  const paragraphs = text.split("\n").filter((p) => p.trim().length > 0);
+
+  if (paragraphs.length <= 2) {
+    return [{ title: "", paragraphs: [text] }];
+  }
+
+  const half = Math.ceil(paragraphs.length / 2);
+  return [
+    { title: "", paragraphs: paragraphs.slice(0, half) },
+    { title: "", paragraphs: paragraphs.slice(half) },
+  ];
 }
 
 export function extractAudioScript(raw: string): string {
@@ -990,6 +1070,111 @@ export function buildJuniorPromptBundle(input: {
 export function extractStrictJson(raw: string): Record<string, unknown> | null {
   return extractJson(raw) as Record<string, unknown> | null;
 }
+
+type TotemArtworkVisual = {
+  animalEn: string;
+  leftFaceFr: string;
+  leftFaceEn: string;
+};
+
+const TOTEM_ARTWORK_VISUALS: Record<AdultArchetypeId, TotemArtworkVisual> = {
+  lion: {
+    animalEn: "lion",
+    leftFaceFr: "visage de lion réaliste avec crinière noire et regard perçant",
+    leftFaceEn: "realistic lion face with a black mane and piercing gaze",
+  },
+  lionne: {
+    animalEn: "lioness",
+    leftFaceFr: "visage de lionne réaliste avec regard protecteur et pelage ocre",
+    leftFaceEn: "realistic lioness face with a protective gaze and ochre fur",
+  },
+  rhinoceros: {
+    animalEn: "rhinoceros",
+    leftFaceFr: "visage de rhinocéros réaliste avec corne massive et peau gravée",
+    leftFaceEn: "realistic rhinoceros face with a massive horn and engraved skin",
+  },
+  crocodile: {
+    animalEn: "crocodile",
+    leftFaceFr: "visage de crocodile réaliste avec écailles sombres et regard ancien",
+    leftFaceEn: "realistic crocodile face with dark scales and an ancient gaze",
+  },
+  serpent: {
+    animalEn: "serpent",
+    leftFaceFr: "visage de serpent royal réaliste avec écailles profondes et regard hypnotique",
+    leftFaceEn: "realistic royal serpent face with deep scales and a hypnotic gaze",
+  },
+  dauphin: {
+    animalEn: "dolphin",
+    leftFaceFr: "visage de dauphin réaliste avec reflets bleus et regard lumineux",
+    leftFaceEn: "realistic dolphin face with blue reflections and a luminous gaze",
+  },
+  elephant: {
+    animalEn: "elephant",
+    leftFaceFr: "visage d'éléphant réaliste avec défenses sculpturales et regard ancestral",
+    leftFaceEn: "realistic elephant face with sculptural tusks and ancestral gaze",
+  },
+  baobab: {
+    animalEn: "baobab",
+    leftFaceFr: "visage anthropomorphe de baobab réaliste avec écorce massive et racines sculptées",
+    leftFaceEn: "realistic anthropomorphic baobab face with massive bark and carved roots",
+  },
+  zebre: {
+    animalEn: "zebra",
+    leftFaceFr: "visage de zèbre réaliste avec rayures nettes et regard calme",
+    leftFaceEn: "realistic zebra face with sharp stripes and a calm gaze",
+  },
+  perroquet: {
+    animalEn: "parrot",
+    leftFaceFr: "visage de perroquet réaliste avec plumage vert et or et regard vif",
+    leftFaceEn: "realistic parrot face with green and gold plumage and a vivid gaze",
+  },
+  aigle: {
+    animalEn: "eagle",
+    leftFaceFr: "visage d'aigle réaliste avec bec royal et regard perçant",
+    leftFaceEn: "realistic eagle face with a royal beak and piercing gaze",
+  },
+  leopard: {
+    animalEn: "leopard",
+    leftFaceFr: "visage de léopard réaliste avec taches sombres et regard précis",
+    leftFaceEn: "realistic leopard face with dark rosettes and a precise gaze",
+  },
+};
+
+export function buildTotemArtworkImagePrompt(input: {
+  archetypeId: AdultArchetypeId;
+  language?: Locale;
+  seed: string;
+  visualFrame?: 1 | 2 | 3 | 4 | 5;
+  personalityKeywords?: string[];
+}): string {
+  const visual = TOTEM_ARTWORK_VISUALS[input.archetypeId];
+  const seed = numericSeed(input.seed);
+  const keywords = input.personalityKeywords?.filter(Boolean).slice(0, 5).join(", ");
+  const frame = input.visualFrame ? visualFrameDescription(input.visualFrame) : "";
+  const leftFace =
+    input.language === "en"
+      ? `left half ${visual.leftFaceEn}`
+      : `moitié gauche ${visual.leftFaceFr}`;
+
+  return [
+    "Portrait ancestral puissant, visage coupé en deux",
+    leftFace,
+    "moitié droite masque Ngil Fang traditionnel africain stylisé avec yeux blancs et motifs géométriques",
+    "fusion harmonieuse au milieu du visage",
+    "peau avec cicatrices rituelles dorées",
+    "ambiance sombre mystique",
+    "éclairage dramatique cinématographique",
+    "style artistique premium africain",
+    "très détaillé, haute résolution, 8k",
+    keywords ? `personality keywords: ${keywords}` : "",
+    frame ? `composition: ${frame}` : "",
+    `sans texte, sans logo, sans watermark --ar 3:4 --stylize 250 --v 6 --seed ${seed}`,
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
+export const buildNgilMaskImagePrompt = buildTotemArtworkImagePrompt;
 
 const JUNIOR_ATTRIBUTES = [
   "Vitesse",
@@ -1309,6 +1494,29 @@ function buildPromptA2(
   answers: Record<string, unknown>,
   narrativeVariant: "A" | "B" | "C" | "D",
 ) {
+  const variantStructures: Record<string, string> = {
+    A: `MOUVEMENT 1 — L'OUVERTURE (200-250 car.) : decor, lieu, heure de vie de l'ancetre
+MOUVEMENT 2 — LE PORTRAIT (350-400 car.) : apparence, geste, relation au peuple
+MOUVEMENT 3 — L'EPREUVE (350-400 car.) : scene emblematique, inspiree de la culture
+MOUVEMENT 4 — LA TRANSMISSION (300-350 car.) : ce que l'ancetre a transmis
+MOUVEMENT 5 — LE PASSAGE (250-300 car.) : adresse directe a ${profile.firstName}`,
+    B: `MOUVEMENT 1 — L'ADRESSE (200-250 car.) : l'ancetre s'adresse d'abord a ${profile.firstName} depuis le present, prise de parole directe
+MOUVEMENT 2 — LA REMONTEE (350-400 car.) : le recit remonte vers l'origine ancestrale, vers le temps du peuple
+MOUVEMENT 3 — L'EPREUVE (350-400 car.) : scene emblematique vecue par l'ancetre dans les temps anciens
+MOUVEMENT 4 — LE PORTRAIT (300-350 car.) : retour sur qui etait cet ancetre, son apparence, son geste
+MOUVEMENT 5 — LE RETOUR (250-300 car.) : retour au present, lien avec ${profile.firstName}, transmission finale`,
+    C: `MOUVEMENT 1 — LA SCENE (200-250 car.) : commencer in medias res, une scene intense et vive, un instant suspendu
+MOUVEMENT 2 — LE RECUL (350-400 car.) : recul temporel, plan large, le contexte de la scene se revele progressivement
+MOUVEMENT 3 — L'ORIGINE (350-400 car.) : retour a l'origine, portrait de l'ancetre, son peuple, sa terre
+MOUVEMENT 4 — L'EPREUVE (300-350 car.) : scene emblematique qui a forge l'ancetre et son enseignement
+MOUVEMENT 5 — LE RETOUR AU PRESENT (250-300 car.) : retour au present, adresse directe a ${profile.firstName}, benediction`,
+    D: `MOUVEMENT 1 — L'APPEL (200-250 car.) : le lieu et l'instant propice, l'ancetre appelle ${profile.firstName}, debut de l'echange
+MOUVEMENT 2 — LA PAROLE DU SAGE (350-400 car.) : l'ancetre parle en italiques, il raconte qui il est et ce qu'il a vecu
+MOUVEMENT 3 — L'ECHO DU DESCENDANT (350-400 car.) : ${profile.firstName} repond en son for interieur, l'ancetre percoit la reponse
+MOUVEMENT 4 — L'ENSEIGNEMENT (300-350 car.) : l'ancetre transmet sa verite en italiques, parole directe et incarnee
+MOUVEMENT 5 — LA BENEDICTION (250-300 car.) : mot de la fin, benediction et adresse finale de l'ancetre a ${profile.firstName}`,
+  };
+
   return `Tu es la plume artistique de TOTEM ANCESTRAL.
 
 Tu vas composer le Parchemin Ancestral de ${profile.firstName}.
@@ -1320,17 +1528,13 @@ Titre de l'oeuvre : "${profile.workTitleFr}"
 Numero mondial : ${profile.orderNumber} · Saison : ${profile.season} · Heure : ${profile.hour}
 Seed : ${profile.seed}
 Langue : ${profile.language}
-Variante narrative selectionnee : ${narrativeVariant} (A|B|C|D)
+Variante narrative selectionnee : ${narrativeVariant} (${narrativeVariant === "A" ? "Classique" : narrativeVariant === "B" ? "Inversee" : narrativeVariant === "C" ? "Flashback" : "Dialogue"})
 
 REPONSES AUX 10 QUESTIONS :
 ${formatPromptAnswers(answers)}
 
-STRUCTURE OBLIGATOIRE — 5 mouvements :
-MOUVEMENT 1 — L'OUVERTURE (200-250 car.) : decor, lieu, heure de vie de l'ancetre
-MOUVEMENT 2 — LE PORTRAIT (350-400 car.) : apparence, geste, relation au peuple
-MOUVEMENT 3 — L'EPREUVE (350-400 car.) : scene emblematique, inspiree de la culture
-MOUVEMENT 4 — LA TRANSMISSION (300-350 car.) : ce que l'ancetre a transmis
-MOUVEMENT 5 — LE PASSAGE (250-300 car.) : adresse directe a ${profile.firstName}
+STRUCTURE OBLIGATOIRE — 5 mouvements (variante ${narrativeVariant}) :
+${variantStructures[narrativeVariant]}
 
 Le nom ${profile.nomComplet} doit apparaitre au moins une fois dans le recit.
 
@@ -1392,7 +1596,15 @@ function buildPromptA4(
   answers: Record<string, unknown>,
   visualFrame: 1 | 2 | 3 | 4 | 5,
 ) {
-  const keywords = personalityKeywords(answers).join(", ");
+  const keywords = personalityKeywords(answers);
+  const visualPrompt = buildTotemArtworkImagePrompt({
+    archetypeId: profile.archetype.id,
+    language: profile.language,
+    seed: profile.seed,
+    visualFrame,
+    personalityKeywords: keywords,
+  });
+
   return `Tu vas composer un prompt Midjourney v6 pour l'oeuvre visuelle de ${profile.firstName}.
 
 CONTEXTE :
@@ -1400,7 +1612,7 @@ Archétype : ${profile.archetype.english} · Peuple : ${profile.archetype.people
 Nom ancestral : ${profile.nomComplet}
 Cadre visuel selectionne : ${visualFrame}
 Seed : ${profile.seed}
-Indices de personnalite : ${keywords}
+Indices de personnalite : ${keywords.join(", ")}
 
 STYLE ARTISTIQUE TOTEM :
 Esthetique : musee, mystique, ancestrale, intemporelle
@@ -1408,11 +1620,18 @@ Palette : noir profond #0D0D1A, or ancestral #C9A84C, terres ocre, indigo, ivoir
 References : Vladimir Cybil Charlier + Kerry James Marshall + Aboudia + masques rituels patines
 Pas de realisme photographique. Pas de cartoonesque. Pas d'AI flat.
 
+FORMAT VISUEL OBLIGATOIRE :
+Portrait ancestral puissant, visage coupe en deux : moitie gauche visage realiste du totem ${profile.archetype.french}, moitie droite masque Ngil Fang traditionnel africain stylise avec yeux blancs et motifs geometriques, fusion harmonieuse au milieu du visage, peau avec cicatrices rituelles dorees, ambiance sombre mystique, eclairage dramatique cinematographique, style artistique premium africain, tres detaille, haute resolution, 8k.
+
+BASE DE PROMPT A CONSERVER :
+${visualPrompt}
+
 REGLES :
-· Sujet humain — l'animal totem peut etre en arriere-plan symbolique, jamais central
-· Visage visible mais NON specifique — pas de ressemblance reelle
+· Visage coupe en deux obligatoire : totem realiste a gauche, masque Ngil Fang a droite
+· Visage visible mais NON specifique — pas de ressemblance reelle avec une personne
 · Pas de texte dans l'image, pas de logos
-· Format vertical 4:5 obligatoire
+· Format vertical 3:4 obligatoire
+· Parametres obligatoires : --ar 3:4 --stylize 250 --v 6
 · --seed ${numericSeed(profile.seed)} obligatoire
 
 REPONSE — Format JSON STRICT :
@@ -1457,10 +1676,13 @@ function buildImagePrompt(
   answers: Record<string, unknown>,
   visualFrame: 1 | 2 | 3 | 4 | 5,
 ) {
-  const frame = visualFrameDescription(visualFrame);
-  const keywords = personalityKeywords(answers).join(", ");
-
-  return `human figure inspired by ${profile.archetype.english}, evoking ${profile.archetype.people} heritage, ${keywords}, ${frame}, painterly mythological portrait, museum-quality, ancestral patina, ritual symbolism, ceremonial textile, painted skin marks, deep black #0D0D1A, ancestral gold #C9A84C, ochre red, indigo, ivory, oil painting and African textile motifs, soft chiaroscuro, sacred silence, dawn light, eternal stillness, no text, no logo, animal totem only as subtle background symbol, vertical 4:5, --style raw --stylize 750 --seed ${numericSeed(profile.seed)}`;
+  return buildTotemArtworkImagePrompt({
+    archetypeId: profile.archetype.id,
+    language: profile.language,
+    seed: profile.seed,
+    visualFrame,
+    personalityKeywords: personalityKeywords(answers),
+  });
 }
 
 function buildAudioScriptFallback(profile: AdultTotemProfile, parchmentText: string) {

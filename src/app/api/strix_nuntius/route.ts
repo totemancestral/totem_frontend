@@ -9,12 +9,7 @@ import type { Json } from "@/integrations/supabase/types";
 type Locale = "fr" | "en";
 type Offre = "essentiel" | "signature" | "heritage";
 type CommandeStatut =
-  | "en_attente_paiement"
-  | "paye"
-  | "en_generation"
-  | "livree"
-  | "erreur"
-  | "remboursee";
+  "en_attente_paiement" | "paye" | "en_generation" | "livree" | "erreur" | "remboursee";
 type SupabaseServiceClient = ReturnType<typeof createServiceClient>;
 
 const OFFER_MAP: Record<string, Offre> = {

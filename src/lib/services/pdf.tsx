@@ -1,5 +1,8 @@
 import React from "react";
 import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import type { StorySection } from "@/lib/totem-v3";
 
 export type PdfPayload = {
   prenom: string;
@@ -10,176 +13,185 @@ export type PdfPayload = {
   langue: "fr" | "en";
   imageUrl?: string;
   imageDataUrl?: string;
+  sections?: StorySection[];
+  subtitle?: string;
+  parchmentBackgroundDataUrl?: string;
 };
 
-const parchmentBase = "#F0DFA0";
-const parchmentLight = "#F4E4A8";
-const parchmentMid = "#E8CC80";
-const parchmentDark = "#8A4810";
-const ink = "#1E0A00";
+const bgDark = "#0d0d12";
+const bgInner = "#f5efe0";
 const gold = "#C9A84C";
 const goldLight = "#FFCD6E";
-const sealRed = "#A60C06";
+const goldDark = "#8A6A2B";
+const ink = "#2c1d0c";
+const inkLight = "#5a4526";
+const sealRed = "#9e1b13";
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: parchmentBase,
+    backgroundColor: bgDark,
     padding: 0,
   },
-  rod: {
-    height: 18,
-    backgroundColor: "#8A520D",
-    marginHorizontal: 12,
-    borderRadius: 9,
-    borderBottom: "1px solid #6A3800",
+  outerFrame: {
+    margin: 16,
+    border: "2px solid #C9A84C",
+    flex: 1,
   },
-  rodTop: {
-    height: 18,
-    backgroundColor: "#8A520D",
-    marginHorizontal: 12,
-    borderBottomLeftRadius: 9,
-    borderBottomRightRadius: 9,
-    borderBottom: "1px solid #6A3800",
+  parchmentArea: {
+    margin: 10,
+    backgroundColor: bgInner,
+    flex: 1,
+    position: "relative",
+    overflow: "hidden",
   },
-  rodBottom: {
-    height: 18,
-    backgroundColor: "#8A520D",
-    marginHorizontal: 12,
-    borderTopLeftRadius: 9,
-    borderTopRightRadius: 9,
-    borderTop: "1px solid #6A3800",
+  parchmentBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "fill",
   },
-  curl: {
-    height: 12,
-    backgroundColor: "#9A5C10",
-    marginHorizontal: 14,
-    opacity: 0.4,
+  parchmentContent: {
+    position: "relative",
+    flex: 1,
+    paddingTop: 66,
+    paddingBottom: 62,
+    paddingHorizontal: 70,
   },
-  outerWrap: {
-    marginHorizontal: 16,
-    border: "1px solid #8A4810",
-    padding: 4,
+  coverTop: {
+    alignItems: "center",
+    marginTop: 12,
   },
-  borderWrap: {
-    border: "0.5px solid #C9A84C",
-    padding: 3,
-  },
-  body: {
-    paddingHorizontal: 28,
-    paddingVertical: 20,
-  },
-  line: {
-    borderBottom: "0.5px solid #8A4810",
-    opacity: 0.15,
-    marginVertical: 8,
-  },
-  title: {
-    fontSize: 16,
-    textAlign: "center",
-    color: ink,
-    marginBottom: 2,
-    letterSpacing: 3,
+  coverTitle: {
+    fontFamily: "Times-Roman",
+    fontSize: 32,
     fontWeight: "bold",
-  },
-  divider: {
+    letterSpacing: 4,
+    color: ink,
     textAlign: "center",
-    fontSize: 13,
-    color: "#8A520D",
-    marginVertical: 6,
-    letterSpacing: 5,
   },
-  imageWrap: {
+  coverSubtitle: {
+    fontFamily: "Times-Roman",
+    fontSize: 13,
+    fontStyle: "italic",
+    color: inkLight,
+    textAlign: "center",
+    marginTop: 4,
+  },
+  goldRule: {
+    width: 100,
+    height: 2,
+    backgroundColor: gold,
+    marginVertical: 12,
+    alignSelf: "center",
+  },
+  coverImageWrap: {
     alignItems: "center",
     marginVertical: 10,
   },
-  image: {
-    width: 320,
-    height: 320,
+  coverImage: {
+    width: 260,
+    height: 260,
     objectFit: "contain",
   },
-  label: {
-    fontSize: 8,
+  coverTotemName: {
+    fontFamily: "Times-Roman",
+    fontSize: 22,
+    fontWeight: "bold",
+    color: ink,
+    textAlign: "center",
+    letterSpacing: 2,
     textTransform: "uppercase",
-    color: "#8A520D",
-    letterSpacing: 1.5,
-    marginBottom: 1,
+    marginTop: 8,
+  },
+  coverFor: {
+    fontFamily: "Times-Italic",
+    fontSize: 16,
+    color: inkLight,
+    textAlign: "center",
     marginTop: 6,
   },
-  value: {
+  coverSealWrap: {
+    alignItems: "center",
+    marginTop: "auto",
+    paddingBottom: 8,
+  },
+  storyHeader: {
+    fontFamily: "Times-Roman",
+    fontSize: 24,
+    fontWeight: "bold",
+    color: ink,
+    textAlign: "center",
+    letterSpacing: 3,
+    textTransform: "uppercase",
+  },
+  storySectionTitle: {
+    fontFamily: "Times-Roman",
+    fontSize: 18,
+    fontWeight: "bold",
+    color: inkLight,
+    marginBottom: 6,
+    marginTop: 12,
+    letterSpacing: 1,
+  },
+  storyParagraph: {
+    fontFamily: "Times-Italic",
     fontSize: 11,
-    color: ink,
-    marginBottom: 4,
-  },
-  bodyText: {
-    fontSize: 10.5,
-    lineHeight: 1.85,
+    lineHeight: 1.7,
     textAlign: "justify",
     color: ink,
-    marginBottom: 6,
+    marginBottom: 8,
   },
-  bodyItalic: {
-    fontSize: 10.5,
-    lineHeight: 1.85,
-    textAlign: "justify",
-    color: ink,
+  signature: {
+    textAlign: "right",
+    fontSize: 9,
+    color: inkLight,
     fontStyle: "italic",
-    marginBottom: 6,
+    marginTop: 8,
+  },
+  serieNum: {
+    textAlign: "center",
+    fontSize: 7,
+    color: inkLight,
+    letterSpacing: 1,
+    marginTop: 6,
   },
   sealWrap: {
     alignItems: "center",
-    marginVertical: 10,
+    marginVertical: 8,
   },
   seal: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     backgroundColor: sealRed,
     alignItems: "center",
     justifyContent: "center",
     border: "1.5px solid #FFCD6E",
   },
   sealInner: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: sealRed,
     alignItems: "center",
     justifyContent: "center",
     border: "0.5px solid rgba(255,205,110,0.5)",
   },
-  sealFleur: {
+  sealText: {
+    fontFamily: "Times-Roman",
     fontSize: 22,
     color: goldLight,
+    fontWeight: "bold",
   },
-  sealText: {
-    fontSize: 5,
-    color: "#F5CD64",
+  sealLabel: {
+    fontSize: 6,
+    color: goldLight,
     letterSpacing: 1,
     textAlign: "center",
     marginTop: 2,
   },
-  signature: {
-    textAlign: "right",
-    fontSize: 9,
-    color: "#8A520D",
-    fontStyle: "italic",
-    marginTop: 6,
-  },
-  serieNum: {
-    textAlign: "center",
-    fontSize: 7,
-    color: "#8A520D",
-    letterSpacing: 1,
-    marginTop: 14,
-  },
-  fold: {
-    borderBottom: "0.5px solid #8A4810",
-    opacity: 0.08,
-    marginVertical: 10,
-    marginHorizontal: 8,
-  },
-
-  // Certificate styles
   certPage: {
     backgroundColor: "#FFFDF5",
     padding: 0,
@@ -192,6 +204,7 @@ const styles = StyleSheet.create({
   certInner: {
     border: "0.5px solid #8A520D",
     padding: 20,
+    flex: 1,
   },
   certTitle: {
     fontSize: 15,
@@ -236,10 +249,6 @@ const styles = StyleSheet.create({
     color: ink,
     flex: 1,
   },
-  certSealWrap: {
-    alignItems: "center",
-    marginVertical: 8,
-  },
   certSig: {
     textAlign: "right",
     fontSize: 9,
@@ -247,100 +256,156 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     marginTop: 12,
   },
-  certImageWrap: {
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  certImage: {
-    width: 200,
-    height: 200,
-    objectFit: "contain",
-  },
 });
+
+function buildSections(text: string): StorySection[] {
+  const paragraphs = text.split("\n").filter((p) => p.trim().length > 0);
+  if (paragraphs.length <= 2) {
+    return [{ title: "", paragraphs }];
+  }
+  const mid = Math.ceil(paragraphs.length / 2);
+  return [
+    { title: "", paragraphs: paragraphs.slice(0, mid) },
+    { title: "", paragraphs: paragraphs.slice(mid) },
+  ];
+}
+
+function GoldRule() {
+  return <View style={styles.goldRule} />;
+}
+
+function ParchmentSurface({
+  payload,
+  children,
+}: {
+  payload: PdfPayload;
+  children: React.ReactNode;
+}) {
+  return (
+    <View style={styles.parchmentArea}>
+      {payload.parchmentBackgroundDataUrl ? (
+        <Image style={styles.parchmentBackground} src={payload.parchmentBackgroundDataUrl} />
+      ) : null}
+      <View style={styles.parchmentContent}>{children}</View>
+    </View>
+  );
+}
+
+function SectionBlock({ section }: { section: StorySection }) {
+  return (
+    <View wrap={false} style={{ marginBottom: 16 }}>
+      {section.title ? <Text style={styles.storySectionTitle}>{section.title}</Text> : null}
+      {section.paragraphs.map((p, i) => {
+        const key = `p-${i}`;
+        return (
+          <Text key={key} style={styles.storyParagraph}>
+            {p}
+          </Text>
+        );
+      })}
+    </View>
+  );
+}
 
 function WaxSeal() {
   return (
     <View style={styles.sealWrap}>
       <View style={styles.seal}>
         <View style={styles.sealInner}>
-          <Text style={styles.sealFleur}>⚜</Text>
+          <Text style={styles.sealText}>TA</Text>
         </View>
       </View>
-      <Text style={styles.sealText}>· SIGILLUM TOTEM ·</Text>
+      <Text style={styles.sealLabel}>· SIGILLUM TOTEM ·</Text>
     </View>
   );
 }
 
 function ParcheminDocument({ payload }: { payload: PdfPayload }) {
-  const paragraphs = payload.texteParchemin.split("\n").filter((p) => p.trim().length > 0);
+  const sections: StorySection[] =
+    payload.sections && payload.sections.length > 0
+      ? payload.sections
+      : buildSections(payload.texteParchemin);
 
   const serieNum = String(payload.numeroCollection).padStart(6, "0");
+  const subtitle =
+    payload.subtitle ||
+    (payload.langue === "fr"
+      ? "Décret royal de révélation symbolique"
+      : "Royal decree of symbolic revelation");
+
+  const hasImage = !!(payload.imageDataUrl || payload.imageUrl);
+  const imageSrc = payload.imageDataUrl || payload.imageUrl || "";
+
+  function renderStoryPages() {
+    if (sections.length === 0) return null;
+
+    const half = Math.ceil(sections.length / 2);
+    const page2 = sections.slice(0, half);
+    const page3 = sections.slice(half);
+
+    const pageContent = (secs: StorySection[]) => (
+      <ParchmentSurface payload={payload}>
+        {secs.map((s, i) => (
+          <SectionBlock key={s.title || i} section={s} />
+        ))}
+        <View style={{ flex: 1 }} />
+        <WaxSeal />
+        <Text style={styles.signature}>✦ SENYCE PARTNERS ✦</Text>
+        <Text style={styles.serieNum}>
+          {payload.langue === "fr"
+            ? `Certifié authentique — ${payload.nomAncestral} — N° ${serieNum}`
+            : `Certified authentic — ${payload.nomAncestral} — No. ${serieNum}`}
+        </Text>
+      </ParchmentSurface>
+    );
+
+    return (
+      <>
+        <Page size="A4" style={styles.page}>
+          <View style={styles.outerFrame}>{pageContent(page2)}</View>
+        </Page>
+        {page3.length > 0 && (
+          <Page size="A4" style={styles.page}>
+            <View style={styles.outerFrame}>{pageContent(page3)}</View>
+          </Page>
+        )}
+      </>
+    );
+  }
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <View style={styles.rodTop} />
-        <View style={styles.curl} />
-
-        <View style={styles.outerWrap}>
-          <View style={styles.borderWrap}>
-            <View style={styles.body}>
-              <Text style={styles.title}>TOTEM ANCESTRAL</Text>
-              <Text style={styles.divider}>⸻ ✦ ⸻</Text>
-
-              {(payload.imageDataUrl || payload.imageUrl) && (
-                <View style={styles.imageWrap}>
-                  <Image style={styles.image} src={payload.imageDataUrl || payload.imageUrl!} />
-                </View>
-              )}
-
-              <View style={styles.line} />
-
-              <Text style={styles.label}>
-                {payload.langue === "fr" ? "Destinataire" : "Recipient"}
-              </Text>
-              <Text style={styles.value}>{payload.prenom}</Text>
-
-              <Text style={styles.label}>
-                {payload.langue === "fr" ? "Nom Ancestral" : "Ancestral Name"}
-              </Text>
-              <Text style={styles.value}>{payload.nomAncestral}</Text>
-
-              <Text style={styles.label}>
-                {payload.langue === "fr" ? "Collection" : "Collection"}
-              </Text>
-              <Text style={styles.value}>
-                {payload.langue === "fr" ? "Tome" : "Volume"} {serieNum}
-              </Text>
-
-              <View style={styles.fold} />
-              <View style={styles.line} />
-
-              {paragraphs.map((para, i) => (
-                <Text key={i} style={i === 0 ? styles.bodyItalic : styles.bodyText}>
-                  {para}
-                </Text>
-              ))}
-
-              <View style={styles.line} />
-              <View style={styles.fold} />
-
-              <WaxSeal />
-
-              <Text style={styles.signature}>✦ SENYCE PARTNERS ✦</Text>
-
-              <Text style={styles.serieNum}>
-                {payload.langue === "fr"
-                  ? `Certifié authentique — ${payload.nomAncestral} — N° ${serieNum}`
-                  : `Certified authentic — ${payload.nomAncestral} — No. ${serieNum}`}
-              </Text>
+        <View style={styles.outerFrame}>
+          <ParchmentSurface payload={payload}>
+            <View style={styles.coverTop}>
+              <Text style={styles.coverTitle}>TOTEM ANCESTRAL</Text>
+              <Text style={styles.coverSubtitle}>{subtitle}</Text>
+              <GoldRule />
             </View>
-          </View>
-        </View>
 
-        <View style={styles.curl} />
-        <View style={styles.rodBottom} />
+            {hasImage && (
+              <View style={styles.coverImageWrap}>
+                <Image style={styles.coverImage} src={imageSrc} />
+              </View>
+            )}
+
+            <Text style={styles.coverTotemName}>{payload.nomAncestral}</Text>
+
+            <Text style={styles.coverFor}>
+              {payload.langue === "fr" ? "Préparé pour" : "Prepared for"} {payload.prenom}
+            </Text>
+
+            <View style={{ flex: 1 }} />
+
+            <View style={styles.coverSealWrap}>
+              <WaxSeal />
+            </View>
+          </ParchmentSurface>
+        </View>
       </Page>
+
+      {renderStoryPages()}
     </Document>
   );
 }
@@ -386,17 +451,20 @@ function CertificatDocument({ payload }: { payload: PdfPayload }) {
             <Text style={styles.certSubtitle}>{t.subtitle}</Text>
 
             {(payload.imageDataUrl || payload.imageUrl) && (
-              <View style={styles.certImageWrap}>
-                <Image style={styles.certImage} src={payload.imageDataUrl || payload.imageUrl!} />
+              <View style={{ alignItems: "center", marginVertical: 10 }}>
+                <Image
+                  style={{ width: 180, height: 180, objectFit: "contain" }}
+                  src={payload.imageDataUrl || payload.imageUrl!}
+                />
               </View>
             )}
 
             <View style={styles.certDivider} />
 
-            <View style={styles.certSealWrap}>
+            <View style={styles.sealWrap}>
               <View style={styles.seal}>
                 <View style={styles.sealInner}>
-                  <Text style={styles.sealFleur}>⚜</Text>
+                  <Text style={styles.sealText}>TA</Text>
                 </View>
               </View>
             </View>
@@ -436,10 +504,40 @@ export async function generatePDFs(payload: PdfPayload): Promise<{
   parcheminBuffer: Buffer;
   certificatBuffer: Buffer;
 }> {
+  const payloadWithBackground = {
+    ...payload,
+    parchmentBackgroundDataUrl:
+      payload.parchmentBackgroundDataUrl ?? (await loadParchmentBackgroundDataUrl()),
+  };
+
   const [parcheminBuffer, certificatBuffer] = await Promise.all([
-    renderToBuffer(<ParcheminDocument payload={payload} />),
-    renderToBuffer(<CertificatDocument payload={payload} />),
+    renderToBuffer(<ParcheminDocument payload={payloadWithBackground} />),
+    renderToBuffer(<CertificatDocument payload={payloadWithBackground} />),
   ]);
 
   return { parcheminBuffer, certificatBuffer };
+}
+
+let parchmentBackgroundCache: string | null = null;
+
+async function loadParchmentBackgroundDataUrl(): Promise<string | undefined> {
+  if (parchmentBackgroundCache) return parchmentBackgroundCache;
+
+  const candidates = [
+    join(process.cwd(), "totem-parchemin/assets/parchemin_ouvert.png"),
+    join(process.cwd(), "totem-parchemin/assets/parchemin_ouvert.webp"),
+  ];
+
+  for (const candidate of candidates) {
+    try {
+      const bytes = await readFile(candidate);
+      const mime = candidate.endsWith(".webp") ? "image/webp" : "image/png";
+      parchmentBackgroundCache = `data:${mime};base64,${bytes.toString("base64")}`;
+      return parchmentBackgroundCache;
+    } catch {
+      // Continue with the next asset candidate, then fall back to flat parchment color.
+    }
+  }
+
+  return undefined;
 }

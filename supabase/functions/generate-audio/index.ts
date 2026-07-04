@@ -3,6 +3,18 @@ const VOICE_MAP: Record<string, string> = {
   B: "sage",
   C: "nova",
   D: "shimmer",
+  lion: "onyx",
+  lionne: "nova",
+  rhinoceros: "onyx",
+  crocodile: "sage",
+  serpent: "sage",
+  dauphin: "shimmer",
+  elephant: "onyx",
+  baobab: "sage",
+  zebre: "nova",
+  perroquet: "shimmer",
+  aigle: "onyx",
+  leopard: "sage",
 };
 
 Deno.serve(async (req) => {

@@ -84,6 +84,113 @@ const qualities: Record<string, string> = {
   "IMANI LA TORTUE ETERNELLE": "Patience",
 };
 
+const totemDetails: Record<
+  string,
+  { animal: string; colors: string[]; identitySeed: string; titleSeries: string[] }
+> = {
+  "KWAME L'AIGLE DES CIMES": {
+    animal: "Aigle",
+    colors: ["or", "bleu nuit", "blanc"],
+    identitySeed: "Avant toi, un ancetre regardait l'horizon et voyait demain.",
+    titleSeries: ["Qui vit dans l'Eclair", "Des Sommets Silencieux", "Qui porte le Soleil"],
+  },
+  "AMARA LA LIONNE DES SAVANES": {
+    animal: "Lionne",
+    colors: ["ocre", "rouge terre", "or"],
+    identitySeed: "Avant toi, une ancetre tenait debout ce que le vent voulait renverser.",
+    titleSeries: ["Du Feu Originel", "Qui garde la Flamme", "Du Premier Matin"],
+  },
+  "ZARA LE LEOPARD DES OMBRES": {
+    animal: "Leopard",
+    colors: ["noir", "or", "vert foret"],
+    identitySeed: "Avant toi, un ancetre attendait dans le silence pour agir dans la lumiere.",
+    titleSeries: ["Des Ombres Profondes", "Qui frappe dans le Silence", "Qui attend l'Heure Juste"],
+  },
+  "KEMI LE SERPENT SAGE": {
+    animal: "Serpent royal",
+    colors: ["vert profond", "noir", "argent"],
+    identitySeed: "Avant toi, une ancetre lisait les secrets que la terre murmure.",
+    titleSeries: ["Qui lit les Eaux", "Des Profondeurs Anciennes", "Qui transforme tout"],
+  },
+  "SEUN L'ELEPHANT GARDIEN": {
+    animal: "Elephant",
+    colors: ["gris ardoise", "terre rouge", "or"],
+    identitySeed: "Avant toi, un ancetre portait la memoire de tous ceux qui etaient partis.",
+    titleSeries: ["Qui porte la Memoire", "Des Racines Profondes", "Des Ancetres Debout"],
+  },
+  "AIDA LA PANTHERE NOIRE": {
+    animal: "Panthere",
+    colors: ["noir", "violet", "or"],
+    identitySeed: "Avant toi, une ancetre marchait entre deux mondes sans jamais choisir.",
+    titleSeries: ["Ne entre Deux Mondes", "Ne dans le Mystere", "Des Passages Caches"],
+  },
+  "KOFI LE BUFFLE DES PLAINES": {
+    animal: "Buffle",
+    colors: ["marron profond", "rouge", "noir"],
+    identitySeed: "Avant toi, un ancetre traversait des terres impossibles sans reculer.",
+    titleSeries: ["Qui ne recule jamais", "Des Plaines Eternelles", "Qui connait le Chemin"],
+  },
+  "NALA LA GRUE ROYALE": {
+    animal: "Grue couronnee",
+    colors: ["blanc", "or", "rouge vif"],
+    identitySeed: "Avant toi, une ancetre dansait pour rappeler qu'il reste de la beaute.",
+    titleSeries: ["Qui danse dans l'Aube", "Des Marais Royaux", "Qui apporte la Paix"],
+  },
+  "BAKARI LE CROCODILE ANCIEN": {
+    animal: "Crocodile",
+    colors: ["vert kaki", "or ancien", "noir"],
+    identitySeed: "Avant toi, un ancetre avait vu passer des empires et n'avait pas bouge.",
+    titleSeries: ["Des Eaux Premieres", "Qui n'oublie rien", "Des Rivieres Sacrees"],
+  },
+  "FATOU LE FAUCON LIBRE": {
+    animal: "Faucon",
+    colors: ["bleu ciel", "blanc", "or"],
+    identitySeed: "Avant toi, une ancetre refusait qu'on lui dise ou elle devait aller.",
+    titleSeries: ["Qui n'appartient a personne", "Des Vents Libres", "Ne sans frontieres"],
+  },
+  "DAYO LE LION DU FEU": {
+    animal: "Lion",
+    colors: ["orange feu", "rouge", "noir"],
+    identitySeed: "Avant toi, un ancetre entrait dans les batailles en chantant.",
+    titleSeries: ["Du Feu Originel", "Des Plaines Brulantes", "Qui dompte les Eclairs"],
+  },
+  "IMANI LA TORTUE ETERNELLE": {
+    animal: "Tortue geante",
+    colors: ["vert ancien", "or", "terre"],
+    identitySeed: "Avant toi, une ancetre savait que la lenteur est une forme de puissance.",
+    titleSeries: ["Qui sait attendre", "Des Matins Calmes", "Ne sous les Etoiles"],
+  },
+};
+
+const prenomsA = [
+  "Kwame",
+  "Kofi",
+  "Ama",
+  "Abena",
+  "Seun",
+  "Kemi",
+  "Amara",
+  "Amani",
+  "Jabari",
+  "Dayo",
+  "Zola",
+  "Mora",
+];
+const prenomsB = [
+  "Aicha",
+  "Fatou",
+  "Lamine",
+  "Mariama",
+  "Nala",
+  "Soro",
+  "Zara",
+  "Imani",
+  "Yara",
+  "Oba",
+  "Tara",
+  "Elan",
+];
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -95,11 +202,14 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
+    const seed =
+      typeof body?.seed === "string" && body.seed.trim() ? body.seed.trim() : crypto.randomUUID();
     const firstName =
       typeof body?.firstName === "string" && body.firstName.trim()
         ? body.firstName.trim().slice(0, 40)
         : "Toi";
     const answers = isRecord(body?.answers) ? body.answers : {};
+    const clanCount = Number.isFinite(Number(body?.clanCount)) ? Number(body.clanCount) : 0;
     const scores: Scores = { F: 0, E: 0, T: 0, A: 0 };
 
     for (let question = 1; question <= 5; question += 1) {
@@ -117,17 +227,44 @@ Deno.serve(async (req) => {
     const secondary = sorted.find((item) => item.dim !== dominant)?.dim ?? dominant;
     const totem = attribution[dominant][secondary] ?? attribution[dominant][dominant];
     const quality = qualities[totem] ?? "Presence";
+    const detail = totemDetails[totem] ?? {
+      animal: totem,
+      colors: ["or", "noir", "ivoire"],
+      identitySeed: `Avant toi, un ancetre portait ${qualityPhrase(quality)} sans bruit.`,
+      titleSeries: ["Du Premier Souffle"],
+    };
+    const orderNumber =
+      Number.isFinite(Number(body?.orderNumber)) && Number(body.orderNumber) > 0
+        ? Number(body.orderNumber)
+        : (hash(`${seed}:order`) % 999999) + 1;
+    const nomComplet = `${pick(prenomsA, seed, "a")}-${pick(prenomsB, seed, "b")}, ${pick(
+      detail.titleSeries,
+      seed,
+      "title",
+    )}`;
+    const attribut = pickAttribute(quality, answers);
+    const clanName = clan(detail.animal);
+    const phrase = normalizePhrase(detail.identitySeed, quality);
+    const messageClan = `#${orderNumber} rejoint le ${clanName} avec ${attribut}. ${clanCount} membres l'attendaient deja.`;
+    const caption = `${nomComplet}\nJe revele mon totem : ${totem}\nA ton tour. #RevealYourTotem`;
+    const messageDefi = `J'ai decouvert mon totem ancestral : ${totem}. Toi, tu es quoi ? totemancestral.com`;
 
     return json({
       type: "junior",
+      seed,
       firstName,
+      orderNumber,
       scores,
       dominant,
       secondary,
-      totem: { name: totem, quality },
-      phrase: `Avant toi, un ancetre portait ${qualityPhrase(quality)} dans son geste, et ce signe avance maintenant avec ton nom.`,
-      caption: `${totem}\nQuel ancetre dort en toi ?\n#RevealYourTotem`,
-      messageDefi: `J'ai decouvert mon totem ancestral : ${totem}. Toi, tu es quoi ? totemancestral.com`,
+      totem: { name: totem, animal: detail.animal, colors: detail.colors, quality },
+      nomComplet,
+      phrase,
+      attribut,
+      messageClan,
+      share: { caption, messageDefi },
+      caption,
+      messageDefi,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
@@ -163,4 +300,42 @@ function qualityPhrase(quality: string) {
   };
 
   return phrases[quality] ?? quality.toLowerCase();
+}
+
+function normalizePhrase(seedPhrase: string, quality: string) {
+  const words = seedPhrase.split(/\s+/);
+  if (words.length >= 20 && words.length <= 35) return seedPhrase;
+  return `Avant toi, un ancetre portait ${qualityPhrase(
+    quality,
+  )} dans son geste, son regard et sa maniere d'avancer sans renoncer.`;
+}
+
+function pickAttribute(quality: string, answers: Record<string, Record<string, unknown>>) {
+  const q3 = answers["3"]?.choice;
+  if (q3 === "A") return "Intuition";
+  if (q3 === "B") return "Protection";
+  if (q3 === "C") return "Elevation";
+  if (q3 === "D") return "Puissance";
+  return quality;
+}
+
+function clan(animal: string) {
+  if (animal === "Aigle" || animal === "Elephant") return `Clan de l'${animal}`;
+  if (["Lionne", "Panthere", "Grue couronnee", "Tortue geante"].includes(animal)) {
+    return `Clan de la ${animal}`;
+  }
+  return `Clan du ${animal}`;
+}
+
+function pick<T>(items: T[], seed: string, salt: string): T {
+  return items[hash(`${seed}:${salt}`) % items.length] ?? items[0]!;
+}
+
+function hash(value: string) {
+  let result = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    result ^= value.charCodeAt(index);
+    result = Math.imul(result, 16777619);
+  }
+  return Math.abs(result >>> 0);
 }

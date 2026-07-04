@@ -1,8 +1,16 @@
 const ARCHETYPE_LABELS: Record<string, { fr: string; en: string }> = {
-  A: { fr: "Guerrier", en: "Warrior" },
-  B: { fr: "Sage", en: "Sage" },
-  C: { fr: "Gardien", en: "Guardian" },
-  D: { fr: "Visionnaire", en: "Visionary" },
+  lion: { fr: "Lion", en: "Lion" },
+  lionne: { fr: "Lionne", en: "Lioness" },
+  rhinoceros: { fr: "Rhinocéros", en: "Rhinoceros" },
+  crocodile: { fr: "Crocodile", en: "Crocodile" },
+  serpent: { fr: "Serpent", en: "Serpent" },
+  dauphin: { fr: "Dauphin", en: "Dolphin" },
+  elephant: { fr: "Éléphant", en: "Elephant" },
+  baobab: { fr: "Baobab", en: "Baobab" },
+  zebre: { fr: "Zèbre", en: "Zebra" },
+  perroquet: { fr: "Perroquet", en: "Parrot" },
+  aigle: { fr: "Aigle", en: "Eagle" },
+  leopard: { fr: "Léopard", en: "Leopard" },
 };
 
 function extractChampsLibres(reponses: Record<string, unknown>): string {
@@ -20,36 +28,76 @@ function buildPrompt(
   langue: "fr" | "en",
 ): string {
   if (langue === "fr") {
-    return `Tu es un griot africain ancestral, un conteur des temps anciens. Rédige un parchemin mystique et poétique pour ${prenom}, dont l'archétype ancestral est "${archetype}".
+    return `Tu es la plume artistique de TOTEM ANCESTRAL.
+
+Tu vas composer le Parchemin Ancestral de ${prenom}.
 
 Voici les réponses de son parcours initiatique (champs libres) :
 ${champsLibres || "Le voyageur n'a pas laissé de paroles."}
 
-Le parchemin doit être :
-- Mystérieux et envoûtant, comme une prophétie ancestrale
-- Rédigé dans un français poétique et soutenu
-- Personnel, adressé directement à ${prenom}
-- Environ 200-300 mots
-- Parler de son archétype ${archetype}, de sa lignée, de son destin
-- Ne pas mentionner que c'est une IA qui écrit
+CONTEXTE :
+Archétype : ${archetype}
 
-Écris uniquement le texte du parchemin, sans titre, sans signature.`;
+STRUCTURE OBLIGATOIRE — 5 mouvements :
+MOUVEMENT 1 — L'OUVERTURE (200-250 car.) : décor, lieu, heure de vie de l'ancêtre
+MOUVEMENT 2 — LE PORTRAIT (350-400 car.) : apparence, geste, relation au peuple
+MOUVEMENT 3 — L'ÉPREUVE (350-400 car.) : scène emblématique, inspirée de la culture
+MOUVEMENT 4 — LA TRANSMISSION (300-350 car.) : ce que l'ancêtre a transmis
+MOUVEMENT 5 — LE PASSAGE (250-300 car.) : adresse directe à ${prenom}
+
+RÈGLES STRICTES :
+- Total : 1500-1800 caractères espaces compris
+- Conditionnel doux : "il aurait vécu", jamais "tu es" pour l'ancêtre
+- Jamais de vérité scientifique ou ethnique : c'est une fable artistique
+- Pas d'emojis, pas d'anglicismes, pas de texte marketing
+
+RÉPONSE — Format JSON STRICT :
+{
+  "parchment_text": "Texte complet, 5 mouvements séparés par \\n\\n",
+  "opening": "Mouvement 1 isolé",
+  "portrait": "Mouvement 2 isolé",
+  "trial": "Mouvement 3 isolé",
+  "transmission": "Mouvement 4 isolé",
+  "passage": "Mouvement 5 isolé",
+  "character_count": 1650,
+  "narrative_variant_used": "A"
+}`;
   }
 
-  return `You are an ancestral African griot, a storyteller from ancient times. Write a mystical and poetic parchment for ${prenom}, whose ancestral archetype is "${archetype}".
+  return `You are the artistic writer of TOTEM ANCESTRAL.
+
+Compose the Ancestral Parchment of ${prenom}.
 
 Here are their initiatory journey answers (free text fields):
 ${champsLibres || "The traveler left no words."}
 
-The parchment must be:
-- Mysterious and enchanting, like an ancestral prophecy
-- Written in poetic, elevated English
-- Personal, addressed directly to ${prenom}
-- About 200-300 words
-- Speak of their ${archetype} archetype, their lineage, their destiny
-- Do not mention it's an AI writing
+CONTEXT:
+Archetype: ${archetype}
 
-Write only the parchment text, no title, no signature.`;
+MANDATORY STRUCTURE — 5 movements:
+MOVEMENT 1 — OPENING (200-250 chars): setting, place, hour of the ancestor's life
+MOVEMENT 2 — PORTRAIT (350-400 chars): appearance, gesture, relation to the people
+MOVEMENT 3 — TRIAL (350-400 chars): emblematic scene inspired by the culture
+MOVEMENT 4 — TRANSMISSION (300-350 chars): what the ancestor passed on
+MOVEMENT 5 — PASSAGE (250-300 chars): direct address to ${prenom}
+
+STRICT RULES:
+- Total: 1500-1800 characters including spaces
+- Gentle conditional mode: "he would have lived", never "you are" for the ancestor
+- No scientific or ethnic truth: this is an artistic fable
+- No emojis, no marketing copy
+
+RESPONSE — Strict JSON format:
+{
+  "parchment_text": "Full text, 5 movements separated by \\n\\n",
+  "opening": "Movement 1 only",
+  "portrait": "Movement 2 only",
+  "trial": "Movement 3 only",
+  "transmission": "Movement 4 only",
+  "passage": "Movement 5 only",
+  "character_count": 1650,
+  "narrative_variant_used": "A"
+}`;
 }
 
 function extractJson(raw: string): Record<string, unknown> | null {
@@ -72,6 +120,43 @@ function extractParchmentText(raw: string): string {
   return raw.trim();
 }
 
+function extractSections(raw: string): { title: string; text: string }[] | null {
+  const parsed = extractJson(raw);
+  if (!parsed || typeof parsed !== "object") return null;
+
+  // Try new format: embedded sections array
+  const root = parsed as Record<string, unknown>;
+  if (Array.isArray(root.sections)) {
+    const items = root.sections as { title?: string; text?: string; paragraphs?: string[] }[];
+    if (items.length > 0) {
+      return items.map((s) => ({
+        title: s.title ?? "",
+        text: s.text ?? s.paragraphs?.join("\n\n") ?? "",
+      }));
+    }
+  }
+
+  // Legacy format: individual movement keys
+  const movementKeys = ["opening", "portrait", "trial", "transmission", "passage"];
+  const movementTitles: Record<string, string> = {
+    opening: "L'Ouverture",
+    portrait: "Le Portrait",
+    trial: "L'Épreuve",
+    transmission: "La Transmission",
+    passage: "Le Passage",
+  };
+
+  const sections: { title: string; text: string }[] = [];
+  for (const key of movementKeys) {
+    if (typeof root[key] === "string") {
+      const val = (root[key] as string).trim();
+      if (val) sections.push({ title: movementTitles[key], text: val });
+    }
+  }
+
+  return sections.length > 0 ? sections : null;
+}
+
 async function callClaude(apiKey: string, prompt: string): Promise<string> {
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -81,7 +166,7 @@ async function callClaude(apiKey: string, prompt: string): Promise<string> {
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-opus-4-8",
+      model: Deno.env.get("ANTHROPIC_MODEL") ?? "claude-opus-4-5",
       max_tokens: 2500,
       messages: [{ role: "user", content: prompt }],
     }),
@@ -156,11 +241,13 @@ Deno.serve(async (req) => {
         : buildPrompt(prenom, archetype, champsLibres, l);
 
     let texte = "";
+    let rawTexte = "";
 
     const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
     if (anthropicKey) {
       try {
-        texte = extractParchmentText(await callClaude(anthropicKey, finalPrompt));
+        rawTexte = await callClaude(anthropicKey, finalPrompt);
+        texte = extractParchmentText(rawTexte);
       } catch (e) {
         console.error("Claude error:", e);
       }
@@ -171,14 +258,14 @@ Deno.serve(async (req) => {
       const senyceEndpoint = Deno.env.get("SENYCE_API_TEXTE");
       if (senyceKey && senyceEndpoint) {
         try {
-          texte = await callSenyce(senyceEndpoint, senyceKey, {
+          rawTexte = await callSenyce(senyceEndpoint, senyceKey, {
             prenom,
             reponses,
             archetype: archetypeId,
             langue: l,
             prompt: finalPrompt,
           });
-          texte = extractParchmentText(texte);
+          texte = extractParchmentText(rawTexte);
         } catch (e) {
           console.error("SENYCE texte error:", e);
         }
@@ -187,12 +274,21 @@ Deno.serve(async (req) => {
 
     if (!texte) {
       texte = fallbackLocal(prenom, archetype, reponses as Record<string, unknown>);
+      rawTexte = texte;
     }
 
-    return new Response(JSON.stringify({ texte }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    const sections = extractSections(rawTexte || texte);
+
+    return new Response(
+      JSON.stringify({
+        texte,
+        sections: sections ?? [],
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
     return new Response(JSON.stringify({ error: message }), {

@@ -1,63 +1,77 @@
-const ARCHETYPE_LABELS: Record<string, { fr: string; en: string }> = {
-  A: { fr: "Guerrier", en: "Warrior" },
-  B: { fr: "Sage", en: "Sage" },
-  C: { fr: "Gardien", en: "Guardian" },
-  D: { fr: "Visionnaire", en: "Visionary" },
+const ANIMAL_VISUALS: Record<string, { fr: string; en: string }> = {
+  lion: {
+    fr: "visage de lion réaliste avec crinière noire et regard perçant",
+    en: "realistic lion face with a black mane and piercing gaze",
+  },
+  lionne: {
+    fr: "visage de lionne réaliste avec regard protecteur et traits royaux",
+    en: "realistic lioness face with a protective gaze and royal features",
+  },
+  rhinoceros: {
+    fr: "visage de rhinocéros réaliste avec corne sculpturale et peau minérale",
+    en: "realistic rhinoceros face with a sculptural horn and mineral skin",
+  },
+  crocodile: {
+    fr: "visage de crocodile réaliste avec écailles profondes et regard ancien",
+    en: "realistic crocodile face with deep scales and ancient gaze",
+  },
+  serpent: {
+    fr: "visage de serpent réaliste avec écailles vert sombre et regard hypnotique",
+    en: "realistic serpent face with dark green scales and hypnotic gaze",
+  },
+  dauphin: {
+    fr: "visage de dauphin réaliste avec peau bleutée et regard lumineux",
+    en: "realistic dolphin face with bluish skin and luminous gaze",
+  },
+  elephant: {
+    fr: "visage d'éléphant réaliste avec défenses sculpturales et regard ancestral",
+    en: "realistic elephant face with sculptural tusks and ancestral gaze",
+  },
+  baobab: {
+    fr: "visage anthropomorphe de baobab réaliste avec écorce massive et racines sculptées",
+    en: "realistic anthropomorphic baobab face with massive bark and carved roots",
+  },
+  zebre: {
+    fr: "visage de zèbre réaliste avec rayures nettes et regard calme",
+    en: "realistic zebra face with sharp stripes and a calm gaze",
+  },
+  perroquet: {
+    fr: "visage de perroquet réaliste avec plumage vert et or et regard vif",
+    en: "realistic parrot face with green and gold plumage and a vivid gaze",
+  },
+  aigle: {
+    fr: "visage d'aigle réaliste avec bec royal et regard perçant",
+    en: "realistic eagle face with a royal beak and piercing gaze",
+  },
+  leopard: {
+    fr: "visage de léopard réaliste avec taches sombres et regard précis",
+    en: "realistic leopard face with dark rosettes and a precise gaze",
+  },
 };
 
-function buildImagePrompt(
-  prenom: string,
-  texte: string,
-  archetype: string,
-  langue: "fr" | "en",
-): string {
+function buildImagePrompt(archetypeId: string, langue: "fr" | "en", seed?: string): string {
+  const visual = ANIMAL_VISUALS[archetypeId];
+  const seedParam = seed ? ` --seed ${numericSeed(seed)}` : "";
+  const leftFace = visual?.[langue] ?? `visage réaliste du totem ${archetypeId}`;
+
   if (langue === "fr") {
-    return `Illustration mystique et ancestrale pour un parchemin spirituel.
-
-Contexte : Ce parchemin raconte l'histoire initiatique de ${prenom}, dont l'archétype ancestral est "${archetype}".
-
-Texte du parchemin :
-"${texte.slice(0, 500)}"
-
-Style :
-- Art africain contemporain mêlé de symbolisme mystique
-- Palette terreuse (ocre, indigo, or, ivoire)
-- Motifs géométriques sacrés et symboles ancestraux
-- Ambiance spirituelle, intemporelle, solennelle
-- Format portrait, aspect mystique et noble
-- Peinture numérique avec textures rappelant le papier parchemin vieilli
-- Pas de texte visible dans l'image
-- L'image doit évoquer la sagesse, la mémoire des ancêtres et le destin`;
+    return `Portrait ancestral puissant, visage coupé en deux : moitié gauche ${leftFace}, moitié droite masque Ngil Fang traditionnel africain stylisé avec yeux blancs et motifs géométriques, fusion harmonieuse au milieu du visage, peau avec cicatrices rituelles dorées, ambiance sombre mystique, éclairage dramatique cinématographique, style artistique premium africain, très détaillé, haute résolution, 8k, sans texte, sans logo, sans watermark --ar 3:4 --stylize 250 --v 6${seedParam}`;
   }
 
-  return `Mystical and ancestral illustration for a spiritual parchment.
+  return `Powerful ancestral portrait, split face: left half ${leftFace}, right half stylized traditional African Fang Ngil mask with white eyes and geometric patterns, harmonious fusion at the center of the face, skin with golden ritual scarifications, dark mystical atmosphere, dramatic cinematic lighting, premium African artistic style, very detailed, high resolution, 8k, no text, no logo, no watermark --ar 3:4 --stylize 250 --v 6${seedParam}`;
+}
 
-Context: This parchment tells the initiatory story of ${prenom}, whose ancestral archetype is "${archetype}".
-
-Parchment text:
-"${texte.slice(0, 500)}"
-
-Style:
-- Contemporary African art blended with mystical symbolism
-- Earthy palette (ochre, indigo, gold, ivory)
-- Sacred geometric patterns and ancestral symbols
-- Spiritual, timeless, solemn atmosphere
-- Portrait format, mystical and noble feel
-- Digital painting with aged parchment paper textures
-- No visible text in the image
-- The image should evoke wisdom, ancestral memory, and destiny`;
+function numericSeed(seed: string): number {
+  let hash = 0;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
+  }
+  return hash || 1;
 }
 
 Deno.serve(async (req) => {
   try {
-    const { prenom, texte, archetypeId, langue = "fr", prompt } = await req.json();
-
-    if (!texte) {
-      return new Response(JSON.stringify({ error: "texte requis" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    const { archetypeId, langue = "fr", prompt, seed } = await req.json();
 
     const openaiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openaiKey) {
@@ -67,12 +81,17 @@ Deno.serve(async (req) => {
       });
     }
 
+    const providedPrompt = typeof prompt === "string" ? prompt.trim() : "";
+
+    if (!archetypeId && !providedPrompt) {
+      return new Response(JSON.stringify({ error: "archetypeId ou prompt requis" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const l = (langue === "en" ? "en" : "fr") as "fr" | "en";
-    const archetype = ARCHETYPE_LABELS[archetypeId as string]?.[l] ?? "Griot";
-    const finalPrompt =
-      typeof prompt === "string" && prompt.trim()
-        ? prompt
-        : buildImagePrompt(prenom, texte, archetype, l);
+    const finalPrompt = providedPrompt || buildImagePrompt(archetypeId, l, seed);
 
     const response = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
@@ -81,10 +100,10 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${openaiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-image-2",
+        model: Deno.env.get("OPENAI_IMAGE_MODEL") ?? "gpt-image-2",
         prompt: finalPrompt,
         n: 1,
-        size: "1024x1024",
+        size: "1024x1360",
       }),
     });
 
@@ -109,7 +128,11 @@ Deno.serve(async (req) => {
     const finalUrl = imageUrl || `data:image/${format};base64,${b64}`;
 
     return new Response(
-      JSON.stringify({ imageUrl: finalUrl, revisedPrompt: result.data?.[0]?.revised_prompt }),
+      JSON.stringify({
+        imageUrl: finalUrl,
+        prompt: finalPrompt,
+        revisedPrompt: result.data?.[0]?.revised_prompt,
+      }),
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
