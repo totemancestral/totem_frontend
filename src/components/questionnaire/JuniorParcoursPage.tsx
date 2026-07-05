@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import {
@@ -16,6 +17,7 @@ import {
   Zap,
 } from "lucide-react";
 import { GoldParticles } from "@/components/GoldParticles";
+import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { apiPath } from "@/lib/routes";
 
 type Locale = "fr" | "en";
@@ -278,6 +280,7 @@ function toLocale(value: string): Locale {
 export function JuniorParcoursPage() {
   const locale = toLocale(useLocale());
   const t = copy[locale];
+  const { session } = useSupabaseSession();
   const [started, setStarted] = useState(false);
   const [index, setIndex] = useState(0);
   const [firstName, setFirstName] = useState("");
@@ -285,6 +288,7 @@ export function JuniorParcoursPage() {
   const [result, setResult] = useState<JuniorResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const current = t.questions[index];
   const progress = started ? ((index + 1) / t.questions.length) * 100 : 0;
@@ -313,6 +317,19 @@ export function JuniorParcoursPage() {
         throw new Error((payload as { error?: string } | null)?.error || t.error);
       }
       setResult(payload);
+
+      if (session?.access_token) {
+        fetch("/api/iuvenis_signum/save", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ firstName, answers: apiAnswers, locale }),
+        })
+          .then((res) => res.ok && setSaved(true))
+          .catch(() => {});
+      }
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : t.error);
     } finally {
@@ -357,6 +374,18 @@ export function JuniorParcoursPage() {
             >
               {t.retry as string}
             </button>
+            {saved && (
+              <p className="mt-4 text-sm" style={{ color: "var(--or-ancestral)" }}>
+                Enregistré dans{" "}
+                <Link
+                  href={`/${locale}/domus_animi`}
+                  className="underline"
+                  style={{ color: "var(--or-ancestral)" }}
+                >
+                  mon espace
+                </Link>
+              </p>
+            )}
           </div>
 
           <div className="grid gap-4">

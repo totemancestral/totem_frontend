@@ -620,10 +620,7 @@ export function Hero() {
             {t.start}
             <ArrowRight size={16} strokeWidth={1.7} />
           </Link>
-          <Link
-            href={juniorHref(locale)}
-            className="btn-secondary w-full sm:w-auto"
-          >
+          <Link href={juniorHref(locale)} className="btn-secondary w-full sm:w-auto">
             {t.juniorCta}
           </Link>
         </motion.div>

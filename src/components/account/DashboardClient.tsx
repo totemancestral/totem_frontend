@@ -16,6 +16,7 @@ import {
   Menu,
   PackageCheck,
   Plus,
+  Share2,
   Sparkles,
   UserRound,
   Volume2,
@@ -217,8 +218,22 @@ export function DashboardClient({
     [locale],
   );
 
+  type JuniorTotem = {
+    id: string;
+    totemName: string;
+    quality: string;
+    phrase: string;
+    orderNumber: number;
+    shareCount: number;
+    createdAt: string;
+    scores: Record<string, number>;
+    dominant: string;
+    secondary: string;
+  };
+
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [oeuvres, setOeuvres] = useState<Oeuvre[]>([]);
+  const [juniorTotems, setJuniorTotems] = useState<JuniorTotem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOeuvre, setSelectedOeuvre] = useState<Oeuvre | null>(null);
@@ -250,11 +265,14 @@ export function DashboardClient({
           return;
         }
 
-        const [commandesRes, oeuvresRes] = await Promise.all([
+        const [commandesRes, oeuvresRes, juniorRes] = await Promise.all([
           fetch("/api/ordo_tabulae", {
             headers: { authorization: `Bearer ${currentToken}` },
           }),
           fetch("/api/opera_artificis", {
+            headers: { authorization: `Bearer ${currentToken}` },
+          }),
+          fetch("/api/iuvenis_signum/totems", {
             headers: { authorization: `Bearer ${currentToken}` },
           }),
         ]);
@@ -270,9 +288,11 @@ export function DashboardClient({
 
         const commandesData: Commande[] = await commandesRes.json();
         const oeuvresData: Oeuvre[] = await oeuvresRes.json();
+        const juniorData: JuniorTotem[] = juniorRes.ok ? await juniorRes.json() : [];
 
         setCommandes(commandesData);
         setOeuvres(oeuvresData);
+        setJuniorTotems(juniorData);
       } catch (err) {
         if (alive) setError(err instanceof Error ? err.message : t.error);
       } finally {
@@ -298,6 +318,23 @@ export function DashboardClient({
   ).length;
   const composition = buildCompositionState({ commandes, oeuvres, copy: t });
   const [activeSection, setActiveSection] = useState<DashboardSection>(section);
+
+  async function shareJuniorTotem(totem: JuniorTotem) {
+    const text = `${totem.totemName} — #${String(totem.orderNumber).padStart(6, "0")}\n"${totem.phrase}"\nDécouvre ton totem ancestral sur totemancestral.com`;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Fallback silencieux
+    }
+    fetch("/api/iuvenis_signum/share", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ id: totem.id }),
+    }).catch(() => {});
+  }
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -522,6 +559,56 @@ export function DashboardClient({
               </div>
 
               <CompositionPanel composition={composition} locale={locale} />
+
+              {juniorTotems.length > 0 && (
+                <section className="premium-panel mt-6 p-5 md:p-6">
+                  <h2 className="h-display text-2xl" style={{ color: "var(--or-ancestral)" }}>
+                    Totems Junior
+                  </h2>
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    {juniorTotems.map((totem) => (
+                      <article
+                        key={totem.id}
+                        className="border p-4"
+                        style={{ borderColor: "rgba(216,173,77,0.22)" }}
+                      >
+                        <p
+                          className="subtext text-[11px] uppercase"
+                          style={{ color: "rgba(237,217,154,0.56)" }}
+                        >
+                          #{String(totem.orderNumber).padStart(6, "0")}
+                        </p>
+                        <h3
+                          className="mt-1 text-xl uppercase"
+                          style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
+                        >
+                          {totem.totemName}
+                        </h3>
+                        <p className="mt-2 text-sm" style={{ color: "rgba(245,240,232,0.7)" }}>
+                          {totem.phrase}
+                        </p>
+                        <div
+                          className="mt-3 flex items-center gap-4 text-xs"
+                          style={{ color: "rgba(237,217,154,0.5)" }}
+                        >
+                          <span>{totem.quality}</span>
+                          <span>
+                            F{totem.scores.F} E{totem.scores.E} T{totem.scores.T} A{totem.scores.A}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn-secondary mt-3 w-full"
+                          onClick={() => shareJuniorTotem(totem)}
+                        >
+                          <Share2 size={14} />
+                          Partager
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
             </section>
           )}
 
