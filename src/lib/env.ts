@@ -88,15 +88,6 @@ export const serverEnvSchema = z
     required("STRIPE_PRICE_ANCESTRAL", "Stripe price Ancestral", env.STRIPE_PRICE_ANCESTRAL);
     required("STRIPE_PRICE_FAMILLE", "Stripe price Famille", env.STRIPE_PRICE_FAMILLE);
 
-    required("R2_ACCOUNT_ID", "R2 account ID", env.R2_ACCOUNT_ID);
-    required("R2_ACCESS_KEY_ID", "R2 access key ID", env.R2_ACCESS_KEY_ID);
-    required("R2_SECRET_ACCESS_KEY", "R2 secret access key", env.R2_SECRET_ACCESS_KEY);
-    required("R2_BUCKET_NAME", "R2 bucket name", env.R2_BUCKET_NAME);
-    required("R2_PUBLIC_URL", "R2 public URL", env.R2_PUBLIC_URL);
-
-    required("RESEND_API_KEY", "Resend API key", env.RESEND_API_KEY);
-    required("RESEND_FROM_EMAIL", "Resend from email", env.RESEND_FROM_EMAIL);
-
     required("ADMIN_EMAIL", "Admin email", env.ADMIN_EMAIL);
 
     if (!env.TOTEM_BACKEND_URL) {
