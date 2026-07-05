@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { useState } from "react";
-import { ArrowRight, Check, ChevronDown, Star } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Star, X } from "lucide-react";
 import { GoldParticles } from "./GoldParticles";
 import { Reveal, Ornament } from "./Reveal";
 
@@ -612,33 +612,20 @@ export function Hero() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7 }}
-          className="mt-12 flex flex-col items-center gap-4"
+          className="mt-12"
         >
-          {!showChoice ? (
-            <button
-              type="button"
-              className="btn-primary animate-pulse-glow w-full sm:w-auto"
-              onClick={() => setShowChoice(true)}
-            >
-              {t.start}
-              <ArrowRight size={16} strokeWidth={1.7} />
-            </button>
-          ) : (
-            <div className="flex w-full flex-col items-center gap-5 sm:flex-row sm:justify-center">
-              <Link
-                href={journeyHref(locale)}
-                className="btn-primary animate-pulse-glow w-full sm:w-auto"
-              >
-                {t.start}
-                <ArrowRight size={16} strokeWidth={1.7} />
-              </Link>
-              <Link href={juniorHref(locale)} className="btn-secondary w-full sm:w-auto">
-                {t.juniorCta}
-              </Link>
-            </div>
-          )}
+          <button
+            type="button"
+            className="btn-primary animate-pulse-glow w-full sm:w-auto"
+            onClick={() => setShowChoice(true)}
+          >
+            {t.start}
+            <ArrowRight size={16} strokeWidth={1.7} />
+          </button>
         </motion.div>
       </div>
+
+      {showChoice && <RoleChoiceToast locale={locale} t={t} onClose={() => setShowChoice(false)} />}
     </section>
   );
 }
@@ -1132,28 +1119,82 @@ export function CtaFinal() {
           <p className="quote-italic mt-8 text-xl md:text-2xl">{t.cta.body}</p>
         </Reveal>
         <Reveal delay={0.2}>
-          {!showChoice ? (
-            <button
-              type="button"
-              className="btn-primary !px-12 !py-6 text-base"
-              onClick={() => setShowChoice(true)}
-            >
-              {t.cta.button}
-              <ArrowRight size={18} strokeWidth={1.7} />
-            </button>
-          ) : (
-            <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
-              <Link href={journeyHref(locale)} className="btn-primary !px-12 !py-6 text-base">
-                {t.cta.button}
-                <ArrowRight size={18} strokeWidth={1.7} />
-              </Link>
-              <Link href={juniorHref(locale)} className="btn-secondary !px-12 !py-6 text-base">
-                {t.juniorCta}
-              </Link>
-            </div>
-          )}
+          <button
+            type="button"
+            className="btn-primary !px-12 !py-6 text-base"
+            onClick={() => setShowChoice(true)}
+          >
+            {t.cta.button}
+            <ArrowRight size={18} strokeWidth={1.7} />
+          </button>
         </Reveal>
       </div>
+
+      {showChoice && <RoleChoiceToast locale={locale} t={t} onClose={() => setShowChoice(false)} />}
     </section>
+  );
+}
+
+function RoleChoiceToast({
+  locale,
+  t,
+  onClose,
+}: {
+  locale: Locale;
+  t: (typeof copy)[Locale];
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center px-5"
+      style={{ background: "rgba(0,0,0,0.72)" }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="relative w-full max-w-md border p-8"
+        style={{ background: "var(--nuit-profonde)", borderColor: "rgba(216,173,77,0.28)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="absolute right-4 top-4"
+          onClick={onClose}
+          style={{ color: "rgba(237,217,154,0.5)" }}
+        >
+          <X size={20} />
+        </button>
+
+        <h3
+          className="h-display text-center text-2xl uppercase"
+          style={{ color: "var(--or-pale)" }}
+        >
+          {t.start}
+        </h3>
+        <p className="mt-3 text-center text-sm" style={{ color: "rgba(245,240,232,0.62)" }}>
+          Choisis ton parcours
+        </p>
+
+        <div className="mt-8 flex flex-col gap-4">
+          <Link
+            href={journeyHref(locale)}
+            className="btn-primary w-full !py-5 text-center text-base"
+            onClick={onClose}
+          >
+            {t.start}
+            <ArrowRight size={16} strokeWidth={1.7} />
+          </Link>
+          <Link
+            href={juniorHref(locale)}
+            className="btn-secondary w-full !py-5 text-center text-base"
+            onClick={onClose}
+          >
+            {t.juniorCta}
+          </Link>
+        </div>
+      </motion.div>
+    </div>
   );
 }
