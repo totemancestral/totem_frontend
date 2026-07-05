@@ -550,6 +550,7 @@ function TriptychCard({
 export function Hero() {
   const { locale, t } = useLandingCopy();
   const titleChars = t.hero.title.split("");
+  const [showChoice, setShowChoice] = useState(false);
 
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-5 pb-16 pt-28 md:px-10">
@@ -611,18 +612,31 @@ export function Hero() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7 }}
-          className="mt-12 flex w-full flex-col items-center justify-center gap-5 sm:w-auto sm:flex-row"
+          className="mt-12 flex flex-col items-center gap-4"
         >
-          <Link
-            href={journeyHref(locale)}
-            className="btn-primary animate-pulse-glow w-full sm:w-auto"
-          >
-            {t.start}
-            <ArrowRight size={16} strokeWidth={1.7} />
-          </Link>
-          <Link href={juniorHref(locale)} className="btn-secondary w-full sm:w-auto">
-            {t.juniorCta}
-          </Link>
+          {!showChoice ? (
+            <button
+              type="button"
+              className="btn-primary animate-pulse-glow w-full sm:w-auto"
+              onClick={() => setShowChoice(true)}
+            >
+              {t.start}
+              <ArrowRight size={16} strokeWidth={1.7} />
+            </button>
+          ) : (
+            <div className="flex w-full flex-col items-center gap-5 sm:flex-row sm:justify-center">
+              <Link
+                href={journeyHref(locale)}
+                className="btn-primary animate-pulse-glow w-full sm:w-auto"
+              >
+                {t.start}
+                <ArrowRight size={16} strokeWidth={1.7} />
+              </Link>
+              <Link href={juniorHref(locale)} className="btn-secondary w-full sm:w-auto">
+                {t.juniorCta}
+              </Link>
+            </div>
+          )}
         </motion.div>
       </div>
     </section>
@@ -1089,6 +1103,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 /* ---------- CTA FINAL ---------- */
 export function CtaFinal() {
   const { locale, t } = useLandingCopy();
+  const [showChoice, setShowChoice] = useState(false);
 
   return (
     <section
@@ -1117,15 +1132,26 @@ export function CtaFinal() {
           <p className="quote-italic mt-8 text-xl md:text-2xl">{t.cta.body}</p>
         </Reveal>
         <Reveal delay={0.2}>
-          <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
-            <Link href={journeyHref(locale)} className="btn-primary !px-12 !py-6 text-base">
+          {!showChoice ? (
+            <button
+              type="button"
+              className="btn-primary !px-12 !py-6 text-base"
+              onClick={() => setShowChoice(true)}
+            >
               {t.cta.button}
               <ArrowRight size={18} strokeWidth={1.7} />
-            </Link>
-            <Link href={juniorHref(locale)} className="btn-secondary !px-12 !py-6 text-base">
-              {t.juniorCta}
-            </Link>
-          </div>
+            </button>
+          ) : (
+            <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
+              <Link href={journeyHref(locale)} className="btn-primary !px-12 !py-6 text-base">
+                {t.cta.button}
+                <ArrowRight size={18} strokeWidth={1.7} />
+              </Link>
+              <Link href={juniorHref(locale)} className="btn-secondary !px-12 !py-6 text-base">
+                {t.juniorCta}
+              </Link>
+            </div>
+          )}
         </Reveal>
       </div>
     </section>

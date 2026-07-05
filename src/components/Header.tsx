@@ -13,7 +13,6 @@ type Locale = "fr" | "en";
 
 const nav = [
   { to: "/", hash: "#experience", labelKey: "experience" },
-  { to: "/iuvenis_signum", hash: "", labelKey: "junior" },
   { to: "/", hash: "#offres", labelKey: "offers" },
   { to: "/", hash: "#faq", labelKey: "faq" },
 ];
