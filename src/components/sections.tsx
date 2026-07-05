@@ -19,6 +19,7 @@ type Locale = "fr" | "en";
 const copy = {
   fr: {
     start: "Commencer",
+    juniorCta: "Je suis Junior",
     question: "Une question",
     hero: {
       eyebrow: "Votre âme lointaine, africaine, réincarnée.",
@@ -234,6 +235,7 @@ const copy = {
   },
   en: {
     start: "Begin",
+    juniorCta: "I am Junior",
     question: "A question",
     hero: {
       eyebrow: "Your distant African soul, reimagined",
@@ -473,6 +475,10 @@ function journeyHref(locale: Locale) {
   return `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`;
 }
 
+function juniorHref(locale: Locale) {
+  return `/${locale}/janua_vitae?mode=signup&role=junior&redirect=${encodeURIComponent(`/${locale}/iuvenis_signum`)}`;
+}
+
 function SectionHeading({
   eyebrow,
   title,
@@ -614,8 +620,11 @@ export function Hero() {
             {t.start}
             <ArrowRight size={16} strokeWidth={1.7} />
           </Link>
-          <Link href={`/${locale}/#faq`} className="btn-secondary w-full sm:w-auto">
-            {t.question}
+          <Link
+            href={juniorHref(locale)}
+            className="btn-secondary w-full sm:w-auto"
+          >
+            {t.juniorCta}
           </Link>
         </motion.div>
       </div>
@@ -1111,10 +1120,15 @@ export function CtaFinal() {
           <p className="quote-italic mt-8 text-xl md:text-2xl">{t.cta.body}</p>
         </Reveal>
         <Reveal delay={0.2}>
-          <Link href={journeyHref(locale)} className="btn-primary mt-12 !px-12 !py-6 text-base">
-            {t.cta.button}
-            <ArrowRight size={18} strokeWidth={1.7} />
-          </Link>
+          <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
+            <Link href={journeyHref(locale)} className="btn-primary !px-12 !py-6 text-base">
+              {t.cta.button}
+              <ArrowRight size={18} strokeWidth={1.7} />
+            </Link>
+            <Link href={juniorHref(locale)} className="btn-secondary !px-12 !py-6 text-base">
+              {t.juniorCta}
+            </Link>
+          </div>
         </Reveal>
       </div>
     </section>

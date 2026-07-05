@@ -7,6 +7,7 @@ type SignupPayload = {
   password?: string;
   prenom?: string;
   locale?: string;
+  role?: string;
   redirectPath?: string;
 };
 
@@ -25,9 +26,11 @@ export async function POST(request: Request) {
   }
 
   const redirectTo = `${getRequestOrigin(request)}${safeRedirectPath(payload.redirectPath, locale)}`;
-  const metadata: { prenom: string; langue: "fr" | "en" } = {
+  const role = payload.role === "junior" ? "junior" : "adulte";
+  const metadata: { prenom: string; langue: "fr" | "en"; role: string } = {
     prenom: payload.prenom?.trim() || email.split("@")[0],
     langue: locale,
+    role,
   };
 
   try {

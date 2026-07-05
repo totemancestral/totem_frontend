@@ -87,6 +87,7 @@ export function AuthClient({ locale }: { locale: Locale }) {
 
   const dashboardPath = useMemo(() => `/${locale}/domus_animi`, [locale]);
   const redirectPath = searchParams.get("redirect") || dashboardPath;
+  const signupRole = searchParams.get("role") || "adulte";
 
   useEffect(() => {
     const sessionToRedirect = existingSession;
@@ -116,7 +117,7 @@ export function AuthClient({ locale }: { locale: Locale }) {
         const response = await fetch("/api/auth/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, prenom, locale, redirectPath }),
+          body: JSON.stringify({ email, password, prenom, locale, role: signupRole, redirectPath }),
         });
 
         if (!response.ok) {
