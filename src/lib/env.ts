@@ -13,6 +13,7 @@ export const serverEnvSchema = z
     STRIPE_PRICE_ORIGINE: z.string().startsWith("price_").optional(),
     STRIPE_PRICE_ANCESTRAL: z.string().startsWith("price_").optional(),
     STRIPE_PRICE_FAMILLE: z.string().startsWith("price_").optional(),
+    STRIPE_PRICE_JUNIOR: z.string().startsWith("price_").optional(),
 
     // Supabase — requis en production
     NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
@@ -87,6 +88,7 @@ export const serverEnvSchema = z
     required("STRIPE_PRICE_ORIGINE", "Stripe price Origine", env.STRIPE_PRICE_ORIGINE);
     required("STRIPE_PRICE_ANCESTRAL", "Stripe price Ancestral", env.STRIPE_PRICE_ANCESTRAL);
     required("STRIPE_PRICE_FAMILLE", "Stripe price Famille", env.STRIPE_PRICE_FAMILLE);
+    required("STRIPE_PRICE_JUNIOR", "Stripe price Junior", env.STRIPE_PRICE_JUNIOR);
 
     required("ADMIN_EMAIL", "Admin email", env.ADMIN_EMAIL);
 

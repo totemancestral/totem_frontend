@@ -1,14 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import {
   ArrowLeft,
   ArrowRight,
   Bird,
+  CreditCard,
   Flame,
   Footprints,
+  Loader,
+  Lock,
   Mountain,
   Shield,
   Sparkles,
@@ -280,15 +284,23 @@ function toLocale(value: string): Locale {
 export function JuniorParcoursPage() {
   const locale = toLocale(useLocale());
   const t = copy[locale];
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { session } = useSupabaseSession();
   const [started, setStarted] = useState(false);
   const [index, setIndex] = useState(0);
   const [firstName, setFirstName] = useState("");
   const [answers, setAnswers] = useState<Record<number, JuniorAnswer>>({});
-  const [result, setResult] = useState<JuniorResult | null>(null);
+  const [result, setResult] = useState<JuniorResult | null>(() => {
+    if (typeof window === "undefined") return null;
+    const stored = sessionStorage.getItem("junior_reveal");
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [showPricing, setShowPricing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const checkoutCalled = useRef(false);
 
   const current = t.questions[index];
   const progress = started ? ((index + 1) / t.questions.length) * 100 : 0;
@@ -302,39 +314,62 @@ export function JuniorParcoursPage() {
     [answers],
   );
 
-  async function reveal() {
+  async function startCheckout() {
+    if (!session?.access_token) {
+      router.push(
+        `/${locale}/janua_vitae?mode=signup&role=junior&redirect=${encodeURIComponent(`/${locale}/iuvenis_signum`)}`,
+      );
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(apiPath("junior"), {
+      const response = await fetch("/api/iuvenis_signum/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ firstName, answers: apiAnswers, locale }),
       });
-      const payload = (await response.json().catch(() => null)) as
-        JuniorResult | { error?: string } | null;
-      if (!response.ok || !payload || !isJuniorResult(payload)) {
-        throw new Error((payload as { error?: string } | null)?.error || t.error);
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.checkoutUrl) {
+        throw new Error(payload?.error || t.error);
       }
-      setResult(payload);
 
-      if (session?.access_token) {
-        fetch("/api/iuvenis_signum/save", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ firstName, answers: apiAnswers, locale }),
-        })
-          .then((res) => res.ok && setSaved(true))
-          .catch(() => {});
-      }
+      sessionStorage.setItem("junior_checkout_session", payload.checkoutSessionId);
+      sessionStorage.setItem("junior_answers", JSON.stringify(apiAnswers));
+      sessionStorage.setItem("junior_firstName", firstName);
+      sessionStorage.setItem("junior_locale", locale);
+
+      window.location.href = payload.checkoutUrl;
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : t.error);
+      setShowPricing(false);
     } finally {
       setLoading(false);
+      checkoutCalled.current = true;
     }
+  }
+
+  function restoreResultFromCache() {
+    if (result) return;
+    const cachedReveal = sessionStorage.getItem("junior_reveal");
+    if (cachedReveal) {
+      try {
+        const parsed = JSON.parse(cachedReveal);
+        setResult(parsed);
+        sessionStorage.removeItem("junior_reveal");
+      } catch {}
+    }
+  }
+
+  const checkoutSuccess = searchParams.get("checkout");
+  const checkoutSessionId = searchParams.get("session_id");
+
+  if (checkoutSuccess === "success" && checkoutSessionId) {
+    restoreResultFromCache();
   }
 
   if (result) {
@@ -544,15 +579,52 @@ export function JuniorParcoursPage() {
                   {t.next as string}
                   <ArrowRight size={16} />
                 </button>
+              ) : showPricing ? (
+                <div className="mt-6 w-full border p-8" style={{ borderColor: "rgba(216,173,77,0.22)" }}>
+                  <p className="text-center text-[11px] uppercase" style={{ color: "var(--or-ancestral)" }}>
+                    {t.eyebrow as string}
+                  </p>
+                  <h2
+                    className="mt-2 text-center text-[32px] uppercase leading-none md:text-[42px]"
+                    style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
+                  >
+                    {locale === "fr" ? "Devoile ton Totem" : "Reveal your Totem"}
+                  </h2>
+                  <p className="mt-4 text-center text-lg" style={{ color: "rgba(245,240,232,0.72)" }}>
+                    {locale === "fr"
+                      ? "Une experience unique pour 9,99€"
+                      : "A unique experience for €9.99"}
+                  </p>
+                  <div className="mt-8 flex justify-center">
+                    <button
+                      type="button"
+                      className="btn-primary text-lg px-10 py-4"
+                      onClick={startCheckout}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <><Loader size={18} className="animate-spin" /> {locale === "fr" ? "Preparation..." : "Preparing..."}</>
+                      ) : (
+                        <><CreditCard size={18} /> {locale === "fr" ? "Choisir - 9,99€" : "Choose - €9.99"}</>
+                      )}
+                    </button>
+                  </div>
+                  <div className="mt-6 flex justify-center gap-2 text-sm" style={{ color: "rgba(245,240,232,0.55)" }}>
+                    <Lock size={14} />
+                    {locale === "fr"
+                      ? "Paiement securise par Stripe"
+                      : "Secure payment by Stripe"}
+                  </div>
+                </div>
               ) : (
                 <button
                   type="button"
                   className="btn-primary"
-                  onClick={reveal}
+                  onClick={() => setShowPricing(true)}
                   disabled={!canContinue || loading}
                 >
-                  {loading ? (t.loading as string) : (t.reveal as string)}
-                  <Sparkles size={16} />
+                  {locale === "fr" ? "Mon Totem - 9,99€" : "My Totem - €9.99"}
+                  <CreditCard size={16} />
                 </button>
               )}
             </div>
@@ -577,7 +649,7 @@ function ResultStat({ label, value }: { label: string; value: string }) {
 }
 
 function isJuniorResult(value: JuniorResult | { error?: string }): value is JuniorResult {
-  return "totem" in value && "nomComplet" in value && "share" in value;
+  return "totem" in value && "phrase" in value && "share" in value;
 }
 
 function ResultBlock({ title, body }: { title: string; body: string }) {
