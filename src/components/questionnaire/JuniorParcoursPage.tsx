@@ -342,6 +342,9 @@ export function JuniorParcoursPage() {
       sessionStorage.setItem("junior_answers", JSON.stringify(apiAnswers));
       sessionStorage.setItem("junior_firstName", firstName);
       sessionStorage.setItem("junior_locale", locale);
+      if (payload.reveal) {
+        sessionStorage.setItem("junior_reveal", JSON.stringify(payload.reveal));
+      }
 
       window.location.href = payload.checkoutUrl;
     } catch (nextError) {

@@ -2,18 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerEnv } from "@/lib/env";
 import { authenticateRequest } from "@/lib/server-auth";
 import { rateLimit } from "@/lib/rate-limit";
-import { z } from "zod";
-
-const juniorCheckoutSchema = z.object({
-  firstName: z.string().trim().max(40).optional(),
-  locale: z.enum(["fr", "en"]).optional(),
-  answers: z.record(
-    z.string(),
-    z.object({
-      choice: z.enum(["A", "B", "C", "D"]),
-    }),
-  ),
-});
+import { pagePath } from "@/lib/routes";
 
 export async function POST(request: Request) {
   const auth = await authenticateRequest(request);
@@ -22,9 +11,9 @@ export async function POST(request: Request) {
   const rateLimitResponse = rateLimit(request, 10, 60_000);
   if (rateLimitResponse) return rateLimitResponse;
 
-  const parsed = juniorCheckoutSchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Requete junior invalide" }, { status: 422 });
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Requete invalide" }, { status: 422 });
   }
 
   const env = getServerEnv();
@@ -32,19 +21,35 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Backend non configure" }, { status: 503 });
   }
 
+  const typed = body as { locale?: string };
+  const locale = typed.locale === "en" ? "en" : "fr";
+
+  const origin = (
+    request.headers.get("origin") ||
+    env.NEXT_PUBLIC_SITE_URL ||
+    env.SITE_URL ||
+    "http://localhost:3000"
+  ).replace(/\/$/, "");
+
   const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
-  const response = await fetch(`${backendUrl}/junior/checkout`, {
+  const response = await fetch(`${backendUrl}/checkout`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: request.headers.get("authorization") ?? "",
     },
-    body: JSON.stringify(parsed.data),
+    body: JSON.stringify({
+      offer: "junior",
+      ...(body as Record<string, unknown>),
+      successUrl: `${origin}${pagePath(locale, "junior", "checkout=success&session_id={CHECKOUT_SESSION_ID}")}`,
+      cancelUrl: `${origin}${pagePath(locale, "junior", "checkout=cancelled")}`,
+    }),
   });
 
   const payload = (await response.json().catch(() => null)) as {
     id?: string;
     url?: string | null;
+    reveal?: Record<string, unknown>;
     message?: string;
     error?: string;
   } | null;
