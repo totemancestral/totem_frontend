@@ -37,7 +37,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Requete de paiement invalide" }, { status: 422 });
   }
 
-  const env = getServerEnv();
+  let env;
+  try {
+    env = getServerEnv();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Configuration serveur invalide";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+
   const config = offerConfig[parsed.data.offre];
   const priceId = env[config.priceEnv];
 

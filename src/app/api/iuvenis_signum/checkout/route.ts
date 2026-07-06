@@ -16,7 +16,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Requete invalide" }, { status: 422 });
   }
 
-  const env = getServerEnv();
+  let env;
+  try {
+    env = getServerEnv();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Configuration serveur invalide";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+
   if (!env.TOTEM_BACKEND_URL) {
     return NextResponse.json({ error: "Backend non configure" }, { status: 503 });
   }
@@ -32,19 +39,24 @@ export async function POST(request: Request) {
   ).replace(/\/$/, "");
 
   const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
-  const response = await fetch(`${backendUrl}/checkout`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: request.headers.get("authorization") ?? "",
-    },
-    body: JSON.stringify({
-      offer: "junior",
-      ...(body as Record<string, unknown>),
-      successUrl: `${origin}${pagePath(locale, "junior", "checkout=success&session_id={CHECKOUT_SESSION_ID}")}`,
-      cancelUrl: `${origin}${pagePath(locale, "junior", "checkout=cancelled")}`,
-    }),
-  });
+  let response;
+  try {
+    response = await fetch(`${backendUrl}/checkout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: request.headers.get("authorization") ?? "",
+      },
+      body: JSON.stringify({
+        offer: "junior",
+        ...(body as Record<string, unknown>),
+        successUrl: `${origin}${pagePath(locale, "junior", "checkout=success&session_id={CHECKOUT_SESSION_ID}")}`,
+        cancelUrl: `${origin}${pagePath(locale, "junior", "checkout=cancelled")}`,
+      }),
+    });
+  } catch {
+    return NextResponse.json({ error: "Backend indisponible" }, { status: 502 });
+  }
 
   const payload = (await response.json().catch(() => null)) as {
     id?: string;
