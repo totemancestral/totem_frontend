@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   try {
     const env = getServerEnv();
     if (!env.TOTEM_BACKEND_URL) {
-      return NextResponse.json({ error: "Backend non configure" }, { status: 503 });
+      return NextResponse.json([]);
     }
 
     const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
