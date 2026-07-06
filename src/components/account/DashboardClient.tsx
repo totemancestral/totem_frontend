@@ -622,7 +622,7 @@ export function DashboardClient({
                 {t.latestOrders}
               </h1>
               {commandes.length === 0 ? (
-                <EmptyState text={t.noOrders} cta={t.emptyCta} href={newJourneyHref(locale)} />
+                <EmptyState text={t.noOrders} cta={t.emptyCta} href={newJourneyHref(locale, false)} />
               ) : (
                 <div className="grid gap-4">
                   {commandes.map((commande) => (
@@ -639,7 +639,7 @@ export function DashboardClient({
                 {t.artworks}
               </h1>
               {oeuvres.length === 0 ? (
-                <EmptyState text={t.noArtworks} cta={t.emptyCta} href={newJourneyHref(locale)} />
+                <EmptyState text={t.noArtworks} cta={t.emptyCta} href={newJourneyHref(locale, false)} />
               ) : (
                 <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                   {oeuvres.map((oeuvre) => (
