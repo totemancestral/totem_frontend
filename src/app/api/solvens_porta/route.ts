@@ -26,18 +26,18 @@ const commandOfferMap = {
 } as const;
 
 export async function POST(request: Request) {
-  const auth = await authenticateRequest(request);
-  if (auth instanceof NextResponse) return auth;
-
-  const rateLimitResponse = rateLimit(request, 10, 60_000);
-  if (rateLimitResponse) return rateLimitResponse;
-
-  const parsed = checkoutSchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Requete de paiement invalide" }, { status: 422 });
-  }
-
   try {
+    const auth = await authenticateRequest(request);
+    if (auth instanceof NextResponse) return auth;
+
+    const rateLimitResponse = rateLimit(request, 10, 60_000);
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const parsed = checkoutSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Requete de paiement invalide" }, { status: 422 });
+    }
+
     return await handleCheckout(request, parsed.data, auth);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erreur interne";
