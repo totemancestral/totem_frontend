@@ -8,6 +8,7 @@ import {
   Activity,
   AlertTriangle,
   Clock3,
+  CreditCard,
   Download,
   FileText,
   Image as ImageIcon,
@@ -97,7 +98,7 @@ const copy = {
     emptyCta: "Commencer le parcours",
     amount: "Montant",
     date: "Date",
-    stripe: "Stripe",
+    stripe: "Transaction",
     files: "Fichiers",
     image: "Image",
     audio: "Audio",
@@ -150,7 +151,7 @@ const copy = {
     emptyCta: "Start the journey",
     amount: "Amount",
     date: "Date",
-    stripe: "Stripe",
+    stripe: "Transaction",
     files: "Files",
     image: "Image",
     audio: "Audio",
@@ -199,8 +200,10 @@ const offerLabels: Record<Locale, Record<string, string>> = {
   en: { essentiel: "Totem Origin", signature: "Totem Ancestral", heritage: "Totem Family" },
 };
 
-function newJourneyHref(locale: Locale) {
-  return `/${locale}/via_sapientiae?restart=1`;
+function newJourneyHref(locale: Locale, isJunior: boolean) {
+  return isJunior
+    ? `/${locale}/iuvenis_signum`
+    : `/${locale}/via_sapientiae?restart=1`;
 }
 
 export function DashboardClient({
@@ -310,6 +313,7 @@ export function DashboardClient({
   const firstName = metadataValue(metadata, ["prenom", "first_name", "given_name"]);
   const lastName = metadataValue(metadata, ["nom", "last_name", "family_name"]);
   const name = firstName || user?.email?.split("@")[0] || t.defaultName;
+  const isJunior = juniorTotems.length > 0;
   const deliveredCount = oeuvres.filter(
     (oeuvre) => oeuvre.statut === "livree" || oeuvre.image_url || oeuvre.pdf_url,
   ).length;
@@ -455,7 +459,7 @@ export function DashboardClient({
       </nav>
 
       <div className="mt-auto flex flex-col gap-3">
-        <Link href={newJourneyHref(locale)} className="btn-primary w-full py-3 text-xs">
+        <Link href={newJourneyHref(locale, isJunior)} className="btn-primary w-full py-3 text-xs">
           <Plus size={14} />
           {t.compose}
         </Link>
@@ -876,12 +880,23 @@ function OrderCard({ commande, locale }: { commande: Commande; locale: Locale })
           </h3>
           <p className="caption mt-1">#{commande.id.slice(0, 8)}</p>
         </div>
-        <span
-          className="w-fit rounded-sm border px-3 py-1 text-xs uppercase"
-          style={statusStyle(commande.statut)}
-        >
-          {status}
-        </span>
+        <div className="flex flex-col items-end gap-2">
+          <span
+            className="w-fit rounded-sm border px-3 py-1 text-xs uppercase"
+            style={statusStyle(commande.statut)}
+          >
+            {status}
+          </span>
+          {commande.statut === "en_attente_paiement" && (
+            <Link
+              href={`/${locale}/via_sapientiae?restart=1`}
+              className="btn-primary px-4 py-2 text-xs"
+            >
+              <CreditCard size={14} />
+              Payer
+            </Link>
+          )}
+        </div>
       </div>
       <dl className="mt-5 grid gap-4 sm:grid-cols-3">
         <ProfileLine
