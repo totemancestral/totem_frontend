@@ -33,14 +33,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Les cinq reponses Junior sont requises" }, { status: 422 });
   }
 
+  try {
+    return await handleJuniorGeneration(parsed.data);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Erreur generation junior";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+async function handleJuniorGeneration(data: z.infer<typeof juniorSchema>) {
   const seed = crypto.randomUUID();
   let profile = createJuniorTotemProfile({
-    firstName: parsed.data.firstName,
-    answers: parsed.data.answers,
+    firstName: data.firstName,
+    answers: data.answers,
     seed,
   });
 
-  let bundle = buildJuniorPromptBundle({ profile, answers: parsed.data.answers });
+  let bundle = buildJuniorPromptBundle({ profile, answers: data.answers });
   let nomComplet = profile.nomComplet;
   let phrase = bundle.fallback.phrase;
   let attribut = bundle.fallback.attribut;
@@ -53,7 +62,7 @@ export async function POST(request: Request) {
     const aiProfile = await generateJuniorWithClaude(
       env.ANTHROPIC_API_KEY,
       profile,
-      parsed.data.answers,
+      data.answers,
     );
     profile = aiProfile.profile;
     bundle = aiProfile.bundle;

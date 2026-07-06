@@ -37,15 +37,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Requete de paiement invalide" }, { status: 422 });
   }
 
-  let env;
   try {
-    env = getServerEnv();
+    return await handleCheckout(request, parsed.data, auth);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Configuration serveur invalide";
+    const message = err instanceof Error ? err.message : "Erreur interne";
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
 
-  const config = offerConfig[parsed.data.offre];
+async function handleCheckout(
+  request: Request,
+  data: z.infer<typeof checkoutSchema>,
+  auth: Awaited<ReturnType<typeof authenticateRequest>> & { userId: string; email: string },
+) {
+  const env = getServerEnv();
+  const config = offerConfig[data.offre];
   const priceId = env[config.priceEnv];
 
   const origin = (
@@ -64,16 +70,16 @@ export async function POST(request: Request) {
     .maybeSingle();
   const prenom = (profileResult?.data as { prenom?: string } | null)?.prenom ?? "";
 
-  const backendAnswers = toBackendAnswers(parsed.data.answers);
+  const backendAnswers = toBackendAnswers(data.answers);
   const { data: parcours, error: parcoursError } = await supabase
     .from("reponses_parcours")
     .upsert(
       {
         user_id: auth.userId,
         session_id: auth.userId,
-        reponses: parsed.data.answers as unknown as Json,
+        reponses: data.answers as unknown as Json,
         termine: backendAnswers.length >= 10,
-        langue: parsed.data.locale,
+        langue: data.locale,
       },
       { onConflict: "user_id, session_id" },
     )
@@ -94,11 +100,11 @@ export async function POST(request: Request) {
       .insert({
         user_id: auth.userId,
         reponses_id: parcours.id,
-        offre: commandOfferMap[parsed.data.offre],
+        offre: commandOfferMap[data.offre],
         statut: "en_attente_paiement",
         montant_cents: config.amountCents,
         devise: "EUR",
-        langue: parsed.data.locale,
+        langue: data.locale,
       })
       .select("id")
       .single();
@@ -117,17 +123,17 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         userId: auth.userId,
         email: auth.email,
-        offer: parsed.data.offre,
+        offer: data.offre,
         externalCommandId: commande.id,
         answers: backendAnswers,
-        locale: parsed.data.locale,
+        locale: data.locale,
         customerName: prenom || undefined,
         successUrl: `${origin}${pagePath(
-          parsed.data.locale,
+          data.locale,
           "parcours",
           `checkout=success&session_id={CHECKOUT_SESSION_ID}&commande_id=${commande.id}`,
         )}`,
-        cancelUrl: `${origin}${pagePath(parsed.data.locale, "parcours", "checkout=cancelled")}`,
+        cancelUrl: `${origin}${pagePath(data.locale, "parcours", "checkout=cancelled")}`,
       }),
     });
 
@@ -178,11 +184,11 @@ export async function POST(request: Request) {
       .insert({
         user_id: auth.userId,
         reponses_id: parcours.id,
-        offre: commandOfferMap[parsed.data.offre],
+        offre: commandOfferMap[data.offre],
         statut: "en_attente_paiement",
         montant_cents: config.amountCents,
         devise: "EUR",
-        langue: parsed.data.locale,
+        langue: data.locale,
       })
       .select("id")
       .single();
@@ -191,7 +197,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: commandeError.message }, { status: 500 });
     }
 
-    const metadata = buildStripeMetadata(parsed.data, auth.userId, auth.email, prenom, commande.id);
+    const metadata = buildStripeMetadata(data, auth.userId, auth.email, prenom, commande.id);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -201,11 +207,11 @@ export async function POST(request: Request) {
       metadata,
       payment_intent_data: { metadata },
       success_url: `${origin}${pagePath(
-        parsed.data.locale,
+        data.locale,
         "parcours",
         `checkout=success&session_id={CHECKOUT_SESSION_ID}&commande_id=${commande.id}`,
       )}`,
-      cancel_url: `${origin}${pagePath(parsed.data.locale, "parcours", "checkout=cancelled")}`,
+      cancel_url: `${origin}${pagePath(data.locale, "parcours", "checkout=cancelled")}`,
     });
 
     await supabase
