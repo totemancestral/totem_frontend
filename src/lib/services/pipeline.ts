@@ -94,12 +94,19 @@ async function callEdgeFunction<T>(
   anonKey: string,
 ): Promise<T | null> {
   try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${anonKey}`,
+    };
+
+    const internalSecret = process.env.PIPELINE_INTERNAL_SECRET;
+    if (internalSecret) {
+      headers["x-pipeline-secret"] = internalSecret;
+    }
+
     const response = await fetch(`${EDGE_FUNCTION_URL}/${slug}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${anonKey}`,
-      },
+      headers,
       body: JSON.stringify(payload),
     });
 
