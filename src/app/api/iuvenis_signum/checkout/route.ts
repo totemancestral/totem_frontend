@@ -174,6 +174,7 @@ export async function POST(request: Request) {
           nom_totem: nomComplet,
           statut: "en_generation",
           recit: phrase,
+          numero_serie: String(profile.orderNumber).padStart(6, "0"),
           metadata: reveal,
         })
         .select("id")

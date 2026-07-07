@@ -247,7 +247,7 @@ async function generateAudio(
         prenom: profile.firstName,
         texte: script,
         script,
-        archetypeId: profile.archetype.id,
+        archetypeId: "A",
         langue: profile.language,
         audioPrompt: prompts.promptA3,
       },
@@ -829,7 +829,7 @@ export async function finalizeCoffret(
   ]);
 }
 
-const JUNIOR_EDGE_URL = process.env.EDGE_FUNCTION_URL?.replace(/\/$/, "") || "https://mjiealkqjcqvlfrxdcif.functions.supabase.co";
+const JUNIOR_EDGE_URL = EDGE_FUNCTION_URL;
 
 export async function generateJuniorMedia(
   oeuvreId: string,

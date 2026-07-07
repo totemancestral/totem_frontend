@@ -320,6 +320,23 @@ export function RevealStep({ data, pdfRef, onBack, onShare, onClan }: RevealStep
               {downloading ? "Generation..." : "Telecharger le PDF"}
             </GoldButton>
 
+            {data.pdfUrl && (
+              <a
+                href={data.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gold-button-outline inline-flex items-center gap-2 rounded-sm px-6 py-3 text-xs uppercase tracking-[.18em] transition-all"
+                style={{
+                  border: "1px solid rgba(216,173,77,0.5)",
+                  color: "var(--or-ancestral)",
+                  textDecoration: "none",
+                }}
+              >
+                <Download className="h-4 w-4" />
+                PDF Haute Definition
+              </a>
+            )}
+
             {onShare && (
               <GoldButton variant="outline" onClick={onShare}>
                 Partager

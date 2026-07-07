@@ -1,8 +1,13 @@
 import React from "react";
-import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer, Font } from "@react-pdf/renderer";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { StorySection } from "@/lib/totem-v3";
+
+Font.register({
+  family: "DancingScript",
+  fonts: [{ src: join(process.cwd(), "public/fonts/totem/DancingScript-Regular.ttf"), fontWeight: "normal" }],
+});
 
 export type PdfPayload = {
   prenom: string;
@@ -64,7 +69,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   coverTitle: {
-    fontFamily: "Times-Roman",
+    fontFamily: "DancingScript",
     fontSize: 32,
     fontWeight: "bold",
     letterSpacing: 4,
@@ -72,7 +77,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   coverSubtitle: {
-    fontFamily: "Times-Roman",
+    fontFamily: "DancingScript",
     fontSize: 13,
     fontStyle: "italic",
     color: inkLight,
@@ -96,7 +101,7 @@ const styles = StyleSheet.create({
     objectFit: "contain",
   },
   coverTotemName: {
-    fontFamily: "Times-Roman",
+    fontFamily: "DancingScript",
     fontSize: 22,
     fontWeight: "bold",
     color: ink,
@@ -106,7 +111,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   coverFor: {
-    fontFamily: "Times-Italic",
+    fontFamily: "DancingScript",
     fontSize: 16,
     color: inkLight,
     textAlign: "center",
@@ -118,7 +123,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   storyHeader: {
-    fontFamily: "Times-Roman",
+    fontFamily: "DancingScript",
     fontSize: 24,
     fontWeight: "bold",
     color: ink,
@@ -127,7 +132,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   storySectionTitle: {
-    fontFamily: "Times-Roman",
+    fontFamily: "DancingScript",
     fontSize: 18,
     fontWeight: "bold",
     color: inkLight,
@@ -136,7 +141,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   storyParagraph: {
-    fontFamily: "Times-Italic",
+    fontFamily: "DancingScript",
     fontSize: 11,
     lineHeight: 1.7,
     textAlign: "justify",
@@ -180,7 +185,7 @@ const styles = StyleSheet.create({
     border: "0.5px solid rgba(255,205,110,0.5)",
   },
   sealText: {
-    fontFamily: "Times-Roman",
+    fontFamily: "DancingScript",
     fontSize: 22,
     color: goldLight,
     fontWeight: "bold",
