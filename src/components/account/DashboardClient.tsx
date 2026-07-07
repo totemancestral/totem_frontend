@@ -313,7 +313,7 @@ export function DashboardClient({
   const firstName = metadataValue(metadata, ["prenom", "first_name", "given_name"]);
   const lastName = metadataValue(metadata, ["nom", "last_name", "family_name"]);
   const name = firstName || user?.email?.split("@")[0] || t.defaultName;
-  const isJunior = juniorTotems.length > 0;
+  const isJunior = user?.user_metadata?.role === "junior";
   const deliveredCount = oeuvres.filter(
     (oeuvre) => oeuvre.statut === "livree" || oeuvre.image_url || oeuvre.pdf_url,
   ).length;
