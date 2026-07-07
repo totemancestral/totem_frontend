@@ -37,11 +37,11 @@ const copy = {
     who: {
       eyebrow: "Avant d'être vous",
       title: "Qui étiez-vous ?",
-      body: "Avant d'être vous, il y avait quelqu'un.",
+      body: "Avant d'être vous, qui étiez-vous ? Il y avait quelqu'un.",
       items: [
         {
           title: "Soixante mille ans",
-          body: "Il y a soixante mille ans, vos ancêtres ont quitté l'Afrique. D'autres sont restés, ont vécu sous d'autres cieux, murmuré d'autres langues, taillé d'autres masques.",
+          body: "Il y a soixante mille ans, vos ancêtres ont quitté l'Afrique. D'autres sont restés - ont vécu sous d'autres cieux, murmuré d'autres langues, taillé d'autres masques.",
           image: oeuvreParchemin,
         },
         {
@@ -62,8 +62,8 @@ const copy = {
       body: "Pourquoi cette maison existe, et ce qu'elle refuse d'être.",
       items: [
         {
-          title: "Une œuvre, pas un test",
-          body: "TOTEM ANCESTRAL est une œuvre, pas un test de personnalité. Chaque parole confiée au griot devient matière à une création narrative et visuelle.",
+          title: "01 - Une œuvre, pas un test",
+          body: "01 - TOTEM ANCESTRAL est une œuvre, pas un test de personnalité. Chaque parole confiée au griot devient matière à une création narrative et visuelle.",
           image: traverserEcoute,
         },
         {
@@ -73,7 +73,7 @@ const copy = {
         },
         {
           title: "L'imaginaire, pas la science",
-          body: "Nous n'exhumons pas un arbre généalogique. Nous appelons l'ancêtre que personne n'a consigné, celui qui a continué à vivre là où le continent l'avait planté.",
+          body: "Nous n'exhumons pas un arbre généalogique. Nous réveillons l'ancêtre qui sommeille en vous — celui que l'histoire vous a refusé — celui qui, lui, n'est jamais parti.",
           image: oeuvreVisuelle,
         },
       ],
@@ -82,19 +82,8 @@ const copy = {
       eyebrow: "Ce que vous recevez",
       title: "Une œuvre. Plusieurs pièces.",
       body: "Chaque coffret réunit une fable, un visage, une voix et un certificat numéroté.",
-      pieces: [
-        {
-          title: "Le Parchemin",
-          body: "Une chronique personnelle en cinq mouvements.",
-          image: oeuvreParchemin,
-        },
-        {
-          title: "La voix et le visage",
-          body: "Une image haute résolution et une parole à écouter.",
-          image: oeuvreVisuelle,
-        },
-      ],
-      note: "Certificat d'authenticité numéroté inclus selon l'offre choisie.",
+      pieces: [],
+      note: "",
     },
     experience: {
       eyebrow: "La traversée",
@@ -102,44 +91,24 @@ const copy = {
       body: "Le parcours commence par une écoute simple, puis la maison compose et livre votre coffret.",
       items: [
         {
-          title: "Le griot interroge",
-          body: "Vous répondez à des questions courtes, intimes et ouvertes.",
+          title: "01 - Le griot prend la parole",
+          body: "Vos réponses reflètent qui vous êtes.",
         },
         {
-          title: "La maison compose",
-          body: "Vos réponses deviennent récit, image, voix et certificat.",
+          title: "02 - L'œuvre prend forme",
+          body: "La maison TOTEM la compose pièce par pièce.",
         },
         {
-          title: "Le Totem arrive",
-          body: "Votre coffret numérique est livré dans votre espace et par email.",
+          title: "03 - Votre TOTEM vous rejoint",
+          body: "Il n'existe qu'une fois et désormais, il existe pour vous.",
         },
-      ],
-    },
-    assurances: {
-      eyebrow: "Garanties",
-      title: "Un coffret pensé pour durer",
-      body: "Chaque pièce est préparée pour être lue, écoutée, conservée et transmise.",
-      items: [
-        {
-          title: "Délai clair",
-          body: "La livraison cible est de quinze minutes après paiement validé.",
-        },
-        {
-          title: "Confidentialité",
-          body: "Vos réponses servent uniquement à composer votre œuvre.",
-        },
-        {
-          title: "Fichiers durables",
-          body: "Les pièces sont téléchargeables et faciles à archiver.",
-        },
-        { title: "Bilingue", body: "L'expérience est structurée pour le français et l'anglais." },
       ],
     },
     offers: {
       eyebrow: "Offrandes",
       title: "Deux manières de recevoir l'œuvre",
       body: "Choisissez le format qui convient le mieux à votre quête et à votre héritage.",
-      footnote: "Carte cadeau offerte à chaque commande",
+      footnote: "Carte cadeau offerte à chaque commande ·",
       items: [
         {
           name: "Totem Ancestral",
@@ -751,9 +720,9 @@ export function Oeuvre() {
             </Reveal>
           ))}
         </div>
-        <Reveal delay={0.2}>
-          <p className="caption mt-10 text-center">{t.artwork.note}</p>
-        </Reveal>
+          <Reveal delay={0.2}>
+            {t.artwork.note && <p className="caption mt-10 text-center">{t.artwork.note}</p>}
+          </Reveal>
       </div>
     </section>
   );
