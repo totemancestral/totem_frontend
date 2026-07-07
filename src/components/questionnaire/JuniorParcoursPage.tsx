@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import {
   ArrowLeft,
@@ -371,9 +371,25 @@ export function JuniorParcoursPage() {
   const checkoutSuccess = searchParams.get("checkout");
   const checkoutSessionId = searchParams.get("session_id");
 
-  if (checkoutSuccess === "success" && checkoutSessionId) {
-    restoreResultFromCache();
-  }
+  useEffect(() => {
+    if (checkoutSuccess === "success" && checkoutSessionId) {
+      restoreResultFromCache();
+    }
+  }, [checkoutSuccess, checkoutSessionId]);
+
+  useEffect(() => {
+    if (!result || saved || !session?.access_token) return;
+    fetch("/api/iuvenis_signum/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify(result),
+    }).then((res) => {
+      if (res.ok) setSaved(true);
+    }).catch(() => {});
+  }, [result, saved, session]);
 
   if (result) {
     return (

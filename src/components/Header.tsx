@@ -40,6 +40,7 @@ export function Header({ locale }: { locale: Locale }) {
   const [isPending, startTransition] = useTransition();
   const [session, setSession] = useState<boolean | null>(null);
   const [isAdminSession, setIsAdminSession] = useState(false);
+  const [juniorSession, setJuniorSession] = useState(false);
   const isAccountArea = Boolean(pathname?.includes("/domus_animi"));
 
   useEffect(() => {
@@ -51,11 +52,15 @@ export function Header({ locale }: { locale: Locale }) {
 
       if (!nextSession) {
         setIsAdminSession(false);
+        setJuniorSession(false);
         return;
       }
 
       const nextIsAdmin = await hasAdminRole(nextSession.user.id);
-      if (alive) setIsAdminSession(nextIsAdmin);
+      if (alive) {
+        setIsAdminSession(nextIsAdmin);
+        setJuniorSession(nextSession.user.user_metadata?.role === "junior");
+      }
     }
 
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -101,7 +106,11 @@ export function Header({ locale }: { locale: Locale }) {
   };
 
   const accountNav = getAccountNav(locale);
-  const composeHref = `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`;
+  const composeHref = session
+    ? juniorSession
+      ? `/${locale}/iuvenis_signum`
+      : `/${locale}/via_sapientiae?restart=1`
+    : `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
