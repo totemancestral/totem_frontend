@@ -11,6 +11,7 @@ import {
   extractStrictJson,
   type JuniorTotemProfile,
 } from "@/lib/totem-v3";
+import { generateJuniorMedia } from "@/lib/services/pipeline";
 
 const answerSchema = z.object({
   choice: z.enum(["A", "B", "C", "D"]),
@@ -112,8 +113,25 @@ export async function POST(request: Request) {
       messageDefi = aiProfile.messageDefi;
     }
 
-    const reveal = {
-      type: "junior" as const,
+    let reveal: {
+      type: "junior";
+      seed: string;
+      orderNumber: number;
+      firstName?: string;
+      scores: Record<string, number>;
+      dominant: string;
+      secondary: string;
+      totem: { name: string; animal: string; colors: string[]; quality: string };
+      nomComplet: string;
+      phrase: string;
+      attribut: string;
+      messageClan: string;
+      share: { caption: string; messageDefi: string };
+      imageUrl?: string;
+      pdfUrl?: string;
+      audioUrl?: string;
+    } = {
+      type: "junior",
       seed,
       orderNumber: profile.orderNumber,
       firstName: profile.firstName,
@@ -128,19 +146,52 @@ export async function POST(request: Request) {
       share: { caption, messageDefi },
     };
 
+    let oeuvreId: string | null = null;
+
     // Sauvegarder dans la table oeuvres pour l'afficher dans le dashboard
     try {
       const serviceSupabase = createServiceClient();
-      await serviceSupabase.from("oeuvres").insert({
-        user_id: auth.userId,
-        commande_id: `junior_${session.id}`,
-        nom_totem: nomComplet,
-        statut: "livree",
-        recit: phrase,
-        metadata: reveal,
-      });
+      const { data: inserted } = await serviceSupabase
+        .from("oeuvres")
+        .insert({
+          user_id: auth.userId,
+          commande_id: `junior_${session.id}`,
+          nom_totem: nomComplet,
+          statut: "en_generation",
+          recit: phrase,
+          metadata: reveal,
+        })
+        .select("id")
+        .single();
+      oeuvreId = inserted?.id ?? null;
     } catch {
-      // Échec silencieux — le résultat est déjà dans le cache frontend
+      // Échec silencieux
+    }
+
+    // Générer l'image et le PDF en parallèle
+    if (oeuvreId) {
+      try {
+        const media = await generateJuniorMedia(
+          oeuvreId,
+          auth.userId,
+          env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+          {
+            prenom: profile.firstName || "Voyageur",
+            nomComplet,
+            phrase,
+            attribut,
+            messageClan,
+            orderNumber: profile.orderNumber,
+          },
+          locale,
+        );
+        if (media) {
+          reveal.imageUrl = media.imageUrl;
+          reveal.pdfUrl = media.pdfUrl;
+        }
+      } catch {
+        // Échec silencieux — le résultat texte est déjà disponible
+      }
     }
 
     return NextResponse.json({

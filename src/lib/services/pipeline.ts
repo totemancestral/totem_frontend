@@ -828,3 +828,158 @@ export async function finalizeCoffret(
       .eq("commande_id", commandeId),
   ]);
 }
+
+const JUNIOR_EDGE_URL = process.env.EDGE_FUNCTION_URL?.replace(/\/$/, "") || "https://mjiealkqjcqvlfrxdcif.functions.supabase.co";
+
+export async function generateJuniorMedia(
+  oeuvreId: string,
+  userId: string,
+  anonKey: string | undefined,
+  juniorResult: {
+    prenom: string;
+    nomComplet: string;
+    phrase: string;
+    attribut: string;
+    messageClan: string;
+    orderNumber: number;
+  },
+  langue: "fr" | "en",
+): Promise<{ imageUrl: string; pdfUrl: string } | null> {
+  try {
+    const env = getServerEnv();
+    let imageUrl = "";
+    let pdfUrl = "";
+
+    if (anonKey) {
+      try {
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${anonKey}`,
+        };
+        const internalSecret = process.env.PIPELINE_INTERNAL_SECRET;
+        if (internalSecret) headers["x-pipeline-secret"] = internalSecret;
+
+        const response = await fetch(`${JUNIOR_EDGE_URL}/generate-image`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            prenom: juniorResult.prenom,
+            texte: juniorResult.phrase,
+            archetypeId: "junior",
+            langue,
+            prompt: `Illustration for ${juniorResult.nomComplet}, a ${juniorResult.attribut}`,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json().catch(() => null);
+          imageUrl = data?.imageUrl ?? "";
+        }
+      } catch {
+        // Silencieux
+      }
+    }
+
+    // Télécharger l'image pour l'embarquer dans le PDF
+    let imageDataUrl = "";
+    let imageBufferForPdf: Buffer | null = null;
+    if (imageUrl) {
+      try {
+        const imgRes = await fetch(imageUrl);
+        if (imgRes.ok) {
+          const imgBuf = Buffer.from(await imgRes.arrayBuffer());
+          imageBufferForPdf = imgBuf;
+          imageDataUrl = `data:image/png;base64,${imgBuf.toString("base64")}`;
+        }
+      } catch {
+        // Silencieux
+      }
+    }
+
+    // Générer le PDF
+    try {
+      const pdfPayload = {
+        prenom: juniorResult.prenom,
+        nomAncestral: juniorResult.nomComplet,
+        archetypeId: "junior",
+        texteParchemin: `${juniorResult.phrase}\n\n${juniorResult.attribut}\n\n${juniorResult.messageClan}`,
+        numeroCollection: juniorResult.orderNumber,
+        langue,
+        imageUrl: imageUrl || undefined,
+        imageDataUrl: imageDataUrl || undefined,
+        sections: [
+          { title: juniorResult.nomComplet, paragraphs: [juniorResult.phrase] },
+          { title: "Attribut", paragraphs: [juniorResult.attribut] },
+          { title: "Clan", paragraphs: [juniorResult.messageClan] },
+        ],
+        subtitle: langue === "fr" ? "Totem Junior" : "Junior Totem",
+      };
+
+      const { parcheminBuffer } = await generatePDFs(pdfPayload);
+
+      const { url: uploadedUrl } = await uploadFile(oeuvreId, {
+        type: "parchemin",
+        buffer: parcheminBuffer,
+        mimeType: "application/pdf",
+        fileName: `junior_${oeuvreId}.pdf`,
+      });
+      pdfUrl = uploadedUrl;
+    } catch {
+      // Silencieux
+    }
+
+    // Uploader l'image au R2
+    let r2ImageUrl = "";
+    if (imageBufferForPdf) {
+      try {
+        const { url: uploadedUrl } = await uploadFile(oeuvreId, {
+          type: "image",
+          buffer: imageBufferForPdf,
+          mimeType: "image/png",
+          fileName: `junior_image_${oeuvreId}.png`,
+        });
+        r2ImageUrl = uploadedUrl;
+      } catch {
+        // Silencieux
+      }
+    }
+
+    const finalImageUrl = r2ImageUrl || imageUrl;
+
+    // Mettre à jour l'oeuvre dans la base
+    const supabase = createServiceClient();
+    await supabase
+      .from("oeuvres")
+      .update({
+        pdf_url: pdfUrl || null,
+        image_url: finalImageUrl || null,
+      })
+      .eq("id", oeuvreId);
+
+    // Envoyer l'email de livraison si on a un PDF
+    if (pdfUrl) {
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("prenom, email")
+          .eq("id", userId)
+          .single();
+        const email = profile?.email;
+        const prenom = profile?.prenom ?? juniorResult.prenom;
+        if (email) {
+          await sendDeliveryEmail(email, prenom, langue, {
+            imageUrl: finalImageUrl || undefined,
+            pdfUrl: pdfUrl || undefined,
+            nomTotem: juniorResult.nomComplet,
+          });
+        }
+      } catch {
+        // Silencieux
+      }
+    }
+
+    return { imageUrl: finalImageUrl, pdfUrl };
+  } catch {
+    return null;
+  }
+}

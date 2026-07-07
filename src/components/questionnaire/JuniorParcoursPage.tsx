@@ -9,14 +9,19 @@ import {
   ArrowRight,
   Bird,
   CreditCard,
+  Download,
+  Facebook,
   Flame,
   Footprints,
   Loader,
   Lock,
+  MessageCircle,
   Mountain,
+  Share2,
   Shield,
   Sparkles,
   Trees,
+  Volume2,
   Waves,
   Zap,
 } from "lucide-react";
@@ -48,6 +53,9 @@ type JuniorResult = {
     caption: string;
     messageDefi: string;
   };
+  imageUrl?: string;
+  pdfUrl?: string;
+  audioUrl?: string;
 };
 
 type Question = {
@@ -392,6 +400,12 @@ export function JuniorParcoursPage() {
   }, [result, saved, session]);
 
   if (result) {
+    const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+    const shareText = `${result.totem.name} — "${result.phrase}"`;
+    const facebookUrl = `https://facebook.com/sharer/sharer.php?quote=${encodeURIComponent(shareText)}&u=${encodeURIComponent(shareUrl)}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+
     return (
       <main className="premium-page min-h-screen overflow-hidden px-5 pb-16 pt-28 md:px-8">
         <GoldParticles count={20} />
@@ -409,6 +423,16 @@ export function JuniorParcoursPage() {
             >
               {result.totem.name}
             </h1>
+            {result.imageUrl && (
+              <div className="mt-6 flex justify-center">
+                <img
+                  src={result.imageUrl}
+                  alt={result.totem.name}
+                  className="w-full max-w-[300px] rounded-sm object-cover"
+                  style={{ border: "1px solid rgba(216,173,77,0.24)" }}
+                />
+              </div>
+            )}
             <p className="mt-5 text-lg" style={{ color: "rgba(245,240,232,0.86)" }}>
               {result.phrase}
             </p>
@@ -421,9 +445,37 @@ export function JuniorParcoursPage() {
                 value={`F${result.scores.F} E${result.scores.E} T${result.scores.T} A${result.scores.A}`}
               />
             </dl>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {result.audioUrl && (
+                <a href={result.audioUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary text-xs">
+                  <Volume2 size={14} />
+                  Audio
+                </a>
+              )}
+              {result.pdfUrl && (
+                <a href={result.pdfUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary text-xs">
+                  <Download size={14} />
+                  PDF
+                </a>
+              )}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="caption text-xs uppercase" style={{ color: "var(--or-ancestral)", alignSelf: "center" }}>
+                Partager :
+              </span>
+              <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-3 py-2 text-xs" title="Facebook">
+                <Facebook size={14} />
+              </a>
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-3 py-2 text-xs" title="WhatsApp">
+                <MessageCircle size={14} />
+              </a>
+              <a href={twitterUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-3 py-2 text-xs" title="Twitter">
+                <Share2 size={14} />
+              </a>
+            </div>
             <button
               type="button"
-              className="btn-secondary mt-8"
+              className="btn-secondary mt-6"
               onClick={() => window.location.reload()}
             >
               {t.retry as string}
