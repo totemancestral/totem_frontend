@@ -196,8 +196,8 @@ const statusLabels: Record<Locale, Record<string, string>> = {
 };
 
 const offerLabels: Record<Locale, Record<string, string>> = {
-  fr: { essentiel: "Totem Origine", signature: "Totem Ancestral", heritage: "Totem Famille" },
-  en: { essentiel: "Totem Origin", signature: "Totem Ancestral", heritage: "Totem Family" },
+  fr: { essentiel: "Totem Origine", signature: "Totem Ancestral", heritage: "Totem Famille", junior: "Totem Junior" },
+  en: { essentiel: "Totem Origin", signature: "Totem Ancestral", heritage: "Totem Family", junior: "Totem Junior" },
 };
 
 function newJourneyHref(locale: Locale, isJunior: boolean) {

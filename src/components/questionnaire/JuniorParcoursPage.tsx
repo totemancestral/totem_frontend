@@ -310,6 +310,24 @@ export function JuniorParcoursPage() {
   const [saved, setSaved] = useState(false);
   const checkoutCalled = useRef(false);
 
+  const restart = () => {
+    sessionStorage.removeItem("junior_reveal");
+    sessionStorage.removeItem("junior_checkout_session");
+    sessionStorage.removeItem("junior_answers");
+    sessionStorage.removeItem("junior_firstName");
+    sessionStorage.removeItem("junior_locale");
+    setStarted(false);
+    setIndex(0);
+    setFirstName("");
+    setAnswers({});
+    setResult(null);
+    setShowPricing(false);
+    setLoading(false);
+    setError(null);
+    setSaved(false);
+    checkoutCalled.current = false;
+  };
+
   const current = t.questions[index];
   const progress = started ? ((index + 1) / t.questions.length) * 100 : 0;
   const canContinue = Boolean(answers[index + 1]);
@@ -476,7 +494,7 @@ export function JuniorParcoursPage() {
             <button
               type="button"
               className="btn-secondary mt-6"
-              onClick={() => window.location.reload()}
+              onClick={restart}
             >
               {t.retry as string}
             </button>

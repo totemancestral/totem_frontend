@@ -148,9 +148,24 @@ export async function POST(request: Request) {
 
     let oeuvreId: string | null = null;
 
-    // Sauvegarder dans la table oeuvres pour l'afficher dans le dashboard
+    // Créer la commande et l'oeuvre dans la base
     try {
       const serviceSupabase = createServiceClient();
+      const now = new Date().toISOString();
+
+      // Commande (offre "essentiel" car l'enum Supabase ne supporte pas "junior")
+      await serviceSupabase.from("commandes").insert({
+        user_id: auth.userId,
+        offre: "essentiel",
+        statut: "paye",
+        montant_cents: 999,
+        devise: "eur",
+        langue: locale,
+        stripe_session_id: session.id,
+        created_at: now,
+      });
+
+      // Oeuvre
       const { data: inserted } = await serviceSupabase
         .from("oeuvres")
         .insert({
@@ -168,7 +183,7 @@ export async function POST(request: Request) {
       // Échec silencieux
     }
 
-    // Générer l'image et le PDF en parallèle
+    // Générer l'image et le PDF
     if (oeuvreId) {
       try {
         const media = await generateJuniorMedia(
@@ -191,6 +206,16 @@ export async function POST(request: Request) {
         }
       } catch {
         // Échec silencieux — le résultat texte est déjà disponible
+      }
+    }
+
+    // Mettre le statut à "livree" (même sans image, le texte est valide)
+    if (oeuvreId) {
+      try {
+        const serviceSupabase = createServiceClient();
+        await serviceSupabase.from("oeuvres").update({ statut: "livree" }).eq("id", oeuvreId);
+      } catch {
+        // Silencieux
       }
     }
 
