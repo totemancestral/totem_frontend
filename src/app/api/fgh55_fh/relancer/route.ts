@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { createServiceClient } from "@/lib/server-auth";
-import { generateCoffret } from "@/lib/services/pipeline";
+import { startPipeline } from "@/lib/services/pipeline";
 
 export const maxDuration = 300;
 
@@ -60,11 +60,6 @@ export async function POST(request: Request) {
   await supabase.from("commandes").update({ statut: "en_generation" }).eq("id", commandeId);
   await ensureOeuvre(supabase, commandeId);
 
-  try {
-    await generateCoffret(commandeId);
-    return NextResponse.json({ success: true, message: "Pipeline termine avec succes" });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Erreur interne";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
-  }
+  startPipeline(commandeId);
+  return NextResponse.json({ success: true, message: "Pipeline lance sur Supabase" });
 }

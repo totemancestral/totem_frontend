@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin-auth";
-import { generateCoffret } from "@/lib/services/pipeline";
+import { startPipeline } from "@/lib/services/pipeline";
 
 const generateSchema = z.object({
   commandeId: z.string().uuid(),
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    await generateCoffret(parsed.data.commandeId);
+    startPipeline(parsed.data.commandeId);
 
     return NextResponse.json({
       commandeId: parsed.data.commandeId,

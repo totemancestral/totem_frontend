@@ -833,6 +833,28 @@ export async function finalizeCoffret(
   ]);
 }
 
+const SUPABASE_ANON_KEY = () => process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+
+export function startPipeline(commandeId: string): void {
+  const anonKey = SUPABASE_ANON_KEY();
+  if (!anonKey) {
+    console.error("startPipeline: SUPABASE_ANON_KEY manquant");
+    return;
+  }
+
+  fetch(`${EDGE_FUNCTION_URL}/process-pipeline`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${anonKey}`,
+      "x-supabase-background": "true",
+    },
+    body: JSON.stringify({ commandeId }),
+  }).catch((err) => {
+    console.error("startPipeline fetch error:", err);
+  });
+}
+
 const JUNIOR_EDGE_URL = EDGE_FUNCTION_URL;
 
 export async function generateJuniorMedia(

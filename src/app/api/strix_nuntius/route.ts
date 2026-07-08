@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { getServerEnv } from "@/lib/env";
 import { createServiceClient } from "@/lib/server-auth";
 import { sendConfirmationEmail } from "@/lib/services/email";
-import { generateCoffret } from "@/lib/services/pipeline";
+import { startPipeline } from "@/lib/services/pipeline";
 import type { Json } from "@/integrations/supabase/types";
 
 export const maxDuration = 300;
@@ -140,11 +140,7 @@ async function handlePaidCheckoutSession(session: Stripe.Checkout.Session) {
     : false;
 
   if (metadataComplete || storedParcoursComplete) {
-    try {
-      await generateCoffret(commande.id);
-    } catch {
-      // Échec silencieux — Stripe retry si timeout
-    }
+    startPipeline(commande.id);
   }
 
   const offreLabel = OFFER_LABELS[offre][locale];

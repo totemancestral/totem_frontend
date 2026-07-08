@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/server-auth";
-import { generateCoffret } from "@/lib/services/pipeline";
+import { startPipeline } from "@/lib/services/pipeline";
 
 export const maxDuration = 300;
 
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       await supabase.from("commandes").update({ statut: "en_generation" }).eq("id", cmd.id);
       await ensureOeuvre(supabase, cmd.id);
 
-      await generateCoffret(cmd.id);
+      startPipeline(cmd.id);
       results.push({ id: cmd.id, status: "ok" });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erreur inconnue";

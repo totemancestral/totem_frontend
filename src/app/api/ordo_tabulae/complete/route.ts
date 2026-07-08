@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
 import { authenticateRequest, createServiceClient } from "@/lib/server-auth";
-import { generateCoffret } from "@/lib/services/pipeline";
+import { startPipeline } from "@/lib/services/pipeline";
 import type { Json } from "@/integrations/supabase/types";
 
 const completeSchema = z.object({
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
       );
     }
 
-    generateCoffret(parsed.data.commandeId).catch(() => undefined);
+    startPipeline(parsed.data.commandeId);
     return NextResponse.json(
       { completed: true, backend: false, generation: "started" },
       { status: 202 },
