@@ -53,7 +53,7 @@ async function generatePDF(
   langue: "fr" | "en",
   orderNumber: number,
 ): Promise<Uint8Array> {
-  const fontUrl = "https://raw.githubusercontent.com/REBCDR07/totem-project/main/public/fonts/totem/DancingScript-Regular.ttf";
+  const fontUrl = "https://mjiealkqjcqvlfrxdcif.supabase.co/storage/v1/object/public/totem-files/fonts/DancingScript-Regular.ttf";
   let fontBytes: Uint8Array;
   try {
     const resp = await fetch(fontUrl);
@@ -141,37 +141,54 @@ async function generatePDF(
       page.drawRectangle({ x: m, y: m, width: width - 2*m, height: height - 2*m, borderColor: GOLD, borderWidth: 2, color: undefined });
       page.drawRectangle({ x: m + pm, y: m + pm, width: width - 2*m - 2*pm, height: height - 2*m - 2*pm, color: BG });
 
-      const marginX = 50, marginY = 60;
+      const marginX = 55, marginY = 70;
       const maxW = width - 2 * marginX;
       let curY = height - marginY;
+      let currentPage = page;
 
-      const pSize = 9.5, lineH = 15;
+      const pSize = 11, lineH = 19;
       for (const para of paragraphs) {
-        curY -= 10;
+        curY -= 12;
         const words = para.split(" ");
         let line = "";
         for (const word of words) {
           const test = line ? line + " " + word : word;
           if (dsFont.widthOfTextAtSize(test, pSize) > maxW) {
-            if (curY < marginY) { curY = height - marginY; }
-            page.drawText(line, { x: marginX, y: curY, size: pSize, font: dsFont, color: INK });
+            if (curY < marginY) {
+              currentPage = pdfDoc.addPage([A4W, A4H]);
+              const { width: w2, height: h2 } = currentPage.getSize();
+              currentPage.drawRectangle({ x: 0, y: 0, width: w2, height: h2, color: DARK });
+              currentPage.drawRectangle({ x: m, y: m, width: w2 - 2*m, height: h2 - 2*m, borderColor: GOLD, borderWidth: 2, color: undefined });
+              currentPage.drawRectangle({ x: m + pm, y: m + pm, width: w2 - 2*m - 2*pm, height: h2 - 2*m - 2*pm, color: BG });
+              curY = h2 - marginY;
+            }
+            currentPage.drawText(line, { x: marginX, y: curY, size: pSize, font: dsFont, color: INK });
             curY -= lineH;
             line = word;
           } else { line = test; }
         }
         if (line) {
-          page.drawText(line, { x: marginX, y: curY, size: pSize, font: dsFont, color: INK });
+          if (curY < marginY) {
+            currentPage = pdfDoc.addPage([A4W, A4H]);
+            const { width: w2, height: h2 } = currentPage.getSize();
+            currentPage.drawRectangle({ x: 0, y: 0, width: w2, height: h2, color: DARK });
+            currentPage.drawRectangle({ x: m, y: m, width: w2 - 2*m, height: h2 - 2*m, borderColor: GOLD, borderWidth: 2, color: undefined });
+            currentPage.drawRectangle({ x: m + pm, y: m + pm, width: w2 - 2*m - 2*pm, height: h2 - 2*m - 2*pm, color: BG });
+            curY = h2 - marginY;
+          }
+          currentPage.drawText(line, { x: marginX, y: curY, size: pSize, font: dsFont, color: INK });
           curY -= lineH;
         }
       }
 
-      page.drawCircle({ x: width / 2, y: 60, size: 20, color: rgb(0.62, 0.11, 0.07) });
-      page.drawCircle({ x: width / 2, y: 60, size: 17, borderColor: GOLD, borderWidth: 0.5, color: undefined });
+      const { width: lastW, height: lastH } = currentPage.getSize();
+      currentPage.drawCircle({ x: lastW / 2, y: 60, size: 20, color: rgb(0.62, 0.11, 0.07) });
+      currentPage.drawCircle({ x: lastW / 2, y: 60, size: 17, borderColor: GOLD, borderWidth: 0.5, color: undefined });
       const taW2 = helvB.widthOfTextAtSize("TA", 12);
-      page.drawText("TA", { x: (width - taW2) / 2, y: 51, size: 12, font: helvB, color: rgb(1, 0.8, 0.43) });
+      currentPage.drawText("TA", { x: (lastW - taW2) / 2, y: 51, size: 12, font: helvB, color: rgb(1, 0.8, 0.43) });
       const sigT = "SENYCE PARTNERS";
       const sigW = dsFont.widthOfTextAtSize(sigT, 8);
-      page.drawText(sigT, { x: width - marginX - sigW, y: 35, size: 8, font: dsFont, color: INK_L });
+      currentPage.drawText(sigT, { x: lastW - marginX - sigW, y: 35, size: 8, font: dsFont, color: INK_L });
     }
   }
 

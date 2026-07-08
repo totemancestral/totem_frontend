@@ -1,64 +1,64 @@
 const ANIMAL_VISUALS: Record<string, { fr: string; en: string }> = {
   lion: {
-    fr: "visage de lion réaliste avec crinière noire et regard perçant",
-    en: "realistic lion face with a black mane and piercing gaze",
+    fr: "lion réaliste avec crinière noire et regard perçant",
+    en: "realistic lion with a black mane and piercing gaze",
   },
   lionne: {
-    fr: "visage de lionne réaliste avec regard protecteur et traits royaux",
-    en: "realistic lioness face with a protective gaze and royal features",
+    fr: "lionne réaliste avec regard protecteur et traits royaux",
+    en: "realistic lioness with a protective gaze and royal features",
   },
   rhinoceros: {
-    fr: "visage de rhinocéros réaliste avec corne sculpturale et peau minérale",
-    en: "realistic rhinoceros face with a sculptural horn and mineral skin",
+    fr: "rhinocéros réaliste avec corne sculpturale et peau minérale",
+    en: "realistic rhinoceros with a sculptural horn and mineral skin",
   },
   crocodile: {
-    fr: "visage de crocodile réaliste avec écailles profondes et regard ancien",
-    en: "realistic crocodile face with deep scales and ancient gaze",
+    fr: "crocodile réaliste avec écailles profondes et regard ancien",
+    en: "realistic crocodile with deep scales and ancient gaze",
   },
   serpent: {
-    fr: "visage de serpent réaliste avec écailles vert sombre et regard hypnotique",
-    en: "realistic serpent face with dark green scales and hypnotic gaze",
+    fr: "serpent réaliste avec écailles vert sombre et regard hypnotique",
+    en: "realistic serpent with dark green scales and hypnotic gaze",
   },
   dauphin: {
-    fr: "visage de dauphin réaliste avec peau bleutée et regard lumineux",
-    en: "realistic dolphin face with bluish skin and luminous gaze",
+    fr: "dauphin réaliste avec peau bleutée et regard lumineux",
+    en: "realistic dolphin with bluish skin and luminous gaze",
   },
   elephant: {
-    fr: "visage d'éléphant réaliste avec défenses sculpturales et regard ancestral",
-    en: "realistic elephant face with sculptural tusks and ancestral gaze",
+    fr: "éléphant réaliste avec défenses sculpturales et regard ancestral",
+    en: "realistic elephant with sculptural tusks and ancestral gaze",
   },
   baobab: {
-    fr: "visage anthropomorphe de baobab réaliste avec écorce massive et racines sculptées",
-    en: "realistic anthropomorphic baobab face with massive bark and carved roots",
+    fr: "baobab réaliste avec écorce massive et racines sculptées",
+    en: "realistic baobab with massive bark and carved roots",
   },
   zebre: {
-    fr: "visage de zèbre réaliste avec rayures nettes et regard calme",
-    en: "realistic zebra face with sharp stripes and a calm gaze",
+    fr: "zèbre réaliste avec rayures nettes et regard calme",
+    en: "realistic zebra with sharp stripes and a calm gaze",
   },
   perroquet: {
-    fr: "visage de perroquet réaliste avec plumage vert et or et regard vif",
-    en: "realistic parrot face with green and gold plumage and a vivid gaze",
+    fr: "perroquet réaliste avec plumage vert et or et regard vif",
+    en: "realistic parrot with green and gold plumage and a vivid gaze",
   },
   aigle: {
-    fr: "visage d'aigle réaliste avec bec royal et regard perçant",
-    en: "realistic eagle face with a royal beak and piercing gaze",
+    fr: "aigle réaliste avec bec royal et regard perçant",
+    en: "realistic eagle with a royal beak and piercing gaze",
   },
   leopard: {
-    fr: "visage de léopard réaliste avec taches sombres et regard précis",
-    en: "realistic leopard face with dark rosettes and a precise gaze",
+    fr: "léopard réaliste avec taches sombres et regard précis",
+    en: "realistic leopard with dark rosettes and a precise gaze",
   },
 };
 
 function buildImagePrompt(archetypeId: string, langue: "fr" | "en", seed?: string): string {
   const visual = ANIMAL_VISUALS[archetypeId];
   const seedParam = seed ? ` --seed ${numericSeed(seed)}` : "";
-  const leftFace = visual?.[langue] ?? `visage réaliste du totem ${archetypeId}`;
+  const leftFace = visual?.[langue] ?? `${archetypeId} réaliste`;
 
   if (langue === "fr") {
-    return `Portrait ancestral puissant, visage coupé en deux : moitié gauche ${leftFace}, moitié droite masque Ngil Fang traditionnel africain stylisé avec yeux blancs et motifs géométriques, fusion harmonieuse au milieu du visage, peau avec cicatrices rituelles dorées, ambiance sombre mystique, éclairage dramatique cinématographique, style artistique premium africain, très détaillé, haute résolution, 8k, sans texte, sans logo, sans watermark --ar 3:4 --stylize 250 --v 6${seedParam}`;
+    return `Portrait ancestral puissant, visage coupé en deux : moitié gauche visage de ${leftFace}, réaliste perçant, moitié droite masque Ngil Fang traditionnel africain stylisé avec yeux blancs et motifs géométriques, fusion harmonieuse au milieu du visage, peau avec cicatrices rituelles dorées, ambiance sombre mystique, éclairage dramatique cinématographique, style artistique premium africain, très détaillé, haute résolution, 8k --ar 3:4 --stylize 250 --v 6${seedParam}`;
   }
 
-  return `Powerful ancestral portrait, split face: left half ${leftFace}, right half stylized traditional African Fang Ngil mask with white eyes and geometric patterns, harmonious fusion at the center of the face, skin with golden ritual scarifications, dark mystical atmosphere, dramatic cinematic lighting, premium African artistic style, very detailed, high resolution, 8k, no text, no logo, no watermark --ar 3:4 --stylize 250 --v 6${seedParam}`;
+  return `Powerful ancestral portrait, split face: left half ${leftFace}, piercing gaze, right half stylized traditional African Fang Ngil mask with white eyes and geometric patterns, harmonious fusion at the center of the face, skin with golden ritual scarifications, dark mystical atmosphere, dramatic cinematic lighting, premium African artistic style, very detailed, high resolution, 8k --ar 3:4 --stylize 250 --v 6${seedParam}`;
 }
 
 function numericSeed(seed: string): number {
