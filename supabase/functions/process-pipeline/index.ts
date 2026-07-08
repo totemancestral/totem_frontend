@@ -169,7 +169,7 @@ async function generatePDF(
       page.drawCircle({ x: width / 2, y: 60, size: 17, borderColor: GOLD, borderWidth: 0.5, color: undefined });
       const taW2 = helvB.widthOfTextAtSize("TA", 12);
       page.drawText("TA", { x: (width - taW2) / 2, y: 51, size: 12, font: helvB, color: rgb(1, 0.8, 0.43) });
-      const sigT = "✦ SENYCE PARTNERS ✦";
+      const sigT = "SENYCE PARTNERS";
       const sigW = dsFont.widthOfTextAtSize(sigT, 8);
       page.drawText(sigT, { x: width - marginX - sigW, y: 35, size: 8, font: dsFont, color: INK_L });
     }
