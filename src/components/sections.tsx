@@ -126,7 +126,7 @@ const copy = {
     },
     offers: {
       eyebrow: "Offrandes",
-      title: "Deux manières de recevoir l'œuvre",
+      title: "Trois manières de recevoir l'œuvre",
       body: "Choisissez le format qui convient le mieux à votre quête et à votre héritage.",
       footnote: "Carte cadeau offerte à chaque commande ·",
       items: [
@@ -147,6 +147,15 @@ const copy = {
           body: "La création dans sa plénitude. Rien ne manque.",
           features: ["Une création complète", "Une voix rituelle", "Tirage Fine Art possible"],
           cta: "Choisir Ancestral",
+        },
+        {
+          name: "Totem Famille",
+          tag: "Famille",
+          badge: "",
+          featured: false,
+          body: "Pour des racines qui se partagent. Offert à vos proches.",
+          features: ["Trois coffrets coordonnés", "Trois destinataires", "Livraison Famille"],
+          cta: "Choisir Famille",
         },
       ],
     },

@@ -7,8 +7,7 @@ import type { StorySection } from "@/lib/totem-v3";
 Font.register({
   family: "DancingScript",
   fonts: [
-    { src: join(process.cwd(), "public/fonts/totem/DancingScript-Regular.ttf"), fontWeight: "normal", fontStyle: "normal" },
-    { src: join(process.cwd(), "public/fonts/totem/DancingScript-Regular.ttf"), fontWeight: 400, fontStyle: "italic" },
+    { src: join(process.cwd(), "public/fonts/totem/DancingScript-Regular.ttf") },
   ],
 });
 
@@ -80,10 +79,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   coverSubtitle: {
-    fontFamily: "DancingScript",
-    fontSize: 13,
-    fontStyle: "italic",
-    color: inkLight,
+  fontFamily: "DancingScript",
+  fontSize: 13,
+  color: inkLight,
     textAlign: "center",
     marginTop: 4,
   },
