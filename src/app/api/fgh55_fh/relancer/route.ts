@@ -5,6 +5,30 @@ import { generateCoffret } from "@/lib/services/pipeline";
 
 export const maxDuration = 300;
 
+async function ensureOeuvre(supabase: ReturnType<typeof createServiceClient>, commandeId: string) {
+  const { data: existing } = await supabase
+    .from("oeuvres")
+    .select("id")
+    .eq("commande_id", commandeId)
+    .maybeSingle();
+
+  if (existing) return;
+
+  const { data: cmd } = await supabase
+    .from("commandes")
+    .select("user_id")
+    .eq("id", commandeId)
+    .single();
+
+  if (cmd) {
+    await supabase.from("oeuvres").insert({
+      user_id: cmd.user_id,
+      commande_id: commandeId,
+      statut: "en_cours",
+    });
+  }
+}
+
 export async function POST(request: Request) {
   const admin = await requireAdmin(request);
   if (admin instanceof NextResponse) return admin;
@@ -34,7 +58,7 @@ export async function POST(request: Request) {
   }
 
   await supabase.from("commandes").update({ statut: "en_generation" }).eq("id", commandeId);
-  await supabase.from("oeuvres").update({ statut: "en_cours" }).eq("commande_id", commandeId);
+  await ensureOeuvre(supabase, commandeId);
 
   try {
     await generateCoffret(commandeId);
