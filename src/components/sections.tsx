@@ -131,6 +131,15 @@ const copy = {
       footnote: "Carte cadeau offerte à chaque commande ·",
       items: [
         {
+          name: "Totem Origine",
+          tag: "Origine",
+          badge: "",
+          featured: false,
+          body: "Les détails et prix apparaissent après les quatre premières questions.",
+          features: ["Une création personnalisée", "Un coffret numérique", "L'accès à votre espace"],
+          cta: "Choisir Origine",
+        },
+        {
           name: "Totem Ancestral",
           tag: "Ancestral",
           badge: "Le plus précieux",
@@ -138,15 +147,6 @@ const copy = {
           body: "La création dans sa plénitude. Rien ne manque.",
           features: ["Une création complète", "Une voix rituelle", "Tirage Fine Art possible"],
           cta: "Choisir Ancestral",
-        },
-        {
-          name: "Totem Famille",
-          tag: "Famille",
-          badge: "",
-          featured: false,
-          body: "Parce que certaines racines se partagent.",
-          features: ["Trois coffrets coordonnés", "Trois destinataires", "Livraison familiale"],
-          cta: "Choisir Famille",
         },
       ],
     },

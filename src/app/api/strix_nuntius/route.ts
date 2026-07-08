@@ -1,10 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getServerEnv } from "@/lib/env";
 import { createServiceClient } from "@/lib/server-auth";
 import { sendConfirmationEmail } from "@/lib/services/email";
 import { generateCoffret } from "@/lib/services/pipeline";
 import type { Json } from "@/integrations/supabase/types";
+
+export const maxDuration = 300;
 
 type Locale = "fr" | "en";
 type Offre = "essentiel" | "signature" | "heritage";
@@ -24,7 +26,7 @@ const OFFER_LABELS: Record<Offre, Record<Locale, string>> = {
   heritage: { fr: "Famille", en: "Family" },
 };
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const signature = request.headers.get("stripe-signature");
   const body = await request.text();
 
@@ -138,12 +140,14 @@ async function handlePaidCheckoutSession(session: Stripe.Checkout.Session) {
     : false;
 
   if (metadataComplete || storedParcoursComplete) {
-    generateCoffret(commande.id).catch(() => undefined);
+    request.waitUntil(generateCoffret(commande.id).catch(() => undefined));
   }
 
   const offreLabel = OFFER_LABELS[offre][locale];
-  sendConfirmationEmail(email, metadata.prenom ?? "", offreLabel, locale, commande.id).catch(
-    () => {},
+  request.waitUntil(
+    sendConfirmationEmail(email, metadata.prenom ?? "", offreLabel, locale, commande.id).catch(
+      () => {},
+    ),
   );
 
   return NextResponse.json({ received: true, commandeId: commande.id }, { status: 202 });
