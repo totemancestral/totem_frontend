@@ -1,16 +1,28 @@
+// Ce script nécessite les variables d'environnement suivantes :
+//   SUPABASE_SERVICE_ROLE_KEY  (service role key Supabase)
+//   PIPELINE_INTERNAL_SECRET   (secret interne pour l'API)
+//   SUPABASE_URL               (ex: https://mjiealkqjcqvlfrxdcif.supabase.co)
+//
+// Usage : SUPABASE_SERVICE_ROLE_KEY=xxx PIPELINE_INTERNAL_SECRET=xxx SUPABASE_URL=xxx node scripts/relancer-commandes.mjs
+
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = "https://mjiealkqjcqvlfrxdcif.supabase.co";
-const SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qaWVhbGtxamNxdmxmcnhkY2lmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTM1MjA2MiwiZXhwIjoyMDk2OTI4MDYyfQ.uuLoOmJJNrAysyXEsjdo_Vyw5jMe46VrAUttIYdw8N0";
-const SECRET = "splqy8rIYxIuCsdiJ3QEb3fqIcmJtCoZ6FMdKH7FUDPaFsorw3KogyWaZGQQNtqc";
-const BASE_URL = "https://totem-ancestral.com";
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SECRET = process.env.PIPELINE_INTERNAL_SECRET;
+const BASE_URL = process.env.BASE_URL || "https://totem-ancestral.com";
+
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY || !SECRET) {
+  console.error("Usage: SUPABASE_SERVICE_ROLE_KEY=xxx PIPELINE_INTERNAL_SECRET=xxx SUPABASE_URL=xxx node scripts/relancer-commandes.mjs");
+  process.exit(1);
+}
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
 async function main() {
-  console.log("Recherche des commandes bloquees...\n");
+  console.log("Recherche des commandes bloquées...\n");
 
   const { data: commandes, error } = await supabase
     .from("commandes")
@@ -19,12 +31,12 @@ async function main() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Erreur requete:", error.message);
+    console.error("Erreur requête:", error.message);
     process.exit(1);
   }
 
   if (!commandes || commandes.length === 0) {
-    console.log("Aucune commande bloquee trouvee.");
+    console.log("Aucune commande bloquée trouvée.");
     return;
   }
 
@@ -59,7 +71,6 @@ async function main() {
         headers: {
           "Content-Type": "application/json",
           "x-pipeline-secret": SECRET,
-          "x-commande-id": cmd.id,
         },
         body: JSON.stringify({ commandeId: cmd.id }),
         signal: controller.signal,
@@ -83,7 +94,7 @@ async function main() {
     }
   }
 
-  console.log("\nTermine. Verifiez le statut des commandes dans l'admin FGH55FH.");
+  console.log("\nTerminé. Vérifiez le statut des commandes dans l'admin FGH55FH.");
 }
 
 main().catch(console.error);
