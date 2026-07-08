@@ -13,6 +13,22 @@ const ARCHETYPE_LABELS: Record<string, { fr: string; en: string }> = {
   leopard: { fr: "Léopard", en: "Leopard" },
 };
 
+function normalizeLanguage(langue: unknown): "fr" | "en" {
+  const raw = typeof langue === "string" ? langue.trim().toLowerCase() : "";
+  if (!raw) return "fr";
+
+  if (
+    raw === "en" ||
+    raw.startsWith("en-") ||
+    raw === "english" ||
+    raw === "anglais" ||
+    raw === "anglaise"
+  ) {
+    return "en";
+  }
+  return "fr";
+}
+
 function extractChampsLibres(reponses: Record<string, unknown>): string {
   return Object.values(reponses)
     .filter((a): a is Record<string, unknown> => !!a && typeof a === "object")
@@ -120,7 +136,7 @@ function extractParchmentText(raw: string): string {
   return raw.trim();
 }
 
-function extractSections(raw: string): { title: string; text: string }[] | null {
+function extractSections(raw: string, langue: "fr" | "en"): { title: string; text: string }[] | null {
   const parsed = extractJson(raw);
   if (!parsed || typeof parsed !== "object") return null;
 
@@ -138,19 +154,28 @@ function extractSections(raw: string): { title: string; text: string }[] | null 
 
   // Legacy format: individual movement keys
   const movementKeys = ["opening", "portrait", "trial", "transmission", "passage"];
-  const movementTitles: Record<string, string> = {
-    opening: "L'Ouverture",
-    portrait: "Le Portrait",
-    trial: "L'Épreuve",
-    transmission: "La Transmission",
-    passage: "Le Passage",
+  const movementTitles: Record<"fr" | "en", Record<string, string>> = {
+    fr: {
+      opening: "L'Ouverture",
+      portrait: "Le Portrait",
+      trial: "L'Épreuve",
+      transmission: "La Transmission",
+      passage: "Le Passage",
+    },
+    en: {
+      opening: "Opening",
+      portrait: "Portrait",
+      trial: "Trial",
+      transmission: "Transmission",
+      passage: "Passage",
+    },
   };
 
   const sections: { title: string; text: string }[] = [];
   for (const key of movementKeys) {
     if (typeof root[key] === "string") {
       const val = (root[key] as string).trim();
-      if (val) sections.push({ title: movementTitles[key], text: val });
+      if (val) sections.push({ title: movementTitles[langue][key], text: val });
     }
   }
 
@@ -209,6 +234,7 @@ function fallbackLocal(
   prenom: string,
   archetype: string,
   reponses: Record<string, unknown>,
+  langue: "fr" | "en",
 ): string {
   const lines: string[] = [];
   for (const val of Object.values(reponses)) {
@@ -218,7 +244,10 @@ function fallbackLocal(
       lines.push(answer.field.trim());
     }
   }
-  return lines.length > 0 ? lines.join("\n\n") : `Totem Ancestral de ${prenom} — ${archetype}`;
+  if (lines.length > 0) return lines.join("\n\n");
+  return langue === "fr"
+    ? `Totem Ancestral de ${prenom} — ${archetype}`
+    : `Ancestral Totem of ${prenom} — ${archetype}`;
 }
 
 Deno.serve(async (req) => {
@@ -232,7 +261,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const l = (langue === "en" ? "en" : "fr") as "fr" | "en";
+    const l = normalizeLanguage(langue);
     const archetype = ARCHETYPE_LABELS[archetypeId as string]?.[l] ?? "Griot";
     const champsLibres = extractChampsLibres(reponses as Record<string, unknown>);
     const finalPrompt =
@@ -273,11 +302,11 @@ Deno.serve(async (req) => {
     }
 
     if (!texte) {
-      texte = fallbackLocal(prenom, archetype, reponses as Record<string, unknown>);
+      texte = fallbackLocal(prenom, archetype, reponses as Record<string, unknown>, l);
       rawTexte = texte;
     }
 
-    const sections = extractSections(rawTexte || texte);
+    const sections = extractSections(rawTexte || texte, l);
 
     return new Response(
       JSON.stringify({

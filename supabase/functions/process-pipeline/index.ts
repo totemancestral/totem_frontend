@@ -56,6 +56,11 @@ const TOTEM_TO_VISUAL: Record<string, string> = {
   phacochre: "rhinoceros", pangolin: "crocodile",
 };
 
+type StorySection = {
+  title: string;
+  paragraphs: string[];
+};
+
 function archetypeFromTotem(nomTotem: string): string {
   const lower = nomTotem.toLowerCase();
   for (const [key, val] of Object.entries(TOTEM_TO_VISUAL)) {
@@ -65,6 +70,92 @@ function archetypeFromTotem(nomTotem: string): string {
 }
 
 function sleep(ms: number) { return new Promise((r) => setTimeout(r, ms)); }
+
+function normalizeLanguage(langue: unknown): "fr" | "en" {
+  const raw = typeof langue === "string" ? langue.trim().toLowerCase() : "";
+  if (!raw) return "fr";
+
+  if (
+    raw === "en" ||
+    raw.startsWith("en-") ||
+    raw === "english" ||
+    raw === "anglais" ||
+    raw === "anglaise"
+  ) {
+    return "en";
+  }
+  return "fr";
+}
+
+function sanitizeText(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function splitParagraphs(text: string): string[] {
+  return text
+    .split(/\n{2,}|\r?\n/g)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function parseStorySections(value: unknown): StorySection[] {
+  if (!Array.isArray(value)) return [];
+
+  const sections: StorySection[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const section = item as { title?: unknown; text?: unknown; paragraphs?: unknown };
+    const title = sanitizeText(section.title);
+
+    let paragraphs: string[] = [];
+    if (Array.isArray(section.paragraphs)) {
+      paragraphs = (section.paragraphs as unknown[])
+        .map((p) => sanitizeText(p))
+        .filter(Boolean);
+    } else {
+      const text = sanitizeText(section.text);
+      if (text) paragraphs = splitParagraphs(text);
+    }
+
+    if (paragraphs.length > 0) {
+      sections.push({ title, paragraphs });
+    }
+  }
+
+  return sections;
+}
+
+function fallbackSectionsFromRecit(recit: string): StorySection[] {
+  const paragraphs = splitParagraphs(recit);
+  if (paragraphs.length === 0) return [];
+  return [{ title: "", paragraphs }];
+}
+
+function collectFreeAnswers(reponses: Record<string, unknown>): string[] {
+  const lines: string[] = [];
+  for (const value of Object.values(reponses)) {
+    if (!value || typeof value !== "object") continue;
+    const answer = value as { field?: unknown };
+    const field = sanitizeText(answer.field);
+    if (field) lines.push(field);
+  }
+  return lines;
+}
+
+function buildFallbackRecit(
+  prenom: string,
+  nomTotem: string,
+  reponses: Record<string, unknown>,
+  langue: "fr" | "en",
+): string {
+  const lines = collectFreeAnswers(reponses);
+  if (lines.length > 0) return lines.join("\n\n");
+
+  if (langue === "fr") {
+    return `${prenom} avance sous le signe de ${nomTotem}. Dans la mémoire des anciens, ce totem veille, protège et éclaire chaque pas du voyage initiatique.`;
+  }
+  return `${prenom} walks under the sign of ${nomTotem}. In ancestral memory, this totem watches over, protects, and illuminates each step of the initiatory journey.`;
+}
 
 function extractArchetypeFromAnswers(reponses: Record<string, unknown>): string {
   for (const value of Object.values(reponses)) {
@@ -128,152 +219,341 @@ async function downloadImage(url: string): Promise<Uint8Array | null> {
   } catch { return null; }
 }
 
+let manuscriptFontCache: Uint8Array | null = null;
+let parchmentTextureCache: Uint8Array | null = null;
+
+async function loadBundledAsset(path: string): Promise<Uint8Array | null> {
+  try {
+    return await Deno.readFile(new URL(path, import.meta.url));
+  } catch {
+    return null;
+  }
+}
+
+async function fetchAsset(url: string): Promise<Uint8Array | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    return new Uint8Array(await response.arrayBuffer());
+  } catch {
+    return null;
+  }
+}
+
+async function loadManuscriptFontBytes(): Promise<Uint8Array> {
+  if (manuscriptFontCache) return manuscriptFontCache;
+
+  const localCandidates = [
+    "./MAKALO-Regular.otf",
+    "./assets/MAKALO-Regular.otf",
+  ];
+  for (const path of localCandidates) {
+    const bytes = await loadBundledAsset(path);
+    if (bytes && bytes.length > 0) {
+      manuscriptFontCache = bytes;
+      return bytes;
+    }
+  }
+
+  const remoteCandidates = [
+    "https://mjiealkqjcqvlfrxdcif.supabase.co/storage/v1/object/public/totem-files/fonts/MAKALO-Regular.otf",
+    "https://mjiealkqjcqvlfrxdcif.supabase.co/storage/v1/object/public/totem-files/fonts/DancingScript-Regular.ttf",
+  ];
+  for (const url of remoteCandidates) {
+    const bytes = await fetchAsset(url);
+    if (bytes && bytes.length > 0) {
+      manuscriptFontCache = bytes;
+      return bytes;
+    }
+  }
+
+  manuscriptFontCache = new Uint8Array(0);
+  return manuscriptFontCache;
+}
+
+async function loadParchmentTextureBytes(): Promise<Uint8Array | null> {
+  if (parchmentTextureCache) return parchmentTextureCache;
+
+  const localCandidates = [
+    "./parchemin_ouvert.png",
+    "./assets/parchemin_ouvert.png",
+  ];
+  for (const path of localCandidates) {
+    const bytes = await loadBundledAsset(path);
+    if (bytes && bytes.length > 0) {
+      parchmentTextureCache = bytes;
+      return bytes;
+    }
+  }
+
+  return null;
+}
+
+function wrapText(text: string, font: { widthOfTextAtSize: (t: string, s: number) => number }, size: number, maxWidth: number): string[] {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return [];
+  const lines: string[] = [];
+  let line = words[0];
+
+  for (let i = 1; i < words.length; i++) {
+    const candidate = `${line} ${words[i]}`;
+    if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {
+      line = candidate;
+    } else {
+      lines.push(line);
+      line = words[i];
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
 async function generatePDF(
-  commandeId: string,
+  _commandeId: string,
   nomTotem: string,
   prenom: string,
   recit: string,
   imageBytes: Uint8Array | null,
+  sections: StorySection[],
   langue: "fr" | "en",
   orderNumber: number,
 ): Promise<Uint8Array> {
-  const fontUrl = "https://mjiealkqjcqvlfrxdcif.supabase.co/storage/v1/object/public/totem-files/fonts/DancingScript-Regular.ttf";
-  let fontBytes: Uint8Array;
-  try {
-    const resp = await fetch(fontUrl);
-    fontBytes = new Uint8Array(await resp.arrayBuffer());
-  } catch {
-    fontBytes = new Uint8Array(0);
-  }
-
   const pdfDoc = await PDFDocument.create();
+  const fontBytes = await loadManuscriptFontBytes();
+  const textureBytes = await loadParchmentTextureBytes();
+
   let dsFont;
   try { dsFont = await pdfDoc.embedFont(fontBytes); } catch { dsFont = await pdfDoc.embedFont(StandardFonts.TimesRoman); }
+
   const helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const helvB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const times = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const timesB = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
 
   const A4W = 595.28, A4H = 841.89;
-  const BG = rgb(0.96, 0.94, 0.88);
+  const BG = rgb(0.97, 0.94, 0.88);
   const GOLD = rgb(0.79, 0.66, 0.30);
   const INK = rgb(0.17, 0.11, 0.05);
   const INK_L = rgb(0.35, 0.27, 0.15);
-  const DARK = rgb(0.05, 0.05, 0.07);
+  const DARK = rgb(0.05, 0.05, 0.08);
   const m = 16, pm = 10;
+
+  const labels = langue === "fr"
+    ? {
+      subtitle: "Decret royal de revelation symbolique",
+      preparedFor: "Prepare pour",
+      storyTitle: "Le Recit",
+      sigilTitle: "Insigne",
+      certLine: "Certifie authentique",
+      certNo: "N°",
+    }
+    : {
+      subtitle: "Royal decree of symbolic revelation",
+      preparedFor: "Prepared for",
+      storyTitle: "The Story",
+      sigilTitle: "Sigil",
+      certLine: "Certified authentic",
+      certNo: "No.",
+    };
 
   let embeddedImg: ReturnType<typeof pdfDoc.embedPng> | null = null;
   if (imageBytes) { try { embeddedImg = await pdfDoc.embedPng(imageBytes); } catch { try { embeddedImg = await pdfDoc.embedJpg(imageBytes); } catch {} } }
 
-  // Cover page
-  {
-    const page = pdfDoc.addPage([A4W, A4H]);
+  let textureImg: ReturnType<typeof pdfDoc.embedPng> | null = null;
+  if (textureBytes) {
+    try {
+      textureImg = await pdfDoc.embedPng(textureBytes);
+    } catch {
+      try {
+        textureImg = await pdfDoc.embedJpg(textureBytes);
+      } catch {
+        textureImg = null;
+      }
+    }
+  }
+
+  function drawWaxSeal(
+    page: ReturnType<typeof pdfDoc.addPage>,
+    cx: number,
+    cy: number,
+    size: number,
+  ) {
+    page.drawCircle({ x: cx, y: cy, size, color: rgb(0.62, 0.11, 0.07) });
+    page.drawCircle({ x: cx, y: cy, size: size * 0.86, borderColor: GOLD, borderWidth: 0.5, color: undefined });
+    const taSize = Math.max(10, Math.round(size * 0.55));
+    const taW = helvB.widthOfTextAtSize("TA", taSize);
+    page.drawText("TA", {
+      x: cx - taW / 2,
+      y: cy - taSize * 0.35,
+      size: taSize,
+      font: helvB,
+      color: rgb(1, 0.8, 0.43),
+    });
+  }
+
+  function drawParchmentFrame(page: ReturnType<typeof pdfDoc.addPage>) {
     const { width, height } = page.getSize();
     page.drawRectangle({ x: 0, y: 0, width, height, color: DARK });
-    page.drawRectangle({ x: m, y: m, width: width - 2*m, height: height - 2*m, color: BG });
-    page.drawRectangle({ x: m, y: m, width: width - 2*m, height: height - 2*m, borderColor: GOLD, borderWidth: 2, color: undefined });
-    page.drawRectangle({ x: m + pm, y: m + pm, width: width - 2*m - 2*pm, height: height - 2*m - 2*pm, color: BG });
+    page.drawRectangle({ x: m, y: m, width: width - 2 * m, height: height - 2 * m, borderColor: GOLD, borderWidth: 2, color: undefined });
+
+    const innerX = m + pm;
+    const innerY = m + pm;
+    const innerW = width - 2 * m - 2 * pm;
+    const innerH = height - 2 * m - 2 * pm;
+
+    page.drawRectangle({ x: innerX, y: innerY, width: innerW, height: innerH, color: BG });
+    if (textureImg) {
+      page.drawImage(textureImg, { x: innerX, y: innerY, width: innerW, height: innerH, opacity: 0.88 });
+    }
+
+    return { width, height, innerX, innerY, innerW, innerH };
+  }
+
+  {
+    const page = pdfDoc.addPage([A4W, A4H]);
+    const { width, height, innerX, innerY, innerW, innerH } = drawParchmentFrame(page);
 
     const tSize = 32;
     const title = "TOTEM ANCESTRAL";
     const tW = dsFont.widthOfTextAtSize(title, tSize);
-    page.drawText(title, { x: (width - tW) / 2, y: height - 100, size: tSize, font: dsFont, color: INK });
+    const topY = innerY + innerH - 86;
+    page.drawText(title, { x: (width - tW) / 2, y: topY, size: tSize, font: dsFont, color: INK });
 
-    const sub = langue === "fr" ? "Decret royal de revelation symbolique" : "Royal decree of symbolic revelation";
     const sSize = 11;
-    page.drawText(sub, { x: (width - dsFont.widthOfTextAtSize(sub, sSize)) / 2, y: height - 130, size: sSize, font: dsFont, color: INK_L });
+    page.drawText(labels.subtitle, {
+      x: (width - dsFont.widthOfTextAtSize(labels.subtitle, sSize)) / 2,
+      y: topY - 30,
+      size: sSize,
+      font: dsFont,
+      color: INK_L,
+    });
 
     const ruleW = 80;
-    page.drawRectangle({ x: (width - ruleW) / 2, y: height - 150, width: ruleW, height: 1.5, color: GOLD });
+    page.drawRectangle({ x: (width - ruleW) / 2, y: topY - 48, width: ruleW, height: 1.5, color: GOLD });
 
-    let cy = height - 170;
+    let cy = topY - 70;
     if (embeddedImg) {
       const maxW = 220, maxH = 220;
       const scale = Math.min(maxW / embeddedImg.width, maxH / embeddedImg.height);
       const dw = embeddedImg.width * scale, dh = embeddedImg.height * scale;
       page.drawImage(embeddedImg, { x: (width - dw) / 2, y: cy - dh, width: dw, height: dh });
-      cy -= dh + 10;
+      cy -= dh + 16;
     }
 
-    const nSize = 18;
+    const nSize = 24;
     const nW = dsFont.widthOfTextAtSize(nomTotem, nSize);
     page.drawText(nomTotem, { x: (width - nW) / 2, y: cy - 10, size: nSize, font: dsFont, color: INK });
-    cy -= 30;
-
-    const prep = langue === "fr" ? `Prepare pour ${prenom}` : `Prepared for ${prenom}`;
+    cy -= 40;
+    const prep = `${labels.preparedFor} ${prenom}`;
     const pSize = 12;
     page.drawText(prep, { x: (width - dsFont.widthOfTextAtSize(prep, pSize)) / 2, y: cy, size: pSize, font: dsFont, color: INK_L });
 
-    const sealY = m + pm + 30;
-    page.drawCircle({ x: width / 2, y: sealY + 30, size: 30, color: rgb(0.62, 0.11, 0.07) });
-    page.drawCircle({ x: width / 2, y: sealY + 30, size: 26, borderColor: GOLD, borderWidth: 0.5, color: undefined });
-    const taW = helvB.widthOfTextAtSize("TA", 18);
-    page.drawText("TA", { x: (width - taW) / 2, y: sealY + 20, size: 18, font: helvB, color: rgb(1, 0.8, 0.43) });
+    drawWaxSeal(page, width / 2, innerY + 58, 28);
 
     const serieStr = String(orderNumber).padStart(6, "0");
-    const certT = langue === "fr" ? `Certifie authentique — N° ${serieStr}` : `Certified authentic — No. ${serieStr}`;
+    const certT = `${labels.certLine} — ${labels.certNo} ${serieStr}`;
     page.drawText(certT, { x: (width - helv.widthOfTextAtSize(certT, 7)) / 2, y: m + 8, size: 7, font: helv, color: INK_L });
   }
 
-  // Story / recit pages
-  {
-    const paragraphs = recit.split("\n").filter(p => p.trim()).map(p => p.trim());
-    if (paragraphs.length > 0) {
-      const page = pdfDoc.addPage([A4W, A4H]);
-      const { width, height } = page.getSize();
-      page.drawRectangle({ x: 0, y: 0, width, height, color: DARK });
-      page.drawRectangle({ x: m, y: m, width: width - 2*m, height: height - 2*m, borderColor: GOLD, borderWidth: 2, color: undefined });
-      page.drawRectangle({ x: m + pm, y: m + pm, width: width - 2*m - 2*pm, height: height - 2*m - 2*pm, color: BG });
+  const storySections = sections.length > 0 ? sections : fallbackSectionsFromRecit(recit);
+  const splitIndex = Math.ceil(storySections.length / 2);
+  const storyGroups: StorySection[][] = [
+    storySections.slice(0, splitIndex),
+    storySections.slice(splitIndex),
+  ];
+  while (storyGroups.length < 2) storyGroups.push([]);
 
-      const marginX = 60, marginY = 75;
-      const maxW = width - 2 * marginX;
-      let curY = height - marginY;
-      let currentPage = page;
+  for (let groupIndex = 0; groupIndex < storyGroups.length; groupIndex++) {
+    const group = storyGroups[groupIndex];
+    const isFirstStoryPage = groupIndex === 0;
+    const isLastStoryPage = groupIndex === storyGroups.length - 1;
 
-      const pSize = 11, lineH = 19;
-      for (const para of paragraphs) {
-        curY -= 12;
-        const words = para.split(" ");
-        let line = "";
-        for (const word of words) {
-          const test = line ? line + " " + word : word;
-          if (dsFont.widthOfTextAtSize(test, pSize) > maxW) {
-            if (curY < marginY) {
-              currentPage = pdfDoc.addPage([A4W, A4H]);
-              const { width: w2, height: h2 } = currentPage.getSize();
-              currentPage.drawRectangle({ x: 0, y: 0, width: w2, height: h2, color: DARK });
-              currentPage.drawRectangle({ x: m, y: m, width: w2 - 2*m, height: h2 - 2*m, borderColor: GOLD, borderWidth: 2, color: undefined });
-              currentPage.drawRectangle({ x: m + pm, y: m + pm, width: w2 - 2*m - 2*pm, height: h2 - 2*m - 2*pm, color: BG });
-              curY = h2 - marginY;
-            }
-            currentPage.drawText(line, { x: marginX, y: curY, size: pSize, font: dsFont, color: INK });
-            curY -= lineH;
-            line = word;
-          } else { line = test; }
-        }
-        if (line) {
-          if (curY < marginY) {
-            currentPage = pdfDoc.addPage([A4W, A4H]);
-            const { width: w2, height: h2 } = currentPage.getSize();
-            currentPage.drawRectangle({ x: 0, y: 0, width: w2, height: h2, color: DARK });
-            currentPage.drawRectangle({ x: m, y: m, width: w2 - 2*m, height: h2 - 2*m, borderColor: GOLD, borderWidth: 2, color: undefined });
-            currentPage.drawRectangle({ x: m + pm, y: m + pm, width: w2 - 2*m - 2*pm, height: h2 - 2*m - 2*pm, color: BG });
-            curY = h2 - marginY;
-          }
-          currentPage.drawText(line, { x: marginX, y: curY, size: pSize, font: dsFont, color: INK });
-          curY -= lineH;
-        }
+    const page = pdfDoc.addPage([A4W, A4H]);
+    const { width, innerX, innerY, innerW, innerH } = drawParchmentFrame(page);
+    const contentX = innerX + 54;
+    const contentW = innerW - 108;
+    const headerY = innerY + innerH - 70;
+    const lineHeight = 16;
+    const paragraphSize = 11;
+    const titleSize = 19;
+    const storyReserve = isLastStoryPage ? 170 : 110;
+    let y = headerY;
+
+    if (isFirstStoryPage) {
+      const h = labels.storyTitle;
+      page.drawText(h, {
+        x: (width - dsFont.widthOfTextAtSize(h, 28)) / 2,
+        y,
+        size: 28,
+        font: dsFont,
+        color: INK,
+      });
+      page.drawRectangle({ x: (width - 100) / 2, y: y - 14, width: 100, height: 1.5, color: GOLD });
+      y -= 40;
+    } else {
+      y -= 6;
+    }
+
+    for (const section of group) {
+      if (section.title) {
+        y -= 6;
+        if (y <= innerY + storyReserve) break;
+        page.drawText(section.title, {
+          x: contentX,
+          y,
+          size: titleSize,
+          font: dsFont,
+          color: INK_L,
+        });
+        y -= 20;
       }
 
-      const { width: lastW, height: lastH } = currentPage.getSize();
-      currentPage.drawCircle({ x: lastW / 2, y: 60, size: 20, color: rgb(0.62, 0.11, 0.07) });
-      currentPage.drawCircle({ x: lastW / 2, y: 60, size: 17, borderColor: GOLD, borderWidth: 0.5, color: undefined });
-      const taW2 = helvB.widthOfTextAtSize("TA", 12);
-      currentPage.drawText("TA", { x: (lastW - taW2) / 2, y: 51, size: 12, font: helvB, color: rgb(1, 0.8, 0.43) });
-      const sigT = "SENYCE PARTNERS";
-      const sigW = dsFont.widthOfTextAtSize(sigT, 8);
-      currentPage.drawText(sigT, { x: lastW - marginX - sigW, y: 35, size: 8, font: dsFont, color: INK_L });
+      for (const paragraph of section.paragraphs) {
+        const lines = wrapText(paragraph, dsFont, paragraphSize, contentW);
+        for (const line of lines) {
+          if (y <= innerY + storyReserve) break;
+          page.drawText(line, {
+            x: contentX,
+            y,
+            size: paragraphSize,
+            font: dsFont,
+            color: INK,
+          });
+          y -= lineHeight;
+        }
+        if (y <= innerY + storyReserve) break;
+        y -= 8;
+      }
+
+      if (y <= innerY + storyReserve) break;
+      y -= 2;
     }
+
+    if (isLastStoryPage) {
+      const sigilY = innerY + 118;
+      const sigilTitle = labels.sigilTitle;
+      const stSize = 24;
+      page.drawText(sigilTitle, {
+        x: (width - dsFont.widthOfTextAtSize(sigilTitle, stSize)) / 2,
+        y: sigilY,
+        size: stSize,
+        font: dsFont,
+        color: INK,
+      });
+      page.drawRectangle({ x: (width - 90) / 2, y: sigilY - 12, width: 90, height: 1.2, color: GOLD });
+      drawWaxSeal(page, width / 2, sigilY - 44, 27);
+    } else {
+      drawWaxSeal(page, width / 2, innerY + 62, 20);
+    }
+
+    const signature = "SENYCE PARTNERS";
+    page.drawText(signature, {
+      x: width - (innerX + 54) - dsFont.widthOfTextAtSize(signature, 8),
+      y: innerY + 28,
+      size: 8,
+      font: dsFont,
+      color: INK_L,
+    });
   }
 
   // Certificate page
@@ -299,9 +579,7 @@ async function generatePDF(
 
     page.drawRectangle({ x: width * 0.15, y: cy - 4, width: width * 0.7, height: 0.5, color: GOLD });
 
-    page.drawCircle({ x: width / 2, y: cy - 30, size: 20, color: rgb(0.62, 0.11, 0.07) });
-    page.drawCircle({ x: width / 2, y: cy - 30, size: 17, borderColor: GOLD, borderWidth: 0.5, color: undefined });
-    page.drawText("TA", { x: (width - helvB.widthOfTextAtSize("TA", 12)) / 2, y: cy - 39, size: 12, font: helvB, color: rgb(1, 0.8, 0.43) });
+    drawWaxSeal(page, width / 2, cy - 30, 20);
 
     cy -= 60;
     const mX = 60, mW = width - 120;
@@ -409,7 +687,7 @@ Deno.serve(async (req) => {
 
     // Lookup commande data: prenom, langue, reponses
     const { data: cmd } = await supabase.from("commandes").select("user_id, langue, reponses_id").eq("id", commandeId).single();
-    const langue = (cmd?.langue as string === "en" ? "en" : "fr") as "fr" | "en";
+    const langue = normalizeLanguage(cmd?.langue);
     let prenom = "";
     if (cmd?.user_id) {
       const { data: profile } = await supabase.from("profiles").select("prenom").eq("id", cmd.user_id).single();
@@ -438,28 +716,38 @@ Deno.serve(async (req) => {
     }
     const inferredArchetypeId = extractArchetypeFromAnswers(reponses);
 
-    // Step 1: Generate recit (story + totem name) via Claude
+    // Step 1: Generate recit (story + sections) with explicit language
     console.log(`[${commandeId}] recit...`);
-    const recitResult = await callEF("generate-recit", { commandeId });
-    let recit = (recitResult?.recit as string) ?? "";
-    let nomTotem = (recitResult?.nom_totem as string) ?? "";
-    if (!recit) {
-      const texteResult = await callEF("generate-texte", {
-        prenom,
-        reponses,
-        archetypeId: inferredArchetypeId,
-        langue,
-      });
-      recit = (texteResult?.texte as string) ?? (texteResult?.parchment_text as string) ?? "";
-    }
+    const texteResult = await callEF("generate-texte", {
+      prenom,
+      reponses,
+      archetypeId: inferredArchetypeId,
+      langue,
+    });
+    let recit = sanitizeText(texteResult?.texte) || sanitizeText(texteResult?.parchment_text);
+    let storySections = parseStorySections(texteResult?.sections);
+
+    // Legacy generator kept for naming fallback compatibility.
+    const recitResult = await callEF("generate-recit", { commandeId, langue });
+    let nomTotem = sanitizeText(recitResult?.nom_totem);
+    if (!recit) recit = sanitizeText(recitResult?.recit);
+
     if (!nomTotem) {
       nomTotem = buildNomTotem(prenom, inferredArchetypeId, langue);
+    }
+    if (!recit) {
+      recit = buildFallbackRecit(prenom, nomTotem, reponses, langue);
+    }
+    if (storySections.length === 0) {
+      storySections = fallbackSectionsFromRecit(recit);
     }
     if (!recit) console.error(`[${commandeId}] recit generation returned empty`);
 
     // Step 2: Generate image
     console.log(`[${commandeId}] image...`);
-    const archetypeId = archetypeFromTotem(nomTotem);
+    const archetypeId = ARCHETYPE_KEYS.has(inferredArchetypeId)
+      ? inferredArchetypeId
+      : archetypeFromTotem(nomTotem);
     const seed = commandeId.replace(/-/g, "").slice(0, 12);
     let imageBytes: Uint8Array | null = null;
     const imgEF = await callEF("generate-image", { archetypeId, langue, seed });
@@ -493,7 +781,16 @@ Deno.serve(async (req) => {
     // Step 4: Generate PDF
     console.log(`[${commandeId}] pdf...`);
     const orderNumber = (hashCode(commandeId) % 999999) + 1;
-    const pdfBytes = await generatePDF(commandeId, nomTotem, prenom, recit, imageBytes, langue, orderNumber);
+    const pdfBytes = await generatePDF(
+      commandeId,
+      nomTotem,
+      prenom,
+      recit,
+      imageBytes,
+      storySections,
+      langue,
+      orderNumber,
+    );
 
     // Step 5: Upload to Supabase Storage
     console.log(`[${commandeId}] upload...`);
