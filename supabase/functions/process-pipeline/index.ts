@@ -10,24 +10,30 @@ async function callEF(name: string, body: unknown): Promise<Record<string, unkno
   const secret = Deno.env.get("PIPELINE_INTERNAL_SECRET");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   if (!secret) { console.error("PIPELINE_INTERNAL_SECRET missing"); return null; }
-  try {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "x-pipeline-secret": secret,
-    };
-    if (anonKey) headers["Authorization"] = `Bearer ${anonKey}`;
-    const res = await fetch(`${EF_BASE}/${name}`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      console.error(`${name} returned ${res.status}: ${text.slice(0, 300)}`);
-      return null;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "x-pipeline-secret": secret,
+  };
+  if (anonKey) headers["Authorization"] = `Bearer ${anonKey}`;
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await sleep(1000 * attempt);
+    try {
+      const res = await fetch(`${EF_BASE}/${name}`, {
+        method: "POST", headers, body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error(`${name} attempt ${attempt + 1} returned ${res.status}: ${text.slice(0, 300)}`);
+        if (res.status < 500) return null;
+        continue;
+      }
+      return await res.json() as Record<string, unknown>;
+    } catch (e) {
+      console.error(`${name} attempt ${attempt + 1} error:`, e);
     }
-    return await res.json() as Record<string, unknown>;
-  } catch (e) { console.error(`${name} fetch error:`, e); return null; }
+  }
+  return null;
 }
 
 async function downloadImage(url: string): Promise<Uint8Array | null> {
@@ -297,6 +303,15 @@ Deno.serve(async (req) => {
     await supabase.from("commandes").update({ statut: "en_generation" }).eq("id", commandeId);
     await supabase.from("oeuvres").update({ statut: "en_cours" }).eq("commande_id", commandeId);
 
+    // Lookup commande data: prenom, langue
+    const { data: cmd } = await supabase.from("commandes").select("user_id, langue").eq("id", commandeId).single();
+    const langue = (cmd?.langue as string === "en" ? "en" : "fr") as "fr" | "en";
+    let prenom = "";
+    if (cmd?.user_id) {
+      const { data: profile } = await supabase.from("profiles").select("prenom").eq("id", cmd.user_id).single();
+      prenom = (profile?.prenom as string) ?? "";
+    }
+
     // Step 1: Generate recit (story + totem name) via Claude
     console.log(`[${commandeId}] recit...`);
     const recitResult = await callEF("generate-recit", { commandeId });
@@ -320,13 +335,13 @@ Deno.serve(async (req) => {
 
     // Step 3: Generate audio
     console.log(`[${commandeId}] audio...`);
-    const audioResult = await callEF("generate-audio", { prenom: "", texte: recit, archetypeId: "A", langue: "fr" });
+    const audioResult = await callEF("generate-audio", { prenom, texte: recit, archetypeId: "A", langue });
     const audioUrl = (audioResult?.audioUrl as string) ?? "";
 
     // Step 4: Generate PDF
     console.log(`[${commandeId}] pdf...`);
     const orderNumber = (hashCode(commandeId) % 999999) + 1;
-    const pdfBytes = await generatePDF(commandeId, nomTotem, "", recit, imageBytes, "fr", orderNumber);
+    const pdfBytes = await generatePDF(commandeId, nomTotem, prenom, recit, imageBytes, langue, orderNumber);
 
     // Step 5: Upload to Supabase Storage
     console.log(`[${commandeId}] upload...`);
@@ -373,7 +388,8 @@ Deno.serve(async (req) => {
 
     // Step 6: Update DB
     console.log(`[${commandeId}] finalize...`);
-    const finalStatut = pdfUrl ? "livree" : "erreur";
+    const hasRecit = !!recit;
+    const finalStatut = hasRecit && pdfUrl ? "livree" : "erreur";
 
     await supabase.from("commandes").update({ statut: finalStatut }).eq("id", commandeId);
     await supabase.from("oeuvres").update({
@@ -384,12 +400,13 @@ Deno.serve(async (req) => {
       pdf_url: pdfUrl || null,
       numero_serie: String(orderNumber).padStart(6, "0"),
       recit: recit || null,
+      prenom: prenom || null,
     }).eq("commande_id", commandeId);
 
     // Step 7: Email
-    const { data: cmd } = await supabase.from("commandes").select("user_id").eq("id", commandeId).single();
-    if (cmd?.user_id && pdfUrl) {
-      await sendEmail(supabase, commandeId, cmd.user_id as string, "", nomTotem, "fr", pdfUrl);
+    const { data: emailCmd } = await supabase.from("commandes").select("user_id").eq("id", commandeId).single();
+    if (emailCmd?.user_id && pdfUrl) {
+      await sendEmail(supabase, commandeId, emailCmd.user_id as string, prenom, nomTotem, langue, pdfUrl);
     }
 
     return new Response(JSON.stringify({ success: true, statut: finalStatut }), {
