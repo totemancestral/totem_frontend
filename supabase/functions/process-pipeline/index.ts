@@ -3,17 +3,101 @@ import { PDFDocument, rgb, StandardFonts } from "npm:pdf-lib@1";
 
 const SUPABASE_PROJECT_REF = "mjiealkqjcqvlfrxdcif";
 const EF_BASE = `https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1`;
+const DEFAULT_PRENOM = "Voyageur";
+const MAX_AUDIO_TEXT_LENGTH = 1800;
+const ARCHETYPE_KEYS = new Set([
+  "lion",
+  "lionne",
+  "rhinoceros",
+  "crocodile",
+  "serpent",
+  "dauphin",
+  "elephant",
+  "baobab",
+  "zebre",
+  "perroquet",
+  "aigle",
+  "leopard",
+]);
+const ARCHETYPE_LABELS: Record<string, { fr: string; en: string }> = {
+  lion: { fr: "Lion", en: "Lion" },
+  lionne: { fr: "Lionne", en: "Lioness" },
+  rhinoceros: { fr: "Rhinoceros", en: "Rhinoceros" },
+  crocodile: { fr: "Crocodile", en: "Crocodile" },
+  serpent: { fr: "Serpent", en: "Serpent" },
+  dauphin: { fr: "Dauphin", en: "Dolphin" },
+  elephant: { fr: "Elephant", en: "Elephant" },
+  baobab: { fr: "Baobab", en: "Baobab" },
+  zebre: { fr: "Zebre", en: "Zebra" },
+  perroquet: { fr: "Perroquet", en: "Parrot" },
+  aigle: { fr: "Aigle", en: "Eagle" },
+  leopard: { fr: "Leopard", en: "Leopard" },
+};
+
+// Map totem animal names (from generate-recit) to ANIMAL_VISUALS archetype keys
+const TOTEM_TO_VISUAL: Record<string, string> = {
+  lion: "lion", lionne: "lionne", panthère: "leopard", panthre: "leopard",
+  guépard: "leopard", gupard: "leopard", hyène: "leopard", hyne: "leopard",
+  léopard: "leopard", lopard: "leopard", rhinocéros: "rhinoceros", rhinoceros: "rhinoceros",
+  crocodile: "crocodile", serpent: "serpent", python: "serpent", cobra: "serpent",
+  vipère: "serpent", vipre: "serpent", boa: "serpent", mamba: "serpent",
+  dauphin: "dauphin", éléphant: "elephant", elephant: "elephant", baobab: "baobab",
+  zèbre: "zebre", zbre: "zebre", perroquet: "perroquet", aigle: "aigle",
+  abeille: "aigle", faucon: "aigle", vautour: "aigle", hibou: "aigle",
+  chouette: "aigle", corbeau: "aigle", grue: "aigle", cigogne: "aigle",
+  héron: "aigle", heron: "aigle", ibis: "aigle", calao: "aigle", marabout: "aigle",
+  autruche: "aigle", paon: "aigle", baleine: "dauphin", requin: "crocodile",
+  tortue: "crocodile", varan: "crocodile", caméléon: "crocodile", cameon: "crocodile",
+  gecko: "crocodile", hippocampe: "dauphin", phoque: "dauphin", lamantin: "dauphin",
+  rat: "lion", buffle: "rhinoceros", hippopotame: "rhinoceros", girafe: "zebre",
+  gorille: "lion", chimpanzé: "lion", chimpanz: "lion", babouin: "lion",
+  singe: "lion", mandrill: "lion", antilope: "zebre", gazelle: "zebre",
+  impala: "zebre", oryx: "zebre", koudou: "zebre", phacochère: "rhinoceros",
+  phacochre: "rhinoceros", pangolin: "crocodile",
+};
+
+function archetypeFromTotem(nomTotem: string): string {
+  const lower = nomTotem.toLowerCase();
+  for (const [key, val] of Object.entries(TOTEM_TO_VISUAL)) {
+    if (lower.includes(key)) return val;
+  }
+  return "lion";
+}
 
 function sleep(ms: number) { return new Promise((r) => setTimeout(r, ms)); }
+
+function extractArchetypeFromAnswers(reponses: Record<string, unknown>): string {
+  for (const value of Object.values(reponses)) {
+    if (!value || typeof value !== "object") continue;
+    const choice = (value as { choice?: unknown }).choice;
+    if (typeof choice !== "string") continue;
+    const normalized = choice.trim().toLowerCase();
+    if (ARCHETYPE_KEYS.has(normalized)) return normalized;
+  }
+  return "lion";
+}
+
+function buildNomTotem(prenom: string, archetypeId: string, langue: "fr" | "en"): string {
+  const key = ARCHETYPE_KEYS.has(archetypeId) ? archetypeId : "lion";
+  const label = ARCHETYPE_LABELS[key]?.[langue] ?? ARCHETYPE_LABELS.lion[langue];
+  const finalPrenom = prenom.trim() || DEFAULT_PRENOM;
+  return `${finalPrenom} ${label}`;
+}
+
+function buildAudioScript(recit: string, langue: "fr" | "en"): string {
+  const normalized = recit.replace(/\s+/g, " ").trim();
+  if (!normalized) return langue === "fr" ? "Message ancestral." : "Ancestral message.";
+  if (normalized.length <= MAX_AUDIO_TEXT_LENGTH) return normalized;
+  return `${normalized.slice(0, MAX_AUDIO_TEXT_LENGTH).trimEnd()}...`;
+}
 
 async function callEF(name: string, body: unknown): Promise<Record<string, unknown> | null> {
   const secret = Deno.env.get("PIPELINE_INTERNAL_SECRET");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  if (!secret) { console.error("PIPELINE_INTERNAL_SECRET missing"); return null; }
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "x-pipeline-secret": secret,
   };
+  if (secret) headers["x-pipeline-secret"] = secret;
   if (anonKey) headers["Authorization"] = `Bearer ${anonKey}`;
 
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -141,7 +225,7 @@ async function generatePDF(
       page.drawRectangle({ x: m, y: m, width: width - 2*m, height: height - 2*m, borderColor: GOLD, borderWidth: 2, color: undefined });
       page.drawRectangle({ x: m + pm, y: m + pm, width: width - 2*m - 2*pm, height: height - 2*m - 2*pm, color: BG });
 
-      const marginX = 55, marginY = 70;
+      const marginX = 60, marginY = 75;
       const maxW = width - 2 * marginX;
       let curY = height - marginY;
       let currentPage = page;
@@ -306,8 +390,10 @@ async function sendEmail(supabase: ReturnType<typeof createClient>, commandeId: 
 }
 
 Deno.serve(async (req) => {
+  let commandeId = "";
   try {
-    const { commandeId } = await req.json() as { commandeId: string };
+    const payload = await req.json() as { commandeId: string };
+    commandeId = payload.commandeId;
     if (!commandeId) {
       return new Response(JSON.stringify({ error: "commandeId requis" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
@@ -315,44 +401,93 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const supabase = createClient(supabaseUrl, serviceKey);
+    const bucket = "totem-files";
 
     // Set commande to en_generation
     await supabase.from("commandes").update({ statut: "en_generation" }).eq("id", commandeId);
     await supabase.from("oeuvres").update({ statut: "en_cours" }).eq("commande_id", commandeId);
 
-    // Lookup commande data: prenom, langue
-    const { data: cmd } = await supabase.from("commandes").select("user_id, langue").eq("id", commandeId).single();
+    // Lookup commande data: prenom, langue, reponses
+    const { data: cmd } = await supabase.from("commandes").select("user_id, langue, reponses_id").eq("id", commandeId).single();
     const langue = (cmd?.langue as string === "en" ? "en" : "fr") as "fr" | "en";
     let prenom = "";
     if (cmd?.user_id) {
       const { data: profile } = await supabase.from("profiles").select("prenom").eq("id", cmd.user_id).single();
       prenom = (profile?.prenom as string) ?? "";
     }
+    if (!prenom) prenom = DEFAULT_PRENOM;
+
+    let reponses: Record<string, unknown> = {};
+    if (cmd?.reponses_id) {
+      const { data: rep } = await supabase.from("reponses_parcours").select("reponses").eq("id", cmd.reponses_id).maybeSingle();
+      if (rep?.reponses && typeof rep.reponses === "object") {
+        reponses = rep.reponses as Record<string, unknown>;
+      }
+    } else if (cmd?.user_id) {
+      const { data: rep } = await supabase
+        .from("reponses_parcours")
+        .select("reponses")
+        .eq("user_id", cmd.user_id)
+        .eq("termine", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (rep?.reponses && typeof rep.reponses === "object") {
+        reponses = rep.reponses as Record<string, unknown>;
+      }
+    }
+    const inferredArchetypeId = extractArchetypeFromAnswers(reponses);
 
     // Step 1: Generate recit (story + totem name) via Claude
     console.log(`[${commandeId}] recit...`);
     const recitResult = await callEF("generate-recit", { commandeId });
-    const recit = (recitResult?.recit as string) ?? "";
-    const nomTotem = (recitResult?.nom_totem as string) ?? "";
+    let recit = (recitResult?.recit as string) ?? "";
+    let nomTotem = (recitResult?.nom_totem as string) ?? "";
+    if (!recit) {
+      const texteResult = await callEF("generate-texte", {
+        prenom,
+        reponses,
+        archetypeId: inferredArchetypeId,
+        langue,
+      });
+      recit = (texteResult?.texte as string) ?? (texteResult?.parchment_text as string) ?? "";
+    }
+    if (!nomTotem) {
+      nomTotem = buildNomTotem(prenom, inferredArchetypeId, langue);
+    }
     if (!recit) console.error(`[${commandeId}] recit generation returned empty`);
 
     // Step 2: Generate image
     console.log(`[${commandeId}] image...`);
-    const imgResult = await callEF("generate-image", { commandeId, nom_totem: nomTotem, recit });
-    const b64 = (imgResult?.b64 as string) ?? "";
+    const archetypeId = archetypeFromTotem(nomTotem);
+    const seed = commandeId.replace(/-/g, "").slice(0, 12);
     let imageBytes: Uint8Array | null = null;
-    if (b64) {
+    const imgEF = await callEF("generate-image", { archetypeId, langue, seed });
+    const imgUrl = (imgEF?.imageUrl as string) ?? "";
+    const imgB64 = (imgEF?.b64 as string) ?? "";
+    let finalImageUrl = imgUrl;
+    if (imgUrl) {
       try {
-        const binaryStr = atob(b64);
-        const bytes = new Uint8Array(binaryStr.length);
-        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
-        imageBytes = bytes;
-      } catch (e) { console.error(`[${commandeId}] b64 decode error:`, e); }
+        const resp = await fetch(imgUrl);
+        if (resp.ok) imageBytes = new Uint8Array(await resp.arrayBuffer());
+      } catch (e) { console.error("image download error:", e); }
+    } else if (imgB64) {
+      try {
+        const decoded = atob(imgB64.replace(/\s/g, ""));
+        imageBytes = new Uint8Array(decoded.length);
+        for (let i = 0; i < decoded.length; i++) imageBytes[i] = decoded.charCodeAt(i);
+      } catch (e) {
+        console.error(`[${commandeId}] image b64 decode failed:`, e);
+      }
     }
 
     // Step 3: Generate audio
     console.log(`[${commandeId}] audio...`);
-    const audioResult = await callEF("generate-audio", { prenom, texte: recit, archetypeId: "A", langue });
+    const audioScript = buildAudioScript(recit, langue);
+    if (audioScript.length < recit.length) {
+      console.log(`[${commandeId}] audio script truncated to ${audioScript.length} chars`);
+    }
+    const audioResult = await callEF("generate-audio", { prenom, texte: audioScript, archetypeId: "A", langue });
     const audioUrl = (audioResult?.audioUrl as string) ?? "";
 
     // Step 4: Generate PDF
@@ -362,8 +497,7 @@ Deno.serve(async (req) => {
 
     // Step 5: Upload to Supabase Storage
     console.log(`[${commandeId}] upload...`);
-    const bucket = "totem-files";
-    let pdfUrl = "", certUrl = "", r2ImageUrl = "", r2AudioUrl = "";
+    let pdfUrl = "", r2AudioUrl = "";
 
     try {
       const { error: pdfErr } = await supabase.storage.from(bucket).upload(
@@ -376,26 +510,32 @@ Deno.serve(async (req) => {
     } catch (e) { console.error("PDF upload error:", e); }
 
     try {
-      if (imageBytes) {
+      if (!finalImageUrl && imageBytes) {
         const { error: imgErr } = await supabase.storage.from(bucket).upload(
           `totems/${commandeId}/image.png`, imageBytes, { contentType: "image/png", upsert: true },
         );
-        if (!imgErr) {
+        if (imgErr) {
+          console.error(`[${commandeId}] image upload failed: ${imgErr.message}`);
+        } else {
           const { data: pub } = supabase.storage.from(bucket).getPublicUrl(`totems/${commandeId}/image.png`);
-          r2ImageUrl = pub?.publicUrl ?? "";
+          finalImageUrl = pub?.publicUrl ?? "";
         }
       }
     } catch (e) { console.error("Image upload error:", e); }
 
     try {
       if (audioUrl) {
-        const base64Match = audioUrl.match(/^data:audio\/[a-z]+;base64,(.+)$/);
-        if (base64Match) {
-          const audioBytes = Uint8Array.from(atob(base64Match[1]), c => c.charCodeAt(0));
+        const base64Match = audioUrl.match(/^data:audio\/[a-z0-9.+-]+;base64,([\s\S]+)$/i);
+        if (!base64Match) {
+          console.error(`[${commandeId}] audio data URL format not supported`);
+        } else {
+          const audioBytes = Uint8Array.from(atob(base64Match[1].replace(/\s/g, "")), c => c.charCodeAt(0));
           const { error: audioErr } = await supabase.storage.from(bucket).upload(
             `totems/${commandeId}/audio.mp3`, audioBytes, { contentType: "audio/mpeg", upsert: true },
           );
-          if (!audioErr) {
+          if (audioErr) {
+            console.error(`[${commandeId}] audio upload failed: ${audioErr.message}`);
+          } else {
             const { data: pub } = supabase.storage.from(bucket).getPublicUrl(`totems/${commandeId}/audio.mp3`);
             r2AudioUrl = pub?.publicUrl ?? "";
           }
@@ -412,7 +552,7 @@ Deno.serve(async (req) => {
     await supabase.from("oeuvres").update({
       statut: finalStatut,
       nom_totem: nomTotem || null,
-      image_url: r2ImageUrl || null,
+      image_url: finalImageUrl || null,
       audio_url: r2AudioUrl || null,
       pdf_url: pdfUrl || null,
       numero_serie: String(orderNumber).padStart(6, "0"),
@@ -432,6 +572,17 @@ Deno.serve(async (req) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
     console.error("process-pipeline error:", message);
+    if (commandeId) {
+      try {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+        const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+        const supabase = createClient(supabaseUrl, serviceKey);
+        await supabase.from("commandes").update({ statut: "erreur" }).eq("id", commandeId);
+        await supabase.from("oeuvres").update({ statut: "erreur" }).eq("commande_id", commandeId);
+      } catch {
+        // noop
+      }
+    }
     return new Response(JSON.stringify({ error: message }), {
       status: 500, headers: { "Content-Type": "application/json" },
     });

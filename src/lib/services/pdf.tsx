@@ -4,10 +4,15 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { StorySection } from "@/lib/totem-v3";
 
+const dancingScriptPath = join(process.cwd(), "public/fonts/totem/DancingScript-Regular.ttf");
+
 Font.register({
   family: "DancingScript",
   fonts: [
-    { src: join(process.cwd(), "public/fonts/totem/DancingScript-Regular.ttf") },
+    { src: dancingScriptPath, fontWeight: 400, fontStyle: "normal" },
+    { src: dancingScriptPath, fontWeight: 400, fontStyle: "italic" },
+    { src: dancingScriptPath, fontWeight: 700, fontStyle: "normal" },
+    { src: dancingScriptPath, fontWeight: 700, fontStyle: "italic" },
   ],
 });
 
@@ -79,9 +84,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   coverSubtitle: {
-  fontFamily: "DancingScript",
-  fontSize: 13,
-  color: inkLight,
+    fontFamily: "DancingScript",
+    fontSize: 13,
+    color: inkLight,
     textAlign: "center",
     marginTop: 4,
   },
@@ -150,10 +155,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   signature: {
+    fontFamily: "Times-Italic",
     textAlign: "right",
     fontSize: 9,
     color: inkLight,
-    fontStyle: "italic",
     marginTop: 8,
   },
   serieNum: {
@@ -221,11 +226,11 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   certSubtitle: {
+    fontFamily: "Times-Italic",
     fontSize: 9,
     textAlign: "center",
     color: "#A06418",
     marginBottom: 14,
-    fontStyle: "italic",
   },
   certBody: {
     fontSize: 10,
@@ -256,10 +261,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   certSig: {
+    fontFamily: "Times-Italic",
     textAlign: "right",
     fontSize: 9,
     color: "#8A520D",
-    fontStyle: "italic",
     marginTop: 12,
   },
 });
