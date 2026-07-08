@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getServerEnv } from "@/lib/env";
 import { createServiceClient } from "@/lib/server-auth";
@@ -26,7 +26,7 @@ const OFFER_LABELS: Record<Offre, Record<Locale, string>> = {
   heritage: { fr: "Famille", en: "Family" },
 };
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
   const body = await request.text();
 
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      return await handlePaidCheckoutSession(session, request);
+      return await handlePaidCheckoutSession(session);
     }
 
     if (event.type === "charge.refunded") {
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handlePaidCheckoutSession(session: Stripe.Checkout.Session, request: NextRequest) {
+async function handlePaidCheckoutSession(session: Stripe.Checkout.Session) {
   const metadata = session.metadata ?? {};
   const userId = metadata.userId;
   const locale = toLocale(metadata.locale);
@@ -140,14 +140,16 @@ async function handlePaidCheckoutSession(session: Stripe.Checkout.Session, reque
     : false;
 
   if (metadataComplete || storedParcoursComplete) {
-    request.waitUntil(generateCoffret(commande.id).catch(() => undefined));
+    try {
+      await generateCoffret(commande.id);
+    } catch {
+      // Échec silencieux — Stripe retry si timeout
+    }
   }
 
   const offreLabel = OFFER_LABELS[offre][locale];
-  request.waitUntil(
-    sendConfirmationEmail(email, metadata.prenom ?? "", offreLabel, locale, commande.id).catch(
-      () => {},
-    ),
+  sendConfirmationEmail(email, metadata.prenom ?? "", offreLabel, locale, commande.id).catch(
+    () => {},
   );
 
   return NextResponse.json({ received: true, commandeId: commande.id }, { status: 202 });
