@@ -104,6 +104,26 @@ const copy = {
         },
       ],
     },
+    assurances: {
+      eyebrow: "Garanties",
+      title: "Un coffret pensé pour durer",
+      body: "Chaque pièce est préparée pour être lue, écoutée, conservée et transmise.",
+      items: [
+        {
+          title: "Délai clair",
+          body: "La livraison cible est de quinze minutes après paiement validé.",
+        },
+        {
+          title: "Confidentialité",
+          body: "Vos réponses servent uniquement à composer votre œuvre.",
+        },
+        {
+          title: "Fichiers durables",
+          body: "Les pièces sont téléchargeables et faciles à archiver.",
+        },
+        { title: "Bilingue", body: "L'expérience est structurée pour le français et l'anglais." },
+      ],
+    },
     offers: {
       eyebrow: "Offrandes",
       title: "Deux manières de recevoir l'œuvre",

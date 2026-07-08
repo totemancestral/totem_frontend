@@ -212,6 +212,8 @@ async function generateImage(
   profile: AdultTotemProfile,
   texte: string,
   prompts: AdultPromptBundle,
+  commandeId: string,
+  nomTotem: string,
 ): Promise<string> {
   if (anonKey) {
     const result = await callEdgeFunction<{ imageUrl?: string }>(
@@ -224,6 +226,8 @@ async function generateImage(
         prompt: prompts.imagePrompt,
         visualPrompt: prompts.promptA4,
         seed: profile.seed,
+        commandeId,
+        nom_totem: nomTotem,
       },
       anonKey,
     );
@@ -514,7 +518,7 @@ export async function generateCoffret(commandeId: string): Promise<void> {
     let imageBufferForPdf: Buffer | null = null;
 
     await Promise.all([
-      generateImage(env.NEXT_PUBLIC_SUPABASE_ANON_KEY, adultProfile, texteParchemin, promptBundle)
+      generateImage(env.NEXT_PUBLIC_SUPABASE_ANON_KEY, adultProfile, texteParchemin, promptBundle, commandeId, nomTotem)
         .then((url) => {
           senyceImageUrl = url || "";
         })
