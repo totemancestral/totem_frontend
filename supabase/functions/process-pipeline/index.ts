@@ -47,7 +47,15 @@ async function generatePDF(
   langue: "fr" | "en",
   orderNumber: number,
 ): Promise<Uint8Array> {
-  const fontBytes = Deno.readFileSync("DancingScript-Regular.ttf");
+  const fontUrl = "https://raw.githubusercontent.com/REBCDR07/totem-project/main/public/fonts/totem/DancingScript-Regular.ttf";
+  let fontBytes: Uint8Array;
+  try {
+    const resp = await fetch(fontUrl);
+    fontBytes = new Uint8Array(await resp.arrayBuffer());
+  } catch {
+    fontBytes = new Uint8Array(0);
+  }
+
   const pdfDoc = await PDFDocument.create();
   let dsFont;
   try { dsFont = await pdfDoc.embedFont(fontBytes); } catch { dsFont = await pdfDoc.embedFont(StandardFonts.TimesRoman); }
