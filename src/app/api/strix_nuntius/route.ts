@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      return await handlePaidCheckoutSession(session);
+      return await handlePaidCheckoutSession(session, request);
     }
 
     if (event.type === "charge.refunded") {
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handlePaidCheckoutSession(session: Stripe.Checkout.Session) {
+async function handlePaidCheckoutSession(session: Stripe.Checkout.Session, request: NextRequest) {
   const metadata = session.metadata ?? {};
   const userId = metadata.userId;
   const locale = toLocale(metadata.locale);
