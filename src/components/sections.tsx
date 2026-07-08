@@ -832,7 +832,7 @@ export function Assurances() {
 export function Offres() {
   const { locale, t } = useLandingCopy();
   const offersGridClass =
-    t.offers.items.length === 2 ? "mx-auto max-w-4xl md:grid-cols-2" : "md:grid-cols-3";
+    (t.offers.items.length as number) === 2 ? "mx-auto max-w-4xl md:grid-cols-2" : "md:grid-cols-3";
 
   return (
     <section id="offres" className="px-5 py-28 md:px-10 md:py-36" style={{ background: "#0c0e16" }}>
