@@ -11,11 +11,17 @@ export async function POST(request: Request) {
   }
 
   const supabase = createServiceClient();
+  const { commandeId } = await request.json().catch(() => ({}));
 
-  const { data: commandes, error } = await supabase
-    .from("commandes")
-    .select("id, statut, offre")
-    .in("statut", ["paye", "en_generation", "erreur"]);
+  const query = supabase.from("commandes").select("id, statut, offre");
+
+  if (commandeId) {
+    query.eq("id", commandeId);
+  } else {
+    query.in("statut", ["paye", "en_generation", "erreur"]);
+  }
+
+  const { data: commandes, error } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -33,34 +33,57 @@ async function main() {
     console.log(`  [${cmd.statut}] ${cmd.id} | ${cmd.offre} | ${cmd.created_at}`);
   }
 
-  console.log("\nRelance via API...\n");
+  console.log("\nReset + relance individuelle (120s timeout par commande)...\n");
 
-  const response = await fetch(`${BASE_URL}/api/fgh55_fh/relancer-tout`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-pipeline-secret": SECRET,
-    },
-  });
+  for (const cmd of commandes) {
+    process.stdout.write(`  ${cmd.id.slice(0, 8)}... `);
 
-  const result = await response.json().catch(() => ({}));
+    const { error: e1 } = await supabase
+      .from("commandes")
+      .update({ statut: "en_generation" })
+      .eq("id", cmd.id);
+    if (e1) { console.log(`reset KO: ${e1.message}`); continue; }
 
-  if (!response.ok) {
-    console.error("Erreur API:", result.error || response.statusText);
-    process.exit(1);
-  }
+    const { error: e2 } = await supabase
+      .from("oeuvres")
+      .update({ statut: "en_cours" })
+      .eq("commande_id", cmd.id);
+    if (e2) { console.log(`reset oeuvre KO: ${e2.message}`); continue; }
 
-  const total = result.results?.length || 0;
-  const ok = result.results?.filter((r) => r.status === "ok").length || 0;
-  const errs = result.results?.filter((r) => r.status !== "ok").length || 0;
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 130000);
 
-  console.log(`Termine: ${ok} OK, ${errs} erreurs sur ${total}`);
+      const response = await fetch(`${BASE_URL}/api/fgh55_fh/relancer-tout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-pipeline-secret": SECRET,
+          "x-commande-id": cmd.id,
+        },
+        body: JSON.stringify({ commandeId: cmd.id }),
+        signal: controller.signal,
+      });
 
-  for (const r of result.results || []) {
-    if (r.status !== "ok") {
-      console.log(`  ${r.id}: ${r.error}`);
+      clearTimeout(timeout);
+      const result = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        const r = result.results?.[0];
+        console.log(r?.status === "ok" ? "OK" : `ERREUR: ${r?.error || "inconnue"}`);
+      } else {
+        console.log(`HTTP ${response.status}: ${result.error || "erreur"}`);
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        console.log("TIMEOUT (130s)");
+      } else {
+        console.log(`Exception: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
   }
+
+  console.log("\nTermine. Verifiez le statut des commandes dans l'admin FGH55FH.");
 }
 
 main().catch(console.error);
