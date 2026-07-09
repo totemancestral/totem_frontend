@@ -631,9 +631,36 @@ function hashCode(str: string): number {
 
 async function sendEmail(supabase: ReturnType<typeof createClient>, commandeId: string, userId: string, prenom: string, nomTotem: string, langue: string, pdfUrl: string) {
   try {
+    let email = "";
     const { data: profile } = await supabase.from("profiles").select("email").eq("id", userId).single();
-    if (!profile?.email) return;
-    const email = profile.email as string;
+    if (profile?.email && typeof profile.email === "string") {
+      email = profile.email.trim();
+    }
+
+    if (!email) {
+      try {
+        const { data: authUser, error: authErr } = await supabase.auth.admin.getUserById(userId);
+        if (authErr) {
+          console.error(`[${commandeId}] auth.getUserById failed: ${authErr.message}`);
+        } else {
+          email = authUser?.user?.email?.trim() ?? "";
+        }
+      } catch (authError) {
+        console.error(`[${commandeId}] auth email lookup error:`, authError);
+      }
+    }
+
+    if (!email) {
+      console.error(`[${commandeId}] sendEmail skipped: no email found for user ${userId}`);
+      return;
+    }
+
+    const resendKey = Deno.env.get("RESEND_API_KEY") ?? "";
+    if (!resendKey) {
+      console.error(`[${commandeId}] sendEmail skipped: RESEND_API_KEY missing`);
+      return;
+    }
+
     const isFr = langue === "fr";
 
     const html = `<div style="font-family:Inter,Arial,sans-serif;background:#0c0e16;color:#e2e1ee;padding:32px">
@@ -654,7 +681,7 @@ async function sendEmail(supabase: ReturnType<typeof createClient>, commandeId: 
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY") ?? ""}`,
+        Authorization: `Bearer ${resendKey}`,
       },
       body: JSON.stringify({
         from: "Totem Ancestral <totem@senycepartners.com>",

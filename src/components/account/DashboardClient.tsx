@@ -14,7 +14,6 @@ import {
   Image as ImageIcon,
   KeyRound,
   LayoutDashboard,
-  Menu,
   PackageCheck,
   Plus,
   Share2,
@@ -23,9 +22,10 @@ import {
   Volume2,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { hasAdminRole } from "@/lib/admin-client";
-import { extractParchmentSections, type StorySection } from "@/lib/totem-v3";
+import { extractParchmentSections } from "@/lib/totem-v3";
 import { TotemRevealClient } from "@/components/totem/TotemRevealClient";
 
 type Locale = "fr" | "en";
@@ -120,6 +120,10 @@ const copy = {
     generatingStatus: "Generation en cours",
     deliveredStatus: "Livraison disponible",
     errorStatus: "Intervention requise",
+    sectionOpened: "Section ouverte",
+    copied: "Lien copié",
+    copyError: "Impossible de copier automatiquement",
+    refreshFailed: "Échec de rafraîchissement du tableau de bord",
   },
   en: {
     eyebrow: "Personal space",
@@ -173,6 +177,10 @@ const copy = {
     generatingStatus: "Generation in progress",
     deliveredStatus: "Delivery available",
     errorStatus: "Action required",
+    sectionOpened: "Section opened",
+    copied: "Link copied",
+    copyError: "Unable to copy automatically",
+    refreshFailed: "Dashboard refresh failed",
   },
 } as const;
 
@@ -297,7 +305,11 @@ export function DashboardClient({
         setOeuvres(oeuvresData);
         setJuniorTotems(juniorData);
       } catch (err) {
-        if (alive) setError(err instanceof Error ? err.message : t.error);
+        if (alive) {
+          const message = err instanceof Error ? err.message : t.error;
+          setError(message);
+          toast.error(t.refreshFailed);
+        }
       } finally {
         if (alive) setLoading(false);
       }
@@ -322,22 +334,44 @@ export function DashboardClient({
   ).length;
   const composition = buildCompositionState({ commandes, oeuvres, copy: t });
   const [activeSection, setActiveSection] = useState<DashboardSection>(section);
+  const sectionToastInitialized = useRef(false);
+  const compositionStatusRef = useRef<string>("");
+  const sectionLabels = useMemo<Record<DashboardSection, string>>(
+    () => ({
+      overview: t.overviewNav,
+      orders: t.ordersNav,
+      artworks: t.artworksNav,
+      profile: t.profileNav,
+    }),
+    [t.artworksNav, t.ordersNav, t.overviewNav, t.profileNav],
+  );
 
   async function shareJuniorTotem(totem: JuniorTotem) {
-    const text = `${totem.totemName} — #${String(totem.orderNumber).padStart(6, "0")}\n"${totem.phrase}"\nDécouvre ton totem ancestral sur totemancestral.com`;
+    const isFr = locale === "fr";
+    const text = isFr
+      ? `${totem.totemName} — #${String(totem.orderNumber).padStart(6, "0")}\n"${totem.phrase}"\nDécouvre ton totem ancestral sur totemancestral.com`
+      : `${totem.totemName} — #${String(totem.orderNumber).padStart(6, "0")}\n"${totem.phrase}"\nDiscover your ancestral totem on totemancestral.com`;
+    let copied = false;
     try {
       await navigator.clipboard.writeText(text);
+      copied = true;
+      toast.success(t.copied);
     } catch {
-      // Fallback silencieux
+      toast.info(t.copyError);
     }
-    fetch("/api/iuvenis_signum/share", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ id: totem.id }),
-    }).catch(() => {});
+    try {
+      await fetch("/api/iuvenis_signum/share", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id: totem.id }),
+      });
+      if (!copied) toast.success(t.copied);
+    } catch {
+      // Non bloquant pour le partage local.
+    }
   }
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -353,6 +387,32 @@ export function DashboardClient({
       document.body.style.overflow = originalOverflow;
     };
   }, [sidebarOpen]);
+
+  useEffect(() => {
+    const handleMenuToggle = () => setSidebarOpen((current) => !current);
+    window.addEventListener("totem:dashboard-menu-toggle", handleMenuToggle);
+    return () => {
+      window.removeEventListener("totem:dashboard-menu-toggle", handleMenuToggle);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!sectionToastInitialized.current) {
+      sectionToastInitialized.current = true;
+      return;
+    }
+    toast.message(`${t.sectionOpened}: ${sectionLabels[activeSection]}`);
+  }, [activeSection, sectionLabels, t.sectionOpened]);
+
+  useEffect(() => {
+    if (!composition.hasComposition) {
+      compositionStatusRef.current = "";
+      return;
+    }
+    if (!composition.status || compositionStatusRef.current === composition.status) return;
+    compositionStatusRef.current = composition.status;
+    toast.info(`${t.compositionStatus}: ${composition.status}`);
+  }, [composition.hasComposition, composition.status, t.compositionStatus]);
 
   const sidebarItems: Array<{
     key: DashboardSection;
@@ -397,15 +457,7 @@ export function DashboardClient({
 
   if (authLoading || loading) {
     return (
-      <section
-        className="premium-page flex min-h-[100svh] items-center justify-center px-5 pt-28"
-        style={{ background: "var(--nuit-profonde)" }}
-      >
-        <div className="flex items-center gap-3 text-sm" style={{ color: "var(--or-pale)" }}>
-          <Clock3 size={18} />
-          {t.loading}
-        </div>
-      </section>
+      <DashboardLoadingState locale={locale} loadingText={t.loading} />
     );
   }
 
@@ -510,20 +562,6 @@ export function DashboardClient({
 
       <main className="flex-1 overflow-y-auto px-5 pb-12 pt-24 md:px-8 md:pb-16 md:pt-28 lg:ml-64">
         <div className="mx-auto max-w-5xl flex flex-col gap-10">
-          <div className="flex items-center justify-between lg:hidden">
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(true)}
-              className="btn-secondary px-4 py-2 text-xs"
-            >
-              <Menu size={16} />
-              Menu
-            </button>
-            <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>
-              ESPACE
-            </p>
-          </div>
-
           {activeSection === "overview" && (
             <section id="dashboard-overview" className="premium-panel-strong p-6 md:p-8">
               <motion.header
@@ -722,6 +760,62 @@ function StatCard({ icon, label, value }: { icon: ReactNode; label: string; valu
         {value}
       </p>
     </article>
+  );
+}
+
+function DashboardLoadingState({
+  locale,
+  loadingText,
+}: {
+  locale: Locale;
+  loadingText: string;
+}) {
+  return (
+    <section
+      className="premium-page min-h-[100svh] px-5 pt-24 pb-10 md:px-8 md:pt-28"
+      style={{ background: "var(--nuit-profonde)" }}
+    >
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-8 flex items-center gap-3 text-sm" style={{ color: "var(--or-pale)" }}>
+          <Clock3 size={18} />
+          {loadingText}
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+          {Array.from({ length: 6 }, (_, index) => (
+            <motion.article
+              key={`dashboard-loading-card-${index}`}
+              className="premium-panel p-5"
+              initial={{ opacity: 0.45, y: 8 }}
+              animate={{ opacity: [0.45, 0.82, 0.45], y: [8, -4, 8] }}
+              transition={{
+                duration: 2.1,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+                delay: index * 0.08,
+              }}
+            >
+              <div
+                className="mb-4 h-4 w-4 rounded-full"
+                style={{ background: "rgba(216,173,77,0.42)" }}
+              />
+              <div
+                className="mb-3 h-3 w-24 rounded-sm"
+                style={{ background: "rgba(246,200,101,0.2)" }}
+              />
+              <div
+                className="h-8 w-16 rounded-sm"
+                style={{ background: "rgba(216,173,77,0.18)" }}
+              />
+            </motion.article>
+          ))}
+        </div>
+
+        <div className="mt-6 text-xs uppercase tracking-wide" style={{ color: "rgba(237,217,154,0.6)" }}>
+          {locale === "fr" ? "Préparation des cartes..." : "Preparing dashboard cards..."}
+        </div>
+      </div>
+    </section>
   );
 }
 

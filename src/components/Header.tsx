@@ -112,6 +112,15 @@ export function Header({ locale }: { locale: Locale }) {
       : `/${locale}/via_sapientiae?restart=1`
     : `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`;
 
+  const openDashboardMenu = () => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(
+      new CustomEvent("totem:dashboard-menu-toggle", {
+        detail: { source: isAdminSession ? "admin" : "user" },
+      }),
+    );
+  };
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
@@ -186,6 +195,18 @@ export function Header({ locale }: { locale: Locale }) {
             )}
 
             <div className="flex items-center gap-3">
+              {isAccountArea && !isAdminSession && (
+                <button
+                  type="button"
+                  onClick={openDashboardMenu}
+                  className="inline-flex h-10 w-10 items-center justify-center border transition-colors hover:bg-ombre lg:hidden"
+                  aria-label={t("menu")}
+                  title={t("menu")}
+                  style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
+                >
+                  <Menu size={17} />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleLogout}

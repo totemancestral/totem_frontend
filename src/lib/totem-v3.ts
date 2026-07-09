@@ -1151,24 +1151,32 @@ export function buildTotemArtworkImagePrompt(input: {
   const seed = numericSeed(input.seed);
   const keywords = input.personalityKeywords?.filter(Boolean).slice(0, 5).join(", ");
   const frame = input.visualFrame ? visualFrameDescription(input.visualFrame) : "";
-  const leftFace =
+  const animalDescriptor =
     input.language === "en"
-      ? `left half ${visual.leftFaceEn}`
-      : `moitié gauche ${visual.leftFaceFr}`;
+      ? visual.animalEn
+      : visual.leftFaceFr.replace(/^visage de |^visage d'|^visage anthropomorphe de /, "");
+  const splitFace =
+    input.language === "en"
+      ? "split-face fusion on the totem head: left half realistic animal face, right half stylized Fang Ngil mask with white eyes and geometric motifs, seamless central merge"
+      : "fusion du visage du totem : moitie gauche visage animal realiste, moitie droite masque Ngil Fang stylise aux yeux blancs et motifs geometriques, fusion harmonieuse sur l'axe central";
 
   return [
-    "Portrait ancestral puissant, visage coupé en deux",
-    leftFace,
-    "moitié droite masque Ngil Fang traditionnel africain stylisé avec yeux blancs et motifs géométriques",
-    "fusion harmonieuse au milieu du visage",
-    "peau avec cicatrices rituelles dorées",
-    "ambiance sombre mystique",
-    "éclairage dramatique cinématographique",
-    "style artistique premium africain",
-    "très détaillé, haute résolution, 8k",
+    input.language === "en"
+      ? `premium ancestral totem sculpture, full-body statue of ${animalDescriptor}, single centered subject on ritual black-and-gold pedestal`
+      : `sculpture totemique ancestrale premium, statue complete de ${animalDescriptor}, sujet unique centre sur socle rituel noir et or`,
+    input.language === "en"
+      ? "engraved African geometric ornaments, ebony and ancient gold materials"
+      : "ornements geometriques africains ciselés, matiere ebene et dorure ancienne",
+    splitFace,
+    input.language === "en"
+      ? "dark mystical atmosphere, dramatic cinematic lighting, museum-grade render, ultra detailed, high resolution 8k"
+      : "ambiance sombre mystique, eclairage cinematographique dramatique, rendu musee, ultra detaille, haute resolution 8k",
+    input.language === "en"
+      ? "no human, no human bust, no human torso, no person, no text, no logo, no watermark"
+      : "aucun humain, aucun buste humain, aucun torse humain, aucun personnage, sans texte, sans logo, sans watermark",
     keywords ? `personality keywords: ${keywords}` : "",
     frame ? `composition: ${frame}` : "",
-    `sans texte, sans logo, sans watermark --ar 3:4 --stylize 250 --v 6 --seed ${seed}`,
+    `--ar 3:4 --stylize 250 --v 6 --seed ${seed}`,
   ]
     .filter(Boolean)
     .join(", ");
@@ -1621,14 +1629,15 @@ References : Vladimir Cybil Charlier + Kerry James Marshall + Aboudia + masques 
 Pas de realisme photographique. Pas de cartoonesque. Pas d'AI flat.
 
 FORMAT VISUEL OBLIGATOIRE :
-Portrait ancestral puissant, visage coupe en deux : moitie gauche visage realiste du totem ${profile.archetype.french}, moitie droite masque Ngil Fang traditionnel africain stylise avec yeux blancs et motifs geometriques, fusion harmonieuse au milieu du visage, peau avec cicatrices rituelles dorees, ambiance sombre mystique, eclairage dramatique cinematographique, style artistique premium africain, tres detaille, haute resolution, 8k.
+Sculpture totemique ancestrale de type objet d'art : animal entier sur socle rituel noir et or, materiaux ebene et dorure ancienne, details geometriques africains. Le visage de la tete du totem est fusionne : moitie gauche animal realiste, moitie droite masque Ngil Fang stylise, fusion harmonieuse sur l'axe central. Aucun corps humain, aucun torse humain, aucun buste humain.
 
 BASE DE PROMPT A CONSERVER :
 ${visualPrompt}
 
 REGLES :
-· Visage coupe en deux obligatoire : totem realiste a gauche, masque Ngil Fang a droite
-· Visage visible mais NON specifique — pas de ressemblance reelle avec une personne
+· Fusion du visage obligatoire sur la tete du totem : animal realiste a gauche, masque Ngil Fang a droite
+· Sujet principal obligatoire : l'animal-sculpture complet, pas un portrait humain
+· Aucun humain, aucun torse, aucun buste, aucun personnage
 · Pas de texte dans l'image, pas de logos
 · Format vertical 3:4 obligatoire
 · Parametres obligatoires : --ar 3:4 --stylize 250 --v 6

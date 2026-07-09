@@ -4,6 +4,7 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { AmbientAudio } from "@/components/AmbientAudio";
 import { CookieConsent } from "@/components/CookieConsent";
+import { Toaster } from "@/components/ui/sonner";
 import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
@@ -35,6 +36,7 @@ export function ClientChrome({ children, locale }: { children: ReactNode; locale
       {!isDashboard && <Footer locale={locale} />}
       <AmbientAudio active />
       <CookieConsent />
+      <Toaster richColors position="top-right" />
     </div>
   );
 }

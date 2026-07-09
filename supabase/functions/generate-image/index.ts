@@ -52,13 +52,13 @@ const ANIMAL_VISUALS: Record<string, { fr: string; en: string }> = {
 function buildImagePrompt(archetypeId: string, langue: "fr" | "en", seed?: string): string {
   const visual = ANIMAL_VISUALS[archetypeId];
   const seedParam = seed ? ` --seed ${numericSeed(seed)}` : "";
-  const leftFace = visual?.[langue] ?? `${archetypeId} réaliste`;
+  const animal = visual?.[langue] ?? (langue === "fr" ? `${archetypeId} réaliste` : `realistic ${archetypeId}`);
 
   if (langue === "fr") {
-    return `Portrait ancestral puissant, visage coupé en deux : moitié gauche visage de ${leftFace}, réaliste perçant, moitié droite masque Ngil Fang traditionnel africain stylisé avec yeux blancs et motifs géométriques, fusion harmonieuse au milieu du visage, peau avec cicatrices rituelles dorées, ambiance sombre mystique, éclairage dramatique cinématographique, style artistique premium africain, très détaillé, haute résolution, 8k --ar 3:4 --stylize 250 --v 6${seedParam}`;
+    return `Sculpture totemique ancestrale premium, statue complete de ${animal}, sujet unique centre sur socle rituel noir et or, ornements geometriques africains ciselés, matiere ebene et dorure ancienne, tete du totem fusionnee en deux : moitie gauche visage animal realiste, moitie droite masque Ngil Fang stylise avec motifs geometriques et yeux blancs, fusion harmonieuse sur l'axe central du visage, arriere-plan sombre mystique, eclairage cinematographique dramatique, tres detaille, rendu musee, haute resolution 8k, aucun humain, aucun buste humain, aucun torse humain, aucun personnage --ar 3:4 --stylize 250 --v 6${seedParam}`;
   }
 
-  return `Powerful ancestral portrait, split face: left half ${leftFace}, piercing gaze, right half stylized traditional African Fang Ngil mask with white eyes and geometric patterns, harmonious fusion at the center of the face, skin with golden ritual scarifications, dark mystical atmosphere, dramatic cinematic lighting, premium African artistic style, very detailed, high resolution, 8k --ar 3:4 --stylize 250 --v 6${seedParam}`;
+  return `Premium ancestral totem sculpture, full-body statue of a ${animal}, single centered subject on a ritual black-and-gold pedestal, engraved African geometric ornaments, ebony-like material with ancient golden inlays, split-face fusion on the totem head: left half realistic animal face, right half stylized Fang Ngil mask with white eyes and geometric motifs, seamless central merge, dark mystical background, dramatic cinematic lighting, museum-grade render, ultra-detailed, high resolution 8k, no human, no human bust, no human torso, no person --ar 3:4 --stylize 250 --v 6${seedParam}`;
 }
 
 function numericSeed(seed: string): number {
@@ -114,22 +114,51 @@ Deno.serve(async (req) => {
 
     const result = (await response.json()) as {
       data?: { b64_json?: string; url?: string; revised_prompt?: string }[];
-      output_format?: string;
     };
 
-    const imageUrl = result.data?.[0]?.url ?? "";
-    const b64 = result.data?.[0]?.b64_json ?? "";
-    const format = result.output_format ?? "png";
-
-    if (!imageUrl && !b64) {
+    const b64Json = result.data?.[0]?.b64_json ?? "";
+    if (!b64Json) {
       throw new Error("OpenAI n'a pas retourné d'image");
     }
 
-    const finalUrl = imageUrl || `data:image/${format};base64,${b64}`;
+    // Upload to storage
+    const storageUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    let publicUrl = "";
+    if (storageUrl && serviceKey) {
+      const key = `totems/${crypto.randomUUID()}/image.png`;
+      console.log(`Uploading to ${storageUrl}/storage/v1/object/totem-files/${key}`);
+      const binaryString = atob(b64Json);
+      const imgBytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        imgBytes[i] = binaryString.charCodeAt(i);
+      }
+      const uploadRes = await fetch(
+        `${storageUrl}/storage/v1/object/totem-files/${key}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${serviceKey}`,
+            "Content-Type": "image/png",
+          },
+          body: imgBytes,
+        },
+      );
+      if (uploadRes.ok) {
+        publicUrl = `${storageUrl}/storage/v1/object/public/totem-files/${key}`;
+        console.log(`Upload OK: ${publicUrl}`);
+      } else {
+        const errText = await uploadRes.text().catch(() => "");
+        console.error(`Upload failed ${uploadRes.status}: ${errText.slice(0, 300)}`);
+      }
+    } else {
+      console.error(`Missing storage config: url=${!!storageUrl} key=${!!serviceKey}`);
+    }
 
     return new Response(
       JSON.stringify({
-        imageUrl: finalUrl,
+        imageUrl: publicUrl,
+        b64: b64Json,
         prompt: finalPrompt,
         revisedPrompt: result.data?.[0]?.revised_prompt,
       }),

@@ -15,7 +15,9 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { Menu, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 type Section = "apercu" | "commandes" | "oeuvres" | "utilisateurs" | "activite" | "evenements";
 
@@ -209,7 +211,9 @@ export default function AdminPage() {
       setErreurs(evtData.erreurs ?? []);
       setChangements(evtData.changements ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur de chargement");
+      const message = err instanceof Error ? err.message : "Erreur de chargement";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -224,7 +228,9 @@ export default function AdminPage() {
       if (!response.ok) throw new Error("Commandes indisponibles");
       setCommandes(((await response.json()) as { commandes: CommandeRow[] }).commandes ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur de chargement");
+      const message = err instanceof Error ? err.message : "Erreur de chargement";
+      setError(message);
+      toast.error(message);
     } finally {
       setListLoading((current) => ({ ...current, commandes: false }));
     }
@@ -241,7 +247,9 @@ export default function AdminPage() {
         ((await response.json()) as { utilisateurs: ProfileRow[] }).utilisateurs ?? [],
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur de chargement");
+      const message = err instanceof Error ? err.message : "Erreur de chargement";
+      setError(message);
+      toast.error(message);
     } finally {
       setListLoading((current) => ({ ...current, utilisateurs: false }));
     }
@@ -256,7 +264,9 @@ export default function AdminPage() {
       if (!response.ok) throw new Error("Œuvres indisponibles");
       setOeuvres(((await response.json()) as { oeuvres: OeuvreRow[] }).oeuvres ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur de chargement");
+      const message = err instanceof Error ? err.message : "Erreur de chargement";
+      setError(message);
+      toast.error(message);
     } finally {
       setListLoading((current) => ({ ...current, oeuvres: false }));
     }
@@ -270,6 +280,7 @@ export default function AdminPage() {
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
       setLoginError(authError.message);
+      toast.error(authError.message);
       setLoginLoading(false);
     }
   }
@@ -285,13 +296,14 @@ export default function AdminPage() {
           body: JSON.stringify({ commandeId }),
         });
         if (res.ok) {
+          toast.success("Pipeline relancé avec succès");
           loadAll(token);
         } else {
           const err = (await res.json()) as { error: string };
-          alert(err.error || "Erreur lors de la relance");
+          toast.error(err.error || "Erreur lors de la relance");
         }
       } catch {
-        alert("Erreur reseau");
+        toast.error("Erreur réseau");
       } finally {
         setRelanceLoading(null);
       }
@@ -314,15 +326,18 @@ export default function AdminPage() {
 
   if (!session) {
     return (
-      <LoginForm
-        email={email}
-        password={password}
-        setEmail={setEmail}
-        setPassword={setPassword}
-        loginError={loginError}
-        loginLoading={loginLoading}
-        onSubmit={handleLogin}
-      />
+      <>
+        <Toaster richColors position="top-right" />
+        <LoginForm
+          email={email}
+          password={password}
+          setEmail={setEmail}
+          setPassword={setPassword}
+          loginError={loginError}
+          loginLoading={loginLoading}
+          onSubmit={handleLogin}
+        />
+      </>
     );
   }
 
@@ -335,43 +350,76 @@ export default function AdminPage() {
     { id: "evenements", label: "Événements" },
   ];
 
+  const selectAdminSection = (next: Section) => {
+    if (next !== section) {
+      setSection(next);
+      const label = navItems.find((item) => item.id === next)?.label ?? next;
+      toast.message(`Section ouverte: ${label}`);
+    }
+    setMobileOpen(false);
+  };
+
   return (
     <div
       className="premium-page flex min-h-screen"
       style={{ background: "var(--nuit-profonde)", color: "var(--ivoire)" }}
     >
+      <Toaster richColors position="top-right" />
       <div className="premium-watermark" aria-hidden="true">
         <img src="/assets/totem-logo.png" alt="" />
       </div>
+      <header
+        className="fixed inset-x-0 top-0 z-[320] border-b backdrop-blur-md"
+        style={{
+          background: "rgba(12,14,22,0.9)",
+          borderColor: "rgba(216,173,77,0.2)",
+        }}
+      >
+        <div className="mx-auto flex h-[72px] max-w-[1220px] items-center justify-between gap-4 px-5 md:px-8">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              className="inline-flex h-10 w-10 items-center justify-center border transition-colors hover:bg-ombre lg:hidden"
+              aria-label="Menu"
+              title="Menu"
+              style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
+            >
+              <Menu size={17} />
+            </button>
+            <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>
+              SENYCE PARTNERS
+            </p>
+            <h1
+              className="hidden text-[20px] uppercase leading-none sm:block"
+              style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
+            >
+              Totem Admin
+            </h1>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="btn-secondary !px-4 !py-2 !text-[11px]"
+          >
+            <LogOut size={14} />
+            Déconnexion
+          </button>
+        </div>
+      </header>
       <Sidebar
         navItems={navItems}
         active={section}
-        onSelect={(s) => {
-          if (s !== section) setSection(s);
-          setMobileOpen(false);
-        }}
+        onSelect={selectAdminSection}
         mobileOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 overflow-y-auto px-5 py-6 md:px-8 md:py-10 lg:ml-64">
+      <main className="flex-1 overflow-y-auto px-5 pb-8 pt-24 md:px-8 md:pb-10 md:pt-28 lg:ml-64">
         <div className="mx-auto max-w-6xl">
-          <div className="flex items-center justify-between mb-8 md:hidden">
-            <button
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              className="btn-secondary px-4 py-2 text-xs"
-            >
-              <Menu size={16} />
-              Menu
-            </button>
-            <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>
-              SENYCE PARTNERS
-            </p>
-          </div>
-
-          {loading && <p className="quote-italic">Chargement...</p>}
+          {loading && <AdminLoadingCards />}
           {error && (
             <div
               className="premium-panel mb-6 p-6"
@@ -381,7 +429,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          {section === "apercu" && (
+          {!loading && section === "apercu" && (
             <OverviewSection
               stats={stats}
               activite={activite}
@@ -392,50 +440,71 @@ export default function AdminPage() {
               changements={changements}
             />
           )}
-          {section === "commandes" && (
+          {!loading && section === "commandes" && (
             <OrdersSection
               commandes={commandes}
               filters={commandeFilters}
               loading={Boolean(listLoading.commandes)}
               onChange={setCommandeFilters}
-              onApply={() => token && loadCommandes(token, commandeFilters)}
+              onApply={() => {
+                if (!token) return;
+                toast.message("Filtre commandes appliqué");
+                loadCommandes(token, commandeFilters);
+              }}
               onReset={() => {
                 const next = { search: "", statut: "", offre: "" };
                 setCommandeFilters(next);
-                if (token) loadCommandes(token, next);
+                if (token) {
+                  toast.message("Filtres commandes réinitialisés");
+                  loadCommandes(token, next);
+                }
               }}
             />
           )}
-          {section === "oeuvres" && (
+          {!loading && section === "oeuvres" && (
             <ArtworksSection
               oeuvres={oeuvres}
               filters={oeuvreFilters}
               loading={Boolean(listLoading.oeuvres)}
               onChange={setOeuvreFilters}
-              onApply={() => token && loadOeuvres(token, oeuvreFilters)}
+              onApply={() => {
+                if (!token) return;
+                toast.message("Filtre œuvres appliqué");
+                loadOeuvres(token, oeuvreFilters);
+              }}
               onReset={() => {
                 const next = { search: "", statut: "", fichier: "" };
                 setOeuvreFilters(next);
-                if (token) loadOeuvres(token, next);
+                if (token) {
+                  toast.message("Filtres œuvres réinitialisés");
+                  loadOeuvres(token, next);
+                }
               }}
             />
           )}
-          {section === "utilisateurs" && (
+          {!loading && section === "utilisateurs" && (
             <UsersSection
               utilisateurs={utilisateurs}
               filters={userFilters}
               loading={Boolean(listLoading.utilisateurs)}
               onChange={setUserFilters}
-              onApply={() => token && loadUtilisateurs(token, userFilters)}
+              onApply={() => {
+                if (!token) return;
+                toast.message("Filtre utilisateurs appliqué");
+                loadUtilisateurs(token, userFilters);
+              }}
               onReset={() => {
                 const next = { search: "", langue: "", activite: "" };
                 setUserFilters(next);
-                if (token) loadUtilisateurs(token, next);
+                if (token) {
+                  toast.message("Filtres utilisateurs réinitialisés");
+                  loadUtilisateurs(token, next);
+                }
               }}
             />
           )}
-          {section === "activite" && <ActivitySection activite={activite} />}
-          {section === "evenements" && (
+          {!loading && section === "activite" && <ActivitySection activite={activite} />}
+          {!loading && section === "evenements" && (
             <EventsSection
               erreurs={erreurs}
               changements={changements}
@@ -457,6 +526,52 @@ function buildQuery(filters: CommandeFilters | UserFilters | OeuvreFilters) {
     if (clean) params.set(key, clean);
   });
   return params.toString();
+}
+
+function AdminLoadingCards() {
+  return (
+    <section className="mb-8">
+      <div className="mb-6 text-sm uppercase" style={{ color: "rgba(237,217,154,0.74)" }}>
+        Chargement des cartes du dashboard...
+      </div>
+      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-4">
+        {Array.from({ length: 8 }, (_, index) => (
+          <div
+            key={`admin-loading-${index}`}
+            className="premium-panel p-5"
+            style={{
+              animation: `totem-admin-float 2.2s ease-in-out ${index * 0.08}s infinite`,
+            }}
+          >
+            <div
+              className="mb-3 h-3 w-24 rounded-sm"
+              style={{ background: "rgba(246,200,101,0.18)" }}
+            />
+            <div
+              className="h-8 w-14 rounded-sm"
+              style={{ background: "rgba(216,173,77,0.22)" }}
+            />
+          </div>
+        ))}
+      </div>
+      <style jsx>{`
+        @keyframes totem-admin-float {
+          0% {
+            transform: translateY(8px);
+            opacity: 0.48;
+          }
+          50% {
+            transform: translateY(-4px);
+            opacity: 0.9;
+          }
+          100% {
+            transform: translateY(8px);
+            opacity: 0.48;
+          }
+        }
+      `}</style>
+    </section>
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -521,7 +636,7 @@ function Sidebar({
   return (
     <>
       <aside
-        className="fixed left-0 top-0 z-40 hidden h-full w-64 lg:block"
+        className="fixed left-0 top-[72px] z-40 hidden h-[calc(100svh-72px)] w-64 lg:block"
         style={{ borderRight: "1px solid rgba(216,173,77,0.18)" }}
       >
         {sidebar}
@@ -536,7 +651,7 @@ function Sidebar({
             onClick={onClose}
           />
           <aside
-            className="fixed inset-y-0 left-0 z-[310] w-[min(18rem,calc(100vw-1rem))] overflow-y-auto"
+            className="fixed left-0 top-[72px] z-[310] h-[calc(100svh-72px)] w-[min(18rem,calc(100vw-1rem))] overflow-y-auto"
             style={{ borderRight: "1px solid rgba(216,173,77,0.18)" }}
           >
             <button
