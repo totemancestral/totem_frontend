@@ -2,10 +2,5 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "buildCommand": "npx next build",
-  "installCommand": "npx pnpm install --no-frozen-lockfile",
-  "functions": {
-    "src/app/api/strix_nuntius/route.ts": {
-      "maxDuration": 300
-    }
-  }
+  "installCommand": "npx pnpm install --no-frozen-lockfile"
 }
