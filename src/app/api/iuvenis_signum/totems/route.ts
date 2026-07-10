@@ -6,12 +6,19 @@ export async function GET(request: Request) {
   const env = getServerEnv();
   if (env.TOTEM_BACKEND_URL) {
     const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
-    const response = await fetch(`${backendUrl}/junior/totems`, {
-      headers: { authorization: request.headers.get("authorization") ?? "" },
-    });
+    try {
+      const response = await fetch(`${backendUrl}/junior/totems`, {
+        headers: { authorization: request.headers.get("authorization") ?? "" },
+      });
 
-    const payload = await response.json().catch(() => null);
-    return NextResponse.json(payload, { status: response.ok ? 200 : response.status || 502 });
+      if (response.ok) {
+        const payload = await response.json().catch(() => null);
+        return NextResponse.json(payload, { status: 200 });
+      }
+      console.error(`[totems] Backend returned status ${response.status}, falling back to Supabase.`);
+    } catch (error) {
+      console.error("[totems] Backend fetch failed, falling back to Supabase:", error);
+    }
   }
 
   const auth = await authenticateRequest(request);

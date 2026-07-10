@@ -1,0 +1,9 @@
+{
+  "name": "totem-ancestral",
+  "target": "production",
+  "gitSource": {
+    "type": "github",
+    "repoId": 1270239259,
+    "ref": "main"
+  }
+}

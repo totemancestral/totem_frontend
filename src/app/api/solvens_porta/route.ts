@@ -114,48 +114,52 @@ async function handleCheckout(
     }
 
     const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
-    const backendResponse = await fetch(`${backendUrl}/checkout`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: request.headers.get("authorization") ?? "",
-      },
-      body: JSON.stringify({
-        userId: auth.userId,
-        email: auth.email,
-        offer: data.offre,
-        externalCommandId: commande.id,
-        answers: backendAnswers,
-        locale: data.locale,
-        customerName: prenom || undefined,
-        successUrl: `${origin}${pagePath(
-          data.locale,
-          "parcours",
-          `checkout=success&session_id={CHECKOUT_SESSION_ID}&commande_id=${commande.id}`,
-        )}`,
-        cancelUrl: `${origin}${pagePath(data.locale, "parcours", "checkout=cancelled")}`,
-      }),
-    });
+    
+    try {
+      const backendResponse = await fetch(`${backendUrl}/checkout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: request.headers.get("authorization") ?? "",
+        },
+        body: JSON.stringify({
+          userId: auth.userId,
+          email: auth.email,
+          offer: data.offre,
+          externalCommandId: commande.id,
+          answers: backendAnswers,
+          locale: data.locale,
+          customerName: prenom || undefined,
+          successUrl: `${origin}${pagePath(
+            data.locale,
+            "parcours",
+            `checkout=success&session_id={CHECKOUT_SESSION_ID}&commande_id=${commande.id}`,
+          )}`,
+          cancelUrl: `${origin}${pagePath(data.locale, "parcours", "checkout=cancelled")}`,
+        }),
+      });
 
-    const backendPayload = (await backendResponse.json().catch(() => null)) as {
-      id?: string;
-      url?: string | null;
-      message?: string;
-      error?: string;
-    } | null;
+      if (backendResponse.ok) {
+        const backendPayload = (await backendResponse.json().catch(() => null)) as {
+          id?: string;
+          url?: string | null;
+        } | null;
 
-    if (!backendResponse.ok || !backendPayload?.url) {
-      return NextResponse.json(
-        { error: backendPayload?.message || backendPayload?.error || "checkout_failed" },
-        { status: backendResponse.ok ? 502 : backendResponse.status },
-      );
+        if (backendPayload?.url) {
+          return NextResponse.json({
+            checkoutUrl: backendPayload.url,
+            checkoutSessionId: backendPayload.id,
+            commandeId: commande.id,
+          });
+        }
+      }
+      
+      console.error(`[solvens_porta] Backend returned status ${backendResponse.status}, falling back to local Stripe.`);
+      await supabase.from("commandes").delete().eq("id", commande.id);
+    } catch (err) {
+      console.error("[solvens_porta] Backend fetch failed, falling back to local Stripe:", err);
+      await supabase.from("commandes").delete().eq("id", commande.id);
     }
-
-    return NextResponse.json({
-      checkoutUrl: backendPayload.url,
-      checkoutSessionId: backendPayload.id,
-      commandeId: commande.id,
-    });
   }
 
   if (!env.STRIPE_SECRET_KEY || !priceId) {
@@ -248,7 +252,10 @@ function buildStripeMetadata(
   };
 
   for (let index = 1; index <= 10; index += 1) {
-    metadata[`q${index}`] = trimMetadataValue(formatAnswer(data.answers[String(index)]));
+    const val = trimMetadataValue(formatAnswer(data.answers[String(index)]));
+    if (val) {
+      metadata[`q${index}`] = val;
+    }
   }
 
   return metadata;
