@@ -68,6 +68,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: commandeError.message }, { status: 500 });
   }
 
+  if (!env.TOTEM_BACKEND_URL) {
+    return NextResponse.json({ completed: true, backend: false }, { status: 202 });
+  }
+
   const authorization = request.headers.get("authorization") ?? "";
   const result = await completeBackendOrder({
     backendUrl: env.TOTEM_BACKEND_URL.replace(/\/$/, ""),
