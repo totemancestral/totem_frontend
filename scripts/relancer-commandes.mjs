@@ -1,19 +1,21 @@
 // Ce script nécessite les variables d'environnement suivantes :
 //   SUPABASE_SERVICE_ROLE_KEY  (service role key Supabase)
-//   PIPELINE_INTERNAL_SECRET   (secret interne pour l'API)
 //   SUPABASE_URL               (ex: https://mjiealkqjcqvlfrxdcif.supabase.co)
+//   TOTEM_BACKEND_URL          (URL du backend NestJS, optionnel)
+//   SUPABASE_AUTH_TOKEN        (JWT admin, prioritaire si fourni)
 //
-// Usage : SUPABASE_SERVICE_ROLE_KEY=xxx PIPELINE_INTERNAL_SECRET=xxx SUPABASE_URL=xxx node scripts/relancer-commandes.mjs
+// Usage : SUPABASE_SERVICE_ROLE_KEY=xxx SUPABASE_URL=xxx node scripts/relancer-commandes.mjs
 
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const SECRET = process.env.PIPELINE_INTERNAL_SECRET;
+const BACKEND_URL = process.env.TOTEM_BACKEND_URL;
+const AUTH_TOKEN = process.env.SUPABASE_AUTH_TOKEN;
 const BASE_URL = process.env.BASE_URL || "https://totem-ancestral.com";
 
-if (!SUPABASE_URL || !SERVICE_ROLE_KEY || !SECRET) {
-  console.error("Usage: SUPABASE_SERVICE_ROLE_KEY=xxx PIPELINE_INTERNAL_SECRET=xxx SUPABASE_URL=xxx node scripts/relancer-commandes.mjs");
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error("Usage: SUPABASE_SERVICE_ROLE_KEY=xxx SUPABASE_URL=xxx node scripts/relancer-commandes.mjs");
   process.exit(1);
 }
 
@@ -45,7 +47,7 @@ async function main() {
     console.log(`  [${cmd.statut}] ${cmd.id} | ${cmd.offre} | ${cmd.created_at}`);
   }
 
-  console.log("\nReset + relance individuelle (120s timeout par commande)...\n");
+  console.log("\nReset + notification backend...\n");
 
   for (const cmd of commandes) {
     process.stdout.write(`  ${cmd.id.slice(0, 8)}... `);
@@ -58,43 +60,46 @@ async function main() {
 
     const { error: e2 } = await supabase
       .from("oeuvres")
-      .update({ statut: "en_cours" })
+      .update({ statut: "en_generation" })
       .eq("commande_id", cmd.id);
     if (e2) { console.log(`reset oeuvre KO: ${e2.message}`); continue; }
 
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 130000);
+    const { error: e3 } = await supabase
+      .from("erreurs_pipeline")
+      .delete()
+      .eq("commande_id", cmd.id);
+    if (e3) { console.log(`efface erreurs KO: ${e3.message}`); }
 
-      const response = await fetch(`${BASE_URL}/api/fgh55_fh/relancer-tout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-pipeline-secret": SECRET,
-        },
-        body: JSON.stringify({ commandeId: cmd.id }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeout);
-      const result = await response.json().catch(() => ({}));
-
-      if (response.ok) {
-        const r = result.results?.[0];
-        console.log(r?.status === "ok" ? "OK" : `ERREUR: ${r?.error || "inconnue"}`);
-      } else {
-        console.log(`HTTP ${response.status}: ${result.error || "erreur"}`);
+    // Notifier le backend NestJS si disponible
+    if (BACKEND_URL) {
+      try {
+        const headers = { "Content-Type": "application/json" };
+        if (AUTH_TOKEN) {
+          headers["Authorization"] = `Bearer ${AUTH_TOKEN}`;
+        }
+        const response = await fetch(`${BACKEND_URL.replace(/\/$/, "")}/orders/retry`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ externalCommandId: cmd.id }),
+        });
+        if (response.ok) {
+          console.log("OK (backend notifie)");
+        } else {
+          const payload = await response.json().catch(() => ({}));
+          console.log(`BACKEND ${response.status}: ${payload.message || payload.error || "erreur"}`);
+        }
+      } catch (err) {
+        console.log(`BACKEND unreachable: ${err instanceof Error ? err.message : String(err)}`);
       }
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") {
-        console.log("TIMEOUT (130s)");
-      } else {
-        console.log(`Exception: ${err instanceof Error ? err.message : String(err)}`);
-      }
+    } else {
+      console.log("OK (reset local, pas de backend)");
     }
   }
 
-  console.log("\nTerminé. Vérifiez le statut des commandes dans l'admin FGH55FH.");
+  console.log("\nTerminé. Le worker NestJS reprendra les commandes en 'en_generation' au prochain cycle.");
+  if (BACKEND_URL) {
+    console.log(`Backend: ${BACKEND_URL}`);
+  }
 }
 
 main().catch(console.error);

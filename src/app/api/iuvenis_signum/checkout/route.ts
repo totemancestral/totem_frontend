@@ -11,7 +11,7 @@ import {
   extractStrictJson,
   type JuniorTotemProfile,
 } from "@/lib/totem-v3";
-import { generateJuniorMedia } from "@/lib/services/pipeline";
+
 
 const answerSchema = z.object({
   choice: z.enum(["A", "B", "C", "D"]),
@@ -184,26 +184,35 @@ export async function POST(request: Request) {
       // Échec silencieux
     }
 
-    // Générer l'image et le PDF
-    if (oeuvreId) {
+    // Générer l'image et le PDF via le backend NestJS
+    if (oeuvreId && env.TOTEM_BACKEND_URL) {
       try {
-        const media = await generateJuniorMedia(
-          oeuvreId,
-          auth.userId,
-          env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-          {
-            prenom: profile.firstName || "Voyageur",
+        const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
+        const authorization = request.headers.get("authorization") ?? "";
+        const response = await fetch(`${backendUrl}/junior/reveal`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authorization,
+          },
+          body: JSON.stringify({
+            oeuvreId,
+            userId: auth.userId,
+            firstName: profile.firstName || "Voyageur",
             nomComplet,
             phrase,
             attribut,
             messageClan,
             orderNumber: profile.orderNumber,
-          },
-          locale,
-        );
-        if (media) {
-          reveal.imageUrl = media.imageUrl;
-          reveal.pdfUrl = media.pdfUrl;
+            locale,
+          }),
+        });
+        if (response.ok) {
+          const data = await response.json().catch(() => null);
+          if (data) {
+            reveal.imageUrl = data.imageUrl ?? data.image_url ?? undefined;
+            reveal.pdfUrl = data.pdfUrl ?? data.pdf_url ?? undefined;
+          }
         }
       } catch {
         // Échec silencieux — le résultat texte est déjà disponible

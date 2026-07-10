@@ -287,28 +287,11 @@ export default function AdminPage() {
 
   const handleRelancer = useCallback(
     async (commandeId: string) => {
-      if (!token) return;
       setRelanceLoading(commandeId);
-      try {
-        const res = await fetch("/api/fgh55_fh/relancer", {
-          method: "POST",
-          headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
-          body: JSON.stringify({ commandeId }),
-        });
-        if (res.ok) {
-          toast.success("Pipeline relancé avec succès");
-          loadAll(token);
-        } else {
-          const err = (await res.json()) as { error: string };
-          toast.error(err.error || "Erreur lors de la relance");
-        }
-      } catch {
-        toast.error("Erreur réseau");
-      } finally {
-        setRelanceLoading(null);
-      }
+      toast.info("Relance pipeline migrée vers le backend NestJS (BullMQ)");
+      setRelanceLoading(null);
     },
-    [token],
+    [],
   );
 
   async function handleLogout() {

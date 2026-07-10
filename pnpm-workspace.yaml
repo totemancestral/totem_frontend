@@ -1,3 +1,6 @@
+packages:
+  - "totem_backend"
+  - "totem-parchemin"
 allowBuilds:
   '@parcel/watcher': true
   '@swc/core': true

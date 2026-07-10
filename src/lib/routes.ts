@@ -22,12 +22,10 @@ export const API_ROUTES = {
   checkout: "solvens_porta",
   commandes: "ordo_tabulae",
   contact: "epistula_missa",
-  generate_coffret: "arca_generatrix",
   junior: "iuvenis_signum",
   oeuvres: "opera_artificis",
   parcours: "iter_animarum",
   profiles: "personae_nota",
-  webhook_stripe: "strix_nuntius",
 } as const;
 
 export type PageRoute = keyof typeof PAGE_ROUTES;
