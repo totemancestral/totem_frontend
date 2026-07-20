@@ -312,7 +312,14 @@ export type Database = {
       app_role: "admin" | "user";
       commande_statut:
         "en_attente_paiement" | "paye" | "en_generation" | "livree" | "erreur" | "remboursee";
-      offre_type: "essentiel" | "signature" | "heritage";
+      offre_type:
+        | "essentiel"
+        | "signature"
+        | "heritage"
+        | "origine"
+        | "ancestral"
+        | "famille"
+        | "junior";
     };
     CompositeTypes: {
       [_ in never]: never;

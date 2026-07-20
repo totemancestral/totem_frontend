@@ -10,12 +10,7 @@ const cspDirectives = {
   "img-src": ["'self'", "data:", "blob:", "https:"],
   "font-src": ["'self'", "data:", "https:"],
   "media-src": ["'self'", "https:", "blob:"],
-  "connect-src": [
-    "'self'",
-    "https://*.supabase.co",
-    "https://api.stripe.com",
-    "https://*.r2.cloudflarestorage.com",
-  ],
+  "connect-src": ["'self'", "https://*.supabase.co", "https://api.stripe.com"],
   "frame-src": ["'self'", "https://js.stripe.com"],
   "frame-ancestors": ["'none'"],
 };
