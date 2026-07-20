@@ -12,7 +12,9 @@
     "i18n:check": "next-auto-i18n check",
     "i18n:check:json": "next-auto-i18n check --json",
     "i18n:sync": "next-auto-i18n sync",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -88,7 +90,8 @@
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vercel": "^54.13.0"
+    "vercel": "^54.13.0",
+    "vitest": "^3.2.4"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

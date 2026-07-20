@@ -157,8 +157,8 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 
 | Fonctionnalite    | Etat    | Notes            |
 | ----------------- | ------- | ---------------- |
-| Tests unitaires   | A faire | 0 fichier        |
-| CI GitHub Actions | A faire | Absent           |
+| Tests unitaires   | Partiel | Vitest : scoring FETA, extraction, mapping (front + backend) |
+| CI GitHub Actions | Fait    | `.github/workflows/ci.yml` (type-check, tests, build) sur les 2 repos |
 | .env.example      | Fait    | Cree dans racine |
 | README.md         | Fait    | Front + backend  |
 
