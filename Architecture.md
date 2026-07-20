@@ -138,3 +138,37 @@ Le frontend convertit `origine/ancestral/famille` -> `essentiel/signature/herita
 - Logique d'archetypes/scoring FETA dupliquee entre front (`src/lib/totem-v3.ts`) et back (`src/totem/totem-animals.ts`, `totem-v3-pipeline.ts`) — risque de derive (couvert par des tests de contrat).
 - Deux vocabulaires d'offres (voir mapping ci-dessus).
 - Composant `ParchmentPdfDocument` (@react-pdf/renderer) cote front conserve alors que le PDF livre est genere par le backend (pdf-lib).
+
+## Generation IA V3 — structure reelle
+
+Les specs (Doc 07) decrivent 9 prompts. L'implementation en respecte le fond avec deux choix structurants :
+
+| Flux | Structure reelle | Modele | Fournisseurs |
+| ---- | ---------------- | ------ | ------------ |
+| Adulte (A1–A5) | **1 appel Claude consolide** (JSON `a1`..`a5`) + fallback deterministe | `claude-opus-4-5` | Texte : Anthropic · Image : **OpenAI gpt-image** · Audio : **OpenAI TTS** (`onyx`) |
+| Junior (J1–J4) | **Cascade de 4 appels** enchainee, chaque sortie alimente la suivante + fallback | `claude-sonnet-4-6` | Anthropic (texte) |
+
+- Scoring, archetype et nom ancestral compose sont **deterministes** (imposes par la matrice FETA + tirage seede) ; Claude ne fait que composer/valider les textes.
+- Les prompts image sont **descriptifs en langage naturel** pour OpenAI gpt-image (le ratio est gere par le parametre `size`, pas par une syntaxe Midjourney `--ar/--stylize/--v`).
+- Audio : OpenAI TTS est la solution retenue (pas ElevenLabs). Voir Doc 07 pour l'intention initiale.
+
+## Referentiel des 12 archetypes adultes (source de verite)
+
+Table canonique alignee sur **Doc 12A** et implementee dans le code (`ADULT_ARCHETYPES`). À utiliser comme reference unique.
+
+> Attention : la liste des peuples du **Doc 07 (Prompt A1)** est incoherente avec Doc 12A (ex. Lion=Akan, Elephant=Bantu, Aigle=Maasai…). **Doc 12A et le code font foi.**
+
+| Archetype  | Peuple  | Region             | Element | Qualite       |
+| ---------- | ------- | ------------------ | ------- | ------------- |
+| Lion       | Yoruba  | Nigeria            | Feu     | Leadership    |
+| Lionne     | Maasai  | Kenya / Tanzanie   | Feu     | Protection    |
+| Rhinoceros | Zulu    | Afrique du Sud     | Feu     | Determination |
+| Crocodile  | Mande   | Mali / Guinee      | Eau     | Gardien       |
+| Serpent    | Fon     | Benin              | Eau     | Transformation|
+| Dauphin    | Serer   | Senegal            | Eau     | Joie          |
+| Elephant   | Akan    | Ghana              | Terre   | Memoire       |
+| Baobab     | Wolof   | Senegal            | Terre   | Ancestralite  |
+| Zebre      | Ndebele | Afrique du Sud     | Terre   | Equilibre     |
+| Perroquet  | Ashanti | Ghana              | Air     | Parole        |
+| Aigle      | Dogon   | Mali               | Air     | Vision        |
+| Leopard    | Yoruba  | Nigeria            | Ombre   | Grace         |
