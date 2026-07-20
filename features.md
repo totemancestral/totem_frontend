@@ -82,6 +82,11 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 
 ## 6. Pipeline de generation
 
+> Note (2026-07) : le pipeline de generation (texte/image/audio/PDF) s'execute desormais
+> **entierement dans le backend NestJS** (`totem_backend`) : Anthropic pour le texte, OpenAI
+> pour image/audio, pdf-lib pour le PDF, Supabase Storage pour le stockage. Le tableau
+> ci-dessous decrit les capacites fonctionnelles ; leur implementation vit cote backend.
+
 | Fonctionnalite              | Etat    | Notes                                                           |
 | --------------------------- | ------- | --------------------------------------------------------------- |
 | Service pipeline            | Fait    | `generateCoffret` complet                                       |
@@ -155,15 +160,16 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 | Tests unitaires   | A faire | 0 fichier        |
 | CI GitHub Actions | A faire | Absent           |
 | .env.example      | Fait    | Cree dans racine |
-| README.md         | A faire |                  |
+| README.md         | Fait    | Front + backend  |
 
 ## 12. Dette technique
 
-| Element                                        | Etat                                 |
-| ---------------------------------------------- | ------------------------------------ |
-| Documentation features.md                      | A jour                               |
-| Documentation Architecture.md                  | A jour                               |
-| Code legacy TanStack src/routes/               | Present (exclu du build)             |
-| local-auth.ts                                  | Present (non importe dans flux prod) |
-| Double lockfile (package-lock.json + bun.lock) | Present                              |
-| recharts installe sans usage                   | Present                              |
+| Element                                          | Etat                                       |
+| ------------------------------------------------ | ------------------------------------------ |
+| Documentation features.md                        | A jour                                     |
+| Documentation Architecture.md                    | A jour                                     |
+| Logique archetypes/scoring dupliquee front/back  | Present (couvert par tests de contrat)     |
+| Deux vocabulaires d'offres (mapping)             | Present (helper centralise)                |
+| ParchmentPdfDocument (@react-pdf) cote front     | Present (PDF livre genere par le backend)  |
+| Client R2 / config SENYCE-OpenAI cote front      | Supprime (nettoyage 2026-07)               |
+| Route dupliquee `strix_nuntius`                  | Supprimee (2026-07)                        |

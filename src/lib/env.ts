@@ -21,28 +21,12 @@ export const serverEnvSchema = z
     SUPABASE_SERVICE_KEY: z.string().min(1).optional(),
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
 
-    // R2
-    R2_ACCOUNT_ID: z.string().optional(),
-    R2_ACCESS_KEY_ID: z.string().optional(),
-    R2_SECRET_ACCESS_KEY: z.string().optional(),
-    R2_BUCKET_NAME: z.string().optional(),
-    R2_PUBLIC_URL: optionalUrl,
-
-    // Resend
+    // Resend (formulaire de contact)
     RESEND_API_KEY: z.string().optional(),
     RESEND_FROM_EMAIL: z.string().email().optional(),
     RESEND_FROM_NAME: z.string().optional(),
 
-    // Microservices IA
-    SENYCE_API_TEXTE: optionalUrl,
-    SENYCE_API_IMAGE: optionalUrl,
-    SENYCE_API_AUDIO: optionalUrl,
-    SENYCE_API_KEY: z.string().optional(),
-
-    // OpenAI
-    OPENAI_API_KEY: z.string().optional(),
-
-    // Anthropic / Claude
+    // Anthropic / Claude — utilisé directement par le flux Junior (optionnel : fallback déterministe sinon)
     ANTHROPIC_API_KEY: z.string().optional(),
     ANTHROPIC_MODEL: z.string().optional(),
     ANTHROPIC_MODEL_JUNIOR: z.string().optional(),
@@ -92,19 +76,10 @@ export const serverEnvSchema = z
 
     required("ADMIN_EMAIL", "Admin email", env.ADMIN_EMAIL);
 
-    if (!env.TOTEM_BACKEND_URL) {
-      const hasDirectTextProvider =
-        Boolean(env.ANTHROPIC_API_KEY) || Boolean(env.SENYCE_API_KEY && env.SENYCE_API_TEXTE);
-
-      if (!hasDirectTextProvider) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["ANTHROPIC_API_KEY"],
-          message:
-            "ANTHROPIC_API_KEY or SENYCE_API_KEY + SENYCE_API_TEXTE required when TOTEM_BACKEND_URL is unset",
-        });
-      }
-    }
+    // Le pipeline de génération (texte/image/audio/PDF) est entièrement délégué au
+    // backend NestJS : sans TOTEM_BACKEND_URL, le webhook Stripe et le checkout
+    // n'ont aucun moteur de génération. Requis en production.
+    required("TOTEM_BACKEND_URL", "Backend URL", env.TOTEM_BACKEND_URL);
   });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
