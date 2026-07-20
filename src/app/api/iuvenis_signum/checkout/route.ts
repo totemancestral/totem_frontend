@@ -5,6 +5,7 @@ import { getServerEnv } from "@/lib/env";
 import { authenticateRequest, createServiceClient } from "@/lib/server-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { pagePath } from "@/lib/routes";
+import { JUNIOR_AMOUNT_CENTS, JUNIOR_COMMANDE_OFFRE } from "@/lib/offers";
 import {
   buildJuniorPromptBundle,
   createJuniorTotemProfile,
@@ -153,12 +154,13 @@ export async function POST(request: Request) {
       const serviceSupabase = createServiceClient();
       const now = new Date().toISOString();
 
-      // Commande (offre "essentiel" car l'enum Supabase ne supporte pas "junior")
+      // Commande Junior : offre placeholder hors ENUM (voir src/lib/offers.ts).
+      // Junior reste identifiable par montant_cents = JUNIOR_AMOUNT_CENTS.
       await serviceSupabase.from("commandes").insert({
         user_id: auth.userId,
-        offre: "essentiel",
+        offre: JUNIOR_COMMANDE_OFFRE,
         statut: "paye",
-        montant_cents: 999,
+        montant_cents: JUNIOR_AMOUNT_CENTS,
         devise: "eur",
         langue: locale,
         stripe_session_id: session.id,

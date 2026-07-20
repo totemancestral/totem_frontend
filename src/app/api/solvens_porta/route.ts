@@ -5,6 +5,7 @@ import { getServerEnv } from "@/lib/env";
 import { authenticateRequest, createServiceClient } from "@/lib/server-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { pagePath } from "@/lib/routes";
+import { ADULT_OFFERS, toCommandeOffre } from "@/lib/offers";
 import type { Json } from "@/integrations/supabase/types";
 
 const checkoutSchema = z.object({
@@ -12,18 +13,6 @@ const checkoutSchema = z.object({
   answers: z.record(z.string(), z.unknown()),
   locale: z.enum(["fr", "en"]),
 });
-
-const offerConfig = {
-  origine: { priceEnv: "STRIPE_PRICE_ORIGINE", amountCents: 4900 },
-  ancestral: { priceEnv: "STRIPE_PRICE_ANCESTRAL", amountCents: 8900 },
-  famille: { priceEnv: "STRIPE_PRICE_FAMILLE", amountCents: 19900 },
-} as const;
-
-const commandOfferMap = {
-  origine: "essentiel",
-  ancestral: "signature",
-  famille: "heritage",
-} as const;
 
 export async function POST(request: Request) {
   try {
@@ -51,7 +40,7 @@ async function handleCheckout(
   auth: Awaited<ReturnType<typeof authenticateRequest>> & { userId: string; email: string },
 ) {
   const env = getServerEnv();
-  const config = offerConfig[data.offre];
+  const config = ADULT_OFFERS[data.offre];
   const priceId = env[config.priceEnv];
 
   const origin = (
@@ -100,7 +89,7 @@ async function handleCheckout(
       .insert({
         user_id: auth.userId,
         reponses_id: parcours.id,
-        offre: commandOfferMap[data.offre],
+        offre: toCommandeOffre(data.offre),
         statut: "en_attente_paiement",
         montant_cents: config.amountCents,
         devise: "EUR",
@@ -188,7 +177,7 @@ async function handleCheckout(
       .insert({
         user_id: auth.userId,
         reponses_id: parcours.id,
-        offre: commandOfferMap[data.offre],
+        offre: toCommandeOffre(data.offre),
         statut: "en_attente_paiement",
         montant_cents: config.amountCents,
         devise: "EUR",
