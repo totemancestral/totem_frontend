@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { PDFDocument, rgb, StandardFonts } from "npm:pdf-lib@1";
 
-const SUPABASE_PROJECT_REF = "mjiealkqjcqvlfrxdcif";
+const SUPABASE_PROJECT_REF = "oeydpyuhycbpvcyjpmln";
 const EF_BASE = `https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1`;
 const DEFAULT_PRENOM = "Voyageur";
 const MAX_AUDIO_TEXT_LENGTH = 1800;
@@ -256,8 +256,8 @@ async function loadManuscriptFontBytes(): Promise<Uint8Array> {
   }
 
   const remoteCandidates = [
-    "https://mjiealkqjcqvlfrxdcif.supabase.co/storage/v1/object/public/totem-files/fonts/MAKALO-Regular.otf",
-    "https://mjiealkqjcqvlfrxdcif.supabase.co/storage/v1/object/public/totem-files/fonts/DancingScript-Regular.ttf",
+    "https://oeydpyuhycbpvcyjpmln.supabase.co/storage/v1/object/public/totem-files/fonts/MAKALO-Regular.otf",
+    "https://oeydpyuhycbpvcyjpmln.supabase.co/storage/v1/object/public/totem-files/fonts/DancingScript-Regular.ttf",
   ];
   for (const url of remoteCandidates) {
     const bytes = await fetchAsset(url);
