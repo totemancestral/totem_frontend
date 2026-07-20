@@ -6,16 +6,22 @@
  *  - UI / backend NestJS : origine | ancestral | famille | junior
  *  - Colonne `commandes.offre` (ENUM `offre_type`) : essentiel | signature | heritage
  *
- * `junior` n'existe PAS dans l'ENUM. Une commande Junior est donc enregistrée
- * avec l'offre placeholder `JUNIOR_COMMANDE_OFFRE` et reste identifiable par
- * `montant_cents = JUNIOR_AMOUNT_CENTS` et par `metadata.type = "junior"` de
- * l'oeuvre associée. Pour lever l'ambiguïté, étendre l'ENUM (`ALTER TYPE
- * offre_type ADD VALUE 'junior'`) puis remplacer JUNIOR_COMMANDE_OFFRE par "junior".
+ * Depuis la migration `20260720000000_add_junior_to_offre_type`, l'ENUM
+ * `offre_type` comporte `junior` : une commande Junior est enregistrée avec
+ * `offre = 'junior'` (constante `JUNIOR_COMMANDE_OFFRE`), et reste identifiable
+ * par `montant_cents = JUNIOR_AMOUNT_CENTS`.
  */
 
 export type AdultOffer = "origine" | "ancestral" | "famille";
 export type Offer = AdultOffer | "junior";
-export type OffreType = "essentiel" | "signature" | "heritage";
+export type OffreType =
+  | "essentiel"
+  | "signature"
+  | "heritage"
+  | "origine"
+  | "ancestral"
+  | "famille"
+  | "junior";
 
 export type StripePriceEnvKey =
   | "STRIPE_PRICE_ORIGINE"
@@ -37,11 +43,8 @@ export const ADULT_OFFERS: Record<AdultOffer, AdultOfferConfig> = {
 /** Prix Junior (offre hors ENUM), en centimes. */
 export const JUNIOR_AMOUNT_CENTS = 999;
 
-/**
- * Offre ENUM placeholder pour une commande Junior (l'ENUM `offre_type` ne
- * comporte pas `junior`). Junior reste distinguable via `montant_cents`.
- */
-export const JUNIOR_COMMANDE_OFFRE: OffreType = "essentiel";
+/** Valeur ENUM `offre_type` pour une commande Junior. */
+export const JUNIOR_COMMANDE_OFFRE: OffreType = "junior";
 
 /** Convertit une offre adulte (UI) vers la valeur ENUM `commandes.offre`. */
 export function toCommandeOffre(offer: AdultOffer): OffreType {

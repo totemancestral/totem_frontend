@@ -35,8 +35,8 @@ describe("offers — garde Junior (hors ENUM)", () => {
     expect(isAdultOffer("junior")).toBe(false);
   });
 
-  it("Junior utilise le placeholder ENUM et son propre montant", () => {
-    expect(JUNIOR_COMMANDE_OFFRE).toBe("essentiel");
+  it("Junior a sa propre valeur ENUM et son montant dédié", () => {
+    expect(JUNIOR_COMMANDE_OFFRE).toBe("junior");
     expect(JUNIOR_AMOUNT_CENTS).toBe(999);
   });
 });

@@ -154,8 +154,7 @@ export async function POST(request: Request) {
       const serviceSupabase = createServiceClient();
       const now = new Date().toISOString();
 
-      // Commande Junior : offre placeholder hors ENUM (voir src/lib/offers.ts).
-      // Junior reste identifiable par montant_cents = JUNIOR_AMOUNT_CENTS.
+      // Commande Junior : offre 'junior' (ENUM étendu, voir src/lib/offers.ts).
       await serviceSupabase.from("commandes").insert({
         user_id: auth.userId,
         offre: JUNIOR_COMMANDE_OFFRE,

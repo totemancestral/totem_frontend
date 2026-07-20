@@ -71,7 +71,7 @@ Deux vocabulaires coexistent et doivent rester synchronises :
 | `origine`           | `essentiel`                                            | 49 €   |
 | `ancestral`         | `signature`                                            | 89 €   |
 | `famille`           | `heritage`                                             | 199 €  |
-| `junior`            | (hors ENUM — stocke en metadata cote oeuvres)          | 9,99 € |
+| `junior`            | `junior` (depuis migration 20260720000000)             | 9,99 € |
 
 Le frontend convertit `origine/ancestral/famille` -> `essentiel/signature/heritage` avant tout `insert` dans `commandes`.
 
