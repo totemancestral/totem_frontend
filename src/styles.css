@@ -191,6 +191,14 @@
     transform: translateY(-1px);
   }
 
+  .footer-link {
+    color: rgba(226, 225, 238, 0.68);
+    transition: color 0.2s ease;
+  }
+  .footer-link:hover {
+    color: var(--or-ancestral);
+  }
+
   .btn-secondary {
     background: transparent;
     color: var(--or-ancestral);
