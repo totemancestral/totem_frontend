@@ -23,22 +23,33 @@ export type OffreType =
   | "famille"
   | "junior";
 
-export type StripePriceEnvKey =
-  | "STRIPE_PRICE_ORIGINE"
-  | "STRIPE_PRICE_ANCESTRAL"
-  | "STRIPE_PRICE_FAMILLE";
-
 type AdultOfferConfig = {
-  priceEnv: StripePriceEnvKey;
   amountCents: number;
   commandeOffre: OffreType;
+  /** Libellé produit envoyé à Stripe via `price_data` (pas de price_id à créer). */
+  label: string;
 };
 
 export const ADULT_OFFERS: Record<AdultOffer, AdultOfferConfig> = {
-  origine: { priceEnv: "STRIPE_PRICE_ORIGINE", amountCents: 4900, commandeOffre: "essentiel" },
-  ancestral: { priceEnv: "STRIPE_PRICE_ANCESTRAL", amountCents: 8900, commandeOffre: "signature" },
-  famille: { priceEnv: "STRIPE_PRICE_FAMILLE", amountCents: 19900, commandeOffre: "heritage" },
+  origine: {
+    amountCents: 4900,
+    commandeOffre: "essentiel",
+    label: "TOTEM ANCESTRAL - Origine",
+  },
+  ancestral: {
+    amountCents: 8900,
+    commandeOffre: "signature",
+    label: "TOTEM ANCESTRAL - Ancestral",
+  },
+  famille: {
+    amountCents: 19900,
+    commandeOffre: "heritage",
+    label: "TOTEM ANCESTRAL - Famille",
+  },
 };
+
+/** Libellé produit Stripe pour l'offre Junior. */
+export const JUNIOR_LABEL = "TOTEM JUNIOR";
 
 /** Prix Junior (offre hors ENUM), en centimes. */
 export const JUNIOR_AMOUNT_CENTS = 999;
