@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ArrowRight, Check, ChevronDown, Star, X } from "lucide-react";
 import { GoldParticles } from "./GoldParticles";
 import { Reveal, Ornament } from "./Reveal";
+import { authPath } from "@/lib/routes";
 
 const totemLogo = "/assets/totem-logo.png";
 const oeuvreParchemin = "/assets/oeuvre-parchemin.jpg";
@@ -470,11 +471,11 @@ function useLandingCopy() {
 }
 
 function journeyHref(locale: Locale) {
-  return `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`;
+  return authPath(locale, "signup", `/${locale}/via_sapientiae?restart=1`);
 }
 
 function juniorHref(locale: Locale) {
-  return `/${locale}/janua_vitae?mode=signup&role=junior&redirect=${encodeURIComponent(`/${locale}/iuvenis_signum`)}`;
+  return `${authPath(locale, "signup", `/${locale}/iuvenis_signum`)}&role=junior`;
 }
 
 function SectionHeading({

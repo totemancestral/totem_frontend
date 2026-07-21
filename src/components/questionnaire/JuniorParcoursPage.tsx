@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { GoldParticles } from "@/components/GoldParticles";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
-import { apiPath } from "@/lib/routes";
+import { apiPath, authPath } from "@/lib/routes";
 
 type Locale = "fr" | "en";
 type ChoiceLetter = "A" | "B" | "C" | "D";
@@ -343,7 +343,7 @@ export function JuniorParcoursPage() {
   async function startCheckout() {
     if (!session?.access_token) {
       router.push(
-        `/${locale}/janua_vitae?mode=signup&role=junior&redirect=${encodeURIComponent(`/${locale}/iuvenis_signum`)}`,
+        `${authPath(locale, "signup", `/${locale}/iuvenis_signum`)}&role=junior`,
       );
       return;
     }

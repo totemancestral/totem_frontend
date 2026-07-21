@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { authPath } from "@/lib/routes";
 
 type Locale = "fr" | "en";
 
 export function Footer({ locale }: { locale: Locale }) {
   const brand = useTranslations("brand");
   const t = useTranslations("footer");
-  const composeHref = `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`;
+  const composeHref = authPath(locale, "signup", `/${locale}/via_sapientiae?restart=1`);
   const labels =
     locale === "en"
       ? { experience: "Experience", order: "Order", legal: "Legal" }

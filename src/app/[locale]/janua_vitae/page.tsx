@@ -1,37 +1,33 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { AuthClient } from "@/components/account/AuthClient";
+import { redirect } from "next/navigation";
+import { authPath } from "@/lib/routes";
 
-export const metadata: Metadata = {
-  title: "Accès · Totem Ancestral",
-};
+/**
+ * Point d'entrée `janua_vitae` : redirige vers connexion (par défaut) ou
+ * inscription (`?mode=signup`). Compatibilité avec les anciens liens qui
+ * passaient `mode`, `redirect` et `role` en query params.
+ */
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { locale: rawLocale } = await params;
+  const locale = rawLocale === "en" ? "en" : "fr";
+  const query = await searchParams;
 
-export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
+  const modeRaw = Array.isArray(query.mode) ? query.mode[0] : query.mode;
+  const kind: "signup" | "signin" = modeRaw === "signup" ? "signup" : "signin";
 
-  return (
-    <Suspense fallback={<AuthFallback />}>
-      <AuthClient locale={toLocale(locale)} />
-    </Suspense>
-  );
-}
+  const redirectRaw = Array.isArray(query.redirect) ? query.redirect[0] : query.redirect;
+  let target = authPath(locale, kind, redirectRaw);
 
-function AuthFallback() {
-  return (
-    <section
-      className="min-h-[100svh] px-5 pb-20 pt-32 md:px-10"
-      style={{ background: "var(--nuit-profonde)" }}
-    >
-      <div
-        className="mx-auto max-w-xl rounded-lg border p-8 text-center"
-        style={{ borderColor: "rgba(201,168,76,0.22)" }}
-      >
-        <p className="quote-italic">Chargement...</p>
-      </div>
-    </section>
-  );
-}
+  const roleRaw = Array.isArray(query.role) ? query.role[0] : query.role;
+  if (roleRaw) {
+    target += target.includes("?") ? "&" : "?";
+    target += `role=${encodeURIComponent(roleRaw)}`;
+  }
 
-function toLocale(locale: string) {
-  return locale === "en" ? "en" : "fr";
+  redirect(target);
 }

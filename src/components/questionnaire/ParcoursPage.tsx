@@ -9,7 +9,7 @@ import { Check, Home, LayoutDashboard } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { apiPath } from "@/lib/routes";
+import { apiPath, authPath } from "@/lib/routes";
 
 type FieldLevel = "PRIORITAIRE" | "SECONDAIRE" | "TERTIAIRE" | "SPECIAL";
 
@@ -407,9 +407,7 @@ export function ParcoursPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       if (!currentSession) {
-        router.replace(
-          `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`,
-        );
+        router.replace(authPath(locale, "signup", `/${locale}/via_sapientiae?restart=1`));
         return;
       }
       setSession(currentSession);
