@@ -8,6 +8,7 @@ import type { Session } from "@supabase/supabase-js";
 import { LogOut, Menu, UserRound, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { hasAdminRole } from "@/lib/admin-client";
+import { authPath } from "@/lib/routes";
 
 type Locale = "fr" | "en";
 
@@ -110,7 +111,7 @@ export function Header({ locale }: { locale: Locale }) {
     ? juniorSession
       ? `/${locale}/iuvenis_signum`
       : `/${locale}/via_sapientiae?restart=1`
-    : `/${locale}/janua_vitae?mode=signup&redirect=${encodeURIComponent(`/${locale}/via_sapientiae?restart=1`)}`;
+    : authPath(locale, "signup", `/${locale}/via_sapientiae?restart=1`);
 
   const openDashboardMenu = () => {
     if (typeof window === "undefined") return;

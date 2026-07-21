@@ -6,6 +6,8 @@
 export const PAGE_ROUTES = {
   a_propos: "athenaeum_arc",
   auth: "janua_vitae",
+  auth_signin: "janua_vitae/redivivum",
+  auth_signup: "janua_vitae/nova",
   cgv: "lex_mercatoria",
   confidentialite: "arcanum_privata",
   contact: "scriba_mundi",
@@ -46,4 +48,18 @@ export function adminPath(): string {
 
 export function adminApiPath(endpoint: "stats" | "commandes"): string {
   return `/api/fgh55_fh/${endpoint}`;
+}
+
+/**
+ * Construit un lien vers la page d'authentification (inscription ou connexion),
+ * avec un paramètre `redirect` optionnel après authentification.
+ */
+export function authPath(
+  locale: string,
+  kind: "signup" | "signin",
+  redirectPath?: string,
+): string {
+  const route = kind === "signup" ? PAGE_ROUTES.auth_signup : PAGE_ROUTES.auth_signin;
+  const base = `/${locale}/${route}`;
+  return redirectPath ? `${base}?redirect=${encodeURIComponent(redirectPath)}` : base;
 }

@@ -6,6 +6,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
 import { ArrowLeft, KeyRound, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { authPath } from "@/lib/routes";
 
 type Locale = "fr" | "en";
 type Phase = "request" | "update";
@@ -99,7 +100,7 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
       if (updateError) throw updateError;
 
       setNotice(t.updated);
-      setTimeout(() => router.replace(`/${locale}/janua_vitae`), 1200);
+      setTimeout(() => router.replace(authPath(locale, "signin")), 1200);
     } catch (err) {
       setError(err instanceof Error ? err.message : t.defaultError);
     } finally {
@@ -182,7 +183,7 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
           </button>
         </form>
 
-        <Link href={`/${locale}/janua_vitae`} className="btn-secondary w-full !px-4">
+        <Link href={authPath(locale, "signin")} className="btn-secondary w-full !px-4">
           <ArrowLeft size={16} />
           {t.back}
         </Link>

@@ -25,6 +25,7 @@ import {
 import { toast } from "sonner";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { hasAdminRole } from "@/lib/admin-client";
+import { authPath } from "@/lib/routes";
 import { extractParchmentSections } from "@/lib/totem-v3";
 import { TotemRevealClient } from "@/components/totem/TotemRevealClient";
 
@@ -224,8 +225,8 @@ export function DashboardClient({
   const router = useRouter();
   const { session, user, loading: authLoading } = useSupabaseSession();
   const t = copy[locale];
-  const authPath = useMemo(
-    () => `/${locale}/janua_vitae?redirect=${encodeURIComponent(`/${locale}/domus_animi`)}`,
+  const signinRedirect = useMemo(
+    () => authPath(locale, "signin", `/${locale}/domus_animi`),
     [locale],
   );
 
@@ -257,7 +258,7 @@ export function DashboardClient({
 
     if (authLoading) return;
     if (!currentSession || !currentToken) {
-      router.replace(authPath);
+      router.replace(signinRedirect);
       return;
     }
     const userId = currentSession.user.id;
@@ -319,7 +320,7 @@ export function DashboardClient({
     return () => {
       alive = false;
     };
-  }, [authLoading, session, token, authPath, locale, router, t.error]);
+  }, [authLoading, session, token, signinRedirect, locale, router, t.error]);
 
   const metadata = user?.user_metadata ?? {};
   const firstName = metadataValue(metadata, ["prenom", "first_name", "given_name"]);
