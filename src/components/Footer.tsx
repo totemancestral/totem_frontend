@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { authPath } from "@/lib/routes";
+import { authPath, pagePath } from "@/lib/routes";
 
 type Locale = "fr" | "en";
 
@@ -8,90 +8,91 @@ export function Footer({ locale }: { locale: Locale }) {
   const brand = useTranslations("brand");
   const t = useTranslations("footer");
   const composeHref = authPath(locale, "signup", `/${locale}/via_sapientiae?restart=1`);
+  const year = new Date().getFullYear();
   const labels =
     locale === "en"
-      ? { experience: "Experience", order: "Order", legal: "Legal" }
-      : { experience: "Expérience", order: "Commander", legal: "Légal" };
+      ? {
+          order: "Order",
+          offers: "Offers",
+          faq: "FAQ",
+          cgv: "Terms",
+          privacy: "Privacy",
+          mentions: "Legal notice",
+          contact: "Contact",
+        }
+      : {
+          order: "Commander",
+          offers: "Offres",
+          faq: "FAQ",
+          cgv: "CGV",
+          privacy: "Confidentialité",
+          mentions: "Mentions",
+          contact: "Contact",
+        };
 
   return (
     <footer
-      className="border-t px-5 py-20 md:px-10 md:py-28"
-      style={{ background: "var(--nuit-profonde)", borderColor: "rgba(216,173,77,0.18)" }}
+      className="border-t px-5 py-8 md:px-10 md:py-10"
+      style={{ background: "var(--nuit-profonde)", borderColor: "rgba(216,173,77,0.14)" }}
     >
-      <div className="mx-auto grid max-w-[1200px] gap-14 md:grid-cols-[1.2fr_1fr_1fr]">
-        <div>
-          <div className="flex items-center gap-4">
-            <img src="/assets/totem-logo.png" alt="" className="h-12 w-12 object-contain" />
-            <div className="h-display text-4xl uppercase" style={{ color: "var(--ivoire)" }}>
+      <div className="mx-auto flex max-w-6xl flex-col gap-6">
+        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+          {/* Marque */}
+          <Link href={`/${locale}`} className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/assets/totem-logo.png" alt="" className="h-9 w-9 object-contain" />
+            <div
+              className="h-display text-xl uppercase tracking-wide"
+              style={{ color: "var(--ivoire)" }}
+            >
               {brand("name")}
             </div>
-          </div>
-          <p
-            className="body-copy mt-8 max-w-sm text-[15px]"
-            style={{ color: "rgba(226,225,238,0.72)" }}
-          >
-            {t("tagline")} {t("studioLine")}
-          </p>
-        </div>
+          </Link>
 
-        <div className="grid grid-cols-2 gap-10">
-          <nav className="space-y-5">
-            <p className="eyebrow" style={{ color: "rgba(216,173,77,0.72)" }}>
-              {labels.experience}
-            </p>
-            <Link
-              className="block text-sm transition-colors hover:text-or"
-              href={composeHref}
-              style={{ color: "rgba(226,225,238,0.76)" }}
-            >
+          {/* Nav compacte */}
+          <nav
+            className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs uppercase"
+            style={{ letterSpacing: "0.08em" }}
+          >
+            <Link href={composeHref} className="footer-link">
               {labels.order}
             </Link>
-            <Link
-              className="block text-sm transition-colors hover:text-or"
-              href={`/${locale}/#offres`}
-              style={{ color: "rgba(226,225,238,0.76)" }}
-            >
-              {t("nav.offers")}
+            <Link href={`/${locale}#offres`} className="footer-link">
+              {labels.offers}
             </Link>
-            <Link
-              className="block text-sm transition-colors hover:text-or"
-              href={`/${locale}/#faq`}
-              style={{ color: "rgba(226,225,238,0.76)" }}
-            >
-              FAQ
+            <Link href={`/${locale}#faq`} className="footer-link">
+              {labels.faq}
             </Link>
-          </nav>
-
-          <nav className="space-y-5">
-            <p className="eyebrow" style={{ color: "rgba(216,173,77,0.72)" }}>
-              {labels.legal}
-            </p>
-            <Link
-              className="block text-sm transition-colors hover:text-or"
-              href={`/${locale}/lex_mercatoria`}
-              style={{ color: "rgba(226,225,238,0.76)" }}
-            >
-              CGV
+            <Link href={pagePath(locale, "contact")} className="footer-link">
+              {labels.contact}
             </Link>
-            <Link
-              className="block text-sm transition-colors hover:text-or"
-              href={`/${locale}/arcanum_privata`}
-              style={{ color: "rgba(226,225,238,0.76)" }}
-            >
-              {t("legal.privacy")}
+            <span
+              aria-hidden="true"
+              className="h-3 w-px"
+              style={{ background: "rgba(216,173,77,0.28)" }}
+            />
+            <Link href={pagePath(locale, "cgv")} className="footer-link">
+              {labels.cgv}
             </Link>
-            <Link
-              className="block text-sm transition-colors hover:text-or"
-              href={`/${locale}/notitia_legalis`}
-              style={{ color: "rgba(226,225,238,0.76)" }}
-            >
-              {t("legal.mentions")}
+            <Link href={pagePath(locale, "confidentialite")} className="footer-link">
+              {labels.privacy}
+            </Link>
+            <Link href={pagePath(locale, "mentions")} className="footer-link">
+              {labels.mentions}
             </Link>
           </nav>
         </div>
 
-        <div className="flex items-end md:justify-end">
-          <p className="caption max-w-xs md:text-right">{t("copyright")}</p>
+        <div
+          className="flex flex-col-reverse items-start justify-between gap-3 border-t pt-4 md:flex-row md:items-center"
+          style={{ borderColor: "rgba(216,173,77,0.10)" }}
+        >
+          <p className="caption" style={{ color: "rgba(226,225,238,0.55)" }}>
+            © {year} SENYCE PARTNERS — {t("copyright")}
+          </p>
+          <p className="caption" style={{ color: "rgba(226,225,238,0.42)" }}>
+            {t("tagline")}
+          </p>
         </div>
       </div>
     </footer>
