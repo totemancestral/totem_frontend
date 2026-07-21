@@ -5,7 +5,7 @@ import { getServerEnv } from "@/lib/env";
 import { authenticateRequest, createServiceClient } from "@/lib/server-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { pagePath } from "@/lib/routes";
-import { JUNIOR_AMOUNT_CENTS, JUNIOR_COMMANDE_OFFRE } from "@/lib/offers";
+import { JUNIOR_AMOUNT_CENTS, JUNIOR_COMMANDE_OFFRE, JUNIOR_LABEL } from "@/lib/offers";
 import {
   buildJuniorPromptBundle,
   createJuniorTotemProfile,
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       "http://localhost:3000"
     ).replace(/\/$/, "");
 
-    if (!env.STRIPE_SECRET_KEY || !env.STRIPE_PRICE_JUNIOR) {
+    if (!env.STRIPE_SECRET_KEY) {
       return NextResponse.json(
         { error: "Le paiement junior n'est pas configure" },
         { status: 503 },
@@ -72,7 +72,16 @@ export async function POST(request: Request) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [{ price: env.STRIPE_PRICE_JUNIOR, quantity: 1 }],
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "eur",
+            unit_amount: JUNIOR_AMOUNT_CENTS,
+            product_data: { name: JUNIOR_LABEL },
+          },
+        },
+      ],
       customer_email: auth.email,
       success_url: `${origin}${pagePath(locale, "junior", "checkout=success&session_id={CHECKOUT_SESSION_ID}")}`,
       cancel_url: `${origin}${pagePath(locale, "junior", "checkout=cancelled")}`,

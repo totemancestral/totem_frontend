@@ -20,10 +20,10 @@ describe("offers — mapping UI -> ENUM commandes.offre", () => {
     expect(ADULT_OFFERS.famille.amountCents).toBe(19900);
   });
 
-  it("relie chaque offre à sa clé de prix Stripe", () => {
-    expect(ADULT_OFFERS.origine.priceEnv).toBe("STRIPE_PRICE_ORIGINE");
-    expect(ADULT_OFFERS.ancestral.priceEnv).toBe("STRIPE_PRICE_ANCESTRAL");
-    expect(ADULT_OFFERS.famille.priceEnv).toBe("STRIPE_PRICE_FAMILLE");
+  it("expose un libellé produit pour Stripe price_data (pas de price_id)", () => {
+    expect(ADULT_OFFERS.origine.label).toBe("TOTEM ANCESTRAL - Origine");
+    expect(ADULT_OFFERS.ancestral.label).toBe("TOTEM ANCESTRAL - Ancestral");
+    expect(ADULT_OFFERS.famille.label).toBe("TOTEM ANCESTRAL - Famille");
   });
 });
 

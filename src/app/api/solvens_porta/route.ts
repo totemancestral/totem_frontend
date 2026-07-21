@@ -41,7 +41,6 @@ async function handleCheckout(
 ) {
   const env = getServerEnv();
   const config = ADULT_OFFERS[data.offre];
-  const priceId = env[config.priceEnv];
 
   const origin = (
     request.headers.get("origin") ||
@@ -151,7 +150,7 @@ async function handleCheckout(
     }
   }
 
-  if (!env.STRIPE_SECRET_KEY || !priceId) {
+  if (!env.STRIPE_SECRET_KEY) {
     return NextResponse.json(
       { error: "Le paiement n'est pas configure. Contacte l'equipe technique." },
       { status: 503 },
@@ -194,7 +193,16 @@ async function handleCheckout(
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "eur",
+            unit_amount: config.amountCents,
+            product_data: { name: config.label },
+          },
+        },
+      ],
       automatic_tax: { enabled: true },
       customer_email: auth.email,
       metadata,
