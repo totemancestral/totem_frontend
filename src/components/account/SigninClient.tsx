@@ -15,8 +15,12 @@ import {
   type Locale,
 } from "@/lib/auth-flow";
 import { authPath, pagePath } from "@/lib/routes";
-import { AuthShell } from "./AuthShell";
+import { AuthShell, type AuthRole } from "./AuthShell";
 import { AuthField } from "./AuthField";
+
+function parseRole(raw: string | null): AuthRole {
+  return raw === "junior" ? "junior" : "adulte";
+}
 
 const copy = {
   fr: {
@@ -62,13 +66,16 @@ export function SigninClient({ locale }: { locale: Locale }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const redirectPath = searchParams.get("redirect") || dashboardPath(locale);
+  const role: AuthRole = parseRole(searchParams.get("role"));
+  const defaultRedirect =
+    role === "junior" ? `/${locale}/iuvenis_signum` : dashboardPath(locale);
+  const redirectPath = searchParams.get("redirect") || defaultRedirect;
   const otherPath = useMemo(() => {
     const redirect = searchParams.get("redirect");
-    const role = searchParams.get("role");
     const base = authPath(locale, "signup", redirect ?? undefined);
-    return role ? `${base}${base.includes("?") ? "&" : "?"}role=${encodeURIComponent(role)}` : base;
-  }, [locale, searchParams]);
+    if (role === "adulte") return base;
+    return `${base}${base.includes("?") ? "&" : "?"}role=${role}`;
+  }, [locale, role, searchParams]);
 
   useEffect(() => {
     if (!existingSession) return;
@@ -115,7 +122,7 @@ export function SigninClient({ locale }: { locale: Locale }) {
   };
 
   return (
-    <AuthShell locale={locale} kind="signin" otherPath={otherPath}>
+    <AuthShell locale={locale} kind="signin" role={role} otherPath={otherPath}>
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         <AuthField
           label={t.email}

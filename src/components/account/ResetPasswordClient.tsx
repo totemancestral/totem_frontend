@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import { ArrowLeft, KeyRound, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { authPath } from "@/lib/routes";
+import { AuthField } from "./AuthField";
 
 type Locale = "fr" | "en";
 type Phase = "request" | "update";
@@ -110,12 +111,20 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
 
   return (
     <section
-      className="premium-page flex min-h-[100svh] items-center justify-center overflow-hidden px-5 pb-20 pt-32 md:px-10"
-      style={{ background: "var(--nuit-profonde)" }}
+      className="premium-page flex w-full items-center justify-center overflow-hidden px-5 py-8 md:h-[100svh] md:px-10 md:py-10"
+      style={{ background: "var(--nuit-profonde)", minHeight: "100svh" }}
     >
       <div className="premium-watermark" aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/totem-logo.png" alt="" />
       </div>
+
+      {/* Halo doré subtil */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-40 top-24 h-[420px] w-[420px] rounded-full opacity-30 blur-[130px]"
+        style={{ background: "radial-gradient(circle, rgba(216,173,77,0.42), transparent 60%)" }}
+      />
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -141,7 +150,7 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
           className="flex flex-col gap-4"
         >
           {phase === "request" ? (
-            <Field
+            <AuthField
               label={t.email}
               value={email}
               onChange={setEmail}
@@ -151,7 +160,7 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
               required
             />
           ) : (
-            <Field
+            <AuthField
               label={t.password}
               value={password}
               onChange={setPassword}
@@ -192,40 +201,3 @@ export function ResetPasswordClient({ locale }: { locale: Locale }) {
   );
 }
 
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  autoComplete,
-  minLength,
-  required,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  type?: string;
-  autoComplete?: string;
-  minLength?: number;
-  required?: boolean;
-}) {
-  return (
-    <label className="flex flex-col gap-2">
-      <span className="caption uppercase" style={{ color: "rgba(246,200,101,0.78)" }}>
-        {label}
-      </span>
-      <input
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        type={type}
-        autoComplete={autoComplete}
-        minLength={minLength}
-        required={required}
-        className="form-input"
-      />
-    </label>
-  );
-}

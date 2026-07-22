@@ -15,8 +15,12 @@ import {
   type Locale,
 } from "@/lib/auth-flow";
 import { authPath, pagePath } from "@/lib/routes";
-import { AuthShell } from "./AuthShell";
+import { AuthShell, type AuthRole } from "./AuthShell";
 import { AuthField } from "./AuthField";
+
+function parseRole(raw: string | null): AuthRole {
+  return raw === "junior" ? "junior" : "adulte";
+}
 
 const copy = {
   fr: {
@@ -69,12 +73,16 @@ export function SignupClient({ locale }: { locale: Locale }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const redirectPath = searchParams.get("redirect") || dashboardPath(locale);
-  const signupRole = searchParams.get("role") || "adulte";
+  const role: AuthRole = parseRole(searchParams.get("role"));
+  const defaultRedirect =
+    role === "junior" ? `/${locale}/iuvenis_signum` : dashboardPath(locale);
+  const redirectPath = searchParams.get("redirect") || defaultRedirect;
   const otherPath = useMemo(() => {
     const redirect = searchParams.get("redirect");
-    return authPath(locale, "signin", redirect ?? undefined);
-  }, [locale, searchParams]);
+    const base = authPath(locale, "signin", redirect ?? undefined);
+    if (role === "adulte") return base;
+    return `${base}${base.includes("?") ? "&" : "?"}role=${role}`;
+  }, [locale, role, searchParams]);
 
   useEffect(() => {
     if (!existingSession) return;
@@ -98,7 +106,7 @@ export function SignupClient({ locale }: { locale: Locale }) {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, prenom, locale, role: signupRole, redirectPath }),
+        body: JSON.stringify({ email, password, prenom, locale, role, redirectPath }),
       });
       if (!response.ok) {
         const data = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -131,7 +139,7 @@ export function SignupClient({ locale }: { locale: Locale }) {
   }, [t.sessionReady]);
 
   return (
-    <AuthShell locale={locale} kind="signup" otherPath={otherPath}>
+    <AuthShell locale={locale} kind="signup" role={role} otherPath={otherPath}>
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         <AuthField
           label={t.firstName}
