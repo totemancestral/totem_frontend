@@ -17,8 +17,6 @@ import {
   Lock,
   MessageCircle,
   Mountain,
-  Pause,
-  Play,
   Share2,
   Shield,
   Sparkles,
@@ -30,6 +28,7 @@ import {
 import { GoldParticles } from "@/components/GoldParticles";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { apiPath, authPath } from "@/lib/routes";
+import { QuestionAudio } from "./QuestionAudio";
 
 type Locale = "fr" | "en";
 type ChoiceLetter = "A" | "B" | "C" | "D";
@@ -792,122 +791,5 @@ function ResultBlock({ title, body }: { title: string; body: string }) {
         {body}
       </p>
     </article>
-  );
-}
-
-/**
- * Lecteur audio de la question Junior.
- *
- * Se (re)charge et se déclenche automatiquement à chaque changement de
- * question (le composant est remonté via `key={index}`), après le geste
- * utilisateur initial (« Commencer » / « Suivant »). Bouton play/pause qui
- * sert aussi de secours si l'autoplay est bloqué par le navigateur.
- */
-function QuestionAudio({
-  src,
-  labels,
-}: {
-  src: string;
-  labels: { listen: string; playing: string; replay: string; hint: string };
-}) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [played, setPlayed] = useState(false);
-
-  useEffect(() => {
-    const el = audioRef.current;
-    if (!el) return;
-    el.currentTime = 0;
-    const promise = el.play();
-    if (promise) {
-      promise.then(() => setPlaying(true)).catch(() => setPlaying(false));
-    }
-    return () => el.pause();
-  }, [src]);
-
-  const toggle = () => {
-    const el = audioRef.current;
-    if (!el) return;
-    if (el.paused) {
-      if (el.ended) el.currentTime = 0;
-      el.play();
-      setPlaying(true);
-    } else {
-      el.pause();
-      setPlaying(false);
-    }
-  };
-
-  const label = playing ? labels.playing : played ? labels.replay : labels.listen;
-
-  return (
-    <div className="flex items-center gap-4">
-      <audio
-        ref={audioRef}
-        src={src}
-        preload="auto"
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        onEnded={() => {
-          setPlaying(false);
-          setPlayed(true);
-        }}
-      />
-      <button
-        type="button"
-        onClick={toggle}
-        aria-label={label}
-        className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
-        style={{
-          background: "var(--or-ancestral)",
-          color: "var(--nuit-profonde)",
-          boxShadow: playing
-            ? "0 0 0 6px rgba(216,173,77,0.16), 0 0 40px -6px rgba(216,173,77,0.75)"
-            : "0 10px 28px -12px rgba(216,173,77,0.65)",
-        }}
-      >
-        {playing ? <Pause size={24} /> : <Play size={24} style={{ marginLeft: 3 }} />}
-        {playing && (
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 rounded-full animate-ping"
-            style={{ border: "1px solid rgba(216,173,77,0.5)" }}
-          />
-        )}
-      </button>
-      <div className="flex flex-col gap-1.5">
-        <span
-          className="inline-flex items-center gap-2 text-sm uppercase tracking-wide"
-          style={{ color: "var(--or-pale)" }}
-        >
-          <Volume2 size={15} />
-          {label}
-        </span>
-        {playing ? (
-          <AudioWave />
-        ) : (
-          <span
-            className="max-w-[200px] text-xs leading-snug"
-            style={{ color: "rgba(245,240,232,0.5)" }}
-          >
-            {labels.hint}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function AudioWave() {
-  return (
-    <span className="flex items-end gap-[3px]" aria-hidden="true">
-      {[0, 1, 2, 3, 4].map((bar) => (
-        <span
-          key={bar}
-          className="audio-bar"
-          style={{ animationDelay: `${bar * 0.12}s` }}
-        />
-      ))}
-    </span>
   );
 }

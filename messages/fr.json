@@ -782,7 +782,11 @@
       "freedom": "Tu as choisi la liberté. Le griot voudrait comprendre la tienne, en une phrase.",
       "previous": "← Question précédente",
       "skip": "Passer →",
-      "continue": "Continuer"
+      "continue": "Continuer",
+      "audioListen": "Écouter la question",
+      "audioPlaying": "Lecture en cours",
+      "audioReplay": "Réécouter",
+      "audioHint": "La question se joue automatiquement — appuie pour réécouter."
     },
     "account": {
       "eyebrow": "Création du compte",

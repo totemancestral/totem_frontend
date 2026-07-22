@@ -1,0 +1,132 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Pause, Play, Volume2 } from "lucide-react";
+
+export type QuestionAudioLabels = {
+  listen: string;
+  playing: string;
+  replay: string;
+  hint: string;
+};
+
+/**
+ * Lecteur audio d'une question (parcours Junior & Adulte).
+ *
+ * Se (re)charge et se déclenche automatiquement à chaque changement de
+ * question (le composant est remonté via `key`), après le geste utilisateur
+ * initial (« Commencer » / « Suivant ») — condition exigée par les
+ * navigateurs pour l'autoplay avec son. Le bouton play/pause sert aussi de
+ * secours si l'autoplay est bloqué.
+ */
+export function QuestionAudio({
+  src,
+  labels,
+  size = "lg",
+}: {
+  src: string;
+  labels: QuestionAudioLabels;
+  /** `lg` = grand cercle (Junior), `sm` = compact (Adulte, layout fixe). */
+  size?: "lg" | "sm";
+}) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [played, setPlayed] = useState(false);
+
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.currentTime = 0;
+    const promise = el.play();
+    if (promise) {
+      promise.then(() => setPlaying(true)).catch(() => setPlaying(false));
+    }
+    return () => el.pause();
+  }, [src]);
+
+  const toggle = () => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.paused) {
+      if (el.ended) el.currentTime = 0;
+      el.play();
+      setPlaying(true);
+    } else {
+      el.pause();
+      setPlaying(false);
+    }
+  };
+
+  const label = playing ? labels.playing : played ? labels.replay : labels.listen;
+  const dim = size === "lg" ? 64 : 46;
+  const icon = size === "lg" ? 24 : 18;
+
+  return (
+    <div className="flex items-center gap-3">
+      <audio
+        ref={audioRef}
+        src={src}
+        preload="auto"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => {
+          setPlaying(false);
+          setPlayed(true);
+        }}
+      />
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={label}
+        className="relative flex shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
+        style={{
+          height: dim,
+          width: dim,
+          background: "var(--or-ancestral)",
+          color: "var(--nuit-profonde)",
+          boxShadow: playing
+            ? "0 0 0 6px rgba(216,173,77,0.16), 0 0 40px -6px rgba(216,173,77,0.75)"
+            : "0 10px 28px -12px rgba(216,173,77,0.65)",
+        }}
+      >
+        {playing ? <Pause size={icon} /> : <Play size={icon} style={{ marginLeft: 3 }} />}
+        {playing && (
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 rounded-full animate-ping"
+            style={{ border: "1px solid rgba(216,173,77,0.5)" }}
+          />
+        )}
+      </button>
+      <div className="flex flex-col gap-1.5">
+        <span
+          className="inline-flex items-center gap-2 text-sm uppercase tracking-wide"
+          style={{ color: "var(--or-pale)" }}
+        >
+          <Volume2 size={15} />
+          {label}
+        </span>
+        {playing ? (
+          <AudioWave />
+        ) : (
+          <span
+            className="max-w-[220px] text-xs leading-snug"
+            style={{ color: "rgba(245,240,232,0.5)" }}
+          >
+            {labels.hint}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AudioWave() {
+  return (
+    <span className="flex items-end gap-[3px]" aria-hidden="true">
+      {[0, 1, 2, 3, 4].map((bar) => (
+        <span key={bar} className="audio-bar" style={{ animationDelay: `${bar * 0.12}s` }} />
+      ))}
+    </span>
+  );
+}

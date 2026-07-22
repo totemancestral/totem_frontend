@@ -10,6 +10,7 @@ import { useLocale, useTranslations } from "next-intl";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { apiPath, authPath } from "@/lib/routes";
+import { QuestionAudio } from "./QuestionAudio";
 
 type FieldLevel = "PRIORITAIRE" | "SECONDAIRE" | "TERTIAIRE" | "SPECIAL";
 
@@ -1053,6 +1054,18 @@ function QuestionScreen({
           >
             {q.question}
           </h1>
+
+          <QuestionAudio
+            key={q.n}
+            src={`/assets/adulte/q${q.n}.mp3`}
+            size="sm"
+            labels={{
+              listen: t("audioListen"),
+              playing: t("audioPlaying"),
+              replay: t("audioReplay"),
+              hint: t("audioHint"),
+            }}
+          />
         </div>
 
         <div className="flex min-h-0 flex-col justify-center gap-3 md:overflow-hidden">
