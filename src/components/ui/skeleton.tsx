@@ -12,13 +12,7 @@ function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)
 }
 
 /** Lignes de texte simulées (dernière ligne plus courte). */
-function SkeletonText({
-  lines = 3,
-  className,
-}: {
-  lines?: number;
-  className?: string;
-}) {
+function SkeletonText({ lines = 3, className }: { lines?: number; className?: string }) {
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       {Array.from({ length: lines }, (_, index) => (

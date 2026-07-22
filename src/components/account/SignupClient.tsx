@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Mail } from "lucide-react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { hasAdminRole } from "@/lib/admin-client";
@@ -39,6 +39,11 @@ const copy = {
     magicSent: "Lien magique envoye. Verifie ta boite mail.",
     sessionReady: "Session ouverte. Redirection...",
     consent: "En creant un compte, tu acceptes nos CGV et notre politique de confidentialite.",
+    roleLegend: "Je crée un compte",
+    roleAdulte: "Adulte",
+    roleJunior: "Junior",
+    roleAdulteHint: "Parcours complet · parchemin, audio & image",
+    roleJuniorHint: "Totem express · 12 signes, défie tes amis",
   },
   en: {
     firstName: "First name",
@@ -56,6 +61,11 @@ const copy = {
     magicSent: "Magic link sent. Check your inbox.",
     sessionReady: "Session opened. Redirecting...",
     consent: "By creating an account, you accept our terms and privacy policy.",
+    roleLegend: "I'm creating an account as",
+    roleAdulte: "Adult",
+    roleJunior: "Junior",
+    roleAdulteHint: "Full journey · parchment, audio & image",
+    roleJuniorHint: "Express totem · 12 signs, challenge friends",
   },
 } as const;
 
@@ -73,9 +83,8 @@ export function SignupClient({ locale }: { locale: Locale }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const role: AuthRole = parseRole(searchParams.get("role"));
-  const defaultRedirect =
-    role === "junior" ? `/${locale}/iuvenis_signum` : dashboardPath(locale);
+  const [role, setRole] = useState<AuthRole>(() => parseRole(searchParams.get("role")));
+  const defaultRedirect = role === "junior" ? `/${locale}/iuvenis_signum` : dashboardPath(locale);
   const redirectPath = searchParams.get("redirect") || defaultRedirect;
   const otherPath = useMemo(() => {
     const redirect = searchParams.get("redirect");
@@ -140,6 +149,29 @@ export function SignupClient({ locale }: { locale: Locale }) {
 
   return (
     <AuthShell locale={locale} kind="signup" role={role} otherPath={otherPath}>
+      <fieldset className="flex flex-col gap-2">
+        <legend className="caption mb-1 uppercase premium-muted">{t.roleLegend}</legend>
+        <div
+          className="grid grid-cols-2 gap-2 rounded-2xl p-1"
+          style={{ background: "rgba(13,13,26,0.55)", border: "1px solid rgba(216,173,77,0.18)" }}
+        >
+          <RoleOption
+            active={role === "adulte"}
+            onClick={() => setRole("adulte")}
+            icon={<ShieldCheck size={16} />}
+            label={t.roleAdulte}
+            hint={t.roleAdulteHint}
+          />
+          <RoleOption
+            active={role === "junior"}
+            onClick={() => setRole("junior")}
+            icon={<Sparkles size={16} />}
+            label={t.roleJunior}
+            hint={t.roleJuniorHint}
+          />
+        </div>
+      </fieldset>
+
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         <AuthField
           label={t.firstName}
@@ -215,10 +247,55 @@ export function SignupClient({ locale }: { locale: Locale }) {
 
       <p className="caption text-center premium-muted" style={{ lineHeight: 1.5 }}>
         {t.consent}{" "}
-        <Link href={pagePath(locale, "cgv")} className="underline" style={{ color: "var(--or-pale)" }}>
+        <Link
+          href={pagePath(locale, "cgv")}
+          className="underline"
+          style={{ color: "var(--or-pale)" }}
+        >
           {locale === "fr" ? "CGV" : "Terms"}
         </Link>
       </p>
     </AuthShell>
+  );
+}
+
+function RoleOption({
+  active,
+  onClick,
+  icon,
+  label,
+  hint,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: ReactNode;
+  label: string;
+  hint: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className="flex flex-col gap-1 rounded-xl px-3 py-2.5 text-left transition-all"
+      style={{
+        background: active ? "rgba(216,173,77,0.14)" : "transparent",
+        boxShadow: active ? "0 0 0 1px var(--or-ancestral)" : "0 0 0 1px transparent",
+      }}
+    >
+      <span
+        className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wide"
+        style={{ color: active ? "var(--or-pale)" : "rgba(226,225,238,0.66)" }}
+      >
+        {icon}
+        {label}
+      </span>
+      <span
+        className="text-[11px] leading-snug"
+        style={{ color: active ? "rgba(245,240,232,0.62)" : "rgba(226,225,238,0.4)" }}
+      >
+        {hint}
+      </span>
+    </button>
   );
 }

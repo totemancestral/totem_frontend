@@ -641,4 +641,30 @@
       opacity: 0.5;
     }
   }
+
+  /* ── Egaliseur audio (parcours Junior) ─────────────────────────── */
+  @keyframes audio-bar {
+    0%,
+    100% {
+      transform: scaleY(0.35);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+
+  .audio-bar {
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    transform-origin: bottom;
+    background: var(--or-ancestral);
+    animation: audio-bar 0.9s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .audio-bar {
+      animation: none;
+    }
+  }
 }

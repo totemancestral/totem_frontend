@@ -21,7 +21,6 @@ export function DashboardSkeleton({ locale = "fr" }: { locale?: Locale }) {
       aria-label={preparing}
     >
       <div className="premium-watermark" aria-hidden="true">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/totem-logo.png" alt="" />
       </div>
 

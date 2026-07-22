@@ -17,6 +17,8 @@ import {
   Lock,
   MessageCircle,
   Mountain,
+  Pause,
+  Play,
   Share2,
   Shield,
   Sparkles,
@@ -86,6 +88,10 @@ const copy = {
     quality: "Qualite",
     score: "Scores FETA",
     error: "Impossible de reveler le totem Junior pour le moment.",
+    listen: "Ecouter la question",
+    playing: "Lecture en cours",
+    replay: "Reecouter",
+    audioHint: "La question se joue automatiquement — appuie pour reecouter.",
     questions: [
       {
         title: "Quand tu entres quelque part, tu es plutot...",
@@ -205,6 +211,10 @@ const copy = {
     quality: "Quality",
     score: "FETA scores",
     error: "The Junior totem cannot be revealed right now.",
+    listen: "Listen to the question",
+    playing: "Playing",
+    replay: "Replay",
+    audioHint: "The question plays automatically — tap to replay.",
     questions: [
       {
         title: "When you enter a place, you are more like...",
@@ -526,10 +536,17 @@ export function JuniorParcoursPage() {
     <main className="premium-page min-h-screen overflow-hidden px-5 pb-16 pt-28 md:px-8">
       <GoldParticles count={24} />
       <section className="relative z-10 mx-auto max-w-[1120px]">
-        <div className="mb-7 h-[3px] bg-[#1e1f28]">
+        <div
+          className="mb-8 h-[5px] overflow-hidden rounded-full"
+          style={{ background: "rgba(30,31,40,0.9)" }}
+        >
           <div
-            className="h-full transition-all duration-500"
-            style={{ width: `${progress}%`, background: "var(--or-ancestral)" }}
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${progress}%`,
+              background: "linear-gradient(90deg, var(--or-ancestral), var(--or-pale))",
+              boxShadow: "0 0 12px rgba(216,173,77,0.6)",
+            }}
           />
         </div>
 
@@ -575,7 +592,7 @@ export function JuniorParcoursPage() {
           </div>
         ) : (
           <div>
-            <div className="mb-8 flex items-end justify-between gap-4">
+            <div className="premium-panel mb-8 grid gap-6 p-6 md:grid-cols-[1.15fr_0.85fr] md:items-center md:p-8">
               <div>
                 <p
                   className="subtext mb-3 text-[12px] uppercase"
@@ -584,7 +601,7 @@ export function JuniorParcoursPage() {
                   {t.eyebrow as string} · {index + 1}/5
                 </p>
                 <h1
-                  className="max-w-[760px] text-[36px] uppercase leading-none md:text-[58px]"
+                  className="max-w-[760px] text-[32px] uppercase leading-[0.95] md:text-[52px]"
                   style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
                 >
                   {current.title}
@@ -593,6 +610,17 @@ export function JuniorParcoursPage() {
                   {current.subtitle}
                 </p>
               </div>
+
+              <QuestionAudio
+                key={index}
+                src={`/assets/junior/q${index + 1}.mp3`}
+                labels={{
+                  listen: t.listen as string,
+                  playing: t.playing as string,
+                  replay: t.replay as string,
+                  hint: t.audioHint as string,
+                }}
+              />
             </div>
 
             <div className="grid gap-3 md:grid-cols-4">
@@ -609,27 +637,40 @@ export function JuniorParcoursPage() {
                         [index + 1]: { choice: choice.letter },
                       }))
                     }
-                    className="min-h-[210px] border p-5 text-left transition-colors"
+                    className="group relative min-h-[210px] rounded-lg border p-5 text-left transition-all duration-200 hover:-translate-y-0.5"
                     style={{
                       borderColor: selected ? "var(--or-ancestral)" : "rgba(216,173,77,0.22)",
-                      background: selected ? "rgba(201,168,76,0.12)" : "rgba(13,13,26,0.54)",
+                      background: selected
+                        ? "linear-gradient(180deg, rgba(216,173,77,0.16), rgba(13,13,26,0.6))"
+                        : "rgba(13,13,26,0.54)",
+                      boxShadow: selected
+                        ? "0 0 0 1px var(--or-ancestral), 0 18px 40px -24px rgba(216,173,77,0.85)"
+                        : undefined,
                     }}
                   >
-                    <Icon size={28} style={{ color: "var(--or-ancestral)" }} />
                     <span
-                      className="mt-8 block text-[11px] uppercase"
-                      style={{ color: "rgba(245,240,232,0.55)" }}
+                      className="flex h-11 w-11 items-center justify-center rounded-full transition-colors"
+                      style={{
+                        background: selected ? "var(--or-ancestral)" : "rgba(216,173,77,0.12)",
+                        color: selected ? "var(--nuit-profonde)" : "var(--or-ancestral)",
+                      }}
+                    >
+                      <Icon size={22} />
+                    </span>
+                    <span
+                      className="mt-6 block text-[11px] uppercase tracking-[0.2em]"
+                      style={{ color: "rgba(245,240,232,0.5)" }}
                     >
                       {choice.letter}
                     </span>
                     <span
-                      className="mt-2 block text-lg font-medium"
+                      className="mt-2 block text-lg font-medium leading-snug"
                       style={{ color: "var(--ivoire)" }}
                     >
                       {choice.label}
                     </span>
                     <span
-                      className="mt-3 block text-sm"
+                      className="mt-2 block text-sm"
                       style={{ color: "rgba(245,240,232,0.62)" }}
                     >
                       {choice.signal}
@@ -751,5 +792,122 @@ function ResultBlock({ title, body }: { title: string; body: string }) {
         {body}
       </p>
     </article>
+  );
+}
+
+/**
+ * Lecteur audio de la question Junior.
+ *
+ * Se (re)charge et se déclenche automatiquement à chaque changement de
+ * question (le composant est remonté via `key={index}`), après le geste
+ * utilisateur initial (« Commencer » / « Suivant »). Bouton play/pause qui
+ * sert aussi de secours si l'autoplay est bloqué par le navigateur.
+ */
+function QuestionAudio({
+  src,
+  labels,
+}: {
+  src: string;
+  labels: { listen: string; playing: string; replay: string; hint: string };
+}) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [played, setPlayed] = useState(false);
+
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.currentTime = 0;
+    const promise = el.play();
+    if (promise) {
+      promise.then(() => setPlaying(true)).catch(() => setPlaying(false));
+    }
+    return () => el.pause();
+  }, [src]);
+
+  const toggle = () => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.paused) {
+      if (el.ended) el.currentTime = 0;
+      el.play();
+      setPlaying(true);
+    } else {
+      el.pause();
+      setPlaying(false);
+    }
+  };
+
+  const label = playing ? labels.playing : played ? labels.replay : labels.listen;
+
+  return (
+    <div className="flex items-center gap-4">
+      <audio
+        ref={audioRef}
+        src={src}
+        preload="auto"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => {
+          setPlaying(false);
+          setPlayed(true);
+        }}
+      />
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={label}
+        className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
+        style={{
+          background: "var(--or-ancestral)",
+          color: "var(--nuit-profonde)",
+          boxShadow: playing
+            ? "0 0 0 6px rgba(216,173,77,0.16), 0 0 40px -6px rgba(216,173,77,0.75)"
+            : "0 10px 28px -12px rgba(216,173,77,0.65)",
+        }}
+      >
+        {playing ? <Pause size={24} /> : <Play size={24} style={{ marginLeft: 3 }} />}
+        {playing && (
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 rounded-full animate-ping"
+            style={{ border: "1px solid rgba(216,173,77,0.5)" }}
+          />
+        )}
+      </button>
+      <div className="flex flex-col gap-1.5">
+        <span
+          className="inline-flex items-center gap-2 text-sm uppercase tracking-wide"
+          style={{ color: "var(--or-pale)" }}
+        >
+          <Volume2 size={15} />
+          {label}
+        </span>
+        {playing ? (
+          <AudioWave />
+        ) : (
+          <span
+            className="max-w-[200px] text-xs leading-snug"
+            style={{ color: "rgba(245,240,232,0.5)" }}
+          >
+            {labels.hint}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AudioWave() {
+  return (
+    <span className="flex items-end gap-[3px]" aria-hidden="true">
+      {[0, 1, 2, 3, 4].map((bar) => (
+        <span
+          key={bar}
+          className="audio-bar"
+          style={{ animationDelay: `${bar * 0.12}s` }}
+        />
+      ))}
+    </span>
   );
 }
