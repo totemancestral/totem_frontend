@@ -15,9 +15,10 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { Skeleton, SkeletonStatCard } from "@/components/ui/skeleton";
 
 type Section = "apercu" | "commandes" | "oeuvres" | "utilisateurs" | "activite" | "evenements";
 
@@ -186,15 +187,26 @@ export default function AdminPage() {
         fetch("/api/fgh55_fh/evenements", { headers: { authorization: `Bearer ${t}` } }),
       ]);
 
-      if (
-        !statsRes.ok ||
-        !cmdRes.ok ||
-        !oeuvresRes.ok ||
-        !usersRes.ok ||
-        !actRes.ok ||
-        !evtRes.ok
-      ) {
-        throw new Error("Acces refuse");
+      const responses: Record<string, Response> = {
+        stats: statsRes,
+        commandes: cmdRes,
+        oeuvres: oeuvresRes,
+        utilisateurs: usersRes,
+        activite: actRes,
+        evenements: evtRes,
+      };
+      const failed = Object.entries(responses).find(([, res]) => !res.ok);
+      if (failed) {
+        const [name, res] = failed;
+        let detail = "";
+        try {
+          const body = (await res.clone().json()) as { error?: string } | null;
+          if (body?.error) detail = ` — ${body.error}`;
+        } catch {
+          /* corps non JSON */
+        }
+        // Message explicite : 403 = role admin manquant, 500 = cle service Vercel manquante.
+        throw new Error(`Acces refuse (${name}: ${res.status}${detail})`);
       }
 
       setStats(await statsRes.json());
@@ -513,46 +525,33 @@ function buildQuery(filters: CommandeFilters | UserFilters | OeuvreFilters) {
 
 function AdminLoadingCards() {
   return (
-    <section className="mb-8">
-      <div className="mb-6 text-sm uppercase" style={{ color: "rgba(237,217,154,0.74)" }}>
-        Chargement des cartes du dashboard...
+    <section className="mb-8" aria-busy="true" aria-label="Chargement du tableau de bord">
+      {/* En-tête */}
+      <div className="mb-6 flex flex-col gap-3">
+        <Skeleton className="h-3 w-28" />
+        <Skeleton className="h-9 w-64 max-w-full" />
       </div>
+
+      {/* Cartes stats (miroir de la vue d'ensemble) */}
       <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 8 }, (_, index) => (
-          <div
-            key={`admin-loading-${index}`}
-            className="premium-panel p-5"
-            style={{
-              animation: `totem-admin-float 2.2s ease-in-out ${index * 0.08}s infinite`,
-            }}
-          >
-            <div
-              className="mb-3 h-3 w-24 rounded-sm"
-              style={{ background: "rgba(246,200,101,0.18)" }}
-            />
-            <div
-              className="h-8 w-14 rounded-sm"
-              style={{ background: "rgba(216,173,77,0.22)" }}
-            />
-          </div>
+          <SkeletonStatCard key={`admin-loading-${index}`} />
         ))}
       </div>
-      <style jsx>{`
-        @keyframes totem-admin-float {
-          0% {
-            transform: translateY(8px);
-            opacity: 0.48;
-          }
-          50% {
-            transform: translateY(-4px);
-            opacity: 0.9;
-          }
-          100% {
-            transform: translateY(8px);
-            opacity: 0.48;
-          }
-        }
-      `}</style>
+
+      {/* Bloc graphique + listes */}
+      <div className="mt-6 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+        <div className="premium-panel p-5">
+          <Skeleton className="mb-4 h-4 w-40" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+        <div className="premium-panel flex flex-col gap-3 p-5">
+          <Skeleton className="mb-1 h-4 w-32" />
+          {Array.from({ length: 5 }, (_, index) => (
+            <Skeleton key={`admin-loading-row-${index}`} className="h-9 w-full" />
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -676,31 +675,39 @@ function LoginForm({
 }) {
   return (
     <main
-      className="premium-page flex min-h-screen items-center justify-center overflow-hidden px-5"
+      className="premium-page relative flex min-h-screen items-center justify-center overflow-hidden px-5"
       style={{ background: "var(--nuit-profonde)", color: "var(--ivoire)" }}
     >
       <div className="premium-watermark" aria-hidden="true">
         <img src="/assets/totem-logo.png" alt="" />
       </div>
+
+      {/* Halo doré */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-24 left-1/2 h-[440px] w-[440px] -translate-x-1/2 rounded-full opacity-30 blur-[130px]"
+        style={{ background: "radial-gradient(circle, rgba(216,173,77,0.5), transparent 60%)" }}
+      />
+
       <form
         onSubmit={onSubmit}
-        className="premium-panel-strong flex w-full max-w-sm flex-col gap-5 p-8"
+        className="premium-panel-strong relative flex w-full max-w-sm flex-col gap-5 p-8"
       >
-        <div className="text-center">
-          <img
-            src="/assets/totem-logo.png"
-            alt=""
-            className="mx-auto mb-4 h-14 w-14 object-contain"
-          />
-          <p className="caption uppercase mb-2" style={{ color: "var(--or-ancestral)" }}>
-            SENYCE PARTNERS
-          </p>
-          <h1 className="h-display text-3xl" style={{ color: "var(--ivoire)" }}>
-            Administration
-          </h1>
-          <p className="text-sm mt-2" style={{ color: "rgba(254,252,240,0.6)" }}>
-            Identifie-toi pour accéder au tableau de bord.
-          </p>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="premium-icon-box">
+            <ShieldCheck size={21} />
+          </div>
+          <div>
+            <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
+              SENYCE PARTNERS
+            </p>
+            <h1 className="h-display mt-2 text-3xl" style={{ color: "var(--ivoire)" }}>
+              Administration
+            </h1>
+            <p className="body-copy mt-2 text-sm premium-muted">
+              Identifie-toi pour accéder au tableau de bord.
+            </p>
+          </div>
         </div>
         <label className="flex flex-col gap-2">
           <span className="caption uppercase text-xs" style={{ color: "rgba(237,217,154,0.78)" }}>
