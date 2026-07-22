@@ -603,4 +603,42 @@
   .animate-spin-slow {
     animation: spin-slow 3s linear infinite;
   }
+
+  /* ── Skeleton premium (chargement) ─────────────────────────────── */
+  @keyframes totem-shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .premium-skeleton {
+    position: relative;
+    overflow: hidden;
+    background: rgba(216, 173, 77, 0.08);
+    border: 1px solid rgba(216, 173, 77, 0.12);
+    border-radius: 8px;
+  }
+
+  .premium-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(246, 200, 101, 0.16) 45%,
+      rgba(246, 200, 101, 0.24) 50%,
+      rgba(246, 200, 101, 0.16) 55%,
+      transparent
+    );
+    animation: totem-shimmer 1.8s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .premium-skeleton::after {
+      animation: none;
+      opacity: 0.5;
+    }
+  }
 }
