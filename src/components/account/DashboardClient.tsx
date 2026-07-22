@@ -28,6 +28,7 @@ import { hasAdminRole } from "@/lib/admin-client";
 import { authPath } from "@/lib/routes";
 import { extractParchmentSections } from "@/lib/totem-v3";
 import { TotemRevealClient } from "@/components/totem/TotemRevealClient";
+import { DashboardSkeleton } from "@/components/account/DashboardSkeleton";
 
 type Locale = "fr" | "en";
 type DashboardSection = "overview" | "orders" | "artworks" | "profile";
@@ -457,9 +458,7 @@ export function DashboardClient({
   };
 
   if (authLoading || loading) {
-    return (
-      <DashboardLoadingState locale={locale} loadingText={t.loading} />
-    );
+    return <DashboardSkeleton locale={locale} />;
   }
 
   if (error) {
@@ -761,62 +760,6 @@ function StatCard({ icon, label, value }: { icon: ReactNode; label: string; valu
         {value}
       </p>
     </article>
-  );
-}
-
-function DashboardLoadingState({
-  locale,
-  loadingText,
-}: {
-  locale: Locale;
-  loadingText: string;
-}) {
-  return (
-    <section
-      className="premium-page min-h-[100svh] px-5 pt-24 pb-10 md:px-8 md:pt-28"
-      style={{ background: "var(--nuit-profonde)" }}
-    >
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8 flex items-center gap-3 text-sm" style={{ color: "var(--or-pale)" }}>
-          <Clock3 size={18} />
-          {loadingText}
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {Array.from({ length: 6 }, (_, index) => (
-            <motion.article
-              key={`dashboard-loading-card-${index}`}
-              className="premium-panel p-5"
-              initial={{ opacity: 0.45, y: 8 }}
-              animate={{ opacity: [0.45, 0.82, 0.45], y: [8, -4, 8] }}
-              transition={{
-                duration: 2.1,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-                delay: index * 0.08,
-              }}
-            >
-              <div
-                className="mb-4 h-4 w-4 rounded-full"
-                style={{ background: "rgba(216,173,77,0.42)" }}
-              />
-              <div
-                className="mb-3 h-3 w-24 rounded-sm"
-                style={{ background: "rgba(246,200,101,0.2)" }}
-              />
-              <div
-                className="h-8 w-16 rounded-sm"
-                style={{ background: "rgba(216,173,77,0.18)" }}
-              />
-            </motion.article>
-          ))}
-        </div>
-
-        <div className="mt-6 text-xs uppercase tracking-wide" style={{ color: "rgba(237,217,154,0.6)" }}>
-          {locale === "fr" ? "Préparation des cartes..." : "Preparing dashboard cards..."}
-        </div>
-      </div>
-    </section>
   );
 }
 
