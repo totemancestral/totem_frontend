@@ -1,69 +1,139 @@
-import { PageHero } from "@/components/PageHero";
+import { LegalLayout, type LegalSection } from "@/components/pages/LegalLayout";
+import { LEGAL } from "@/lib/legal";
 
 export function PrivacyPage() {
-  const sections = [
+  const sections: LegalSection[] = [
     {
-      title: "Responsable du traitement",
-      body: "SENYCE PARTNERS est responsable des traitements liés au service Totem Ancestral. Pour toute demande : contact@totemancestral.com.",
+      title: "1. Responsable du traitement",
+      body: (
+        <p>
+          {LEGAL.company} ({LEGAL.form}) est responsable des traitements de données personnelles
+          liés au service {LEGAL.brand}. Pour toute question ou demande d'exercice de vos droits :{" "}
+          <a href={`mailto:${LEGAL.email}`} className="link-gold">
+            {LEGAL.email}
+          </a>
+          .
+        </p>
+      ),
     },
     {
-      title: "Données collectées",
-      body: "Nous collectons les informations nécessaires à l'expérience : prénom, email, réponses au questionnaire, choix d'offre, état de commande, identifiants techniques, informations de livraison numérique et références de paiement. Les données bancaires complètes ne transitent pas par nos serveurs.",
+      title: "2. Données collectées",
+      body: (
+        <p>
+          Nous collectons les informations nécessaires à l'expérience : prénom, email, réponses au
+          questionnaire, choix d'offre, état de commande, identifiants techniques (session, langue),
+          informations de livraison numérique et références de paiement. Les données bancaires
+          complètes ne transitent pas par nos serveurs : elles sont traitées directement par Stripe.
+        </p>
+      ),
     },
     {
-      title: "Finalités",
-      body: "Ces données servent à créer votre compte, composer l'œuvre, générer les fichiers, livrer le coffret, assurer le support, prévenir la fraude, respecter nos obligations comptables et améliorer la fiabilité du service.",
+      title: "3. Finalités et bases légales",
+      body: (
+        <p>
+          Vos données servent à créer votre compte, composer l'œuvre, générer et livrer les
+          fichiers, assurer le support, prévenir la fraude et respecter nos obligations comptables.
+          Les traitements reposent sur l'<strong>exécution du contrat</strong> (commande et
+          livraison), notre <strong>intérêt légitime</strong> (sécurité et amélioration du service),
+          nos <strong>obligations légales</strong> (facturation) et votre{" "}
+          <strong>consentement</strong> lorsqu'il est requis.
+        </p>
+      ),
     },
     {
-      title: "Bases légales",
-      body: "Les traitements reposent sur l'exécution du contrat pour la commande et la livraison, sur notre intérêt légitime pour la sécurité et l'amélioration du service, sur nos obligations légales pour la facturation, et sur votre consentement lorsque celui-ci est requis.",
+      title: "4. Destinataires et sous-traitants",
+      body: (
+        <>
+          <p>Seules les données nécessaires sont transmises à chaque prestataire :</p>
+          <ul className="ml-5 list-disc space-y-1">
+            <li>Supabase — authentification, base de données et stockage des fichiers ;</li>
+            <li>Stripe — traitement des paiements ;</li>
+            <li>Resend — envoi des emails transactionnels ;</li>
+            <li>
+              Anthropic (Claude) et OpenAI — génération de texte, d'image et de voix assistée par
+              IA.
+            </li>
+          </ul>
+        </>
+      ),
     },
     {
-      title: "Prestataires",
-      body: "Le service peut s'appuyer sur Supabase pour l'authentification et la base de données, Stripe pour le paiement, Resend pour les emails, Cloudflare R2 pour le stockage de fichiers, OpenAI ou les APIs SENYCE pour la génération assistée par IA. Seules les données nécessaires sont transmises à chaque prestataire.",
+      title: "5. Transferts hors Union européenne",
+      body: (
+        <p>
+          Certains prestataires (hébergement, IA) peuvent traiter des données en dehors de l'Union
+          européenne, notamment aux États-Unis. Ces transferts sont encadrés par des garanties
+          appropriées au sens du RGPD, telles que les clauses contractuelles types de la Commission
+          européenne.
+        </p>
+      ),
     },
     {
-      title: "Conservation",
-      body: "Les données de compte et de commande sont conservées le temps nécessaire au suivi commercial et aux obligations légales. Les réponses au questionnaire et fichiers générés peuvent être conservés pour permettre le téléchargement, la récupération du coffret et le support, sauf demande de suppression lorsque la loi le permet.",
+      title: "6. Durées de conservation",
+      body: (
+        <p>
+          Les données de compte et de commande sont conservées le temps de la relation puis
+          archivées conformément aux obligations légales (jusqu'à dix ans pour les pièces
+          comptables). Les réponses au questionnaire et les fichiers générés sont conservés pour
+          permettre le téléchargement et le support, puis supprimés sur demande lorsque la loi le
+          permet.
+        </p>
+      ),
     },
     {
-      title: "Sécurité",
-      body: "Les accès sensibles restent côté serveur. Les fichiers sont stockés dans des environnements sécurisés et les échanges utilisent des connexions chiffrées. Aucun dispositif ne garantit toutefois une sécurité absolue sur Internet.",
+      title: "7. Mineurs (parcours Junior)",
+      body: (
+        <p>
+          Le parcours Junior s'adresse à un public jeune. La création d'un compte et toute commande
+          doivent être réalisées par un parent ou un titulaire de l'autorité parentale, qui consent
+          au traitement des données de l'enfant. {LEGAL.company} ne collecte pas sciemment de
+          données d'un mineur sans ce consentement ; toute demande de suppression peut être adressée
+          à {LEGAL.email}.
+        </p>
+      ),
     },
     {
-      title: "Cookies",
-      body: "Le site utilise des cookies techniques nécessaires au fonctionnement de l'expérience, de la langue, de la session et du consentement. Aucun cookie publicitaire n'est nécessaire au service.",
+      title: "8. Sécurité",
+      body: (
+        <p>
+          Les accès sensibles restent côté serveur, les fichiers sont stockés dans des
+          environnements sécurisés et les échanges utilisent des connexions chiffrées (HTTPS). Aucun
+          dispositif ne garantit toutefois une sécurité absolue sur Internet.
+        </p>
+      ),
     },
     {
-      title: "Vos droits",
-      body: "Conformément au RGPD, vous pouvez demander l'accès, la rectification, l'effacement, la limitation, l'opposition ou la portabilité de vos données. Écrivez à contact@totemancestral.com. Vous pouvez également saisir l'autorité de contrôle compétente.",
+      title: "9. Cookies",
+      body: (
+        <p>
+          Le site utilise uniquement des cookies techniques nécessaires au fonctionnement de
+          l'expérience (session, langue, consentement). Aucun cookie publicitaire n'est utilisé.
+        </p>
+      ),
+    },
+    {
+      title: "10. Vos droits",
+      body: (
+        <p>
+          Conformément au RGPD, vous disposez des droits d'accès, de rectification, d'effacement, de
+          limitation, d'opposition, de portabilité et du droit de définir des directives relatives
+          au sort de vos données après votre décès. Vous pouvez retirer votre consentement à tout
+          moment. Pour les exercer, écrivez à{" "}
+          <a href={`mailto:${LEGAL.email}`} className="link-gold">
+            {LEGAL.email}
+          </a>
+          . Vous pouvez également introduire une réclamation auprès de la CNIL (3 Place de Fontenoy,
+          TSA 80715, 75334 Paris Cedex 07 — www.cnil.fr).
+        </p>
+      ),
     },
   ];
 
   return (
-    <>
-      <PageHero
-        title="Politique de confidentialité"
-        subtitle="Comment Totem Ancestral protège les données liées à votre œuvre. Dernière mise à jour : 18 juin 2026."
-      />
-      <section
-        className="premium-page px-5 pb-24 md:px-10"
-        style={{ background: "var(--nuit-profonde)" }}
-      >
-        <article
-          className="premium-panel mx-auto max-w-3xl space-y-8 p-6 text-[15px] leading-[1.85] md:p-8"
-          style={{ color: "var(--ivoire)" }}
-        >
-          {sections.map((s) => (
-            <div key={s.title}>
-              <h2 className="h-display text-2xl mb-3" style={{ color: "var(--or-ancestral)" }}>
-                {s.title}
-              </h2>
-              <p>{s.body}</p>
-            </div>
-          ))}
-        </article>
-      </section>
-    </>
+    <LegalLayout
+      title="Politique de confidentialité"
+      subtitle="Comment Totem Ancestral protège les données liées à votre œuvre."
+      sections={sections}
+    />
   );
 }
