@@ -5,7 +5,6 @@ import { useState } from "react";
 import { ArrowRight, Check, ChevronDown, Star, X } from "lucide-react";
 import { GoldParticles } from "./GoldParticles";
 import { Reveal, Ornament } from "./Reveal";
-import { authPath } from "@/lib/routes";
 
 const totemLogo = "/assets/totem-logo.png";
 const oeuvreParchemin = "/assets/oeuvre-parchemin.jpg";
@@ -471,11 +470,13 @@ function useLandingCopy() {
 }
 
 function journeyHref(locale: Locale) {
-  return authPath(locale, "signup", `/${locale}/via_sapientiae?restart=1`);
+  // Accès direct au parcours : le compte n'est demandé qu'au moment du paiement.
+  return `/${locale}/via_sapientiae?restart=1`;
 }
 
 function juniorHref(locale: Locale) {
-  return `${authPath(locale, "signup", `/${locale}/iuvenis_signum`)}&role=junior`;
+  // Le parcours Junior est libre ; le compte est demandé au checkout.
+  return `/${locale}/iuvenis_signum`;
 }
 
 function SectionHeading({

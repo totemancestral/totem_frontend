@@ -25,7 +25,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Mot de passe trop court" }, { status: 400 });
   }
 
-  const redirectTo = `${getRequestOrigin(request)}${safeRedirectPath(payload.redirectPath, locale)}`;
+  // Après confirmation de l'email, l'utilisateur atterrit sur la page
+  // « compte activé », qui le redirige ensuite vers sa destination.
+  const nextPath = safeRedirectPath(payload.redirectPath, locale);
+  const redirectTo = `${getRequestOrigin(request)}/${locale}/confirmatio?next=${encodeURIComponent(nextPath)}`;
   const role = payload.role === "junior" ? "junior" : "adulte";
   const metadata: { prenom: string; langue: "fr" | "en"; role: string } = {
     prenom: payload.prenom?.trim() || email.split("@")[0],

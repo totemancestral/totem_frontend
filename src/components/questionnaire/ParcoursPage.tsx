@@ -406,18 +406,17 @@ export function ParcoursPage() {
   const restartRequested = searchParams.get("restart") === "1";
 
   useEffect(() => {
+    // Accès anonyme autorisé : on récupère la session si elle existe, sans
+    // forcer la connexion. Le compte n'est demandé qu'au moment du paiement.
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      if (!currentSession) {
-        router.replace(authPath(locale, "signup", `/${locale}/via_sapientiae?restart=1`));
-        return;
-      }
+      if (!currentSession) return;
       setSession(currentSession);
       setAccount({
         prenom: currentSession.user.user_metadata?.prenom ?? "",
         email: currentSession.user.email ?? "",
       });
     });
-  }, [locale, router]);
+  }, []);
 
   useEffect(() => {
     if (!session) return;
@@ -621,7 +620,12 @@ export function ParcoursPage() {
   const canContinue = phase !== "question" ? true : !!a?.choice || (current.canSkip && a?.skipped);
 
   async function chooseOffer(offer: Offer) {
-    if (!session) return;
+    if (!session) {
+      // Le compte n'est requis qu'ici, pour payer. La progression reste
+      // sauvegardée en localStorage et sera restaurée au retour.
+      router.push(authPath(locale, "signup", `/${locale}/via_sapientiae`));
+      return;
+    }
     setCheckoutError(null);
     setLoadingOffer(offer.id);
 
