@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ArrowRight, Check, ChevronDown, Star, X } from "lucide-react";
 import { GoldParticles } from "./GoldParticles";
 import { Reveal, Ornament } from "./Reveal";
+import { LiquidGlassPreview } from "@/components/liquid-glass/LiquidGlassPreview";
 
 const totemLogo = "/assets/totem-logo.png";
 const oeuvreParchemin = "/assets/oeuvre-parchemin.jpg";
@@ -553,7 +554,7 @@ export function Hero() {
   const [showChoice, setShowChoice] = useState(false);
 
   return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-5 pb-16 pt-28 md:px-10">
+    <section className="liquid-hero relative flex min-h-screen items-center overflow-hidden px-5 pb-16 pt-28 md:px-10">
       <GoldParticles count={34} />
       <div
         className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-20"
@@ -566,62 +567,76 @@ export function Hero() {
           style={{ filter: "grayscale(1) brightness(0.42)" }}
         />
       </div>
-      <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          className="eyebrow"
-          style={{ color: "var(--or-ancestral)" }}
-        >
-          {t.hero.eyebrow}
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: "easeOut", delay: 0.1 }}
-          className="h-display mt-8 text-6xl leading-[0.95] sm:text-7xl md:text-8xl lg:text-[112px]"
-          style={{ color: "var(--ivoire)" }}
-          aria-label={t.hero.title}
-        >
-          {titleChars.map((char, index) =>
-            char === " " ? (
-              " "
-            ) : (
-              <span
-                key={`${char}-${index}`}
-                className="hero-char inline-block"
-                style={{ animationDelay: `${index * 70}ms` }}
-                aria-hidden="true"
-              >
-                {char}
-              </span>
-            ),
-          )}
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.9, delay: 0.45 }}
-          className="body-copy mt-9 max-w-2xl text-lg md:text-xl"
-          style={{ color: "rgba(226,225,238,0.84)" }}
-        >
-          {t.hero.body}
-        </motion.p>
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.7 }}
-          className="mt-12"
-        >
-          <button
-            type="button"
-            className="btn-primary animate-pulse-glow w-full sm:w-auto"
-            onClick={() => setShowChoice(true)}
+      <div className="liquid-hero-layout relative z-10 mx-auto w-full max-w-6xl">
+        <div className="liquid-hero-copy">
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="eyebrow"
+            style={{ color: "var(--or-ancestral)" }}
           >
-            {t.start}
-            <ArrowRight size={16} strokeWidth={1.7} />
-          </button>
+            {t.hero.eyebrow}
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: "easeOut", delay: 0.1 }}
+            className="h-display mt-8 text-6xl leading-[0.9] sm:text-7xl md:text-8xl lg:text-[112px]"
+            style={{ color: "var(--ivoire)" }}
+            aria-label={t.hero.title}
+          >
+            {titleChars.map((char, index) =>
+              char === " " ? (
+                " "
+              ) : (
+                <span
+                  key={`${char}-${index}`}
+                  className="hero-char inline-block"
+                  style={{ animationDelay: `${index * 70}ms` }}
+                  aria-hidden="true"
+                >
+                  {char}
+                </span>
+              ),
+            )}
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.9, delay: 0.45 }}
+            className="body-copy mt-9 max-w-xl text-lg md:text-xl"
+            style={{ color: "color-mix(in srgb, var(--ivoire) 84%, transparent)" }}
+          >
+            {t.hero.body}
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.7 }}
+            className="mt-12 flex flex-wrap items-center gap-4"
+          >
+            <button
+              type="button"
+              className="btn-primary animate-pulse-glow w-full sm:w-auto"
+              onClick={() => setShowChoice(true)}
+            >
+              {t.start}
+              <ArrowRight size={16} strokeWidth={1.7} />
+            </button>
+            <a className="liquid-hero-note" href="#experience">
+              <span className="liquid-note-mark">01</span>
+              {locale === "fr" ? "Entrer dans l'expérience" : "Enter the experience"}
+            </a>
+          </motion.div>
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 26, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 1, ease: "easeOut", delay: 0.35 }}
+          className="liquid-hero-visual"
+        >
+          <LiquidGlassPreview locale={locale} />
         </motion.div>
       </div>
 

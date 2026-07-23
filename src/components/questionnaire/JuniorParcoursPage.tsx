@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import {
   ArrowLeft,
@@ -14,7 +14,6 @@ import {
   Flame,
   Footprints,
   Loader,
-  Lock,
   MessageCircle,
   Mountain,
   Share2,
@@ -27,7 +26,7 @@ import {
 } from "lucide-react";
 import { GoldParticles } from "@/components/GoldParticles";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
-import { apiPath, authPath } from "@/lib/routes";
+import { authPath } from "@/lib/routes";
 import { QuestionAudio } from "./QuestionAudio";
 
 type Locale = "fr" | "en";
@@ -313,11 +312,9 @@ export function JuniorParcoursPage() {
     const stored = sessionStorage.getItem("junior_reveal");
     return stored ? JSON.parse(stored) : null;
   });
-  const [showPricing, setShowPricing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
-  const checkoutCalled = useRef(false);
 
   const restart = () => {
     sessionStorage.removeItem("junior_reveal");
@@ -330,11 +327,9 @@ export function JuniorParcoursPage() {
     setFirstName("");
     setAnswers({});
     setResult(null);
-    setShowPricing(false);
     setLoading(false);
     setError(null);
     setSaved(false);
-    checkoutCalled.current = false;
   };
 
   const current = t.questions[index];
@@ -384,14 +379,37 @@ export function JuniorParcoursPage() {
       window.location.href = payload.checkoutUrl;
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : t.error);
-      setShowPricing(false);
     } finally {
       setLoading(false);
-      checkoutCalled.current = true;
     }
   }
 
-  function restoreResultFromCache() {
+  async function revealJunior() {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/iuvenis_signum", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstName, answers: apiAnswers, locale }),
+      });
+      const payload = (await response.json().catch(() => null)) as
+        | JuniorResult
+        | { error?: string }
+        | null;
+      if (!response.ok || !payload || !isJuniorResult(payload)) {
+        throw new Error(payload && "error" in payload ? payload.error : t.error);
+      }
+      sessionStorage.setItem("junior_reveal", JSON.stringify(payload));
+      setResult(payload);
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : t.error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const restoreResultFromCache = useCallback(() => {
     if (result) return;
     const cachedReveal = sessionStorage.getItem("junior_reveal");
     if (cachedReveal) {
@@ -401,7 +419,7 @@ export function JuniorParcoursPage() {
         sessionStorage.removeItem("junior_reveal");
       } catch {}
     }
-  }
+  }, [result]);
 
   const checkoutSuccess = searchParams.get("checkout");
   const checkoutSessionId = searchParams.get("session_id");
@@ -410,21 +428,36 @@ export function JuniorParcoursPage() {
     if (checkoutSuccess === "success" && checkoutSessionId) {
       restoreResultFromCache();
     }
-  }, [checkoutSuccess, checkoutSessionId]);
+  }, [checkoutSessionId, checkoutSuccess, restoreResultFromCache]);
 
   useEffect(() => {
     if (!result || saved || !session?.access_token) return;
+    const cachedAnswers = sessionStorage.getItem("junior_answers");
+    let persistedAnswers = apiAnswers;
+    if (cachedAnswers) {
+      try {
+        persistedAnswers = JSON.parse(cachedAnswers) as typeof apiAnswers;
+      } catch {
+        persistedAnswers = apiAnswers;
+      }
+    }
     fetch("/api/iuvenis_signum/save", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify(result),
+      body: JSON.stringify({
+        ...result,
+        answers: persistedAnswers,
+        firstName: firstName || result.firstName,
+        locale,
+        checkoutSessionId: sessionStorage.getItem("junior_checkout_session") || undefined,
+      }),
     }).then((res) => {
       if (res.ok) setSaved(true);
     }).catch(() => {});
-  }, [result, saved, session]);
+  }, [apiAnswers, firstName, locale, result, saved, session]);
 
   if (result) {
     const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -707,53 +740,36 @@ export function JuniorParcoursPage() {
                   {t.next as string}
                   <ArrowRight size={16} />
                 </button>
-              ) : showPricing ? (
-                <div className="mt-6 w-full border p-8" style={{ borderColor: "rgba(216,173,77,0.22)" }}>
-                  <p className="text-center text-[11px] uppercase" style={{ color: "var(--or-ancestral)" }}>
-                    {t.eyebrow as string}
-                  </p>
-                  <h2
-                    className="mt-2 text-center text-[32px] uppercase leading-none md:text-[42px]"
-                    style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
-                  >
-                    {locale === "fr" ? "Devoile ton Totem" : "Reveal your Totem"}
-                  </h2>
-                  <p className="mt-4 text-center text-lg" style={{ color: "rgba(245,240,232,0.72)" }}>
-                    {locale === "fr"
-                      ? "Une experience unique pour 9,99€"
-                      : "A unique experience for €9.99"}
-                  </p>
-                  <div className="mt-8 flex justify-center">
-                    <button
-                      type="button"
-                      className="btn-primary text-lg px-10 py-4"
-                      onClick={startCheckout}
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <><Loader size={18} className="animate-spin" /> {locale === "fr" ? "Preparation..." : "Preparing..."}</>
-                      ) : (
-                        <><CreditCard size={18} /> {locale === "fr" ? "Choisir - 9,99€" : "Choose - €9.99"}</>
-                      )}
-                    </button>
-                  </div>
-                  <div className="mt-6 flex justify-center gap-2 text-sm" style={{ color: "rgba(245,240,232,0.55)" }}>
-                    <Lock size={14} />
-                    {locale === "fr"
-                      ? "Paiement securise par Stripe"
-                      : "Secure payment by Stripe"}
-                  </div>
-                </div>
               ) : (
-                <button
-                  type="button"
-                  className="btn-primary"
-                  onClick={() => setShowPricing(true)}
-                  disabled={!canContinue || loading}
-                >
-                  {locale === "fr" ? "Mon Totem - 9,99€" : "My Totem - €9.99"}
-                  <CreditCard size={16} />
-                </button>
+                <div className="flex flex-col items-end gap-2">
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={revealJunior}
+                    disabled={!canContinue || loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader size={16} className="animate-spin" />
+                        {t.loading as string}
+                      </>
+                    ) : (
+                      <>
+                        {t.reveal as string}
+                        <Sparkles size={16} />
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-secondary !px-4 !py-2 text-xs"
+                    onClick={startCheckout}
+                    disabled={!canContinue || loading}
+                  >
+                    <CreditCard size={14} />
+                    {locale === "fr" ? "Version complète · 9,99 €" : "Full version · €9.99"}
+                  </button>
+                </div>
               )}
             </div>
           </div>

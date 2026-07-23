@@ -42,12 +42,10 @@ async function handleCheckout(
   const env = getServerEnv();
   const config = ADULT_OFFERS[data.offre];
 
-  const origin = (
-    request.headers.get("origin") ||
-    env.NEXT_PUBLIC_SITE_URL ||
-    env.SITE_URL ||
-    "http://localhost:3000"
-  ).replace(/\/$/, "");
+    const origin = (env.NEXT_PUBLIC_SITE_URL || env.SITE_URL || "http://localhost:3000").replace(
+      /\/$/,
+      "",
+    );
   const supabase = createServiceClient();
 
   // Récupérer le prénom de l'utilisateur

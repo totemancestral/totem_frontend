@@ -41,11 +41,11 @@ export function GoldParticles({ count = 26 }: { count?: number }) {
               top: `${p.top}%`,
               width: `${p.size}px`,
               height: `${p.size}px`,
-              background: "#C9A84C",
+              background: "var(--or-ancestral)",
               opacity: p.opacity,
               animationDelay: `${p.delay}s`,
               animationDuration: `${p.duration}s`,
-              boxShadow: "0 0 6px rgba(201, 168, 76, 0.6)",
+              boxShadow: "0 0 6px color-mix(in srgb, var(--or-ancestral) 60%, transparent)",
             }}
           />
         ))}

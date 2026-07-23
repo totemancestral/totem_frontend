@@ -55,7 +55,7 @@ export function RevelationOeuvre({ oeuvre, locale }: { oeuvre: OeuvreData; local
   const isFr = locale === "fr";
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden" style={{ background: "#0D0D1A" }}>
+    <div className="relative min-h-screen w-full overflow-hidden" style={{ background: "var(--nuit-profonde)" }}>
       <AnimatePresence mode="wait">
         {step === "black" && (
           <motion.div
@@ -64,7 +64,7 @@ export function RevelationOeuvre({ oeuvre, locale }: { oeuvre: OeuvreData; local
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 flex items-center justify-center"
-            style={{ background: "#0D0D1A" }}
+            style={{ background: "var(--nuit-profonde)" }}
           >
             <div className="text-center">
               {Array.from({ length: 30 }).map((_, i) => (
@@ -74,7 +74,8 @@ export function RevelationOeuvre({ oeuvre, locale }: { oeuvre: OeuvreData; local
                   style={{
                     width: 2 + Math.random() * 4,
                     height: 2 + Math.random() * 4,
-                    background: `rgba(201, 168, 76, ${0.3 + Math.random() * 0.7})`,
+                     background: "var(--or-ancestral)",
+                     opacity: 0.3 + Math.random() * 0.7,
                     left: `${Math.random() * 100}%`,
                     top: `${Math.random() * 100}%`,
                   }}
@@ -119,7 +120,7 @@ export function RevelationOeuvre({ oeuvre, locale }: { oeuvre: OeuvreData; local
             <div
               className="absolute inset-0"
               style={{
-                background: "linear-gradient(to bottom, transparent 40%, #0D0D1A 92%)",
+                background: "linear-gradient(to bottom, transparent 40%, var(--nuit-profonde) 92%)",
               }}
             />
           </motion.div>

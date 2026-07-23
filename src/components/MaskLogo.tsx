@@ -11,12 +11,12 @@ export function MaskLogo({ size = 80, className = "" }: { size?: number; classNa
     >
       <defs>
         <linearGradient id="maskGold" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#EDD99A" />
-          <stop offset="100%" stopColor="#C9A84C" />
+           <stop offset="0%" stopColor="var(--or-pale)" />
+           <stop offset="100%" stopColor="var(--or-ancestral)" />
         </linearGradient>
         <radialGradient id="maskGlow" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#C9A84C" stopOpacity="0.18" />
-          <stop offset="100%" stopColor="#C9A84C" stopOpacity="0" />
+           <stop offset="0%" stopColor="var(--or-ancestral)" stopOpacity="0.18" />
+           <stop offset="100%" stopColor="var(--or-ancestral)" stopOpacity="0" />
         </radialGradient>
       </defs>
       <circle cx="40" cy="48" r="42" fill="url(#maskGlow)" />

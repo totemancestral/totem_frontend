@@ -13,21 +13,25 @@ import {
   ProofBand,
 } from "@/components/sections";
 import { ExperienceConsignes } from "@/components/ExperienceConsignes";
+import { LiquidGlassAtmosphere } from "@/components/liquid-glass/LiquidGlassAtmosphere";
 
 export function HomePage() {
   return (
-    <>
+    <div className="liquid-home-shell">
+      <LiquidGlassAtmosphere />
       <SiteTourModal active />
-      <Hero />
-      <ProofBand />
-      <LeGeste />
-      <Manifeste />
-      <ExperienceConsignes />
-      <Offres />
-      <Maison />
-      <Avis />
-      <FAQ />
-      <CtaFinal />
-    </>
+      <div className="relative z-10">
+        <Hero />
+        <ProofBand />
+        <LeGeste />
+        <Manifeste />
+        <ExperienceConsignes />
+        <Offres />
+        <Maison />
+        <Avis />
+        <FAQ />
+        <CtaFinal />
+      </div>
+    </div>
   );
 }

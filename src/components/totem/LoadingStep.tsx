@@ -49,7 +49,7 @@ export function LoadingStep({ onComplete, duration = 5000 }: LoadingStepProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="relative flex min-h-[100dvh] flex-col items-center justify-center"
-      style={{ background: "#0D0D1A" }}
+      style={{ background: "var(--nuit-profonde)" }}
     >
       <StarField />
 

@@ -450,7 +450,7 @@ export const Constants = {
         "erreur",
         "remboursee",
       ],
-      offre_type: ["essentiel", "signature", "heritage"],
+      offre_type: ["essentiel", "signature", "heritage", "junior"],
     },
   },
 } as const;

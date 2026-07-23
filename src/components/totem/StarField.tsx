@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 const STARS = 46;
@@ -31,10 +31,10 @@ function generateStars(): Star[] {
 
 export function StarField() {
   const reduce = useReducedMotion();
-  const starsRef = useRef<Star[]>([]);
+  const [stars, setStars] = useState<Star[]>([]);
 
   useEffect(() => {
-    starsRef.current = generateStars();
+    setStars(generateStars());
   }, []);
 
   if (reduce) return null;
@@ -43,10 +43,10 @@ export function StarField() {
     <div
       className="pointer-events-none fixed inset-0 z-0"
       style={{
-        background: "radial-gradient(ellipse at 50% 40%, #0D0D1A 0%, #050508 100%)",
+        background: "radial-gradient(ellipse at 50% 40%, var(--indigo-ancestral) 0%, var(--nuit-profonde) 100%)",
       }}
     >
-      {starsRef.current.map((star) => (
+      {stars.map((star) => (
         <motion.div
           key={star.id}
           className="absolute rounded-full"
@@ -55,8 +55,9 @@ export function StarField() {
             top: star.top,
             width: star.size,
             height: star.size,
-            background: `rgba(201, 168, 76, ${0.25 + Math.random() * 0.5})`,
-            boxShadow: `0 0 ${star.size * 2}px rgba(201, 168, 76, 0.15)`,
+            background: "var(--or-ancestral)",
+            opacity: 0.25 + (star.id % 5) * 0.1,
+            boxShadow: `0 0 ${star.size * 2}px color-mix(in srgb, var(--or-ancestral) 15%, transparent)`,
           }}
           animate={{
             opacity: [0, 0.7, 0],

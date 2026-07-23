@@ -31,7 +31,7 @@ function PdfPage({ children }: { children: React.ReactNode }) {
         style={{
           position: "absolute",
           inset: 14,
-          border: "2px solid #8A6A2B",
+          border: "2px solid var(--ombre-doree)",
           boxShadow: "inset 0 0 0 1px rgba(212,169,74,0.25)",
           borderRadius: 4,
         }}
@@ -102,7 +102,7 @@ const Rule = () => (
       height: 2,
       width: 120,
       margin: "10px auto",
-      background: "linear-gradient(90deg, transparent, #8A6A2B, transparent)",
+      background: "linear-gradient(90deg, transparent, var(--ombre-doree), transparent)",
     }}
   />
 );

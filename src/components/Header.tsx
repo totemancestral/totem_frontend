@@ -140,15 +140,13 @@ export function Header({ locale }: { locale: Locale }) {
 
   return (
     <header
-      className="fixed left-0 right-0 top-0 z-50 border-b transition-all duration-500"
+      className="pointer-events-none fixed left-0 right-0 top-0 z-50 px-3 pt-3 transition-all duration-500 md:px-5 md:pt-4"
       style={{
-        background: scrolled ? "rgba(12,14,22,0.92)" : "rgba(12,14,22,0.82)",
-        backdropFilter: "blur(16px)",
-        borderColor: "rgba(216,173,77,0.18)",
+        background: "transparent",
       }}
     >
       <div
-        className={`mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-5 transition-all duration-300 md:px-8 ${scrolled ? "py-3" : "py-4"}`}
+        className={`liquid-nav pointer-events-auto mx-auto flex max-w-[1240px] items-center justify-between gap-4 px-4 transition-all duration-300 md:px-6 ${scrolled ? "liquid-nav-scrolled py-3" : "py-3.5"}`}
       >
         <Link
           href={`/${locale}`}
@@ -160,10 +158,7 @@ export function Header({ locale }: { locale: Locale }) {
             alt="Totem Ancestral"
             className="h-8 w-auto transition-transform duration-300 group-hover:scale-105 md:h-9"
           />
-          <span
-            className="hidden text-[24px] uppercase leading-none sm:block"
-            style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
-          >
+          <span className="liquid-nav-wordmark hidden text-[24px] uppercase leading-none sm:block">
             Totem Ancestral
           </span>
         </Link>
@@ -176,7 +171,7 @@ export function Header({ locale }: { locale: Locale }) {
                   <Link
                     href="/fgh55_fh"
                     className="subtext text-[12px] uppercase transition-colors hover:text-or"
-                    style={{ color: "rgba(209,197,177,0.92)" }}
+                    style={{ color: "color-mix(in srgb, var(--ivoire) 72%, transparent)" }}
                   >
                     Admin
                   </Link>
@@ -186,7 +181,7 @@ export function Header({ locale }: { locale: Locale }) {
                       key={item.href}
                       href={item.href}
                       className="subtext text-[12px] uppercase transition-colors hover:text-or"
-                      style={{ color: "rgba(209,197,177,0.92)" }}
+                      style={{ color: "color-mix(in srgb, var(--ivoire) 72%, transparent)" }}
                     >
                       {item.label}
                     </Link>
@@ -246,7 +241,7 @@ export function Header({ locale }: { locale: Locale }) {
                   key={item.labelKey}
                   href={item.to === "/" ? `/${locale}${item.hash}` : `/${locale}${item.to}`}
                   className="subtext text-[12px] uppercase transition-colors hover:text-or"
-                  style={{ color: "rgba(209,197,177,0.92)" }}
+                  style={{ color: "color-mix(in srgb, var(--ivoire) 72%, transparent)" }}
                 >
                   {t(`nav.${item.labelKey}`)}
                 </Link>
@@ -263,18 +258,18 @@ export function Header({ locale }: { locale: Locale }) {
                   onClick={() => changeLocale("fr")}
                   disabled={isPending}
                   aria-current={locale === "fr" ? "true" : undefined}
-                  style={{ color: locale === "fr" ? "var(--or-ancestral)" : "#888" }}
+                  style={{ color: locale === "fr" ? "var(--or-ancestral)" : "color-mix(in srgb, var(--ivoire) 38%, transparent)" }}
                   className="transition-colors disabled:cursor-wait"
                 >
                   FR
                 </button>
-                <span style={{ color: "#444" }}>·</span>
+                <span style={{ color: "color-mix(in srgb, var(--ivoire) 22%, transparent)" }}>·</span>
                 <button
                   type="button"
                   onClick={() => changeLocale("en")}
                   disabled={isPending}
                   aria-current={locale === "en" ? "true" : undefined}
-                  style={{ color: locale === "en" ? "var(--or-ancestral)" : "#888" }}
+                  style={{ color: locale === "en" ? "var(--or-ancestral)" : "color-mix(in srgb, var(--ivoire) 38%, transparent)" }}
                   className="transition-colors disabled:cursor-wait"
                 >
                   EN
@@ -310,8 +305,8 @@ export function Header({ locale }: { locale: Locale }) {
 
       {open && !isAccountArea && (
         <div
-          className="max-h-[calc(100svh-72px)] overflow-y-auto border-t md:hidden"
-          style={{ background: "var(--nuit-profonde)", borderColor: "rgba(216,173,77,0.18)" }}
+          className="liquid-mobile-menu pointer-events-auto max-h-[calc(100svh-72px)] overflow-y-auto md:hidden"
+          style={{ background: "var(--nuit-profonde)" }}
         >
           <div className="px-6 py-6 flex flex-col gap-5">
             {session ? (

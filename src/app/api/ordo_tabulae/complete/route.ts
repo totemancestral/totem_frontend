@@ -47,14 +47,14 @@ export async function POST(request: Request) {
   }
 
   const env = getServerEnv();
-  const { error: commandeReadError } = await supabase
+  const { data: commande, error: commandeReadError } = await supabase
     .from("commandes")
     .select("id")
     .eq("id", parsed.data.commandeId)
     .eq("user_id", auth.userId)
     .maybeSingle();
 
-  if (commandeReadError) {
+  if (commandeReadError || !commande) {
     return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
   }
 

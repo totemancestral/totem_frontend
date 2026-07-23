@@ -110,7 +110,7 @@ export function RevealStep({ data, pdfRef, onBack, onShare, onClan }: RevealStep
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="relative flex min-h-[100dvh] flex-col items-center justify-center px-4 py-12"
-      style={{ background: "#0D0D1A" }}
+      style={{ background: "var(--nuit-profonde)" }}
     >
       {/* Flash lumineux a l'ouverture */}
       <AnimatePresence>
@@ -269,7 +269,7 @@ export function RevealStep({ data, pdfRef, onBack, onShare, onClan }: RevealStep
               <div
                 className="my-4 h-[2px] w-28"
                 style={{
-                  background: "linear-gradient(90deg, transparent, #8A6A2B, transparent)",
+                  background: "linear-gradient(90deg, transparent, var(--ombre-doree), transparent)",
                 }}
               />
 

@@ -299,11 +299,36 @@ export default function AdminPage() {
 
   const handleRelancer = useCallback(
     async (commandeId: string) => {
+      if (!token) return;
       setRelanceLoading(commandeId);
-      toast.info("Relance pipeline migrée vers le backend NestJS (BullMQ)");
-      setRelanceLoading(null);
+      try {
+        const response = await fetch("/api/fgh55_fh/relancer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ commandeId }),
+        });
+        const payload = (await response.json().catch(() => null)) as
+          | { error?: string; ok?: boolean }
+          | null;
+        if (!response.ok || !payload?.ok) {
+          throw new Error(payload?.error || "La relance n’a pas pu être lancée");
+        }
+        toast.success("Pipeline relancé");
+        setCommandes((current) =>
+          current.map((commande) =>
+            commande.id === commandeId ? { ...commande, statut: "en_generation" } : commande,
+          ),
+        );
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Erreur de relance");
+      } finally {
+        setRelanceLoading(null);
+      }
     },
-    [],
+    [token],
   );
 
   async function handleLogout() {

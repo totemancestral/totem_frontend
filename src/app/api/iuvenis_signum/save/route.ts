@@ -1,24 +1,11 @@
 import { NextResponse } from "next/server";
+import Stripe from "stripe";
 import { getServerEnv } from "@/lib/env";
+import { JUNIOR_AMOUNT_CENTS } from "@/lib/offers";
 import { createServiceClient } from "@/lib/server-auth";
 
 export async function POST(request: Request) {
   const env = getServerEnv();
-  if (env.TOTEM_BACKEND_URL) {
-    const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
-    const response = await fetch(`${backendUrl}/junior/reveal`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: request.headers.get("authorization") ?? "",
-      },
-      body: await request.text(),
-    });
-
-    const payload = await response.json().catch(() => null);
-    return NextResponse.json(payload, { status: response.ok ? 200 : response.status || 502 });
-  }
-
   const authHeader = request.headers.get("authorization");
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
   if (!token) {
@@ -36,9 +23,62 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Corps requis" }, { status: 400 });
   }
 
+  const checkoutSessionId =
+    typeof body.checkoutSessionId === "string" ? body.checkoutSessionId : null;
+  if (checkoutSessionId) {
+    if (!env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: "Paiement impossible à vérifier" }, { status: 503 });
+    }
+    try {
+      const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2026-02-25.clover" });
+      const checkoutSession = await stripe.checkout.sessions.retrieve(checkoutSessionId);
+      if (
+        checkoutSession.payment_status !== "paid" ||
+        checkoutSession.metadata?.userId !== user.id
+      ) {
+        return NextResponse.json({ error: "Paiement non confirmé" }, { status: 402 });
+      }
+    } catch {
+      return NextResponse.json({ error: "Session de paiement invalide" }, { status: 402 });
+    }
+  }
+
+  if (env.TOTEM_BACKEND_URL) {
+    const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
+    const response = await fetch(`${backendUrl}/junior/reveal`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authHeader,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const payload = await response.json().catch(() => null);
+    return NextResponse.json(payload, { status: response.ok ? 200 : response.status || 502 });
+  }
+
+  const { data: commande, error: commandeError } = await supabase
+    .from("commandes")
+    .insert({
+      user_id: user.id,
+      offre: "junior",
+      statut: "livree",
+      montant_cents: checkoutSessionId ? JUNIOR_AMOUNT_CENTS : 0,
+      devise: "eur",
+      langue: body.locale === "en" ? "en" : "fr",
+      stripe_session_id: checkoutSessionId,
+    })
+    .select("id")
+    .single();
+
+  if (commandeError || !commande) {
+    return NextResponse.json({ error: "Erreur sauvegarde commande" }, { status: 500 });
+  }
+
   const { error } = await supabase.from("oeuvres").insert({
     user_id: user.id,
-    commande_id: `junior_${user.id}_${Date.now()}`,
+    commande_id: commande.id,
     nom_totem: body.nomComplet || "Totem Junior",
     statut: "livree",
     recit: body.phrase || null,
