@@ -611,7 +611,6 @@ export function JuniorParcoursPage() {
               </div>
 
               <QuestionAudio
-                key={index}
                 src={`/assets/junior/q${index + 1}.mp3`}
                 labels={{
                   listen: t.listen as string,

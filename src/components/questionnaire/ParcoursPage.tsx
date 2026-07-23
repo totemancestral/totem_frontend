@@ -1056,7 +1056,6 @@ function QuestionScreen({
           </h1>
 
           <QuestionAudio
-            key={q.n}
             src={`/assets/adulte/q${q.n}.mp3`}
             size="sm"
             labels={{

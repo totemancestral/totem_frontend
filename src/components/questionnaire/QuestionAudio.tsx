@@ -33,15 +33,30 @@ export function QuestionAudio({
   const [playing, setPlaying] = useState(false);
   const [played, setPlayed] = useState(false);
 
+  // (Re)charge la nouvelle question et tente l'autoplay. L'élément <audio>
+  // est persistant (pas de remount via `key`) pour conserver le
+  // « déverrouillage » audio obtenu au premier geste utilisateur.
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
-    el.currentTime = 0;
+    setPlayed(false);
+    setPlaying(false);
+    try {
+      el.load();
+    } catch {
+      /* noop */
+    }
     const promise = el.play();
-    if (promise) {
+    if (promise && typeof promise.then === "function") {
       promise.then(() => setPlaying(true)).catch(() => setPlaying(false));
     }
-    return () => el.pause();
+    return () => {
+      try {
+        el.pause();
+      } catch {
+        /* noop */
+      }
+    };
   }, [src]);
 
   const toggle = () => {
@@ -49,8 +64,12 @@ export function QuestionAudio({
     if (!el) return;
     if (el.paused) {
       if (el.ended) el.currentTime = 0;
-      el.play();
-      setPlaying(true);
+      const promise = el.play();
+      if (promise && typeof promise.then === "function") {
+        promise.then(() => setPlaying(true)).catch(() => setPlaying(false));
+      } else {
+        setPlaying(true);
+      }
     } else {
       el.pause();
       setPlaying(false);
