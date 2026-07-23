@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: authHeader,
+        Authorization: authHeader ?? "",
       },
       body: JSON.stringify(body),
     });
