@@ -6,6 +6,7 @@ import { ArrowRight, Check, ChevronDown, Star, X } from "lucide-react";
 import { GoldParticles } from "./GoldParticles";
 import { Reveal, Ornament } from "./Reveal";
 import { LiquidGlassPreview } from "@/components/liquid-glass/LiquidGlassPreview";
+import { authPath } from "@/lib/routes";
 
 const totemLogo = "/assets/totem-logo.png";
 const oeuvreParchemin = "/assets/oeuvre-parchemin.jpg";
@@ -22,6 +23,15 @@ const copy = {
     start: "Commencer",
     juniorCta: "Je suis Junior",
     question: "Une question",
+    choose: {
+      title: "Avant de commencer",
+      subtitle: "Es-tu Junior (moins de 18 ans) ?",
+      junior: "Oui, je suis Junior",
+      adulte: "Non, je suis adulte",
+      hintJunior: "Totem express · 12 signes · défie tes amis",
+      hintAdulte: "Parcours complet · parchemin, audio & image",
+      footnote: "Tu choisiras et pourras modifier ton statut sur la page suivante.",
+    },
     hero: {
       eyebrow: "Votre âme lointaine, africaine, réincarnée.",
       title: "TOTEM ANCESTRAL",
@@ -236,6 +246,15 @@ const copy = {
     start: "Begin",
     juniorCta: "I am Junior",
     question: "A question",
+    choose: {
+      title: "Before you begin",
+      subtitle: "Are you a Junior (under 18)?",
+      junior: "Yes, I'm a Junior",
+      adulte: "No, I'm an adult",
+      hintJunior: "Express totem · 12 signs · challenge friends",
+      hintAdulte: "Full journey · parchment, audio & image",
+      footnote: "You'll choose and can change your status on the next page.",
+    },
     hero: {
       eyebrow: "Your distant African soul, reimagined",
       title: "TOTEM ANCESTRAL",
@@ -480,6 +499,16 @@ function juniorHref(locale: Locale) {
   return `/${locale}/iuvenis_signum`;
 }
 
+/**
+ * Depuis « Commencer », on envoie l'utilisateur créer son compte avec son
+ * statut présélectionné (modifiable sur la page). Après inscription, il
+ * atterrit sur le parcours correspondant.
+ */
+function signupChoiceHref(locale: Locale, role: "adulte" | "junior") {
+  const redirect = role === "junior" ? juniorHref(locale) : journeyHref(locale);
+  return `${authPath(locale, "signup", redirect)}&role=${role}`;
+}
+
 function SectionHeading({
   eyebrow,
   title,
@@ -582,7 +611,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut", delay: 0.1 }}
-            className="h-display mt-8 text-6xl leading-[0.9] sm:text-7xl md:text-8xl lg:text-[112px]"
+            className="liquid-hero-title h-display mt-8 whitespace-nowrap leading-[0.9]"
             style={{ color: "var(--ivoire)" }}
             aria-label={t.hero.title}
           >
@@ -1159,57 +1188,113 @@ function RoleChoiceToast({
   t: (typeof copy)[Locale];
   onClose: () => void;
 }) {
+  const c = t.choose;
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center px-5"
-      style={{ background: "rgba(0,0,0,0.72)" }}
+      className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-4 py-8"
+      style={{ background: "rgba(0,0,0,0.74)", backdropFilter: "blur(6px)" }}
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={c.title}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.92, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
-        className="relative w-full max-w-md border p-8"
-        style={{ background: "var(--nuit-profonde)", borderColor: "rgba(216,173,77,0.28)" }}
+        className="premium-panel-strong relative my-auto w-full max-w-md p-6 sm:p-8"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
-          className="absolute right-4 top-4"
+          className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors hover:bg-ombre"
           onClick={onClose}
-          style={{ color: "rgba(237,217,154,0.5)" }}
+          aria-label={locale === "fr" ? "Fermer" : "Close"}
+          style={{ borderColor: "rgba(216,173,77,0.28)", color: "rgba(237,217,154,0.7)" }}
         >
-          <X size={20} />
+          <X size={18} />
         </button>
 
-        <h3
-          className="h-display text-center text-2xl uppercase"
-          style={{ color: "var(--or-pale)" }}
-        >
+        <p className="eyebrow text-center" style={{ color: "var(--or-ancestral)" }}>
           {t.start}
+        </p>
+        <h3
+          className="h-display mt-3 text-center text-3xl uppercase"
+          style={{ color: "var(--ivoire)" }}
+        >
+          {c.title}
         </h3>
-        <p className="mt-3 text-center text-sm" style={{ color: "rgba(245,240,232,0.62)" }}>
-          Choisis ton parcours
+        <p className="mt-3 text-center text-sm" style={{ color: "rgba(245,240,232,0.66)" }}>
+          {c.subtitle}
         </p>
 
-        <div className="mt-8 flex flex-col gap-4">
-          <Link
-            href={journeyHref(locale)}
-            className="btn-primary w-full !py-5 text-center text-base"
-            onClick={onClose}
-          >
-            {t.start}
-            <ArrowRight size={16} strokeWidth={1.7} />
-          </Link>
-          <Link
-            href={juniorHref(locale)}
-            className="btn-secondary w-full !py-5 text-center text-base"
-            onClick={onClose}
-          >
-            {t.juniorCta}
-          </Link>
+        <div className="mt-7 flex flex-col gap-3">
+          <RoleChoiceButton
+            href={signupChoiceHref(locale, "junior")}
+            label={c.junior}
+            hint={c.hintJunior}
+            onClose={onClose}
+            featured
+          />
+          <RoleChoiceButton
+            href={signupChoiceHref(locale, "adulte")}
+            label={c.adulte}
+            hint={c.hintAdulte}
+            onClose={onClose}
+          />
         </div>
+
+        <p className="mt-6 text-center text-xs" style={{ color: "rgba(226,225,238,0.45)" }}>
+          {c.footnote}
+        </p>
       </motion.div>
     </div>
+  );
+}
+
+function RoleChoiceButton({
+  href,
+  label,
+  hint,
+  onClose,
+  featured = false,
+}: {
+  href: string;
+  label: string;
+  hint: string;
+  onClose: () => void;
+  featured?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClose}
+      className="group flex items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-left transition-all"
+      style={{
+        borderColor: featured ? "var(--or-ancestral)" : "rgba(216,173,77,0.24)",
+        background: featured ? "rgba(216,173,77,0.12)" : "rgba(13,13,26,0.5)",
+      }}
+    >
+      <span className="flex flex-col gap-1">
+        <span
+          className="text-base uppercase tracking-wide"
+          style={{
+            fontFamily: "var(--font-display)",
+            color: featured ? "var(--or-pale)" : "var(--ivoire)",
+          }}
+        >
+          {label}
+        </span>
+        <span className="text-[12px] leading-snug" style={{ color: "rgba(226,225,238,0.6)" }}>
+          {hint}
+        </span>
+      </span>
+      <ArrowRight
+        size={18}
+        strokeWidth={1.7}
+        className="shrink-0 transition-transform group-hover:translate-x-1"
+        style={{ color: "var(--or-ancestral)" }}
+      />
+    </Link>
   );
 }

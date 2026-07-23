@@ -138,6 +138,87 @@ export function Header({ locale }: { locale: Locale }) {
     };
   }, [open]);
 
+  // ── Tableau de bord : barre supérieure jointe à la sidebar ──────────────
+  if (isAccountArea) {
+    return (
+      <header className="fixed inset-x-0 top-0 z-50">
+        <div className="dashboard-topbar pointer-events-auto flex h-[68px] items-center justify-between gap-3 px-4 lg:ml-64 lg:pl-6 lg:pr-8">
+          <div className="flex min-w-0 items-center gap-3">
+            {!isAdminSession && (
+              <button
+                type="button"
+                onClick={openDashboardMenu}
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors hover:bg-ombre lg:hidden"
+                aria-label={t("menu")}
+                title={t("menu")}
+                style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
+              >
+                <Menu size={17} />
+              </button>
+            )}
+            <Link
+              href={`/${locale}`}
+              aria-label="Totem Ancestral"
+              className="flex min-w-0 items-center gap-2.5 lg:hidden"
+            >
+              <img src="/assets/totem-logo.png" alt="" className="h-7 w-auto" />
+              <span className="liquid-nav-wordmark truncate text-[19px] uppercase leading-none">
+                Totem Ancestral
+              </span>
+            </Link>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-3">
+            <div
+              className="subtext flex items-center gap-1 rounded-full border px-3.5 py-1.5 text-[11px] uppercase"
+              style={{ borderColor: "rgba(216,173,77,0.28)" }}
+            >
+              <button
+                type="button"
+                onClick={() => changeLocale("fr")}
+                disabled={isPending}
+                aria-current={locale === "fr" ? "true" : undefined}
+                style={{ color: locale === "fr" ? "var(--or-ancestral)" : "color-mix(in srgb, var(--ivoire) 38%, transparent)" }}
+                className="transition-colors disabled:cursor-wait"
+              >
+                FR
+              </button>
+              <span style={{ color: "color-mix(in srgb, var(--ivoire) 22%, transparent)" }}>·</span>
+              <button
+                type="button"
+                onClick={() => changeLocale("en")}
+                disabled={isPending}
+                aria-current={locale === "en" ? "true" : undefined}
+                style={{ color: locale === "en" ? "var(--or-ancestral)" : "color-mix(in srgb, var(--ivoire) 38%, transparent)" }}
+                className="transition-colors disabled:cursor-wait"
+              >
+                EN
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="btn-secondary hidden !px-5 !py-2 !text-[11px] md:inline-flex"
+            >
+              <LogOut size={14} />
+              {t("logout")}
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors hover:bg-ombre md:hidden"
+              aria-label={t("logout")}
+              title={t("logout")}
+              style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
+            >
+              <LogOut size={17} />
+            </button>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header
       className="pointer-events-none fixed left-0 right-0 top-0 z-50 px-3 pt-3 transition-all duration-500 md:px-5 md:pt-4"
@@ -195,7 +276,7 @@ export function Header({ locale }: { locale: Locale }) {
                 <button
                   type="button"
                   onClick={openDashboardMenu}
-                  className="inline-flex h-10 w-10 items-center justify-center border transition-colors hover:bg-ombre lg:hidden"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors hover:bg-ombre lg:hidden"
                   aria-label={t("menu")}
                   title={t("menu")}
                   style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
@@ -214,7 +295,7 @@ export function Header({ locale }: { locale: Locale }) {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex h-10 w-10 items-center justify-center border transition-colors hover:bg-ombre md:hidden"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors hover:bg-ombre md:hidden"
                 aria-label={t("logout")}
                 title={t("logout")}
                 style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
@@ -250,7 +331,7 @@ export function Header({ locale }: { locale: Locale }) {
 
             <div className="flex items-center gap-3 md:gap-5">
               <div
-                className="subtext flex items-center gap-1 border px-3 py-1 text-[11px] uppercase"
+                className="subtext flex items-center gap-1 rounded-full border px-3.5 py-1.5 text-[11px] uppercase"
                 style={{ borderColor: "rgba(216,173,77,0.28)" }}
               >
                 <button
@@ -279,7 +360,7 @@ export function Header({ locale }: { locale: Locale }) {
                 href={`/${locale}/domus_animi`}
                 aria-label={t("account")}
                 title={t("account")}
-                className="hidden h-10 w-10 items-center justify-center border transition-colors hover:bg-ombre md:inline-flex"
+                className="hidden h-10 w-10 items-center justify-center rounded-full border transition-colors hover:bg-ombre md:inline-flex"
                 style={{ borderColor: "rgba(216,173,77,0.28)", color: "var(--or-ancestral)" }}
               >
                 <UserRound size={17} />

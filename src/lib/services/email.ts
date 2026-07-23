@@ -137,34 +137,41 @@ function layoutEmail(title: string, body: string, cta?: EmailLink, links: EmailL
   const site = siteUrl();
 
   const ctaHtml = cta
-    ? `<tr><td style="padding:8px 0 4px"><a href="${escapeAttribute(cta.url)}" style="display:inline-block;background:#d8ad4d;color:#0c0e16;text-decoration:none;font-weight:700;padding:14px 26px;border-radius:10px;text-transform:uppercase;letter-spacing:.12em;font-size:12px">${escapeHtml(cta.label)}</a></td></tr>`
+    ? `<tr><td style="padding:10px 0 4px"><a href="${escapeAttribute(cta.url)}" style="display:inline-block;background:#d8ad4d;background:linear-gradient(135deg,#eacb63,#d8ad4d);color:#0c0e16;text-decoration:none;font-weight:700;padding:15px 30px;border-radius:999px;text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-family:Arial,Helvetica,sans-serif">${escapeHtml(cta.label)}</a></td></tr>`
     : "";
 
   const linksHtml = links.length
-    ? `<tr><td style="padding:18px 0 0">${links
+    ? `<tr><td style="padding:20px 0 0">${links
         .map(
           (link) =>
-            `<a href="${escapeAttribute(link.url)}" style="display:inline-block;margin:0 14px 8px 0;color:#f6c865;text-decoration:none;font-size:13px;border-bottom:1px solid rgba(246,200,101,.35);padding-bottom:2px">${escapeHtml(link.label)} &rarr;</a>`,
+            `<a href="${escapeAttribute(link.url)}" style="display:inline-block;margin:0 16px 10px 0;color:#f6c865;text-decoration:none;font-size:13px;border-bottom:1px solid rgba(246,200,101,.4);padding-bottom:2px">${escapeHtml(link.label)} &rarr;</a>`,
         )
         .join("")}</td></tr>`
     : "";
 
   return `<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"></head>
-<body style="margin:0;padding:0;background:#0c0e16;">
+<body style="margin:0;padding:0;background:#0a0b12;">
 <span style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(title)} — ${LEGAL.brand}</span>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0c0e16;padding:32px 16px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0b12;padding:36px 16px">
   <tr><td align="center">
-    <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#12131b;border:1px solid rgba(216,173,77,.28);border-radius:14px;overflow:hidden">
-      <tr><td style="padding:30px 32px 0">
-        <p style="letter-spacing:.24em;text-transform:uppercase;color:#d8ad4d;font-size:12px;margin:0 0 6px;font-family:Arial,Helvetica,sans-serif">TOTEM ANCESTRAL</p>
-        <div style="height:1px;background:linear-gradient(90deg,rgba(216,173,77,.6),transparent);margin:10px 0 22px"></div>
-        <h1 style="font-size:26px;line-height:1.15;margin:0 0 16px;color:#ffffff;font-family:Georgia,'Times New Roman',serif">${escapeHtml(title)}</h1>
+    <table role="presentation" width="580" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;background:#16121b;background:linear-gradient(160deg,#1a1c27 0%,#131420 55%,#0e0f17 100%);border:1px solid rgba(216,173,77,.34);border-radius:22px;overflow:hidden;box-shadow:0 24px 60px -30px rgba(216,173,77,.4)">
+      <tr><td style="height:3px;line-height:3px;font-size:0;background:linear-gradient(90deg,transparent,rgba(216,173,77,.85),transparent)">&nbsp;</td></tr>
+      <tr><td style="padding:30px 36px 0">
+        <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+          <td valign="middle"><img src="${site}/assets/totem-logo.png" width="42" height="42" alt="" style="display:block;border:0;outline:none"></td>
+          <td valign="middle" style="padding-left:13px;font-family:Arial,Helvetica,sans-serif">
+            <div style="letter-spacing:.26em;text-transform:uppercase;color:#d8ad4d;font-size:13px;font-weight:700">TOTEM ANCESTRAL</div>
+            <div style="letter-spacing:.14em;text-transform:uppercase;color:#8a8677;font-size:10px;margin-top:3px">${escapeHtml(LEGAL.company)}</div>
+          </td>
+        </tr></table>
+        <div style="height:1px;background:linear-gradient(90deg,rgba(216,173,77,.6),transparent);margin:22px 0 22px"></div>
+        <h1 style="font-size:27px;line-height:1.18;margin:0 0 16px;color:#ffffff;font-family:Georgia,'Times New Roman',serif">${escapeHtml(title)}</h1>
       </td></tr>
-      <tr><td style="padding:0 32px;color:#e2e1ee;font-size:15px;line-height:1.65;font-family:Arial,Helvetica,sans-serif">
+      <tr><td style="padding:0 36px 6px;color:#e2e1ee;font-size:15px;line-height:1.66;font-family:Arial,Helvetica,sans-serif">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td>${body}</td></tr>${ctaHtml}${linksHtml}</table>
       </td></tr>
-      <tr><td style="padding:28px 32px 30px">
+      <tr><td style="padding:26px 36px 32px">
         <div style="height:1px;background:rgba(216,173,77,.18);margin:20px 0 16px"></div>
         <p style="margin:0 0 6px;color:#bab5a7;font-size:12px;font-family:Arial,Helvetica,sans-serif">${escapeHtml(LEGAL.company)} — ${escapeHtml(LEGAL.brand)}</p>
         <p style="margin:0;color:#8a8677;font-size:12px;font-family:Arial,Helvetica,sans-serif">

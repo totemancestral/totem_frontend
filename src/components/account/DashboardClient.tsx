@@ -479,26 +479,34 @@ export function DashboardClient({
   }
 
   const sidebar = (
-    <div className="premium-sidebar flex h-full flex-col gap-6 p-6">
-      <div className="text-center">
+    <div className="premium-sidebar flex h-full flex-col">
+      <div
+        className="flex h-[68px] shrink-0 items-center gap-3 border-b px-6"
+        style={{ borderColor: "rgba(216,173,77,0.18)" }}
+      >
         <img
           src="/assets/totem-logo.png"
           alt=""
-          className="mx-auto mb-3 h-12 w-12 object-contain"
+          className="h-8 w-8 shrink-0 object-contain"
         />
-        <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>
-          ESPACE
-        </p>
-        <h2 className="logo-wordmark mt-1 text-base">Totem Ancestral</h2>
+        <div className="min-w-0">
+          <p
+            className="caption text-[10px] uppercase leading-none"
+            style={{ color: "var(--or-ancestral)" }}
+          >
+            Espace
+          </p>
+          <h2 className="logo-wordmark text-sm leading-tight">Totem Ancestral</h2>
+        </div>
       </div>
 
-      <nav className="flex flex-col gap-1">
+      <nav className="flex flex-col gap-1 p-4">
         {sidebarItems.map((item) => (
           <button
             key={item.key}
             type="button"
             onClick={() => selectSection(item.key, item.href)}
-            className="flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm uppercase transition-colors hover:bg-ombre"
+            className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm uppercase transition-colors hover:bg-ombre"
             style={{
               color: item.key === activeSection ? "var(--or-ancestral)" : "rgba(226,225,238,0.72)",
               background: item.key === activeSection ? "rgba(216,173,77,0.1)" : undefined,
@@ -510,7 +518,7 @@ export function DashboardClient({
         ))}
       </nav>
 
-      <div className="mt-auto flex flex-col gap-3">
+      <div className="mt-auto flex flex-col gap-3 p-4">
         <Link href={newJourneyHref(locale, isJunior)} className="btn-primary w-full py-3 text-xs">
           <Plus size={14} />
           {t.compose}
@@ -528,7 +536,7 @@ export function DashboardClient({
         <img src="/assets/totem-logo.png" alt="" />
       </div>
       <aside
-        className="fixed left-0 top-0 z-40 hidden h-full w-64 pt-20 lg:block"
+        className="fixed left-0 top-0 z-40 hidden h-full w-64 lg:block"
         style={{ borderRight: "1px solid rgba(216,173,77,0.18)" }}
       >
         {sidebar}

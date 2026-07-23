@@ -120,7 +120,7 @@ export function AuthShell({
 
   return (
     <section
-      className="premium-page relative w-full overflow-hidden px-5 py-6 md:h-[100svh] md:overflow-hidden md:px-10 md:py-10"
+      className="premium-page relative flex w-full items-center overflow-hidden px-5 pb-12 pt-24 md:px-10 md:py-16"
       style={{ background: "var(--nuit-profonde)", minHeight: "100svh" }}
     >
       <div className="premium-watermark" aria-hidden="true">
@@ -140,7 +140,7 @@ export function AuthShell({
         style={{ background: `radial-gradient(circle, ${s.haloB}, transparent 60%)` }}
       />
 
-      <div className="relative mx-auto grid h-full w-full max-w-6xl gap-8 md:grid-cols-[0.92fr_1.08fr] md:items-center md:gap-12">
+      <div className="relative mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-[0.92fr_1.08fr] md:items-center md:gap-12">
         {/* ── Hero éditorial ─────────────────────────────────────────── */}
         <motion.aside
           initial={{ opacity: 0, y: 16 }}

@@ -8,6 +8,7 @@ import {
   Line,
   BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   Tooltip,
@@ -32,6 +33,15 @@ const COMMAND_STATUSES = [
 ];
 const OFFER_TYPES = ["essentiel", "signature", "heritage"];
 const OEUVRE_STATUSES = ["en_cours", "livree", "erreur"];
+
+const STATUT_BAR_COLORS: Record<string, string> = {
+  en_attente_paiement: "#9aa0b5",
+  paye: "#f6c865",
+  en_generation: "#c9a24d",
+  livree: "#d8ad4d",
+  erreur: "#E07A6B",
+  remboursee: "#c0895f",
+};
 
 type AdminStats = {
   totalCommandes: number;
@@ -1333,11 +1343,97 @@ function EventsSection({
 }) {
   const commandesErreur = commandes.filter((c) => c.statut === "erreur");
 
+  const statutData = COMMAND_STATUSES.map((s) => ({
+    statut: s.replace(/_/g, " "),
+    count: changements.filter((c) => c.statut === s).length,
+    fill: STATUT_BAR_COLORS[s] ?? "#d8ad4d",
+  })).filter((d) => d.count > 0);
+
+  const errorDays: string[] = [];
+  const today = new Date();
+  for (let i = 6; i >= 0; i -= 1) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    errorDays.push(d.toISOString().slice(0, 10));
+  }
+  const errorsByDay = errorDays.map((day) => ({
+    date: day,
+    erreurs: erreurs.filter((e) => (e.created_at || "").slice(0, 10) === day).length,
+  }));
+
   return (
     <section>
       <h2 className="h-display text-2xl mb-6" style={{ color: "var(--or-ancestral)" }}>
         Événements
       </h2>
+
+      <div className="mb-8 grid gap-4 lg:grid-cols-2">
+        <div className="premium-panel p-5">
+          <h3 className="mb-4 text-sm uppercase" style={{ color: "var(--or-pale)" }}>
+            Répartition des changements de statut
+          </h3>
+          {statutData.length === 0 ? (
+            <p className="quote-italic">Aucun changement récent.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={statutData} layout="vertical" margin={{ left: 12 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(216,173,77,0.08)" horizontal={false} />
+                <XAxis type="number" allowDecimals={false} stroke="rgba(226,225,238,0.42)" tick={{ fontSize: 11 }} />
+                <YAxis
+                  type="category"
+                  dataKey="statut"
+                  width={120}
+                  stroke="rgba(226,225,238,0.42)"
+                  tick={{ fontSize: 11 }}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(216,173,77,0.06)" }}
+                  contentStyle={{
+                    background: "#1e1f28",
+                    border: "1px solid rgba(216,173,77,0.3)",
+                    borderRadius: 6,
+                    color: "#e2e1ee",
+                  }}
+                />
+                <Bar dataKey="count" name="Changements" radius={[0, 3, 3, 0]}>
+                  {statutData.map((entry) => (
+                    <Cell key={entry.statut} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        <div className="premium-panel p-5">
+          <h3 className="mb-4 text-sm uppercase" style={{ color: "rgba(224,122,107,0.85)" }}>
+            Erreurs pipeline — 7 derniers jours
+          </h3>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={errorsByDay}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(224,122,107,0.08)" />
+              <XAxis
+                dataKey="date"
+                tickFormatter={shortDate}
+                stroke="rgba(226,225,238,0.42)"
+                tick={{ fontSize: 11 }}
+              />
+              <YAxis allowDecimals={false} stroke="rgba(226,225,238,0.42)" tick={{ fontSize: 11 }} />
+              <Tooltip
+                cursor={{ fill: "rgba(224,122,107,0.06)" }}
+                contentStyle={{
+                  background: "#1e1f28",
+                  border: "1px solid rgba(224,122,107,0.3)",
+                  borderRadius: 6,
+                  color: "#e2e1ee",
+                }}
+                labelFormatter={(v) => new Date(v).toLocaleDateString("fr-FR")}
+              />
+              <Bar dataKey="erreurs" name="Erreurs" fill="#E07A6B" radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
       <div className="mb-8">
         <h3 className="mb-3 text-sm uppercase" style={{ color: "var(--or-pale)" }}>
