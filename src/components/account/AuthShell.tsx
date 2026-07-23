@@ -140,7 +140,7 @@ export function AuthShell({
         style={{ background: `radial-gradient(circle, ${s.haloB}, transparent 60%)` }}
       />
 
-      <div className="relative mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-[0.92fr_1.08fr] md:items-center md:gap-12">
+      <div className="relative mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-[1fr_minmax(0,420px)] md:items-center md:gap-14">
         {/* ── Hero éditorial ─────────────────────────────────────────── */}
         <motion.aside
           initial={{ opacity: 0, y: 16 }}
@@ -195,7 +195,7 @@ export function AuthShell({
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="premium-panel-strong mx-auto flex w-full max-w-[520px] flex-col gap-5 p-5 md:p-8"
+          className="premium-panel-strong mx-auto flex w-full max-w-[420px] flex-col gap-5 p-5 md:p-7"
         >
           {children}
 
