@@ -819,14 +819,15 @@
       "labels": {
         "usage": "Use",
         "content": "Content",
-        "delivery": "Time"
+        "delivery": "Time",
+        "savings": "if bought separately"
       },
       "security": "Secure payment · Visa · Mastercard · Apple Pay · Google Pay · No subscription · GDPR",
       "saved": "✦ Your journey is saved. The remaining questions are waiting for you.",
       "offers": [
         {
-          "name": "TOTEM ORIGIN",
-          "price": "€49",
+          "name": "ORIGIN",
+          "price": "49€",
           "sub": "The essential experience.",
           "bestFor": "First journey",
           "delivery": "15 min",
@@ -837,12 +838,12 @@
             "Numbered certificate of authenticity",
             "Delivery within 15 minutes by email"
           ],
-          "cta": "Choose · €49",
+          "cta": "Begin the journey · 49€",
           "featured": false
         },
         {
-          "name": "TOTEM ANCESTRAL",
-          "price": "€89",
+          "name": "REVELATION",
+          "price": "99€",
           "sub": "The complete experience.",
           "bestFor": "Complete box",
           "delivery": "15 min",
@@ -854,24 +855,25 @@
             "Numbered certificate of authenticity",
             "Delivery within 15 minutes by email"
           ],
-          "cta": "Choose · €89",
+          "cta": "Reveal my Totem · 99€",
           "featured": true
         },
         {
-          "name": "TOTEM FAMILY",
-          "price": "€199",
+          "name": "FAMILY",
+          "price": "219€",
           "sub": "The experience to share.",
           "bestFor": "Three recipients",
           "delivery": "30 min",
           "includes": "3 boxes",
           "features": [
-            "Three complete TOTEM ANCESTRAL artworks",
+            "Three complete RÉVÉLATION artworks",
             "Three chosen recipients",
             "Three separate certificates of authenticity",
             "Delivery within 30 minutes"
           ],
-          "cta": "Choose · €199",
-          "featured": false
+          "cta": "Gather my family · 219€",
+          "featured": false,
+          "compareAtPrice": "297€"
         }
       ]
     },

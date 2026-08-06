@@ -367,6 +367,8 @@ type Offer = {
   name: string;
   amountCents: number;
   price: string;
+  /** Prix de reference barre (ex. Famille : equivalent de trois achats). */
+  compareAtPrice?: string;
   sub: string;
   bestFor: string;
   delivery: string;
@@ -1376,7 +1378,7 @@ function PaywallTransition() {
 const offers = [
   {
     id: "origine",
-    name: "TOTEM ORIGINE",
+    name: "ORIGINE",
     amountCents: 4900,
     price: "49€",
     sub: "L'expérience essentielle.",
@@ -1389,14 +1391,14 @@ const offers = [
       "Le Certificat d'authenticité numéroté",
       "Livraison sous 15 minutes par email",
     ],
-    cta: "Choisir · 49€",
+    cta: "Commencer le voyage · 49€",
     featured: false,
   },
   {
     id: "ancestral",
-    name: "TOTEM ANCESTRAL",
-    amountCents: 8900,
-    price: "89€",
+    name: "RÉVÉLATION",
+    amountCents: 9900,
+    price: "99€",
     sub: "L'expérience complète.",
     bestFor: "Coffret complet",
     delivery: "15 min",
@@ -1408,25 +1410,26 @@ const offers = [
       "Le Certificat d'authenticité numéroté",
       "Livraison sous 15 minutes par email",
     ],
-    cta: "Choisir · 89€",
+    cta: "Révéler mon Totem · 99€",
     featured: true,
   },
   {
     id: "famille",
-    name: "TOTEM FAMILLE",
-    amountCents: 19900,
-    price: "199€",
+    name: "FAMILLE",
+    amountCents: 21900,
+    price: "219€",
+    compareAtPrice: "297€",
     sub: "L'expérience à partager.",
     bestFor: "Trois destinataires",
     delivery: "30 min",
     includes: "3 coffrets",
     features: [
-      "Trois œuvres TOTEM ANCESTRAL complètes",
+      "Trois œuvres RÉVÉLATION complètes",
       "Trois destinataires au choix",
       "Trois certificats d'authenticité distincts",
       "Livraison sous 30 minutes",
     ],
-    cta: "Choisir · 199€",
+    cta: "Réunir ma famille · 219€",
     featured: false,
   },
 ] satisfies Offer[];
@@ -1509,6 +1512,15 @@ function Paywall({
               >
                 {o.price}
               </div>
+              {o.compareAtPrice && (
+                <p
+                  className="mt-1 text-center text-[13px]"
+                  style={{ color: "rgba(226,225,238,0.5)" }}
+                >
+                  <span style={{ textDecoration: "line-through" }}>{o.compareAtPrice}</span>{" "}
+                  {t("labels.savings")}
+                </p>
+              )}
               <p className="quote-italic mt-1 text-center text-[13px] leading-relaxed md:text-[15px]">
                 {o.sub}
               </p>

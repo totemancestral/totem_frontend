@@ -37,12 +37,12 @@ export const ADULT_OFFERS: Record<AdultOffer, AdultOfferConfig> = {
     label: "TOTEM ANCESTRAL - Origine",
   },
   ancestral: {
-    amountCents: 8900,
+    amountCents: 9900,
     commandeOffre: "signature",
-    label: "TOTEM ANCESTRAL - Ancestral",
+    label: "TOTEM ANCESTRAL - Revelation",
   },
   famille: {
-    amountCents: 19900,
+    amountCents: 21900,
     commandeOffre: "heritage",
     label: "TOTEM ANCESTRAL - Famille",
   },

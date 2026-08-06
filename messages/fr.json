@@ -819,13 +819,14 @@
       "labels": {
         "usage": "Usage",
         "content": "Contenu",
-        "delivery": "Délai"
+        "delivery": "Délai",
+        "savings": "si achetés séparément"
       },
       "security": "Paiement sécurisé · Visa · Mastercard · Apple Pay · Google Pay · Aucun abonnement · RGPD",
       "saved": "✦ Ton parcours est sauvegardé. Les questions restantes t'attendent.",
       "offers": [
         {
-          "name": "TOTEM ORIGINE",
+          "name": "ORIGINE",
           "price": "49€",
           "sub": "L'expérience essentielle.",
           "bestFor": "Premier voyage",
@@ -837,12 +838,12 @@
             "Le Certificat d'authenticité numéroté",
             "Livraison sous 15 minutes par email"
           ],
-          "cta": "Choisir · 49€",
+          "cta": "Commencer le voyage · 49€",
           "featured": false
         },
         {
-          "name": "TOTEM ANCESTRAL",
-          "price": "89€",
+          "name": "RÉVÉLATION",
+          "price": "99€",
           "sub": "L'expérience complète.",
           "bestFor": "Coffret complet",
           "delivery": "15 min",
@@ -854,24 +855,25 @@
             "Le Certificat d'authenticité numéroté",
             "Livraison sous 15 minutes par email"
           ],
-          "cta": "Choisir · 89€",
+          "cta": "Révéler mon Totem · 99€",
           "featured": true
         },
         {
-          "name": "TOTEM FAMILLE",
-          "price": "199€",
+          "name": "FAMILLE",
+          "price": "219€",
           "sub": "L'expérience à partager.",
           "bestFor": "Trois destinataires",
           "delivery": "30 min",
           "includes": "3 coffrets",
           "features": [
-            "Trois œuvres TOTEM ANCESTRAL complètes",
+            "Trois œuvres RÉVÉLATION complètes",
             "Trois destinataires au choix",
             "Trois certificats d'authenticité distincts",
             "Livraison sous 30 minutes"
           ],
-          "cta": "Choisir · 199€",
-          "featured": false
+          "cta": "Réunir ma famille · 219€",
+          "featured": false,
+          "compareAtPrice": "297€"
         }
       ]
     },
