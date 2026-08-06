@@ -8,13 +8,13 @@ type Locale = "fr" | "en";
 const layers = {
   fr: [
     { label: "La matière", value: "Vos réponses deviennent une fable" },
-    { label: "La présence", value: "Une image pensée pour vous" },
-    { label: "La transmission", value: "Une voix à garder et partager" },
+    { label: "La présence", value: "Votre fable devient visage" },
+    { label: "La transformation", value: "Votre visage devient une voix" },
   ],
   en: [
     { label: "The matter", value: "Your answers become a fable" },
-    { label: "The presence", value: "An image composed for you" },
-    { label: "The transmission", value: "A voice to keep and share" },
+    { label: "The presence", value: "Your fable becomes a face" },
+    { label: "The transformation", value: "Your face becomes a voice" },
   ],
 } as const;
 
@@ -86,7 +86,7 @@ export function LiquidGlassPreview({ locale }: { locale: Locale }) {
         </div>
 
         <div className="liquid-preview-footer">
-          <span>{locale === "fr" ? "Intelligence symbolique" : "Symbolic intelligence"}</span>
+          <span>{locale === "fr" ? "Mémoire symbolique" : "Symbolic memory"}</span>
           <span className="liquid-preview-footer-link">
             {locale === "fr" ? "Voir le geste" : "See the gesture"}
             <ChevronRight size={13} />

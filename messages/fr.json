@@ -453,7 +453,7 @@
       ]
     },
     "instructions": {
-      "eyebrow": "Avant de traverser",
+      "eyebrow": "Le seuil",
       "title": "Avant de traverser",
       "subtitle": "Quatre gestes pour recevoir ce qui vient.",
       "items": [
@@ -471,9 +471,10 @@
         },
         {
           "title": "Gardez votre TOTEM",
-          "text": "Gardez votre TOTEM comme on garde un nom. Il n'existe qu'à travers vous."
+          "text": "Comme on garde un nom, comme on garde un secret. Il n'existe qu'à travers vous — et ne vivra nulle part ailleurs."
         }
-      ]
+      ],
+      "timer": "15 minutes"
     },
     "ctaFinal": {
       "title": "Votre ancêtre vous attend.",
@@ -792,7 +793,11 @@
       "eyebrow": "Création du compte",
       "title": "Réserve ton espace personnel.",
       "body": "Les quatre premières réponses ouvrent le parcours. Ton email servira à retrouver ton coffret, recevoir la livraison et reprendre l'expérience sans perdre ta progression.",
-      "checks": ["4 questions écoutées", "Compte préparé", "Choix du coffret"],
+      "checks": [
+        "4 questions écoutées",
+        "Compte préparé",
+        "Choix du coffret"
+      ],
       "formEyebrow": "Identité de livraison",
       "formTitle": "Avant le choix du prix",
       "firstName": "Prénom",

@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { useState } from "react";
-import { ArrowRight, Check, ChevronDown, Star, X } from "lucide-react";
+import { ArrowRight, ChevronDown, X } from "lucide-react";
 import { GoldParticles } from "./GoldParticles";
 import { Reveal, Ornament } from "./Reveal";
 import { LiquidGlassPreview } from "@/components/liquid-glass/LiquidGlassPreview";
@@ -20,7 +20,7 @@ type Locale = "fr" | "en";
 
 const copy = {
   fr: {
-    start: "Commencer",
+    start: "Commencer mon voyage",
     juniorCta: "Je suis Junior",
     question: "Une question",
     choose: {
@@ -35,7 +35,8 @@ const copy = {
     hero: {
       eyebrow: "Votre âme lointaine, africaine, réincarnée.",
       title: "TOTEM ANCESTRAL",
-      body: "Qui étiez-vous, avant d'être qui vous êtes ? Une œuvre tissée dans la langue des origines, qui vous ramène à la source. Une création numérique singulière, nourrie des cosmogonies africaines, aidée et née de l'IA.",
+      body: "Qui étiez-vous, avant d'être qui vous êtes ? Une œuvre unique, tissée dans la langue des origines, qui vous ramène à la source. Nourrie des cosmogonies africaines, elle révèle l'ancêtre qui sommeille en vous.",
+      note: "Quinze minutes. Une œuvre pour toute une vie.",
     },
     marquee: [
       "Une âme",
@@ -48,11 +49,11 @@ const copy = {
     who: {
       eyebrow: "Avant d'être vous",
       title: "Qui étiez-vous ?",
-      body: "Avant d'être vous, qui étiez-vous ? Il y avait quelqu'un.",
+      body: "Avant d'être vous, qui étiez-vous ? Il y avait quelqu'un. Il y a toujours quelqu'un.",
       items: [
         {
           title: "Soixante mille ans",
-          body: "Il y a soixante mille ans, vos ancêtres ont quitté l'Afrique. D'autres sont restés - ont vécu sous d'autres cieux, murmuré d'autres langues, taillé d'autres masques.",
+          body: "Il y a soixante mille ans, vos ancêtres ont quitté l'Afrique. D'autres ont vécu sous d'autres cieux, murmuré d'autres langues, taillé d'autres masques. D'autres sont restés. Ce chemin-là aussi vous appartient.",
           image: oeuvreParchemin,
         },
         {
@@ -70,11 +71,11 @@ const copy = {
     manifest: {
       eyebrow: "Notre démarche",
       title: "Le manifeste en trois temps",
-      body: "Pourquoi cette maison existe, et ce qu'elle refuse d'être.",
+      body: "Pourquoi cette maison existe — et ce qu'elle refuse d'être.",
       items: [
         {
-          title: "01 - Une œuvre, pas un test",
-          body: "01 - TOTEM ANCESTRAL est une œuvre, pas un test de personnalité. Chaque parole confiée au griot devient matière à une création narrative et visuelle.",
+          title: "Une œuvre, pas un test",
+          body: "TOTEM ANCESTRAL est une œuvre, pas un test de personnalité. Chaque parole confiée au griot devient un récit, un visage — jamais un résultat, jamais un score.",
           image: traverserEcoute,
         },
         {
@@ -140,33 +141,43 @@ const copy = {
       title: "Trois manières de recevoir l'œuvre",
       body: "Choisissez le format qui convient le mieux à votre quête et à votre héritage.",
       footnote: "Carte cadeau offerte à chaque commande ·",
+      reassurance:
+        "Chaque Totem Ancestral est une création unique, façonnée spécialement pour vous à partir de votre récit.",
       items: [
         {
-          name: "Totem Origine",
-          tag: "Origine",
+          name: "Origine",
+          tag: "Porte d'entrée",
           badge: "",
           featured: false,
-          body: "Les détails et prix apparaissent après les quatre premières questions.",
-          features: ["Une création personnalisée", "Un coffret numérique", "L'accès à votre espace"],
-          cta: "Choisir Origine",
+          body: "Le premier pas vers votre source.",
+          features: [
+            "Création personnalisée",
+            "Un coffret que vous seul pouvez ouvrir",
+            "Un lieu à vous, où votre œuvre demeure",
+          ],
+          cta: "Commencer le voyage",
         },
         {
-          name: "Totem Ancestral",
-          tag: "Ancestral",
-          badge: "Le plus précieux",
+          name: "Révélation",
+          tag: "Le chemin le plus suivi",
+          badge: "Le plus choisi",
           featured: true,
-          body: "La création dans sa plénitude. Rien ne manque.",
-          features: ["Une création complète", "Une voix rituelle", "Tirage Fine Art possible"],
-          cta: "Choisir Ancestral",
+          body: "La création dans sa plénitude — le récit, le visage, la voix.",
+          features: ["Création complète", "Voix rituelle", "Tirage Fine Art en option"],
+          cta: "Révéler mon Totem",
         },
         {
-          name: "Totem Famille",
-          tag: "Famille",
+          name: "Famille",
+          tag: "Offre cadeau",
           badge: "",
           featured: false,
-          body: "Pour des racines qui se partagent. Offert à vos proches.",
-          features: ["Trois coffrets coordonnés", "Trois destinataires", "Livraison Famille"],
-          cta: "Choisir Famille",
+          body: "Pour des racines qui se partagent.",
+          features: [
+            "Trois coffrets, un seul récit d'origine",
+            "Trois âmes, une même origine",
+            "Livrés ensemble, portés à vie",
+          ],
+          cta: "Réunir ma famille",
         },
       ],
     },
@@ -174,41 +185,41 @@ const copy = {
       eyebrow: "Qui nous sommes",
       title: "Une maison de création",
       paragraphs: [
-        "TOTEM ANCESTRAL est une maison de création fondée à Paris, au carrefour de l'art numérique et des mémoires africaines.",
-        "Nous ne sommes ni archivistes, ni devins, ni généalogistes. Nous sommes des passeurs entre ce que vous êtes et ce que vous auriez pu être. Entre aujourd'hui et les soixante mille ans qui vous précèdent.",
+        "TOTEM ANCESTRAL est une maison de création née à Paris, au carrefour de l'art et des mémoires africaines.",
+        "Nous ne sommes ni archivistes, ni devins, ni généalogistes. Nous sommes des passeurs — entre ce que vous êtes et ce que vous auriez pu être, entre aujourd'hui et les soixante mille ans qui vous précèdent.",
       ],
     },
     testimonials: {
       eyebrow: "Ils ont traversé",
-      title: "Ce qu'ils en pensent",
+      title: "Ce qu'ils en ont ramené",
       body: "Découvrez les récits de ceux qui ont déjà éveillé leur Totem.",
       rows: [
         [
           {
             q: "J'ai pleuré en lisant le Parchemin. Ça ne ressemblait à rien d'autre. Une émotion brute.",
-            a: "Aïcha - Dakar",
+            a: "Aïcha · Dakar",
           },
           {
             q: "La Voix m'a donné des frissons. On dirait que mon ancêtre me connaissait vraiment.",
-            a: "Kwame - Accra",
+            a: "Kwame · Accra",
           },
           {
-            q: "Le coffret Famille nous a réunis autour d'une histoire commune, enfin écrite.",
-            a: "Fatou - Bamako",
+            q: "Je m'attendais à un gadget. J'ai reçu un héritage.",
+            a: "Sékou · Abidjan",
           },
         ],
         [
           {
-            q: "Pas un gadget. Une vraie expérience, posée et sincère, qui touche le cœur.",
-            a: "Yannick - Paris",
+            q: "Le coffret Famille nous a réunis autour d'une histoire commune, enfin écrite.",
+            a: "Fatou · Bamako",
           },
           {
             q: "Le Visage trône maintenant dans mon salon. C'est mon Totem, mon héritage.",
-            a: "Naomi - London",
+            a: "Naomi · London",
           },
           {
             q: "Quinze minutes comme promis, et un objet que je garderai toute ma vie.",
-            a: "Idris - Lagos",
+            a: "Idris · Lagos",
           },
         ],
       ],
@@ -220,19 +231,23 @@ const copy = {
       items: [
         {
           q: "Chaque œuvre est-elle unique ?",
-          a: "Oui. Votre Totem est généré en temps réel à partir de vos réponses spécifiques. Il n'existe pas deux créations identiques dans le cosmos de Totem Ancestral.",
+          a: "Oui. Chaque Totem naît de votre récit, de ce que vous seul confiez au griot. Il n'existe pas deux créations identiques — votre œuvre porte un numéro, comme un nom propre gravé une seule fois.",
         },
         {
           q: "Est-ce un test ADN ?",
-          a: "Non. Nous explorons la mémoire spirituelle et culturelle plutôt que biologique. C'est une quête artistique et symbolique de vos racines.",
+          a: "Non. Nous n'exhumons pas un arbre généalogique et ne procédons à aucune analyse biologique. TOTEM ANCESTRAL explore la mémoire spirituelle et culturelle, non la mémoire génétique — une quête artistique et symbolique de vos racines, un miroir narratif, pas un rapport scientifique. Le détail de notre méthode de création figure dans nos CGV.",
         },
         {
           q: "Comment recevoir mon Totem ?",
-          a: "Selon l'offre choisie, vous recevez un accès numérique, un coffret complet et les fichiers préparés dans votre espace personnel.",
+          a: "Après votre traversée du questionnaire — environ quinze minutes — votre œuvre est façonnée puis déposée dans votre espace, le lieu où elle vous attend et demeure. Selon la formule choisie, un tirage Fine Art vous est ensuite expédié.",
         },
         {
           q: "Mes données sont-elles protégées ?",
-          a: "Vos réponses servent uniquement à composer et livrer l'œuvre. Elles ne sont pas vendues à des tiers.",
+          a: "Oui. Vos réponses servent uniquement à composer votre œuvre — elles ne sont ni vendues, ni partagées. Le détail complet du traitement de vos données figure dans notre page Confidentialité.",
+        },
+        {
+          q: "Puis-je offrir un Totem sans que la personne réponde elle-même au questionnaire ?",
+          a: "Oui. Vous pouvez répondre en son nom, ou lui offrir l'accès pour qu'elle traverse elle-même l'expérience — le choix vous appartient.",
         },
       ],
     },
@@ -243,7 +258,7 @@ const copy = {
     },
   },
   en: {
-    start: "Begin",
+    start: "Begin my journey",
     juniorCta: "I am Junior",
     question: "A question",
     choose: {
@@ -258,7 +273,8 @@ const copy = {
     hero: {
       eyebrow: "Your distant African soul, reimagined",
       title: "TOTEM ANCESTRAL",
-      body: "Four questions. A work composed for you, nourished by African cosmogonies and shaped with artificial intelligence.",
+      body: "Who were you, before being who you are? A unique work, woven in the language of origins, that brings you back to the source. Nourished by African cosmogonies, it reveals the ancestor asleep within you.",
+      note: "Fifteen minutes. A work for a lifetime.",
     },
     marquee: [
       "A soul",
@@ -365,33 +381,43 @@ const copy = {
       title: "Three ways to receive the work",
       body: "Choose the format that best suits your quest and your legacy.",
       footnote: "Gift card included with every order",
+      reassurance:
+        "Each Totem Ancestral is a unique creation, shaped especially for you from your own story.",
       items: [
         {
-          name: "Totem Origin",
-          tag: "Origin",
+          name: "Origin",
+          tag: "Entry point",
           badge: "",
           featured: false,
-          body: "Details and prices appear after the first four questions.",
-          features: ["A personalized creation", "A digital box", "Access to your space"],
-          cta: "Choose Origin",
+          body: "The first step towards your source.",
+          features: [
+            "Personalized creation",
+            "A box only you can open",
+            "A place of your own, where your work remains",
+          ],
+          cta: "Begin the journey",
         },
         {
-          name: "Totem Ancestral",
-          tag: "Ancestral",
-          badge: "Most precious",
+          name: "Revelation",
+          tag: "The most travelled path",
+          badge: "Most chosen",
           featured: true,
-          body: "The creation in full. Nothing missing. Composed to last a lifetime.",
-          features: ["A complete creation", "A ritual voice", "Fine Art print possible"],
-          cta: "Choose Ancestral",
+          body: "The creation in full — the story, the face, the voice.",
+          features: ["Complete creation", "Ritual voice", "Fine Art print as an option"],
+          cta: "Reveal my Totem",
         },
         {
-          name: "Totem Family",
-          tag: "Family",
+          name: "Family",
+          tag: "Gift offering",
           badge: "",
           featured: false,
-          body: "Because some roots are shared. For your loved ones.",
-          features: ["Three coordinated boxes", "Three recipients", "Family delivery"],
-          cta: "Choose Family",
+          body: "For roots that are shared.",
+          features: [
+            "Three boxes, one single origin story",
+            "Three souls, one same origin",
+            "Delivered together, carried for life",
+          ],
+          cta: "Gather my family",
         },
       ],
     },
@@ -658,6 +684,15 @@ export function Hero() {
               {locale === "fr" ? "Entrer dans l'expérience" : "Enter the experience"}
             </a>
           </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+            className="caption mt-5"
+            style={{ color: "color-mix(in srgb, var(--ivoire) 52%, transparent)" }}
+          >
+            {t.hero.note}
+          </motion.p>
         </div>
         <motion.div
           initial={{ opacity: 0, y: 26, scale: 0.96 }}
@@ -886,7 +921,6 @@ export function Offres() {
         <SectionHeading eyebrow={t.offers.eyebrow} title={t.offers.title} body={t.offers.body} />
         <div className={`mt-20 grid items-stretch gap-8 ${offersGridClass}`}>
           {t.offers.items.map((offer, index) => {
-            const Icon = offer.featured ? Star : Check;
             return (
               <Reveal
                 key={offer.name}
@@ -932,22 +966,16 @@ export function Offres() {
                     {offer.body}
                   </p>
                   <ul
-                    className="my-10 flex flex-1 flex-col gap-5 border-t pt-8"
+                    className="my-10 flex flex-1 flex-col gap-4 border-t pt-8 text-center"
                     style={{ borderColor: "rgba(216,173,77,0.18)" }}
                   >
                     {offer.features.map((feature) => (
                       <li
                         key={feature}
-                        className="flex items-start gap-3 text-[15px] leading-relaxed"
+                        className="text-[15px] leading-relaxed"
                         style={{ color: "rgba(226,225,238,0.84)" }}
                       >
-                        <Icon
-                          className="mt-1 shrink-0"
-                          size={17}
-                          strokeWidth={1.8}
-                          style={{ color: "var(--or-ancestral)" }}
-                        />
-                        <span>{feature}</span>
+                        {feature}
                       </li>
                     ))}
                   </ul>
@@ -962,8 +990,16 @@ export function Offres() {
             );
           })}
         </div>
+        <Reveal delay={0.2}>
+          <p
+            className="quote-italic mx-auto mt-14 max-w-2xl text-center text-base"
+            style={{ color: "rgba(226,225,238,0.72)" }}
+          >
+            {t.offers.reassurance}
+          </p>
+        </Reveal>
         <Reveal delay={0.25}>
-          <p className="eyebrow mt-16 text-center" style={{ color: "rgba(216,173,77,0.72)" }}>
+          <p className="eyebrow mt-8 text-center" style={{ color: "rgba(216,173,77,0.72)" }}>
             ✦ {t.offers.footnote} ✦
           </p>
         </Reveal>

@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { Clock3 } from "lucide-react";
 import { Reveal, Ornament } from "./Reveal";
 
 const posture = "/assets/avant-traverser-1-posez-le-monde.png";
@@ -37,6 +38,14 @@ export function ExperienceConsignes() {
               {t("title")}
             </h2>
             <p className="quote-italic mt-2 text-lg md:text-xl">{t("subtitle")}</p>
+            {/* Rappel discret de l'engagement de temps, avant d'entrer dans le questionnaire. */}
+            <p
+              className="caption inline-flex items-center gap-2 rounded-full border px-4 py-1.5"
+              style={{ borderColor: "rgba(216,173,77,0.28)", color: "rgba(237,217,154,0.72)" }}
+            >
+              <Clock3 size={13} />
+              {t("timer")}
+            </p>
           </div>
         </Reveal>
 

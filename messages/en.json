@@ -453,7 +453,7 @@
       ]
     },
     "instructions": {
-      "eyebrow": "Read before entering",
+      "eyebrow": "The threshold",
       "title": "Before crossing",
       "subtitle": "Prepare your mind and your space to receive the words of the elders.",
       "items": [
@@ -470,10 +470,11 @@
           "text": "The griot does not want the right answer. He wants yours, the one that comes from farther than memory."
         },
         {
-          "title": "Keep your Totem",
-          "text": "Once awakened, your Totem becomes a travelling companion: an ancestor held in matter and spirit."
+          "title": "Keep your TOTEM",
+          "text": "As you keep a name, as you keep a secret. It exists only through you — and will live nowhere else."
         }
-      ]
+      ],
+      "timer": "15 minutes"
     },
     "ctaFinal": {
       "title": "The artwork is waiting.",
@@ -792,7 +793,11 @@
       "eyebrow": "Account creation",
       "title": "Reserve your personal space.",
       "body": "The first four answers open the journey. Your email will help you retrieve your box, receive delivery and resume the experience without losing progress.",
-      "checks": ["4 questions heard", "Account prepared", "Box selection"],
+      "checks": [
+        "4 questions heard",
+        "Account prepared",
+        "Box selection"
+      ],
       "formEyebrow": "Delivery identity",
       "formTitle": "Before choosing the price",
       "firstName": "First name",
