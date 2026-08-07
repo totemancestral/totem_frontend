@@ -11,6 +11,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { apiPath, authPath } from "@/lib/routes";
 import { QuestionAudio } from "./QuestionAudio";
+import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
 
 type FieldLevel = "PRIORITAIRE" | "SECONDAIRE" | "TERTIAIRE" | "SPECIAL";
 
@@ -1002,6 +1003,7 @@ function QuestionScreen({
   isFirst: boolean;
 }) {
   const t = useTranslations("parcours.questionUi");
+  const locale = useLocale();
   const [showTertiary, setShowTertiary] = useState(false);
   const isD = answer?.choice === "D";
   const baseRows = q.field.rows;
@@ -1062,7 +1064,8 @@ function QuestionScreen({
           </h1>
 
           <QuestionAudio
-            src={`/assets/adulte/q${q.n}.mp3`}
+            src={questionAudioSrc("adulte", q.n, locale)}
+            fallbackSrc={questionAudioFallbackSrc("adulte", q.n)}
             size="sm"
             labels={{
               listen: t("audioListen"),

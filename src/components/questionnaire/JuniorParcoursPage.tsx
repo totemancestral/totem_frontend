@@ -28,6 +28,7 @@ import { GoldParticles } from "@/components/GoldParticles";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { authPath } from "@/lib/routes";
 import { QuestionAudio } from "./QuestionAudio";
+import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
 
 type Locale = "fr" | "en";
 type ChoiceLetter = "A" | "B" | "C" | "D";
@@ -644,7 +645,8 @@ export function JuniorParcoursPage() {
               </div>
 
               <QuestionAudio
-                src={`/assets/junior/q${index + 1}.mp3`}
+                src={questionAudioSrc("junior", index + 1, locale)}
+                fallbackSrc={questionAudioFallbackSrc("junior", index + 1)}
                 labels={{
                   listen: t.listen as string,
                   playing: t.playing as string,

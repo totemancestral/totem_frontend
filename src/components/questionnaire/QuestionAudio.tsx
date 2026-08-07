@@ -21,10 +21,13 @@ export type QuestionAudioLabels = {
  */
 export function QuestionAudio({
   src,
+  fallbackSrc,
   labels,
   size = "lg",
 }: {
   src: string;
+  /** Piste de secours si `src` est introuvable (ex. voix EN pas encore deposee). */
+  fallbackSrc?: string;
   labels: QuestionAudioLabels;
   /** `lg` = grand cercle (Junior), `sm` = compact (Adulte, layout fixe). */
   size?: "lg" | "sm";
@@ -32,6 +35,12 @@ export function QuestionAudio({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [played, setPlayed] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(src);
+
+  // Une nouvelle question repart toujours de la piste demandee.
+  useEffect(() => {
+    setCurrentSrc(src);
+  }, [src]);
 
   // (Re)charge la nouvelle question et tente l'autoplay. L'élément <audio>
   // est persistant (pas de remount via `key`) pour conserver le
@@ -57,7 +66,7 @@ export function QuestionAudio({
         /* noop */
       }
     };
-  }, [src]);
+  }, [currentSrc]);
 
   const toggle = () => {
     const el = audioRef.current;
@@ -84,10 +93,15 @@ export function QuestionAudio({
     <div className="flex items-center gap-3">
       <audio
         ref={audioRef}
-        src={src}
+        src={currentSrc}
         preload="auto"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
+        onError={() => {
+          // Piste absente (ex. voix EN non encore deposee) : on bascule sur le
+          // repli plutot que de laisser un lecteur muet.
+          if (fallbackSrc && currentSrc !== fallbackSrc) setCurrentSrc(fallbackSrc);
+        }}
         onEnded={() => {
           setPlaying(false);
           setPlayed(true);
