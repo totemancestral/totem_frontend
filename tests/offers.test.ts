@@ -14,15 +14,15 @@ describe("offers — mapping UI -> ENUM commandes.offre", () => {
     expect(toCommandeOffre("famille")).toBe("heritage");
   });
 
-  it("expose des montants cohérents (49 / 89 / 199 €)", () => {
+  it("expose des montants cohérents (49 / 99 / 219 €)", () => {
     expect(ADULT_OFFERS.origine.amountCents).toBe(4900);
-    expect(ADULT_OFFERS.ancestral.amountCents).toBe(8900);
-    expect(ADULT_OFFERS.famille.amountCents).toBe(19900);
+    expect(ADULT_OFFERS.ancestral.amountCents).toBe(9900);
+    expect(ADULT_OFFERS.famille.amountCents).toBe(21900);
   });
 
   it("expose un libellé produit pour Stripe price_data (pas de price_id)", () => {
     expect(ADULT_OFFERS.origine.label).toBe("TOTEM ANCESTRAL - Origine");
-    expect(ADULT_OFFERS.ancestral.label).toBe("TOTEM ANCESTRAL - Ancestral");
+    expect(ADULT_OFFERS.ancestral.label).toBe("TOTEM ANCESTRAL - Revelation");
     expect(ADULT_OFFERS.famille.label).toBe("TOTEM ANCESTRAL - Famille");
   });
 });
