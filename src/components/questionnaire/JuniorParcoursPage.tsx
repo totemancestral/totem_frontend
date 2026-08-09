@@ -79,28 +79,28 @@ type Question = {
 const copy = {
   fr: {
     eyebrow: "TOTEM JUNIOR",
-    title: "Decouvre ton totem en cinq choix.",
-    firstName: "Prenom optionnel",
+    title: "Découvre ton totem en cinq choix.",
+    firstName: "Prénom optionnel",
     start: "Commencer",
     next: "Suivant",
     back: "Retour",
-    reveal: "Reveler mon Totem",
-    loading: "Le griot compose ton signe...",
+    reveal: "Révéler mon Totem",
+    loading: "Le griot compose ton signe…",
     retry: "Recommencer",
     share: "Texte de partage",
-    challenge: "Defi a envoyer",
+    challenge: "Défi a envoyer",
     clan: "Clan",
-    quality: "Qualite",
+    quality: "Qualité",
     score: "Scores FETA",
-    error: "Impossible de reveler le totem Junior pour le moment.",
-    listen: "Ecouter la question",
+    error: "Impossible de révéler le totem Junior pour le moment.",
+    listen: "Écouter la question",
     playing: "Lecture en cours",
-    replay: "Reecouter",
+    replay: "Réécouter",
     audioHint: "La question se joue automatiquement — appuie pour reecouter.",
     questions: [
       {
-        title: "Quand tu entres quelque part, tu es plutot...",
-        subtitle: "L'energie que les autres sentent en premier.",
+        title: "Quand tu entres quelque part, tu es plutôt...",
+        subtitle: "L'énergie que les autres sentent en premier.",
         choices: [
           { letter: "A", label: "Une flamme qui s'impose", signal: "Dominant / Chef", icon: Flame },
           {
@@ -112,7 +112,7 @@ const copy = {
           {
             letter: "C",
             label: "Une ombre qui observe",
-            signal: "Strategie / Discretion",
+            signal: "Stratégie / Discrétion",
             icon: Footprints,
           },
           {
@@ -125,47 +125,47 @@ const copy = {
       },
       {
         title: "Ton endroit de puissance, c'est...",
-        subtitle: "Le territoire ou tu retrouves ta force.",
+        subtitle: "Le territoire où tu retrouves ta force.",
         choices: [
-          { letter: "A", label: "La foret profonde", signal: "Ancrage / Patience", icon: Trees },
+          { letter: "A", label: "La forêt profonde", signal: "Ancrage / Patience", icon: Trees },
           {
             letter: "B",
             label: "Le sommet d'une montagne",
             signal: "Vision / Solitude",
             icon: Mountain,
           },
-          { letter: "C", label: "L'ocean sans fond", signal: "Mystere / Profondeur", icon: Waves },
+          { letter: "C", label: "L'océan sans fond", signal: "Mystère / Profondeur", icon: Waves },
           {
             letter: "D",
-            label: "La savane a l'aube",
-            signal: "Liberte / Mouvement",
+            label: "La savane à l'aube",
+            signal: "Liberté / Mouvement",
             icon: Sparkles,
           },
         ],
       },
       {
-        title: "Sans meme y penser, tu sais...",
+        title: "Sans même y penser, tu sais...",
         subtitle: "Le don qui agit avant les mots.",
         choices: [
           { letter: "A", label: "Lire les gens", signal: "Intuition", icon: Sparkles },
-          { letter: "B", label: "Proteger ceux que tu aimes", signal: "Gardien", icon: Shield },
+          { letter: "B", label: "Protéger ceux que tu aimes", signal: "Gardien", icon: Shield },
           { letter: "C", label: "Trouver un chemin", signal: "Explorateur", icon: Footprints },
           { letter: "D", label: "Faire bouger les autres", signal: "Meneur", icon: Flame },
         ],
       },
       {
         title: "Ce que les autres ne voient pas en toi...",
-        subtitle: "La part cachee qui pese ou qui protege.",
+        subtitle: "La part cachée qui pèse ou qui protege.",
         choices: [
           {
             letter: "A",
-            label: "Tu gardes tout a l'interieur",
-            signal: "Profondeur cachee",
+            label: "Tu gardes tout à l'intérieur",
+            signal: "Profondeur cachée",
             icon: Waves,
           },
-          { letter: "B", label: "Tu te bats seul", signal: "Fierte", icon: Shield },
+          { letter: "B", label: "Tu te bats seul", signal: "Fierté", icon: Shield },
           { letter: "C", label: "Tu t'adaptes aux gens", signal: "Adaptation", icon: Sparkles },
-          { letter: "D", label: "Tu ressens tout trop fort", signal: "Intensite", icon: Flame },
+          { letter: "D", label: "Tu ressens tout trop fort", signal: "Intensité", icon: Flame },
         ],
       },
       {
@@ -175,19 +175,19 @@ const copy = {
           {
             letter: "A",
             label: "Voler au-dessus de tout",
-            signal: "Aigle / Elevation",
+            signal: "Aigle / Élévation",
             icon: Bird,
           },
           {
             letter: "B",
             label: "Chasser ce que tu veux",
-            signal: "Leopard / Precision",
+            signal: "Leopard / Précision",
             icon: Zap,
           },
           {
             letter: "C",
             label: "Tenir quelque chose debout",
-            signal: "Elephant / Memoire",
+            signal: "Elephant / Mémoire",
             icon: Shield,
           },
           {
@@ -899,7 +899,7 @@ function JuniorShareBlock({
         {cardUrl && (
           <a href={cardUrl} download="mon-totem.png" className="btn-primary !px-5 !py-2.5 text-xs">
             <Download size={14} />
-            {isFr ? "Telecharger l'image" : "Download image"}
+            {isFr ? "Télécharger l'image" : "Download image"}
           </a>
         )}
         <button type="button" onClick={copyText} className="btn-secondary !px-5 !py-2.5 text-xs">

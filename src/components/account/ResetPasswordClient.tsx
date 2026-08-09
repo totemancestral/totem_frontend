@@ -16,7 +16,7 @@ const copy = {
   fr: {
     requestTitle: "Mot de passe oublie",
     updateTitle: "Nouveau mot de passe",
-    requestText: "Entre ton email pour recevoir un lien de reinitialisation securise.",
+    requestText: "Entre ton email pour recevoir un lien de reinitialisation sécurisé.",
     updateText: "Choisis un nouveau mot de passe pour rouvrir ton espace personnel.",
     email: "Email",
     emailPlaceholder: "ton@email.com",
@@ -24,7 +24,7 @@ const copy = {
     passwordPlaceholder: "Minimum 6 caracteres",
     send: "Envoyer le lien",
     update: "Mettre a jour",
-    sent: "Lien envoye. Verifie ta boite mail.",
+    sent: "Lien envoye. Vérifie ta boite mail.",
     updated: "Mot de passe mis a jour. Redirection vers la connexion...",
     back: "Retour a la connexion",
     loading: "...",

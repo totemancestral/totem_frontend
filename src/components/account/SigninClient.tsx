@@ -33,7 +33,7 @@ const copy = {
     or: "ou",
     magic: "Recevoir un lien magique",
     magicSending: "Envoi...",
-    magicSent: "Lien magique envoye. Verifie ta boite mail.",
+    magicSent: "Lien magique envoye. Vérifie ta boite mail.",
     sessionReady: "Session ouverte. Redirection...",
     forgot: "Mot de passe oublie ?",
   },

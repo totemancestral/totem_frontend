@@ -103,15 +103,15 @@ const copy = {
       body: "Le parcours commence par une écoute simple, puis la maison compose et livre votre coffret.",
       items: [
         {
-          title: "01 - Le griot prend la parole",
+          title: "01 — Le griot prend la parole",
           body: "Vos réponses reflètent qui vous êtes.",
         },
         {
-          title: "02 - L'œuvre prend forme",
+          title: "02 — L'œuvre prend forme",
           body: "La maison TOTEM la compose pièce par pièce.",
         },
         {
-          title: "03 - Votre TOTEM vous rejoint",
+          title: "03 — Votre TOTEM vous rejoint",
           body: "Il n'existe qu'une fois et désormais, il existe pour vous.",
         },
       ],
@@ -437,29 +437,29 @@ const copy = {
         [
           {
             q: "I cried while reading the Parchment. It felt like nothing else. A raw emotion.",
-            a: "Aicha - Dakar",
+            a: "Aïcha · Dakar",
           },
           {
             q: "The Voice gave me chills. It felt as if my ancestor truly knew me.",
-            a: "Kwame - Accra",
+            a: "Kwame · Accra",
           },
           {
             q: "The Family box brought us around a common story, finally written.",
-            a: "Fatou - Bamako",
+            a: "Fatou · Bamako",
           },
         ],
         [
           {
             q: "Not a gimmick. A real, grounded, sincere experience that touched the heart.",
-            a: "Yannick - Paris",
+            a: "Yannick · Paris",
           },
           {
             q: "The Face now stands in my living room. It is my Totem, my legacy.",
-            a: "Naomi - London",
+            a: "Naomi · London",
           },
           {
             q: "Fifteen minutes as promised, and an object I will keep all my life.",
-            a: "Idris - Lagos",
+            a: "Idris · Lagos",
           },
         ],
       ],

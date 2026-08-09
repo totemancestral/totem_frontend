@@ -12,35 +12,35 @@ export type AuthRole = "adulte" | "junior";
 /** Copy dépendant du rôle & mode. */
 const copy = {
   fr: {
-    site: "Revenir a l'accueil",
+    site: "Revenir à l'accueil",
     crossToSignup: "Nouveau ici ?",
-    crossToSignupCta: "Compose ton oeuvre",
-    crossToSignin: "Deja un compte ?",
+    crossToSignupCta: "Compose ton œuvre",
+    crossToSignin: "Déjà un compte ?",
     crossToSigninCta: "Reviens dans ton espace",
     adulte: {
-      eyebrow: "Acces personnel",
+      eyebrow: "Accès personnel",
       signup: {
         title: "Ouvre ton passage",
-        text: "Cree ton compte pour commencer la composition. Ton parcours et tes livrables seront rattaches a cet espace.",
-        checks: ["Nom ancestral unique", "Parchemin + audio + image", "Espace personnel a vie"],
+        text: "Crée ton compte pour commencer la composition. Ton parcours et tes livrables seront rattachés à cet espace.",
+        checks: ["Nom ancestral unique", "Parchemin + audio + image", "Espace personnel à vie"],
       },
       signin: {
         title: "Reviens dans ton espace",
-        text: "Retrouve ton parcours, tes commandes et tes oeuvres — ce que tu as commence t'attend intact.",
-        checks: ["Parcours sauvegarde", "Livrables rattaches", "Retour securise"],
+        text: "Retrouve ton parcours, tes commandes et tes œuvres — ce que tu as commencé t'attend intact.",
+        checks: ["Parcours sauvegardé", "Livrables rattachés", "Retour sécurisé"],
       },
     },
     junior: {
       eyebrow: "Espace Junior",
       signup: {
-        title: "Reveille ton totem",
-        text: "Cree ton compte pour decouvrir ton totem, ton nom ancestral et defier tes amis.",
+        title: "Réveille ton totem",
+        text: "Crée ton compte pour découvrir ton totem, ton nom ancestral et défier tes amis.",
         checks: ["Ton totem parmi 12", "Ton nom ancestral", "Defie tes amis"],
       },
       signin: {
         title: "Rejoins ton clan",
-        text: "Reviens voir ton totem, ton nom ancestral et partager le defi avec tes amis.",
-        checks: ["Ton totem", "Ton clan", "Ton defi"],
+        text: "Reviens voir ton totem, ton nom ancestral et partager le défi avec tes amis.",
+        checks: ["Ton totem", "Ton clan", "Ton défi"],
       },
     },
   },
