@@ -502,16 +502,11 @@
   "il_y_a_une_heure_dans_la_journee_ou_tout_semble_plus_clair": "Il y a une heure dans la journée où tout semble plus clair. Une heure où tu es vraiment toi.",
   "imagine_que_dans_cent_ans_quelqu_un_parle_de_toi_qu_est_ce": "Imagine que dans cent ans, quelqu'un parle de toi. Qu'est-ce qu'il dit ?",
   "intro": {
-    "start": "Lancer l'expérience",
-    "startAria": "Lancer l'introduction avec le son",
-    "skip": "Passer",
-    "welcomePrefix": "Bienvenue sur",
-    "line1": "Apprêtez-vous à entrer dans une expérience sacrée.",
-    "line2": "L'ancêtre vous parlera.",
-    "line3": "Écoutez sa voix et laissez-le vous conduire.",
-    "enter": "J'entre dans l'expérience ancestrale",
-    "enterAria": "J'entre dans l'expérience ancestrale",
-    "withSound": "(avec le son)"
+    "label": "Vidéo d'introduction",
+    "enter": "Entrer",
+    "skip": "Passer l'intro",
+    "unmute": "Activer le son",
+    "mute": "Couper le son"
   },
   "intro_2": "intro",
   "items": "items",

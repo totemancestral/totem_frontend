@@ -502,16 +502,11 @@
   "il_y_a_une_heure_dans_la_journee_ou_tout_semble_plus_clair": "There’s a certain time of day when everything seems clearer. A time when you’re truly yourself.",
   "imagine_que_dans_cent_ans_quelqu_un_parle_de_toi_qu_est_ce": "Imagine that in a hundred years, someone is talking about you. What would they say?",
   "intro": {
-    "start": "Start the experience",
-    "startAria": "Start the introduction with sound",
-    "skip": "Skip",
-    "welcomePrefix": "Welcome to",
-    "line1": "Prepare to enter a sacred experience.",
-    "line2": "The ancestor will speak to you.",
-    "line3": "Listen to the voice and let it guide you.",
-    "enter": "Enter the ancestral experience",
-    "enterAria": "Enter the ancestral experience",
-    "withSound": "(with sound)"
+    "label": "Introduction video",
+    "enter": "Enter",
+    "skip": "Skip intro",
+    "unmute": "Turn on sound",
+    "mute": "Mute"
   },
   "intro_2": "intro",
   "items": "items",
