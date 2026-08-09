@@ -10,14 +10,22 @@ export type QuestionAudioLabels = {
   hint: string;
 };
 
+/** Met la nappe musicale en veille pendant la voix, puis la relance. */
+function duckAmbient() {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("totem:ambient-duck"));
+}
+function unduckAmbient() {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("totem:ambient-unduck"));
+}
+
 /**
  * Lecteur audio d'une question (parcours Junior & Adulte).
  *
  * Se (re)charge et se déclenche automatiquement à chaque changement de
- * question (le composant est remonté via `key`), après le geste utilisateur
- * initial (« Commencer » / « Suivant ») — condition exigée par les
- * navigateurs pour l'autoplay avec son. Le bouton play/pause sert aussi de
- * secours si l'autoplay est bloqué.
+ * question, après le geste utilisateur initial (« Commencer » / « Suivant ») —
+ * condition exigée par les navigateurs pour l'autoplay avec son. Le bouton
+ * play/pause sert aussi de secours si l'autoplay est bloqué. Pendant la
+ * lecture, la nappe musicale du site est mise en veille.
  */
 export function QuestionAudio({
   src,
@@ -65,6 +73,7 @@ export function QuestionAudio({
       } catch {
         /* noop */
       }
+      unduckAmbient();
     };
   }, [currentSrc]);
 
@@ -95,8 +104,14 @@ export function QuestionAudio({
         ref={audioRef}
         src={currentSrc}
         preload="auto"
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
+        onPlay={() => {
+          setPlaying(true);
+          duckAmbient();
+        }}
+        onPause={() => {
+          setPlaying(false);
+          unduckAmbient();
+        }}
         onError={() => {
           // Piste absente (ex. voix EN non encore deposee) : on bascule sur le
           // repli plutot que de laisser un lecteur muet.
@@ -105,6 +120,7 @@ export function QuestionAudio({
         onEnded={() => {
           setPlaying(false);
           setPlayed(true);
+          unduckAmbient();
         }}
       />
       <button

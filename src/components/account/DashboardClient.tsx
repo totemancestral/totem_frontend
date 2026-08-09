@@ -642,9 +642,6 @@ export function DashboardClient({
                           style={{ color: "rgba(237,217,154,0.5)" }}
                         >
                           <span>{totem.quality}</span>
-                          <span>
-                            F{totem.scores.F} E{totem.scores.E} T{totem.scores.T} A{totem.scores.A}
-                          </span>
                         </div>
                         <button
                           type="button"

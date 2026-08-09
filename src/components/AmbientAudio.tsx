@@ -23,6 +23,13 @@ export function AmbientAudio({ active }: { active: boolean }) {
   const enabledRef = useRef(true);
   const [enabled, setEnabled] = useState(true);
   const [playing, setPlaying] = useState(false);
+  const playingRef = useRef(false);
+  /** Vrai si la musique jouait avant d'être mise en veille par une voix. */
+  const resumeAfterDuckRef = useRef(false);
+
+  useEffect(() => {
+    playingRef.current = playing;
+  }, [playing]);
 
   const fadeOutAndPause = useCallback(() => {
     const token = ++fadeTokenRef.current;
@@ -121,6 +128,28 @@ export function AmbientAudio({ active }: { active: boolean }) {
     if (!active || !enabled || playing) return;
     startPlayback();
   }, [active, enabled, playing, startPlayback]);
+
+  // Mise en veille pendant une voix du parcours : la question doit s'entendre
+  // seule, sans la nappe musicale par-dessus. La musique reprend ensuite, mais
+  // seulement si elle jouait avant (on ne la démarre jamais de force).
+  useEffect(() => {
+    const duck = () => {
+      resumeAfterDuckRef.current = playingRef.current;
+      if (playingRef.current) fadeOutAndPause();
+    };
+    const unduck = () => {
+      if (!resumeAfterDuckRef.current) return;
+      resumeAfterDuckRef.current = false;
+      if (enabledRef.current) startPlayback();
+    };
+
+    window.addEventListener("totem:ambient-duck", duck);
+    window.addEventListener("totem:ambient-unduck", unduck);
+    return () => {
+      window.removeEventListener("totem:ambient-duck", duck);
+      window.removeEventListener("totem:ambient-unduck", unduck);
+    };
+  }, [fadeOutAndPause, startPlayback]);
 
   useEffect(() => {
     if (active && enabled) return;

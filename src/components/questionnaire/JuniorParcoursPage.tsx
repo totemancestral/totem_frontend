@@ -385,31 +385,6 @@ export function JuniorParcoursPage() {
     }
   }
 
-  async function revealJunior() {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/iuvenis_signum", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, answers: apiAnswers, locale }),
-      });
-      const payload = (await response.json().catch(() => null)) as
-        | JuniorResult
-        | { error?: string }
-        | null;
-      if (!response.ok || !payload || !isJuniorResult(payload)) {
-        throw new Error(payload && "error" in payload ? payload.error : t.error);
-      }
-      sessionStorage.setItem("junior_reveal", JSON.stringify(payload));
-      setResult(payload);
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : t.error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   const restoreResultFromCache = useCallback(() => {
     if (result) return;
     const cachedReveal = sessionStorage.getItem("junior_reveal");
@@ -497,14 +472,10 @@ export function JuniorParcoursPage() {
             <p className="mt-5 text-lg" style={{ color: "rgba(245,240,232,0.86)" }}>
               {result.phrase}
             </p>
-            <dl className="mt-8 grid grid-cols-2 gap-3">
+            <dl className="mt-8 grid grid-cols-3 gap-3">
               <ResultStat label={t.quality as string} value={result.totem.quality} />
               <ResultStat label="Attribut" value={result.attribut} />
               <ResultStat label="Animal" value={result.totem.animal} />
-              <ResultStat
-                label={t.score as string}
-                value={`F${result.scores.F} E${result.scores.E} T${result.scores.T} A${result.scores.A}`}
-              />
             </dl>
             <div className="mt-6 flex flex-wrap gap-3">
               {result.audioUrl && (
@@ -747,7 +718,7 @@ export function JuniorParcoursPage() {
                   <button
                     type="button"
                     className="btn-primary"
-                    onClick={revealJunior}
+                    onClick={startCheckout}
                     disabled={!canContinue || loading}
                   >
                     {loading ? (
@@ -762,15 +733,13 @@ export function JuniorParcoursPage() {
                       </>
                     )}
                   </button>
-                  <button
-                    type="button"
-                    className="btn-secondary !px-4 !py-2 text-xs"
-                    onClick={startCheckout}
-                    disabled={!canContinue || loading}
+                  <span
+                    className="inline-flex items-center gap-1.5 text-xs"
+                    style={{ color: "rgba(245,240,232,0.55)" }}
                   >
-                    <CreditCard size={14} />
-                    {locale === "fr" ? "Version complète · 9,99 €" : "Full version · €9.99"}
-                  </button>
+                    <CreditCard size={13} />
+                    {locale === "fr" ? "Paiement sécurisé · 9,99 €" : "Secure payment · €9.99"}
+                  </span>
                 </div>
               )}
             </div>
@@ -792,10 +761,6 @@ function ResultStat({ label, value }: { label: string; value: string }) {
       </dd>
     </div>
   );
-}
-
-function isJuniorResult(value: JuniorResult | { error?: string }): value is JuniorResult {
-  return "totem" in value && "phrase" in value && "share" in value;
 }
 
 function ResultBlock({ title, body }: { title: string; body: string }) {
