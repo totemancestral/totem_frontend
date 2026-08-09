@@ -23,24 +23,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Corps requis" }, { status: 400 });
   }
 
+  // Le paiement est obligatoire : sans session Stripe verifiee, l'appel
+  // permettait d'enregistrer un totem a 0 EUR par simple requete HTTP.
   const checkoutSessionId =
     typeof body.checkoutSessionId === "string" ? body.checkoutSessionId : null;
-  if (checkoutSessionId) {
-    if (!env.STRIPE_SECRET_KEY) {
-      return NextResponse.json({ error: "Paiement impossible à vérifier" }, { status: 503 });
+  if (!checkoutSessionId) {
+    return NextResponse.json({ error: "Paiement requis" }, { status: 402 });
+  }
+  if (!env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: "Paiement impossible à vérifier" }, { status: 503 });
+  }
+  try {
+    const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2026-02-25.clover" });
+    const checkoutSession = await stripe.checkout.sessions.retrieve(checkoutSessionId);
+    if (checkoutSession.payment_status !== "paid" || checkoutSession.metadata?.userId !== user.id) {
+      return NextResponse.json({ error: "Paiement non confirmé" }, { status: 402 });
     }
-    try {
-      const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2026-02-25.clover" });
-      const checkoutSession = await stripe.checkout.sessions.retrieve(checkoutSessionId);
-      if (
-        checkoutSession.payment_status !== "paid" ||
-        checkoutSession.metadata?.userId !== user.id
-      ) {
-        return NextResponse.json({ error: "Paiement non confirmé" }, { status: 402 });
-      }
-    } catch {
-      return NextResponse.json({ error: "Session de paiement invalide" }, { status: 402 });
-    }
+  } catch {
+    return NextResponse.json({ error: "Session de paiement invalide" }, { status: 402 });
   }
 
   if (env.TOTEM_BACKEND_URL) {
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       user_id: user.id,
       offre: "junior",
       statut: "livree",
-      montant_cents: checkoutSessionId ? JUNIOR_AMOUNT_CENTS : 0,
+      montant_cents: JUNIOR_AMOUNT_CENTS,
       devise: "eur",
       langue: body.locale === "en" ? "en" : "fr",
       stripe_session_id: checkoutSessionId,
