@@ -16,7 +16,6 @@ import {
   Loader,
   MessageCircle,
   Mountain,
-  Share2,
   Shield,
   Sparkles,
   Trees,
@@ -30,6 +29,12 @@ import { authPath } from "@/lib/routes";
 import { QuestionAudio } from "./QuestionAudio";
 import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
 import { GenderModal, type Gender } from "./GenderModal";
+import {
+  juniorShareText,
+  renderJuniorShareCard,
+  type JuniorCardInput,
+} from "@/lib/junior-share-card";
+import { Copy, Instagram, Linkedin, Music2 } from "lucide-react";
 
 type Locale = "fr" | "en";
 type ChoiceLetter = "A" | "B" | "C" | "D";
@@ -320,6 +325,10 @@ export function JuniorParcoursPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  // Carte de partage composee dans le navigateur, puis stockee avec l'oeuvre.
+  const [cardUrl, setCardUrl] = useState<string | null>(null);
+  const [cardDataUrl, setCardDataUrl] = useState<string | null>(null);
+  const [cardFailed, setCardFailed] = useState(false);
 
   const restart = () => {
     sessionStorage.removeItem("junior_reveal");
@@ -410,8 +419,36 @@ export function JuniorParcoursPage() {
     }
   }, [checkoutSessionId, checkoutSuccess, restoreResultFromCache]);
 
+  // Composition de la carte des que le totem est revele : elle sert a la fois
+  // d'illustration de l'oeuvre et de visuel a publier.
+  useEffect(() => {
+    if (!result || cardDataUrl) return;
+    let alive = true;
+    renderJuniorShareCard(cardInput(result, locale))
+      .then((blob) => {
+        if (!alive) return;
+        setCardUrl(URL.createObjectURL(blob));
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (alive && typeof reader.result === "string") setCardDataUrl(reader.result);
+        };
+        reader.readAsDataURL(blob);
+      })
+      .catch(() => {
+        // Sans carte, la revelation reste complete : on n'affiche simplement
+        // pas de visuel a partager, et l'oeuvre est enregistree sans image.
+        if (alive) setCardFailed(true);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [result, cardDataUrl, locale]);
+
   useEffect(() => {
     if (!result || saved || !session?.access_token) return;
+    // On attend la carte pour l'enregistrer avec l'oeuvre. `cardFailed` evite
+    // d'attendre indefiniment si sa composition a echoue.
+    if (!cardDataUrl && !cardFailed) return;
     const cachedAnswers = sessionStorage.getItem("junior_answers");
     let persistedAnswers = apiAnswers;
     if (cachedAnswers) {
@@ -433,18 +470,19 @@ export function JuniorParcoursPage() {
         firstName: firstName || result.firstName,
         locale,
         checkoutSessionId: sessionStorage.getItem("junior_checkout_session") || undefined,
+        imageDataUrl: cardDataUrl ?? undefined,
       }),
     }).then((res) => {
       if (res.ok) setSaved(true);
     }).catch(() => {});
-  }, [apiAnswers, firstName, locale, result, saved, session]);
+  }, [apiAnswers, cardDataUrl, cardFailed, firstName, locale, result, saved, session]);
 
   if (result) {
-    const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-    const shareText = `${result.totem.name} — "${result.phrase}"`;
+    const shareUrl = "https://totem-ancestral.com";
+    const shareText = juniorShareText(cardInput(result, locale));
+    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
     const facebookUrl = `https://facebook.com/sharer/sharer.php?quote=${encodeURIComponent(shareText)}&u=${encodeURIComponent(shareUrl)}`;
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`;
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 
     return (
       <main className="premium-page min-h-screen overflow-hidden px-5 pb-16 pt-28 md:px-8">
@@ -495,20 +533,14 @@ export function JuniorParcoursPage() {
                 </a>
               )}
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="caption text-xs uppercase" style={{ color: "var(--or-ancestral)", alignSelf: "center" }}>
-                Partager :
-              </span>
-              <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-3 py-2 text-xs" title="Facebook">
-                <Facebook size={14} />
-              </a>
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-3 py-2 text-xs" title="WhatsApp">
-                <MessageCircle size={14} />
-              </a>
-              <a href={twitterUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-3 py-2 text-xs" title="Twitter">
-                <Share2 size={14} />
-              </a>
-            </div>
+            <JuniorShareBlock
+              locale={locale}
+              cardUrl={cardUrl}
+              shareText={shareText}
+              linkedinUrl={linkedinUrl}
+              whatsappUrl={whatsappUrl}
+              facebookUrl={facebookUrl}
+            />
             <button
               type="button"
               className="btn-secondary mt-6"
@@ -794,5 +826,149 @@ function ResultBlock({ title, body }: { title: string; body: string }) {
         {body}
       </p>
     </article>
+  );
+}
+
+function cardInput(result: JuniorResult, locale: Locale): JuniorCardInput {
+  return {
+    animal: result.totem.animal,
+    totemName: result.totem.name,
+    nomComplet: result.nomComplet,
+    phrase: result.phrase,
+    quality: result.totem.quality,
+    orderNumber: result.orderNumber,
+    locale,
+  };
+}
+
+/**
+ * Partage du totem Junior.
+ *
+ * TikTok et Instagram n'exposent aucun lien de partage pre-rempli depuis un
+ * navigateur : pour eux, le chemin qui fonctionne est de telecharger l'image
+ * et de copier le texte, puis de publier depuis l'application. LinkedIn,
+ * WhatsApp et Facebook acceptent en revanche une intention web directe.
+ */
+function JuniorShareBlock({
+  locale,
+  cardUrl,
+  shareText,
+  linkedinUrl,
+  whatsappUrl,
+  facebookUrl,
+}: {
+  locale: Locale;
+  cardUrl: string | null;
+  shareText: string;
+  linkedinUrl: string;
+  whatsappUrl: string;
+  facebookUrl: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  const isFr = locale === "fr";
+
+  const copyText = async () => {
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Presse-papiers refuse : le texte reste selectionnable a l'ecran.
+    }
+  };
+
+  return (
+    <div className="mt-6">
+      {cardUrl && (
+        <img
+          src={cardUrl}
+          alt={isFr ? "Visuel de ton totem a partager" : "Your totem visual to share"}
+          className="mx-auto w-full max-w-[280px] rounded-xl border"
+          style={{ borderColor: "rgba(216,173,77,0.28)" }}
+        />
+      )}
+
+      <p
+        className="mt-5 whitespace-pre-line rounded-lg border p-4 text-sm leading-relaxed"
+        style={{ borderColor: "rgba(216,173,77,0.22)", color: "rgba(245,240,232,0.86)" }}
+      >
+        {shareText}
+      </p>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {cardUrl && (
+          <a href={cardUrl} download="mon-totem.png" className="btn-primary !px-5 !py-2.5 text-xs">
+            <Download size={14} />
+            {isFr ? "Telecharger l'image" : "Download image"}
+          </a>
+        )}
+        <button type="button" onClick={copyText} className="btn-secondary !px-5 !py-2.5 text-xs">
+          <Copy size={14} />
+          {copied
+            ? isFr
+              ? "Texte copie"
+              : "Text copied"
+            : isFr
+              ? "Copier le texte"
+              : "Copy text"}
+        </button>
+      </div>
+
+      <p className="caption mt-5 text-xs uppercase" style={{ color: "var(--or-ancestral)" }}>
+        {isFr ? "Publier sur" : "Share on"}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <a
+          href={linkedinUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-secondary px-3 py-2 text-xs"
+          title="LinkedIn"
+        >
+          <Linkedin size={14} />
+        </a>
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-secondary px-3 py-2 text-xs"
+          title="WhatsApp"
+        >
+          <MessageCircle size={14} />
+        </a>
+        <a
+          href={facebookUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-secondary px-3 py-2 text-xs"
+          title="Facebook"
+        >
+          <Facebook size={14} />
+        </a>
+        <a
+          href="https://www.instagram.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-secondary px-3 py-2 text-xs"
+          title="Instagram"
+        >
+          <Instagram size={14} />
+        </a>
+        <a
+          href="https://www.tiktok.com/upload"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-secondary px-3 py-2 text-xs"
+          title="TikTok"
+        >
+          <Music2 size={14} />
+        </a>
+      </div>
+      <p className="mt-2 text-[11px]" style={{ color: "rgba(226,225,238,0.45)" }}>
+        {isFr
+          ? "Pour Instagram et TikTok : telecharge l'image et copie le texte, puis publie depuis l'application."
+          : "For Instagram and TikTok: download the image and copy the text, then post from the app."}
+      </p>
+    </div>
   );
 }

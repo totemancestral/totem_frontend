@@ -4,6 +4,9 @@ import { getServerEnv } from "@/lib/env";
 import { JUNIOR_AMOUNT_CENTS } from "@/lib/offers";
 import { createServiceClient } from "@/lib/server-auth";
 
+/** Bucket public partage avec le pipeline de livraison. */
+const STORAGE_BUCKET = "totem-files";
+
 export async function POST(request: Request) {
   const env = getServerEnv();
   const authHeader = request.headers.get("authorization");
@@ -76,11 +79,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Erreur sauvegarde commande" }, { status: 500 });
   }
 
+  // Carte de partage composee par le navigateur : stockee avec l'oeuvre pour
+  // que le totem apparaisse illustre dans le tableau de bord.
+  const imageUrl = await storeShareCard(supabase, commande.id, body.imageDataUrl);
+
   const { error } = await supabase.from("oeuvres").insert({
     user_id: user.id,
     commande_id: commande.id,
     nom_totem: body.nomComplet || "Totem Junior",
     statut: "livree",
+    image_url: imageUrl,
     recit: body.phrase || null,
     metadata: {
       type: "junior",
@@ -103,4 +111,35 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ ok: true });
+}
+
+/**
+ * Depose la carte de partage dans le bucket public et renvoie son URL.
+ *
+ * L'echec n'est jamais bloquant : le totem est deja paye et compose, il serait
+ * absurde de refuser la livraison parce que l'illustration n'a pas pu etre
+ * televersee. L'oeuvre est alors simplement enregistree sans image.
+ */
+async function storeShareCard(
+  supabase: ReturnType<typeof createServiceClient>,
+  commandeId: string,
+  dataUrl: unknown,
+): Promise<string | null> {
+  if (typeof dataUrl !== "string") return null;
+
+  const match = /^data:image\/png;base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl.trim());
+  if (!match) return null;
+
+  const bytes = Buffer.from(match[1], "base64");
+  // Garde-fou : une carte legitime pese quelques centaines de kilo-octets.
+  if (bytes.byteLength === 0 || bytes.byteLength > 4_000_000) return null;
+
+  const key = `totems/junior/${commandeId}/totem.png`;
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(key, bytes, {
+    contentType: "image/png",
+    upsert: true,
+  });
+  if (error) return null;
+
+  return supabase.storage.from(STORAGE_BUCKET).getPublicUrl(key).data.publicUrl ?? null;
 }
