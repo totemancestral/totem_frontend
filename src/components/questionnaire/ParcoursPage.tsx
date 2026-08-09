@@ -11,6 +11,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { apiPath, authPath } from "@/lib/routes";
 import { QuestionAudio } from "./QuestionAudio";
+import { GenderModal, type Gender } from "./GenderModal";
 import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
 
 type FieldLevel = "PRIORITAIRE" | "SECONDAIRE" | "TERTIAIRE" | "SPECIAL";
@@ -396,6 +397,9 @@ export function ParcoursPage() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
+  const [gender, setGender] = useState<Gender | null>(null);
+  // Le sexe est demande juste avant la derniere question, pas au demarrage.
+  const [askGender, setAskGender] = useState(false);
   const [account, setAccount] = useState<AccountDraft>({ prenom: "", email: "" });
   const [session, setSession] = useState<Session | null>(null);
   const [hasUnlockedRest, setHasUnlockedRest] = useState(false);
@@ -483,6 +487,7 @@ export function ParcoursPage() {
       if (!raw) return;
       const saved = JSON.parse(raw) as {
         answers?: Record<number, Answer>;
+        gender?: Gender | null;
         account?: AccountDraft;
         hasUnlockedRest?: boolean;
         paidCommandId?: string | null;
@@ -490,6 +495,7 @@ export function ParcoursPage() {
         phase?: Phase;
       };
       if (saved.answers) setAnswers(saved.answers);
+      if (saved.gender) setGender(saved.gender);
       if (saved.account) setAccount(saved.account);
       if (typeof saved.hasUnlockedRest === "boolean") setHasUnlockedRest(saved.hasUnlockedRest);
       if (typeof saved.paidCommandId === "string") setPaidCommandId(saved.paidCommandId);
@@ -516,12 +522,12 @@ export function ParcoursPage() {
     try {
       localStorage.setItem(
         PARCOURS_STORAGE_KEY,
-        JSON.stringify({ answers, account, hasUnlockedRest, paidCommandId, index, phase }),
+        JSON.stringify({ answers, gender, account, hasUnlockedRest, paidCommandId, index, phase }),
       );
     } catch {
       /* quota, ignore */
     }
-  }, [answers, account, hasUnlockedRest, paidCommandId, index, phase]);
+  }, [answers, gender, account, hasUnlockedRest, paidCommandId, index, phase]);
 
   const current = questions[index] ?? QUESTIONS[index];
   const progress = phase === "intro" ? 0 : phase === "question" ? current.progress : 100;
@@ -538,7 +544,7 @@ export function ParcoursPage() {
       await fetch(apiPath("parcours", "/reponses"), {
         method: "POST",
         headers,
-        body: JSON.stringify({ reponses: answers, termine: true, langue: locale }),
+        body: JSON.stringify({ reponses: answers, sexe: gender, termine: true, langue: locale }),
       });
       return;
     }
@@ -546,14 +552,14 @@ export function ParcoursPage() {
     const response = await fetch(apiPath("commandes", "/complete"), {
       method: "POST",
       headers,
-      body: JSON.stringify({ commandeId: paidCommandId, answers, locale }),
+      body: JSON.stringify({ commandeId: paidCommandId, answers, sexe: gender, locale }),
     });
 
     if (!response.ok) {
       const payload = (await response.json().catch(() => null)) as { error?: string } | null;
       throw new Error(payload?.error || "complete_order_failed");
     }
-  }, [answers, locale, paidCommandId, session]);
+  }, [answers, gender, locale, paidCommandId, session]);
 
   // Paywall auto-transition
   useEffect(() => {
@@ -606,6 +612,12 @@ export function ParcoursPage() {
     }
     if (current.n === 10) {
       setPhase("final-transition");
+      return;
+    }
+    // Avant d'ouvrir la derniere question, le griot demande le sexe de
+    // l'ancetre : sans lui, le recit resterait au neutre.
+    if (current.n === 9 && !gender) {
+      setAskGender(true);
       return;
     }
     setIndex((i) => i + 1);
@@ -789,6 +801,17 @@ export function ParcoursPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {askGender && (
+        <GenderModal
+          locale={locale}
+          onChoose={(choice) => {
+            setGender(choice);
+            setAskGender(false);
+            setIndex((i) => i + 1);
+          }}
+        />
+      )}
     </div>
   );
 }

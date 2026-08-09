@@ -19,6 +19,7 @@ const answerSchema = z.object({
 
 const juniorSchema = z.object({
   firstName: z.string().trim().max(40).optional(),
+  sexe: z.enum(["homme", "femme"]).nullish(),
   answers: z.record(z.string(), answerSchema),
   locale: z.enum(["fr", "en"]).optional(),
 });
@@ -92,6 +93,7 @@ export async function POST(request: Request) {
     const seed = crypto.randomUUID();
     let profile = createJuniorTotemProfile({
       firstName: parsed.data.firstName,
+      gender: parsed.data.sexe ?? null,
       answers: parsed.data.answers,
       seed,
     });

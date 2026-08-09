@@ -7,6 +7,7 @@ import type { Json } from "@/integrations/supabase/types";
 const completeSchema = z.object({
   commandeId: z.string().uuid(),
   answers: z.record(z.string(), z.unknown()),
+  sexe: z.enum(["homme", "femme"]).nullish(),
   locale: z.enum(["fr", "en"]),
 });
 
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Commande incomplete invalide" }, { status: 422 });
   }
 
-  const backendAnswers = toBackendAnswers(parsed.data.answers);
+  const backendAnswers = withGender(toBackendAnswers(parsed.data.answers), parsed.data.sexe);
   if (backendAnswers.length !== 10) {
     return NextResponse.json({ error: "Reponses incompletes" }, { status: 422 });
   }
@@ -131,6 +132,17 @@ async function completeBackendOrder(input: {
   }
 
   return { ok: false, status: lastStatus, error: lastError };
+}
+
+/** Le sexe declare voyage comme reponse dediee : le backend le lit sous
+ *  l'identifiant « sexe » et n'en tient pas compte dans le scoring. */
+function withGender(
+  answers: { questionId: string; answer: string }[],
+  sexe: unknown,
+): { questionId: string; answer: string }[] {
+  const value = typeof sexe === "string" ? sexe.trim().toLowerCase() : "";
+  if (value !== "homme" && value !== "femme") return answers;
+  return [...answers, { questionId: "sexe", answer: value }];
 }
 
 function toBackendAnswers(answers: Record<string, unknown>): BackendAnswer[] {

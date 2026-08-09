@@ -11,6 +11,7 @@ import type { Json } from "@/integrations/supabase/types";
 const checkoutSchema = z.object({
   offre: z.enum(["origine", "ancestral", "famille"]),
   answers: z.record(z.string(), z.unknown()),
+  sexe: z.enum(["homme", "femme"]).nullish(),
   locale: z.enum(["fr", "en"]),
 });
 
@@ -56,7 +57,7 @@ async function handleCheckout(
     .maybeSingle();
   const prenom = (profileResult?.data as { prenom?: string } | null)?.prenom ?? "";
 
-  const backendAnswers = toBackendAnswers(data.answers);
+  const backendAnswers = withGender(toBackendAnswers(data.answers), data.sexe);
   const { data: parcours, error: parcoursError } = await supabase
     .from("reponses_parcours")
     .upsert(
@@ -261,6 +262,17 @@ function formatAnswer(value: unknown) {
   const answer = value as { choice?: string; field?: string; skipped?: boolean };
   if (answer.skipped) return "skipped";
   return [answer.choice, answer.field?.trim()].filter(Boolean).join(" | ");
+}
+
+/** Le sexe declare voyage comme reponse dediee : le backend le lit sous
+ *  l'identifiant « sexe » et n'en tient pas compte dans le scoring. */
+function withGender(
+  answers: { questionId: string; answer: string }[],
+  sexe: unknown,
+): { questionId: string; answer: string }[] {
+  const value = typeof sexe === "string" ? sexe.trim().toLowerCase() : "";
+  if (value !== "homme" && value !== "femme") return answers;
+  return [...answers, { questionId: "sexe", answer: value }];
 }
 
 function toBackendAnswers(answers: Record<string, unknown>) {

@@ -841,7 +841,12 @@ export type JuniorTotemProfile = JuniorProfile & {
   prenomB: string;
   title: string;
   nomComplet: string;
+  /** Sexe declare : genre le totem et son recit. `null` = neutre. */
+  gender: JuniorGender;
 };
+
+/** `null` quand le sexe n'a pas ete declare : le recit reste neutre. */
+export type JuniorGender = "homme" | "femme" | null;
 
 export type JuniorPromptBundle = {
   promptJ1: string;
@@ -1027,6 +1032,7 @@ export function createJuniorTotemProfile(input: {
   seed: string;
   orderNumber?: number;
   clanCount?: number;
+  gender?: JuniorGender;
 }): JuniorTotemProfile {
   const scored = scoreJuniorAnswers(input.answers);
   const totem = JUNIOR_TOTEMS[scored.totemId];
@@ -1049,6 +1055,7 @@ export function createJuniorTotemProfile(input: {
     prenomB,
     title,
     nomComplet: `${prenomA}-${prenomB}, ${title}`,
+    gender: input.gender ?? null,
   };
 }
 
@@ -1276,6 +1283,17 @@ REPONSE — Format JSON STRICT :
 }`;
 }
 
+/** Consigne de genre inseree dans les prompts Junior. */
+function juniorGenderLine(gender: JuniorGender): string {
+  if (gender === "homme") {
+    return "MASCULIN — accorde tout le texte au masculin, sans formulation neutre.";
+  }
+  if (gender === "femme") {
+    return "FEMININ — accorde tout le texte au feminin, sans formulation neutre.";
+  }
+  return "NON DECLARE — garde des formulations valables au masculin comme au feminin.";
+}
+
 function buildPromptJ2(profile: JuniorTotemProfile, answers: Record<string, unknown>) {
   return `Tu es le Griot de TOTEM ANCESTRAL.
 
@@ -1284,6 +1302,7 @@ Ton registre : oral, poetique, puissant. Jamais scientifique. Jamais religieux.
 
 TOTEM : ${profile.totem.name}
 NOM ANCESTRAL : ${profile.nomComplet}
+SEXE : ${juniorGenderLine(profile.gender)}
 
 REPONSES DU PROFIL :
 Q1 (energie) : ${juniorAnswerLabel(answers, 1)}
@@ -1317,6 +1336,7 @@ Tu accueilles un adolescent dans son Clan.
 
 TOTEM : ${profile.totem.name}
 NOM ANCESTRAL : ${profile.nomComplet}
+SEXE : ${juniorGenderLine(profile.gender)}
 CLAN : ${juniorClanName(profile.totem)}
 NUMERO MONDIAL : ${profile.orderNumber}
 DON DECLARE (Q3) : ${juniorAnswerLabel(answers, 3)}

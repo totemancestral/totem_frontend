@@ -29,6 +29,7 @@ import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { authPath } from "@/lib/routes";
 import { QuestionAudio } from "./QuestionAudio";
 import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
+import { GenderModal, type Gender } from "./GenderModal";
 
 type Locale = "fr" | "en";
 type ChoiceLetter = "A" | "B" | "C" | "D";
@@ -306,6 +307,9 @@ export function JuniorParcoursPage() {
   const { session } = useSupabaseSession();
   const [started, setStarted] = useState(false);
   const [index, setIndex] = useState(0);
+  const [gender, setGender] = useState<Gender | null>(null);
+  // Le sexe est demande juste avant la derniere question.
+  const [askGender, setAskGender] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [answers, setAnswers] = useState<Record<number, JuniorAnswer>>({});
   const [result, setResult] = useState<JuniorResult | null>(() => {
@@ -362,7 +366,7 @@ export function JuniorParcoursPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ firstName, answers: apiAnswers, locale }),
+        body: JSON.stringify({ firstName, answers: apiAnswers, sexe: gender, locale }),
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok || !payload?.checkoutUrl) {
@@ -707,7 +711,13 @@ export function JuniorParcoursPage() {
                 <button
                   type="button"
                   className="btn-primary"
-                  onClick={() => setIndex((currentIndex) => currentIndex + 1)}
+                  onClick={() => {
+                    if (index === 3 && !gender) {
+                      setAskGender(true);
+                      return;
+                    }
+                    setIndex((currentIndex) => currentIndex + 1);
+                  }}
                   disabled={!canContinue || loading}
                 >
                   {t.next as string}
@@ -746,6 +756,17 @@ export function JuniorParcoursPage() {
           </div>
         )}
       </section>
+
+      {askGender && (
+        <GenderModal
+          locale={locale}
+          onChoose={(choice) => {
+            setGender(choice);
+            setAskGender(false);
+            setIndex((currentIndex) => currentIndex + 1);
+          }}
+        />
+      )}
     </main>
   );
 }
