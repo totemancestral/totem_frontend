@@ -7,7 +7,7 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== "object") {
-    return NextResponse.json({ error: "Corps de requete invalide" }, { status: 422 });
+    return NextResponse.json({ error: "Corps de requête invalide" }, { status: 422 });
   }
 
   const { reponses, termine } = body as {

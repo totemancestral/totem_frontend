@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => null);
     if (!body || typeof body !== "object") {
-      return NextResponse.json({ error: "Requete invalide" }, { status: 422 });
+      return NextResponse.json({ error: "Requête invalide" }, { status: 422 });
     }
 
     const env = getServerEnv();
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
     if (!env.STRIPE_SECRET_KEY) {
       return NextResponse.json(
-        { error: "Le paiement junior n'est pas configure" },
+        { error: "Le paiement junior n'est pas configuré" },
         { status: 503 },
       );
     }
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
     const completed = countJuniorAnswers(parsed.data.answers);
     if (completed !== 5) {
-      return NextResponse.json({ error: "Les cinq reponses Junior sont requises" }, { status: 422 });
+      return NextResponse.json({ error: "Les cinq réponses Junior sont requises" }, { status: 422 });
     }
 
     const stripe = new Stripe(env.STRIPE_SECRET_KEY, {

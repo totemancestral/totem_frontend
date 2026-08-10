@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
     const parsed = checkoutSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) {
-      return NextResponse.json({ error: "Requete de paiement invalide" }, { status: 422 });
+      return NextResponse.json({ error: "Requête de paiement invalide" }, { status: 422 });
     }
 
     return await handleCheckout(request, parsed.data, auth);
@@ -78,7 +78,7 @@ async function handleCheckout(
   }
 
   if (backendAnswers.length < 4) {
-    return NextResponse.json({ error: "Reponses insuffisantes" }, { status: 422 });
+    return NextResponse.json({ error: "Réponses insuffisantes" }, { status: 422 });
   }
 
   if (env.TOTEM_BACKEND_URL) {
@@ -151,7 +151,7 @@ async function handleCheckout(
 
   if (!env.STRIPE_SECRET_KEY) {
     return NextResponse.json(
-      { error: "Le paiement n'est pas configure. Contacte l'equipe technique." },
+      { error: "Le paiement n'est pas configuré. Contacte l'équipe technique." },
       { status: 503 },
     );
   }

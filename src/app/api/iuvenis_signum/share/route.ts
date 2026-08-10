@@ -4,7 +4,7 @@ import { getServerEnv } from "@/lib/env";
 export async function POST(request: Request) {
   const env = getServerEnv();
   if (!env.TOTEM_BACKEND_URL) {
-    return NextResponse.json({ error: "Backend non configure" }, { status: 503 });
+    return NextResponse.json({ error: "Backend non configuré" }, { status: 503 });
   }
 
   const { id } = await request.json().catch(() => ({}));

@@ -65,7 +65,7 @@ export async function POST(request: Request) {
 
         if (isAlreadyConfirmedError(resendError.message)) {
           return NextResponse.json(
-            { error: "Un compte existe deja avec cet email. Connecte-toi." },
+            { error: "Un compte existe déjà avec cet email. Connecte-toi." },
             { status: 409 },
           );
         }

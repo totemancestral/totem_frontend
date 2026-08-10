@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
   const backendAnswers = withGender(toBackendAnswers(parsed.data.answers), parsed.data.sexe);
   if (backendAnswers.length !== 10) {
-    return NextResponse.json({ error: "Reponses incompletes" }, { status: 422 });
+    return NextResponse.json({ error: "Réponses incomplètes" }, { status: 422 });
   }
 
   const supabase = createServiceClient();

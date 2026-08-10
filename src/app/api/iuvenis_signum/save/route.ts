@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   const authHeader = request.headers.get("authorization");
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
   if (!token) {
-    return NextResponse.json({ error: "Non authentifie" }, { status: 401 });
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
   const supabase = createServiceClient();

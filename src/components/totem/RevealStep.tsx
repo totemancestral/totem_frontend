@@ -317,7 +317,7 @@ export function RevealStep({ data, pdfRef, onBack, onShare, onClan }: RevealStep
               ) : (
                 <Download className="h-4 w-4" />
               )}
-              {downloading ? "Generation..." : "Telecharger le PDF"}
+              {downloading ? "Génération…" : "Telecharger le PDF"}
             </GoldButton>
 
             {data.pdfUrl && (

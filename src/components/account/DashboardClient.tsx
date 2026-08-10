@@ -119,7 +119,7 @@ const copy = {
     draftStatus: "Questionnaire en cours",
     offerStatus: "Offre à choisir",
     paidStatus: "Commande enregistrée",
-    generatingStatus: "Generation en cours",
+    generatingStatus: "Génération en cours",
     deliveredStatus: "Livraison disponible",
     errorStatus: "Intervention requise",
     sectionOpened: "Section ouverte",
@@ -190,7 +190,7 @@ const statusLabels: Record<Locale, Record<string, string>> = {
   fr: {
     en_attente_paiement: "Paiement attendu",
     paye: "Payée",
-    en_generation: "En generation",
+    en_generation: "En génération",
     livree: "Livrée",
     erreur: "Erreur",
     remboursee: "Remboursée",

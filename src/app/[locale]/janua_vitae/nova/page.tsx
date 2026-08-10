@@ -5,7 +5,7 @@ import { SignupClient } from "@/components/account/SignupClient";
 export const metadata: Metadata = {
   title: "Creer mon compte · Totem Ancestral",
   description:
-    "Ouvre ton passage : cree ton compte pour composer ton oeuvre et retrouver tes livrables dans ton espace personnel.",
+    "Ouvre ton passage : crée ton compte pour composer ton œuvre et retrouver tes livrables dans ton espace personnel.",
 };
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {

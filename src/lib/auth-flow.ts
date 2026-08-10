@@ -34,11 +34,11 @@ export function translateAuthError(error: unknown, locale: Locale): string {
       }
     : {
         invalid: "Email ou mot de passe incorrect.",
-        notFound: "Cree d'abord ton compte.",
-        exists: "Un compte existe deja avec cet email.",
+        notFound: "Crée d'abord ton compte.",
+        exists: "Un compte existe déjà avec cet email.",
         notConfirmed: "Confirme d'abord ton adresse email.",
         password: "Mot de passe trop court, minimum 6 caracteres.",
-        email: "Verifie l'adresse email.",
+        email: "Vérifie l'adresse email.",
         rate: "Trop de tentatives. Attends un moment avant de reessayer.",
         fallback: "Authentification impossible.",
       };
