@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { authPath, pagePath } from "@/lib/routes";
+import { LEGAL, legalAddress } from "@/lib/legal";
 
 type Locale = "fr" | "en";
 
@@ -83,12 +84,27 @@ export function Footer({ locale }: { locale: Locale }) {
           </nav>
         </div>
 
+        {/* Identification de l'editeur — mentions obligatoires (art. 6 LCEN),
+            alimentees par la source unique src/lib/legal.ts. */}
+        <address
+          className="caption not-italic border-t pt-4 leading-relaxed"
+          style={{ borderColor: "rgba(216,173,77,0.10)", color: "rgba(226,225,238,0.45)" }}
+        >
+          <strong style={{ color: "rgba(226,225,238,0.62)", fontWeight: 600 }}>
+            {LEGAL.company}
+          </strong>
+          , {LEGAL.form} au capital de {LEGAL.capital} · Siège social : {legalAddress()}
+          <br />
+          {locale === "en" ? "Registration" : "Immatriculation"} : {LEGAL.rcs} ·{" "}
+          {locale === "en" ? "VAT number" : "N° TVA intracommunautaire"} : {LEGAL.tva}
+        </address>
+
         <div
           className="flex flex-col-reverse items-start justify-between gap-3 border-t pt-4 md:flex-row md:items-center"
           style={{ borderColor: "rgba(216,173,77,0.10)" }}
         >
           <p className="caption" style={{ color: "rgba(226,225,238,0.55)" }}>
-            © {year} SENYCE PARTNERS — {t("copyright")}
+            © {year} {LEGAL.company} — {t("copyright")}
           </p>
           <p className="caption" style={{ color: "rgba(226,225,238,0.42)" }}>
             {t("tagline")}
