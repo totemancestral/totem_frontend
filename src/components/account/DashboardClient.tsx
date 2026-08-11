@@ -351,8 +351,8 @@ export function DashboardClient({
   async function shareJuniorTotem(totem: JuniorTotem) {
     const isFr = locale === "fr";
     const text = isFr
-      ? `${totem.totemName} — #${String(totem.orderNumber).padStart(6, "0")}\n"${totem.phrase}"\nDécouvre ton totem ancestral sur totemancestral.com`
-      : `${totem.totemName} — #${String(totem.orderNumber).padStart(6, "0")}\n"${totem.phrase}"\nDiscover your ancestral totem on totemancestral.com`;
+      ? `${totem.totemName} · #${String(totem.orderNumber).padStart(6, "0")}\n"${totem.phrase}"\nDécouvre ton totem ancestral sur totem-ancestral.com`
+      : `${totem.totemName} · #${String(totem.orderNumber).padStart(6, "0")}\n"${totem.phrase}"\nDiscover your ancestral totem on totem-ancestral.com`;
     let copied = false;
     try {
       await navigator.clipboard.writeText(text);

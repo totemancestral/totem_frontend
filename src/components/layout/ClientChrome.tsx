@@ -2,6 +2,7 @@
 
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { IntroVideo } from "@/components/IntroVideo";
 import { AmbientAudio } from "@/components/AmbientAudio";
 import { CookieConsent } from "@/components/CookieConsent";
 import { Toaster } from "@/components/ui/sonner";
@@ -13,6 +14,11 @@ type Locale = "fr" | "en";
 export function ClientChrome({ children, locale }: { children: ReactNode; locale: Locale }) {
   const pathname = usePathname();
   const isDashboard = Boolean(pathname?.includes("/domus_animi"));
+  // L'intro precede l'entree sur le site : elle est montee ici, au-dessus de
+  // toute l'application. Dans HomePage elle restait prisonniere du contexte
+  // d'empilement de .liquid-home-shell (isolation: isolate) et le header du
+  // site s'affichait par-dessus.
+  const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -31,6 +37,7 @@ export function ClientChrome({ children, locale }: { children: ReactNode; locale
         overflowX: "clip",
       }}
     >
+      {isHome && <IntroVideo />}
       <Header locale={locale} />
       <main style={{ maxWidth: "100%", overflowX: "clip" }}>{children}</main>
       {!isDashboard && <Footer locale={locale} />}

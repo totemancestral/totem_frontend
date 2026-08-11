@@ -1,9 +1,8 @@
 /**
  * Informations légales de l'éditeur — source unique.
  *
- * ⚠️ Les valeurs marquées « [À COMPLÉTER …] » doivent être renseignées avec
- * les informations réelles de la société (extrait Kbis). Une fois remplies
- * ici, elles se propagent aux Mentions légales, CGV et Confidentialité.
+ * Source unique : ces valeurs alimentent le pied de page, les Mentions
+ * légales, les CGV et la page Confidentialité.
  */
 export const LEGAL = {
   /** Raison sociale. */
@@ -23,9 +22,13 @@ export const LEGAL = {
   /** Email de contact public. */
   email: "contact@totem-ancestral.com",
   /** Directeur / directrice de la publication. */
-  director: "[À COMPLÉTER : directeur de la publication]",
+  director: "AGOSSOU Adimagbolo",
   /** Médiateur de la consommation (obligatoire B2C). */
-  mediator: "[À COMPLÉTER : nom + site du médiateur de la consommation]",
+  mediator: "CM2C — Centre de la Médiation de la Consommation de Conciliateurs de Justice",
+  /** Site de saisine du médiateur. */
+  mediatorUrl: "https://cm2c.net",
+  /** Adresse postale du médiateur. */
+  mediatorAddress: "14 rue Saint-Jean, 75017 Paris",
   /** Nom commercial du service. */
   brand: "Totem Ancestral",
   /** Domaine principal. */

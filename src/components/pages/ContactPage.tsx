@@ -116,8 +116,8 @@ export function ContactForm() {
       </button>
       <p className="caption text-center leading-relaxed">
         Ou écrivez directement à{" "}
-        <a href="mailto:contact@totemancestral.com" className="link-gold">
-          contact@totemancestral.com
+        <a href="mailto:contact@totem-ancestral.com" className="link-gold">
+          contact@totem-ancestral.com
         </a>
       </p>
     </form>

@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     await sendResendEmail({
       to: {
-        email: readEnvValue("ADMIN_EMAIL") || "contact@totemancestral.com",
+        email: readEnvValue("ADMIN_EMAIL") || "contact@totem-ancestral.com",
         name: "SENYCE Partners",
       },
       replyTo: { email, name: prenom },

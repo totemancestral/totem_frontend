@@ -163,7 +163,7 @@ export const ADULT_ARCHETYPES: Record<AdultArchetypeId, AdultArchetype> = {
   rhinoceros: {
     id: "rhinoceros",
     french: "Rhinocéros",
-    english: "Rhinocéros",
+    english: "Rhinoceros",
     people: "Zulu",
     region: "Afrique du Sud",
     element: "F",
@@ -207,7 +207,7 @@ export const ADULT_ARCHETYPES: Record<AdultArchetypeId, AdultArchetype> = {
   elephant: {
     id: "elephant",
     french: "Éléphant",
-    english: "Éléphant",
+    english: "Elephant",
     people: "Akan",
     region: "Ghana",
     element: "T",
@@ -262,7 +262,7 @@ export const ADULT_ARCHETYPES: Record<AdultArchetypeId, AdultArchetype> = {
   leopard: {
     id: "leopard",
     french: "Léopard",
-    english: "Léopard",
+    english: "Leopard",
     people: "Yoruba",
     region: "Nigeria",
     element: "F",
@@ -1378,7 +1378,7 @@ Maximum 3 lignes. Accroche forte en ligne 1 avec le nom ancestral.
 Ligne 3 : appel a l'action. Inclut #RevealYourTotem
 
 VERSION B — Snapchat / WhatsApp
-1-2 phrases maximum. Defi direct a un ami. Inclut totemancestral.com
+1-2 phrases maximum. Defi direct a un ami. Inclut totem-ancestral.com
 
 REPONSE — Format JSON STRICT :
 {
@@ -1398,7 +1398,7 @@ function buildJuniorFallback(profile: JuniorTotemProfile, answers: Record<string
     attribut: attribute,
     messageClan,
     caption: `${profile.nomComplet}\nJe revele mon totem : ${profile.totem.name}\nA ton tour. #RevealYourTotem`,
-    messageDefi: `J'ai decouvert mon totem ancestral : ${profile.totem.name}. Toi, tu es quoi ? totemancestral.com`,
+    messageDefi: `J'ai decouvert mon totem ancestral : ${profile.totem.name}. Toi, tu es quoi ? totem-ancestral.com`,
   };
 }
 
@@ -1567,6 +1567,7 @@ ${variantStructures[narrativeVariant]}
 Le nom ${profile.nomComplet} doit apparaitre au moins une fois dans le recit.
 
 REGLES STRICTES :
+- PONCTUATION : n'utilise JAMAIS de tiret (-) ni de tiret cadratin (—) pour separer des mots, des idees ou des phrases, ni devant un numero. Emploie une ponctuation francaise correcte : virgule, point, deux-points, parentheses. Le tiret n'est admis qu'a l'interieur d'un mot compose.
 · Total : 1500-1800 caracteres espaces compris
 · Conditionnel doux : "il aurait vecu", JAMAIS "tu es" pour l'ancetre
 · Jamais de verite scientifique ou ethnique — c'est une fable
@@ -1604,6 +1605,7 @@ STRUCTURE :
 · Adresse finale ("sois...", "marche...", "porte...") — 1-2 phrases
 
 REGLES STRICTES :
+- PONCTUATION : n'utilise JAMAIS de tiret (-) ni de tiret cadratin (—) pour separer des mots, des idees ou des phrases, ni devant un numero. Emploie une ponctuation francaise correcte : virgule, point, deux-points, parentheses. Le tiret n'est admis qu'a l'interieur d'un mot compose.
 · Longueur : 130-160 mots
 · Phrases courtes — faciliter la diction
 · Pas de chiffres en chiffres
@@ -1655,6 +1657,7 @@ BASE DE PROMPT A CONSERVER :
 ${visualPrompt}
 
 REGLES :
+- PONCTUATION : jamais de tiret (-) ni de tiret cadratin (—) entre des mots ou des idees, ni devant un numero. Ponctuation francaise correcte uniquement.
 · Fusion du visage obligatoire sur la tete du totem : animal realiste a gauche, masque Ngil Fang a droite
 · Sujet principal obligatoire : l'animal-sculpture complet, pas un portrait humain
 · Aucun humain, aucun torse, aucun buste, aucun personnage
@@ -1689,7 +1692,7 @@ Membres du Clan actuellement : ${clanCount}
 
 MISSION — Trois sorties distinctes :
 SORTIE 1 — CAPTION LINKEDIN / INSTAGRAM : maximum 4 lignes, inclut #RevealYourTotem.
-SORTIE 2 — MESSAGE WHATSAPP : 2 phrases maximum, inclut totemancestral.com.
+SORTIE 2 — MESSAGE WHATSAPP : 2 phrases maximum, inclut totem-ancestral.com.
 SORTIE 3 — MESSAGE D'ACCUEIL CLAN : une phrase de 20-35 mots.
 
 REPONSE — Format JSON STRICT :
@@ -1728,15 +1731,15 @@ function buildShareFallback(profile: AdultTotemProfile, clanCount: number, passa
 
   if (profile.language === "en") {
     return {
-      captionLinkedin: `${profile.nomComplet}\nA symbolic fable has named my ancestral totem: ${profile.archetype.english}.\n${passage || "A passage opens; a name remains."}\nReveal yours: totemancestral.com #RevealYourTotem`,
-      messageWhatsapp: `I discovered my ancestral totem: ${profile.archetype.english}. Your turn: totemancestral.com`,
+      captionLinkedin: `${profile.nomComplet}\nA symbolic fable has named my ancestral totem: ${profile.archetype.english}.\n${passage || "A passage opens; a name remains."}\nReveal yours: totem-ancestral.com #RevealYourTotem`,
+      messageWhatsapp: `I discovered my ancestral totem: ${profile.archetype.english}. Your turn: totem-ancestral.com`,
       messageClan: `#${profile.orderNumber} enters the ${clan}; ${clanCount} members already carry this sign before ${profile.nomComplet}.`,
     };
   }
 
   return {
-    captionLinkedin: `${profile.nomComplet}\nUne fable symbolique m'a donne mon totem ancestral : ${profile.archetype.french}.\n${passage || "Un passage s'ouvre ; un nom demeure."}\nRevele le tien : totemancestral.com #RevealYourTotem`,
-    messageWhatsapp: `J'ai decouvert mon totem ancestral : ${profile.archetype.french}. A ton tour : totemancestral.com`,
+    captionLinkedin: `${profile.nomComplet}\nUne fable symbolique m'a donne mon totem ancestral : ${profile.archetype.french}.\n${passage || "Un passage s'ouvre ; un nom demeure."}\nRevele le tien : totem-ancestral.com #RevealYourTotem`,
+    messageWhatsapp: `J'ai decouvert mon totem ancestral : ${profile.archetype.french}. A ton tour : totem-ancestral.com`,
     messageClan: `#${profile.orderNumber} entre dans le ${clan} ; ${clanCount} membres portaient deja ce signe avant ${profile.nomComplet}.`,
   };
 }

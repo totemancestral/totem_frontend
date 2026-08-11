@@ -53,6 +53,7 @@ export function IntroVideo({
     rememberIntroSeen();
     setOpen(false);
     onDone?.();
+    window.dispatchEvent(new Event("totem:intro-done"));
   };
 
   useEffect(() => {

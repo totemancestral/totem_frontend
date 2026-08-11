@@ -107,8 +107,12 @@ export function MentionsPage() {
         <p>
           Conformément aux articles L.611-1 et suivants du Code de la consommation, le client
           consommateur peut recourir gratuitement à un médiateur de la consommation en vue de la
-          résolution amiable d'un litige. Médiateur compétent : {LEGAL.mediator}. Une réclamation
-          préalable doit être adressée à {LEGAL.email} avant toute saisine.
+          résolution amiable d'un litige. Médiateur compétent : {LEGAL.mediator},{" "}
+          {LEGAL.mediatorAddress} —{" "}
+          <a href={LEGAL.mediatorUrl} target="_blank" rel="noreferrer" className="link-gold">
+            {LEGAL.mediatorUrl.replace(/^https?:\/\//, "")}
+          </a>
+          . Une réclamation préalable doit être adressée à {LEGAL.email} avant toute saisine.
         </p>
       ),
     },

@@ -136,8 +136,11 @@ export function CGVPage() {
             {LEGAL.email}
           </a>
           . À défaut de solution amiable, le consommateur peut recourir gratuitement à un médiateur
-          de la consommation ({LEGAL.mediator}), conformément aux articles L.611-1 et suivants du
-          Code de la consommation.
+          de la consommation : {LEGAL.mediator}, {LEGAL.mediatorAddress},{" "}
+          <a href={LEGAL.mediatorUrl} target="_blank" rel="noreferrer" className="link-gold">
+            {LEGAL.mediatorUrl.replace(/^https?:\/\//, "")}
+          </a>
+          , conformément aux articles L.611-1 et suivants du Code de la consommation.
         </p>
       ),
     },
