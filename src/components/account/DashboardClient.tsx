@@ -15,6 +15,7 @@ import {
   KeyRound,
   LayoutDashboard,
   PackageCheck,
+  PlayCircle,
   Plus,
   Share2,
   Sparkles,
@@ -26,6 +27,7 @@ import { toast } from "sonner";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { hasAdminRole } from "@/lib/admin-client";
 import { authPath } from "@/lib/routes";
+import { fetchParcoursDrafts, type ParcoursDraft } from "@/lib/parcours-draft";
 import { extractParchmentSections } from "@/lib/totem-v3";
 import { TotemRevealClient } from "@/components/totem/TotemRevealClient";
 import { DashboardSkeleton } from "@/components/account/DashboardSkeleton";
@@ -126,6 +128,12 @@ const copy = {
     copied: "Lien copié",
     copyError: "Impossible de copier automatiquement",
     refreshFailed: "Échec de rafraîchissement du tableau de bord",
+    resumeTitle: "Parcours en cours",
+    resumeAdult: "Totem Ancestral",
+    resumeJunior: "Totem Junior",
+    resumeProgress: "Question {current} sur {total}",
+    resumeHint: "Ta progression est sauvegardée. Reprends où tu t'es arrêté, sur n'importe quel appareil.",
+    resumeCta: "Continuer",
   },
   en: {
     eyebrow: "Personal space",
@@ -183,6 +191,12 @@ const copy = {
     copied: "Link copied",
     copyError: "Unable to copy automatically",
     refreshFailed: "Dashboard refresh failed",
+    resumeTitle: "Journey in progress",
+    resumeAdult: "Totem Ancestral",
+    resumeJunior: "Totem Junior",
+    resumeProgress: "Question {current} of {total}",
+    resumeHint: "Your progress is saved. Pick up where you left off, on any device.",
+    resumeCta: "Continue",
   },
 } as const;
 
@@ -216,6 +230,14 @@ function newJourneyHref(locale: Locale, isJunior: boolean) {
     : `/${locale}/via_sapientiae?restart=1`;
 }
 
+/**
+ * Lien de reprise : sans `restart`, la page de parcours restaure d'elle-meme
+ * le brouillon serveur et rouvre la question laissee en suspens.
+ */
+function resumeJourneyHref(locale: Locale, piste: ParcoursDraft["piste"]) {
+  return piste === "junior" ? `/${locale}/iuvenis_signum` : `/${locale}/via_sapientiae`;
+}
+
 export function DashboardClient({
   locale,
   section = "overview",
@@ -247,6 +269,7 @@ export function DashboardClient({
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [oeuvres, setOeuvres] = useState<Oeuvre[]>([]);
   const [juniorTotems, setJuniorTotems] = useState<JuniorTotem[]>([]);
+  const [drafts, setDrafts] = useState<ParcoursDraft[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOeuvre, setSelectedOeuvre] = useState<Oeuvre | null>(null);
@@ -278,7 +301,7 @@ export function DashboardClient({
           return;
         }
 
-        const [commandesRes, oeuvresRes, juniorRes] = await Promise.all([
+        const [commandesRes, oeuvresRes, juniorRes, draftsData] = await Promise.all([
           fetch("/api/ordo_tabulae", {
             headers: { authorization: `Bearer ${currentToken}` },
           }),
@@ -288,6 +311,7 @@ export function DashboardClient({
           fetch("/api/iuvenis_signum/totems", {
             headers: { authorization: `Bearer ${currentToken}` },
           }),
+          fetchParcoursDrafts(String(currentToken)),
         ]);
 
         if (!alive) return;
@@ -306,6 +330,11 @@ export function DashboardClient({
         setCommandes(commandesData);
         setOeuvres(oeuvresData);
         setJuniorTotems(juniorData);
+        setDrafts(
+          [draftsData.adulte, draftsData.junior].filter(
+            (draft): draft is ParcoursDraft => Boolean(draft),
+          ),
+        );
       } catch (err) {
         if (alive) {
           const message = err instanceof Error ? err.message : t.error;
@@ -664,8 +693,17 @@ export function DashboardClient({
               <h1 className="h-display text-4xl" style={{ color: "var(--or-ancestral)" }}>
                 {t.latestOrders}
               </h1>
+              {drafts.map((draft) => (
+                <ResumeCard key={draft.piste} draft={draft} locale={locale} copy={t} />
+              ))}
               {commandes.length === 0 ? (
-                <EmptyState text={t.noOrders} cta={t.emptyCta} href={newJourneyHref(locale, isJunior)} />
+                drafts.length === 0 ? (
+                  <EmptyState
+                    text={t.noOrders}
+                    cta={t.emptyCta}
+                    href={newJourneyHref(locale, isJunior)}
+                  />
+                ) : null
               ) : (
                 <div className="grid gap-4">
                   {commandes.map((commande) => (
@@ -1063,6 +1101,67 @@ function ArtworkCard({
         )}
       </div>
     </article>
+  );
+}
+
+/**
+ * Carte de reprise d'un parcours interrompu. Elle ouvre la piste concernee sur
+ * la question ou le visiteur s'etait arrete, quel que soit l'appareil utilise
+ * au demarrage.
+ */
+function ResumeCard({
+  draft,
+  locale,
+  copy: t,
+}: {
+  draft: ParcoursDraft;
+  locale: Locale;
+  copy: (typeof copy)[Locale];
+}) {
+  const total = draft.totalQuestions ?? (draft.piste === "junior" ? 5 : 10);
+  const current = Math.min(draft.questionNumber ?? draft.index + 1, total);
+  const progress = Math.round((current / total) * 100);
+
+  return (
+    <div
+      className="premium-panel-strong flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between md:p-6"
+      style={{ borderColor: "rgba(216,173,77,0.42)" }}
+    >
+      <div className="flex min-w-0 flex-col gap-2">
+        <span
+          className="caption inline-flex items-center gap-2 uppercase"
+          style={{ color: "var(--or-ancestral)" }}
+        >
+          <Clock3 size={13} />
+          {t.resumeTitle}
+        </span>
+        <p className="h-display text-2xl" style={{ color: "var(--or-pale)" }}>
+          {draft.piste === "junior" ? t.resumeJunior : t.resumeAdult}
+        </p>
+        <p className="subtext text-sm">
+          {t.resumeProgress
+            .replace("{current}", String(current))
+            .replace("{total}", String(total))}
+        </p>
+        <div
+          className="h-[3px] w-full max-w-[280px] overflow-hidden rounded-full"
+          style={{ background: "rgba(216,173,77,0.16)" }}
+        >
+          <div
+            className="h-full rounded-full"
+            style={{ width: `${progress}%`, background: "var(--or-ancestral)" }}
+          />
+        </div>
+        <p className="subtext text-xs opacity-80">{t.resumeHint}</p>
+      </div>
+      <Link
+        href={resumeJourneyHref(locale, draft.piste)}
+        className="btn-primary shrink-0 justify-center"
+      >
+        <PlayCircle size={15} />
+        {t.resumeCta}
+      </Link>
+    </div>
   );
 }
 

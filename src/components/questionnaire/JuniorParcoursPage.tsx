@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import {
   ArrowLeft,
@@ -29,6 +29,11 @@ import { authPath } from "@/lib/routes";
 import { QuestionAudio } from "./QuestionAudio";
 import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
 import { GenderModal, type Gender } from "./GenderModal";
+import {
+  clearParcoursDraft,
+  fetchParcoursDrafts,
+  saveParcoursDraft,
+} from "@/lib/parcours-draft";
 import {
   juniorShareText,
   renderJuniorShareCard,
@@ -327,6 +332,10 @@ export function JuniorParcoursPage() {
   const [cardUrl, setCardUrl] = useState<string | null>(null);
   const [cardDataUrl, setCardDataUrl] = useState<string | null>(null);
   const [cardFailed, setCardFailed] = useState(false);
+  // Sauvegarde serveur du parcours, pour reprendre depuis un autre appareil.
+  const [draftSyncReady, setDraftSyncReady] = useState(false);
+  const draftRestoredRef = useRef(false);
+  const draftClearedRef = useRef(false);
 
   const restart = () => {
     sessionStorage.removeItem("junior_reveal");
@@ -334,6 +343,14 @@ export function JuniorParcoursPage() {
     sessionStorage.removeItem("junior_answers");
     sessionStorage.removeItem("junior_firstName");
     sessionStorage.removeItem("junior_locale");
+    if (session?.access_token) {
+      // On bloque la sauvegarde le temps que l'effacement arrive au serveur,
+      // sinon la progression remise a zero repartirait aussitot.
+      draftClearedRef.current = true;
+      void clearParcoursDraft(session.access_token, "junior").finally(() => {
+        draftClearedRef.current = false;
+      });
+    }
     setStarted(false);
     setIndex(0);
     setFirstName("");
@@ -416,6 +433,72 @@ export function JuniorParcoursPage() {
       restoreResultFromCache();
     }
   }, [checkoutSessionId, checkoutSuccess, restoreResultFromCache]);
+
+  // Reprise du parcours junior : on rouvre le questionnaire la ou l'enfant
+  // s'etait arrete, meme depuis un autre appareil.
+  useEffect(() => {
+    if (!session?.access_token || draftRestoredRef.current) return;
+    draftRestoredRef.current = true;
+
+    let cancelled = false;
+    fetchParcoursDrafts(session.access_token)
+      .then((drafts) => {
+        const draft = drafts.junior;
+        if (cancelled || !draft || result) return;
+        setAnswers(draft.answers as Record<number, JuniorAnswer>);
+        if (draft.sexe) setGender(draft.sexe);
+        if (draft.prenom) setFirstName(draft.prenom);
+        setIndex(Math.min(draft.index, t.questions.length - 1));
+        setStarted(true);
+      })
+      .finally(() => {
+        if (!cancelled) setDraftSyncReady(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session]);
+
+  // Sauvegarde temporisee de la progression.
+  useEffect(() => {
+    if (!session?.access_token || !draftSyncReady || draftClearedRef.current) return;
+    if (result || Object.keys(answers).length === 0) return;
+
+    const token = session.access_token;
+    const timer = setTimeout(() => {
+      void saveParcoursDraft(token, "junior", locale, {
+        index,
+        phase: "question",
+        answers: answers as Record<string, unknown>,
+        sexe: gender,
+        prenom: firstName || undefined,
+        questionNumber: index + 1,
+        totalQuestions: t.questions.length,
+        updatedAt: new Date().toISOString(),
+      });
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [
+    answers,
+    draftSyncReady,
+    firstName,
+    gender,
+    index,
+    locale,
+    result,
+    session,
+    t.questions.length,
+  ]);
+
+  // Totem revele : le brouillon laisse la place a l'oeuvre.
+  useEffect(() => {
+    if (!result || !session?.access_token || draftClearedRef.current) return;
+    draftClearedRef.current = true;
+    void clearParcoursDraft(session.access_token, "junior");
+  }, [result, session]);
 
   // Composition de la carte des que le totem est revele : elle sert a la fois
   // d'illustration de l'oeuvre et de visuel a publier.

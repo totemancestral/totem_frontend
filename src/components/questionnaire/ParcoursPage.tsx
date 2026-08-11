@@ -13,6 +13,12 @@ import { apiPath, authPath } from "@/lib/routes";
 import { QuestionAudio } from "./QuestionAudio";
 import { GenderModal, type Gender } from "./GenderModal";
 import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
+import {
+  clearParcoursDraft,
+  fetchParcoursDrafts,
+  isNewer,
+  saveParcoursDraft,
+} from "@/lib/parcours-draft";
 
 type FieldLevel = "PRIORITAIRE" | "SECONDAIRE" | "TERTIAIRE" | "SPECIAL";
 
@@ -411,6 +417,15 @@ export function ParcoursPage() {
   const filledRef = useRef<Set<number>>(new Set());
   const completionStartedRef = useRef(false);
   const restartRequested = searchParams.get("restart") === "1";
+  // Sauvegarde du parcours : l'horodatage de la copie locale sert d'arbitre
+  // face au brouillon serveur, pour que l'appareil ou l'on a repondu en
+  // dernier gagne. `draftSyncReady` empeche d'ecraser un bon brouillon avec
+  // l'etat vide du tout premier rendu.
+  const localDraftUpdatedAtRef = useRef<string | null>(null);
+  const [draftSyncReady, setDraftSyncReady] = useState(false);
+  const draftRestoredRef = useRef(false);
+  const draftDiscardedRef = useRef(restartRequested);
+  const draftClearedRef = useRef(false);
 
   useEffect(() => {
     // Accès anonyme autorisé : on récupère la session si elle existe, sans
@@ -493,7 +508,9 @@ export function ParcoursPage() {
         paidCommandId?: string | null;
         index?: number;
         phase?: Phase;
+        updatedAt?: string;
       };
+      localDraftUpdatedAtRef.current = saved.updatedAt ?? null;
       if (saved.answers) setAnswers(saved.answers);
       if (saved.gender) setGender(saved.gender);
       if (saved.account) setAccount(saved.account);
@@ -519,15 +536,114 @@ export function ParcoursPage() {
   // Persist progress to localStorage on every change
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const updatedAt = new Date().toISOString();
+    localDraftUpdatedAtRef.current = updatedAt;
     try {
       localStorage.setItem(
         PARCOURS_STORAGE_KEY,
-        JSON.stringify({ answers, gender, account, hasUnlockedRest, paidCommandId, index, phase }),
+        JSON.stringify({
+          answers,
+          gender,
+          account,
+          hasUnlockedRest,
+          paidCommandId,
+          index,
+          phase,
+          updatedAt,
+        }),
       );
     } catch {
       /* quota, ignore */
     }
   }, [answers, gender, account, hasUnlockedRest, paidCommandId, index, phase]);
+
+  // Reprise multi-appareils : au premier chargement avec un compte connecte, on
+  // recupere le brouillon serveur et on l'applique s'il est plus recent que la
+  // copie locale. Un parcours commence sur ordinateur reprend ainsi sur mobile.
+  useEffect(() => {
+    if (!session || draftRestoredRef.current) return;
+    draftRestoredRef.current = true;
+
+    if (draftDiscardedRef.current) {
+      // Redemarrage explicite : on efface aussi la copie serveur, sinon elle
+      // reviendrait au prochain chargement.
+      void clearParcoursDraft(session.access_token, "adulte");
+      setDraftSyncReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    fetchParcoursDrafts(session.access_token)
+      .then((drafts) => {
+        if (cancelled) return;
+        const draft = drafts.adulte;
+        if (draft && isNewer(draft.updatedAt, localDraftUpdatedAtRef.current)) {
+          setAnswers(draft.answers as Record<number, Answer>);
+          if (draft.sexe) setGender(draft.sexe);
+          if (typeof draft.hasUnlockedRest === "boolean") {
+            setHasUnlockedRest(draft.hasUnlockedRest);
+          }
+          if (typeof draft.paidCommandId === "string") setPaidCommandId(draft.paidCommandId);
+          setIndex(draft.index);
+          // On ne restaure jamais un ecran d'attente : le visiteur reprend sur
+          // une question, ou sur le paiement s'il n'a pas encore paye.
+          if (draft.phase && draft.phase !== "waiting") {
+            setPhase(draft.phase === "account" ? "paywall-transition" : (draft.phase as Phase));
+          } else {
+            setPhase("question");
+          }
+        }
+      })
+      .finally(() => {
+        setDraftSyncReady(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session]);
+
+  // Sauvegarde serveur, temporisee pour ne pas ecrire a chaque frappe.
+  useEffect(() => {
+    if (!session || !draftSyncReady) return;
+    if (draftClearedRef.current) return;
+    if (Object.keys(answers).length === 0) return;
+    if (phase === "waiting" || phase === "final-transition") return;
+
+    const timer = setTimeout(() => {
+      void saveParcoursDraft(session.access_token, "adulte", locale, {
+        index,
+        phase,
+        answers: answers as Record<string, unknown>,
+        sexe: gender,
+        hasUnlockedRest,
+        paidCommandId,
+        questionNumber: QUESTIONS[index]?.n ?? index + 1,
+        totalQuestions: QUESTIONS.length,
+        updatedAt: localDraftUpdatedAtRef.current ?? new Date().toISOString(),
+      });
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [
+    answers,
+    draftSyncReady,
+    gender,
+    hasUnlockedRest,
+    index,
+    locale,
+    paidCommandId,
+    phase,
+    session,
+  ]);
+
+  // Parcours acheve : le brouillon n'a plus lieu d'etre, la commande prend le
+  // relais dans le tableau de bord.
+  useEffect(() => {
+    if (phase !== "waiting" || !session || draftClearedRef.current) return;
+    draftClearedRef.current = true;
+    void clearParcoursDraft(session.access_token, "adulte");
+  }, [phase, session]);
 
   const current = questions[index] ?? QUESTIONS[index];
   const progress = phase === "intro" ? 0 : phase === "question" ? current.progress : 100;
