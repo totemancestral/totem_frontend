@@ -337,6 +337,14 @@ export function JuniorParcoursPage() {
   const draftRestoredRef = useRef(false);
   const draftClearedRef = useRef(false);
 
+  // Meme retrait de la nappe musicale que sur le parcours adulte.
+  useEffect(() => {
+    window.dispatchEvent(new Event("totem:ambient-lower"));
+    return () => {
+      window.dispatchEvent(new Event("totem:ambient-restore"));
+    };
+  }, []);
+
   const restart = () => {
     sessionStorage.removeItem("junior_reveal");
     sessionStorage.removeItem("junior_checkout_session");

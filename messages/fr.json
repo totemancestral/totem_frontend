@@ -132,7 +132,7 @@
       "privacy": "Politique de confidentialité",
       "mentions": "Mentions légales"
     },
-    "copyright": "SENYCE PARTNERS © 2026 · Tous droits réservés.",
+    "copyright": "Tous droits réservés.",
     "studioLine": "Une maison de création artistique. Une œuvre assistée par intelligence artificielle."
   },
   "footer_2": "footer",
@@ -560,7 +560,7 @@
   "le_feu_ou_la_lumiere_une_flamme_un_soleil_un_eclair_quelque": "Le feu ou la lumière, une flamme, un soleil, un éclair, quelque chose qui brûle et qui illumine.",
   "le_feu_qui_danse_dans_la_nuit_je_suis_attire_par_sa_lumiere": "Le feu qui danse dans la nuit, je suis attiré par sa lumière, sa chaleur imprévisible, sa façon de tout transformer.",
   "le_griot_a_ecoute": "Le Griot a écouté.",
-  "le_griot_parle": "Le Griot parle.",
+  "le_griot_parle": "Le Griot vous parle.",
   "le_griot_reprend_la_parole_les_questions_restantes": "Le Griot reprend la parole. Les questions restantes construiront ton œuvre.",
   "le_griot_t_a_ecoute_il_percoit_deja_ton_essence": "Le Griot t'a écouté. Il perçoit déjà ton essence.",
   "le_griot_t_a_ecoute_si_tu_veux_lui_souffler_une_nuance_il_l": "Le griot t'a écouté. Si tu veux lui souffler une nuance, il l'entendra.",
@@ -765,7 +765,7 @@
   "welcome": "welcome",
   "parcours": {
     "intro": {
-      "title": "Le Griot parle.",
+      "title": "Le Griot vous parle.",
       "body1": "Il n'y a pas de bonnes ou de mauvaises réponses ici. Il y a ta vérité, et celle que tu t'autorises à voir.",
       "body2": "Réponds avec ce que tu ressens. Pas avec ce que tu crois devoir répondre.",
       "body3": "Le temps n'existe pas ici. L'ancêtre attend.",
@@ -782,7 +782,11 @@
       "audioListen": "Écouter la question",
       "audioPlaying": "Lecture en cours",
       "audioReplay": "Réécouter",
-      "audioHint": "La question se joue automatiquement — appuie pour réécouter."
+      "audioHint": "La question se joue automatiquement — appuie pour réécouter.",
+      "optional": "facultatif",
+      "required": "obligatoire",
+      "words": "{count} / {max} mots",
+      "wordsExceeded": "Résume en {max} mots maximum pour que le griot puisse tout entendre."
     },
     "account": {
       "eyebrow": "Création du compte",
@@ -951,7 +955,7 @@
           }
         ],
         "field": {
-          "level": "TERTIAIRE",
+          "level": "SECONDAIRE",
           "label": "+ ajouter une nuance",
           "placeholder": "Décris le moment où tu te sens pleinement vivant(e)...",
           "rows": 1
@@ -1011,7 +1015,7 @@
           }
         ],
         "field": {
-          "level": "TERTIAIRE",
+          "level": "SECONDAIRE",
           "label": "+ ajouter une nuance",
           "placeholder": "Comment tu gères vraiment les situations difficiles...",
           "rows": 1
@@ -1050,9 +1054,8 @@
       {
         "n": 6,
         "progress": 60,
-        "note": "Cette question est la seule que tu peux choisir de ne pas répondre.",
-        "canSkip": true,
-        "griot": "Cette question est la seule que tu peux choisir de ne pas répondre. Mais si tu le fais, les ancêtres seront plus proches.",
+        "note": "Cette question est obligatoire : le griot a besoin de ton origine pour situer l'ancêtre.",
+        "griot": "Remonte le fil aussi loin que tu le peux. Même un pays, une région ou une ethnie suffit à orienter le griot.",
         "question": "Quelle est l'origine de tes ancêtres, aussi loin que tu le sais ?",
         "choices": [
           {
@@ -1074,9 +1077,10 @@
         ],
         "field": {
           "level": "SPECIAL",
-          "label": "Tu sais quelque chose de précis ?",
-          "placeholder": "Un pays, une ethnie, une région que tu connais ou que tu as envie d'explorer...",
-          "rows": 2
+          "label": "Précise ton origine",
+          "placeholder": "Un pays, une ethnie, une région que tu connais ou dont tu te sens proche...",
+          "rows": 2,
+          "required": true
         }
       },
       {
@@ -1133,7 +1137,7 @@
           }
         ],
         "field": {
-          "level": "TERTIAIRE",
+          "level": "SECONDAIRE",
           "label": "+ ajouter une nuance",
           "placeholder": "Ce que tu veux qu'on retienne de ta vie, en quelques mots...",
           "rows": 1

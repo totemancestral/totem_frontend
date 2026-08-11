@@ -218,6 +218,7 @@ export type Database = {
           id: string;
           langue: string;
           pays: string | null;
+          nom: string | null;
           prenom: string | null;
           updated_at: string;
         };
@@ -227,6 +228,7 @@ export type Database = {
           id: string;
           langue?: string;
           pays?: string | null;
+          nom?: string | null;
           prenom?: string | null;
           updated_at?: string;
         };
@@ -236,6 +238,7 @@ export type Database = {
           id?: string;
           langue?: string;
           pays?: string | null;
+          nom?: string | null;
           prenom?: string | null;
           updated_at?: string;
         };

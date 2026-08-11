@@ -1283,15 +1283,21 @@ REPONSE — Format JSON STRICT :
 }`;
 }
 
-/** Consigne de genre inseree dans les prompts Junior. */
+/**
+ * Consigne de genre inseree dans les prompts Junior.
+ *
+ * Comme sur le parcours adulte, une seule variable accorde le texte : le
+ * totem se leve a l'image de l'adolescent, l'accord du recit et l'adresse au
+ * destinataire sont donc identiques.
+ */
 function juniorGenderLine(gender: JuniorGender): string {
   if (gender === "homme") {
-    return "MASCULIN — accorde tout le texte au masculin, sans formulation neutre.";
+    return "MASCULIN. Accorde tout le texte au masculin, sans formulation neutre. Quand le griot s'adresse au destinataire, il dit « mon fils ».";
   }
   if (gender === "femme") {
-    return "FEMININ — accorde tout le texte au feminin, sans formulation neutre.";
+    return "FEMININ. Accorde tout le texte au feminin, sans formulation neutre. Quand le griot s'adresse a la destinataire, il dit « ma fille ».";
   }
-  return "NON DECLARE — garde des formulations valables au masculin comme au feminin.";
+  return "NON DECLARE. Garde des formulations valables au masculin comme au feminin.";
 }
 
 function buildPromptJ2(profile: JuniorTotemProfile, answers: Record<string, unknown>) {

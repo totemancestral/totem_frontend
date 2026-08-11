@@ -37,7 +37,7 @@ export function translateAuthError(error: unknown, locale: Locale): string {
         notFound: "Crée d'abord ton compte.",
         exists: "Un compte existe déjà avec cet email.",
         notConfirmed: "Confirme d'abord ton adresse email.",
-        password: "Mot de passe trop court, minimum 6 caracteres.",
+        password: "Mot de passe trop court, minimum 6 caractères.",
         email: "Vérifie l'adresse email.",
         rate: "Trop de tentatives. Attends un moment avant de reessayer.",
         fallback: "Authentification impossible.",

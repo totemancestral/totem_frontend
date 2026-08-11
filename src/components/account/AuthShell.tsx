@@ -2,98 +2,85 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowRight, ArrowUpRight, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 import type { Locale } from "@/lib/auth-flow";
 
 type Kind = "signup" | "signin";
 export type AuthRole = "adulte" | "junior";
 
-/** Copy dépendant du rôle & mode. */
+/**
+ * Copy des deux volets.
+ *
+ * Le volet visuel ne porte qu'une accroche : c'est lui qui donne le ton. Le
+ * volet formulaire annonce sobrement ce qu'on y fait.
+ */
 const copy = {
   fr: {
-    site: "Revenir à l'accueil",
-    crossToSignup: "Nouveau ici ?",
-    crossToSignupCta: "Compose ton œuvre",
+    back: "Revenir à l'accueil",
+    crossToSignup: "Pas encore de compte ?",
+    crossToSignupCta: "Créer un compte",
     crossToSignin: "Déjà un compte ?",
-    crossToSigninCta: "Reviens dans ton espace",
+    crossToSigninCta: "Se connecter",
     adulte: {
-      eyebrow: "Accès personnel",
       signup: {
-        title: "Ouvre ton passage",
-        text: "Crée ton compte pour commencer la composition. Ton parcours et tes livrables seront rattachés à cet espace.",
-        checks: ["Nom ancestral unique", "Parchemin + audio + image", "Espace personnel à vie"],
+        headline: "Ouvre ton passage",
+        formTitle: "Créer un compte",
+        formSubtitle: "Ton parcours et tes œuvres seront rattachés à cet espace.",
       },
       signin: {
-        title: "Reviens dans ton espace",
-        text: "Retrouve ton parcours, tes commandes et tes œuvres — ce que tu as commencé t'attend intact.",
-        checks: ["Parcours sauvegardé", "Livrables rattachés", "Retour sécurisé"],
+        headline: "Te revoilà",
+        formTitle: "Connexion",
+        formSubtitle: "Entre tes identifiants pour retrouver ton espace.",
       },
     },
     junior: {
-      eyebrow: "Espace Junior",
       signup: {
-        title: "Réveille ton totem",
-        text: "Crée ton compte pour découvrir ton totem, ton nom ancestral et défier tes amis.",
-        checks: ["Ton totem parmi 12", "Ton nom ancestral", "Defie tes amis"],
+        headline: "Réveille ton totem",
+        formTitle: "Créer un compte",
+        formSubtitle: "Découvre ton totem, ton nom ancestral, et défie tes amis.",
       },
       signin: {
-        title: "Rejoins ton clan",
-        text: "Reviens voir ton totem, ton nom ancestral et partager le défi avec tes amis.",
-        checks: ["Ton totem", "Ton clan", "Ton défi"],
+        headline: "Rejoins ton clan",
+        formTitle: "Connexion",
+        formSubtitle: "Retrouve ton totem et ton nom ancestral.",
       },
     },
   },
   en: {
-    site: "Back to home",
-    crossToSignup: "New here?",
-    crossToSignupCta: "Compose your work",
+    back: "Back to home",
+    crossToSignup: "No account yet?",
+    crossToSignupCta: "Create an account",
     crossToSignin: "Already have an account?",
-    crossToSigninCta: "Return to your space",
+    crossToSigninCta: "Log in",
     adulte: {
-      eyebrow: "Personal access",
       signup: {
-        title: "Open your passage",
-        text: "Create your account to start composing. Your journey and deliverables will be attached to this space.",
-        checks: ["Unique ancestral name", "Parchment + audio + image", "Personal space for life"],
+        headline: "Open your passage",
+        formTitle: "Create Account",
+        formSubtitle: "Your journey and your works will be attached to this space.",
       },
       signin: {
-        title: "Return to your space",
-        text: "Find your journey, orders and artworks — what you began is waiting untouched.",
-        checks: ["Saved journey", "Attached files", "Secure return"],
+        headline: "Welcome back",
+        formTitle: "Login",
+        formSubtitle: "Enter your details to return to your space.",
       },
     },
     junior: {
-      eyebrow: "Junior space",
       signup: {
-        title: "Awaken your totem",
-        text: "Create your account to discover your totem, your ancestral name and challenge your friends.",
-        checks: ["Your totem among 12", "Your ancestral name", "Challenge your friends"],
+        headline: "Awaken your totem",
+        formTitle: "Create Account",
+        formSubtitle: "Discover your totem, your ancestral name, and challenge your friends.",
       },
       signin: {
-        title: "Join your clan",
-        text: "Come back to see your totem, your ancestral name and share the challenge.",
-        checks: ["Your totem", "Your clan", "Your challenge"],
+        headline: "Join your clan",
+        formTitle: "Login",
+        formSubtitle: "Find your totem and your ancestral name again.",
       },
     },
   },
 } as const;
 
-/** Habillage visuel dépendant du rôle. */
-const skin = {
-  adulte: {
-    haloA: "rgba(216,173,77,0.42)", // or ancestral
-    haloB: "rgba(216,173,77,0.20)",
-    icon: ShieldCheck,
-    accent: "var(--or-ancestral)",
-  },
-  junior: {
-    haloA: "rgba(240,140,60,0.42)", // feu (Kwame/Dayo)
-    haloB: "rgba(216,173,77,0.32)",
-    icon: Sparkles,
-    accent: "var(--or-pale)",
-  },
-} as const;
+const VISUAL = "/assets/oeuvre-visuelle-voix.jpg";
 
 export function AuthShell({
   locale,
@@ -110,111 +97,113 @@ export function AuthShell({
   children: ReactNode;
 }) {
   const t = copy[locale];
-  const roleCopy = t[role];
-  const modeCopy = roleCopy[kind];
-  const s = skin[role];
-  const CheckIcon = s.icon;
+  const modeCopy = t[role][kind];
   const isSignup = kind === "signup";
   const crossLabel = isSignup ? t.crossToSignin : t.crossToSignup;
   const crossCta = isSignup ? t.crossToSigninCta : t.crossToSignupCta;
 
+  // Création : le visuel accueille à gauche. Connexion : il referme à droite.
+  const visualSide = isSignup ? "md:order-1" : "md:order-2";
+  const formSide = isSignup ? "md:order-2" : "md:order-1";
+
   return (
     <section
-      className="premium-page relative flex w-full items-center overflow-hidden px-5 pb-12 pt-24 md:px-10 md:py-16"
+      className="premium-page relative flex w-full items-center justify-center overflow-hidden px-4 py-20 md:px-8 md:py-16"
       style={{ background: "var(--nuit-profonde)", minHeight: "100svh" }}
     >
-      <div className="premium-watermark" aria-hidden="true">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/assets/totem-logo.png" alt="" />
-      </div>
-
-      {/* Halo décoratif dépendant du rôle */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-40 top-24 h-[520px] w-[520px] rounded-full opacity-40 blur-[140px]"
-        style={{ background: `radial-gradient(circle, ${s.haloA}, transparent 60%)` }}
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-[-160px] bottom-[-120px] h-[360px] w-[360px] rounded-full opacity-30 blur-[130px]"
-        style={{ background: `radial-gradient(circle, ${s.haloB}, transparent 60%)` }}
+        className="pointer-events-none absolute -left-40 top-24 h-[520px] w-[520px] rounded-full opacity-30 blur-[150px]"
+        style={{ background: "radial-gradient(circle, rgba(216,173,77,0.4), transparent 62%)" }}
       />
 
-      <div className="relative mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-[1fr_minmax(0,420px)] md:items-center md:gap-14">
-        {/* ── Hero éditorial ─────────────────────────────────────────── */}
-        <motion.aside
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="flex flex-col gap-6 text-left"
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative grid w-full max-w-5xl overflow-hidden rounded-3xl border md:grid-cols-2"
+        style={{
+          borderColor: "rgba(216,173,77,0.22)",
+          background: "rgba(17,17,26,0.92)",
+          boxShadow: "0 40px 120px rgba(0,0,0,0.55)",
+        }}
+      >
+        {/* ── Volet visuel ───────────────────────────────────────────── */}
+        <div
+          className={`relative flex min-h-[220px] flex-col justify-between overflow-hidden p-7 md:min-h-[640px] md:p-9 ${visualSide}`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/totem-logo.png" alt="" className="h-12 w-12 object-contain md:h-14 md:w-14" />
+          <img
+            src={VISUAL}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(165deg, rgba(13,13,26,0.62) 0%, rgba(13,13,26,0.30) 42%, rgba(13,13,26,0.88) 100%)",
+            }}
+          />
 
-          <p className="eyebrow" style={{ color: s.accent }}>
-            <span
-              aria-hidden="true"
-              className="mr-3 inline-block h-px w-8 align-middle"
-              style={{ background: s.accent, opacity: 0.7 }}
-            />
-            {roleCopy.eyebrow}
-          </p>
+          <Link
+            href={`/${locale}`}
+            className="caption relative inline-flex w-fit items-center gap-2 rounded-full border px-3 py-2 uppercase backdrop-blur transition-colors hover:bg-ombre"
+            style={{
+              borderColor: "rgba(216,173,77,0.3)",
+              background: "rgba(13,13,26,0.45)",
+              color: "var(--or-pale)",
+            }}
+          >
+            <ArrowLeft size={14} />
+            {t.back}
+          </Link>
 
           <h1
-            className="h-display text-3xl leading-[1.05] md:text-5xl lg:text-6xl"
+            className="h-display relative mt-8 text-4xl leading-[1.05] md:text-5xl"
             style={{ color: "var(--ivoire)", textWrap: "balance" }}
           >
-            {modeCopy.title}
+            {modeCopy.headline}
           </h1>
+        </div>
 
-          <p className="body-copy max-w-xl premium-muted">{modeCopy.text}</p>
+        {/* ── Volet formulaire ───────────────────────────────────────── */}
+        <div className={`flex flex-col justify-center gap-5 p-7 md:p-10 ${formSide}`}>
+          <header className="flex flex-col gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/totem-logo.png"
+              alt=""
+              className="mb-2 h-10 w-10 object-contain"
+            />
+            <h2 className="h-display text-3xl" style={{ color: "var(--or-pale)" }}>
+              {modeCopy.formTitle}
+            </h2>
+            <p className="caption premium-muted" style={{ lineHeight: 1.5 }}>
+              {modeCopy.formSubtitle}
+            </p>
+          </header>
 
-          <ul className="grid gap-3 sm:grid-cols-3">
-            {modeCopy.checks.map((item, index) => (
-              <motion.li
-                key={item}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.15 + index * 0.08 }}
-                className="premium-panel px-4 py-4"
-              >
-                <CheckIcon size={17} color={s.accent} />
-                <p className="caption mt-2 premium-muted">{item}</p>
-              </motion.li>
-            ))}
-          </ul>
-
-          <Link href={`/${locale}`} className="btn-secondary mt-1 w-fit">
-            {t.site}
-            <ArrowRight size={16} />
-          </Link>
-        </motion.aside>
-
-        {/* ── Panneau form ───────────────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-          className="premium-panel-strong mx-auto flex w-full max-w-[420px] flex-col gap-5 p-5 md:p-7"
-        >
           {children}
 
           <div
-            className="flex items-center justify-between gap-4 border-t pt-4"
+            className="flex flex-wrap items-center justify-center gap-2 border-t pt-4"
             style={{ borderColor: "rgba(216,173,77,0.18)" }}
           >
-            <span className="caption uppercase premium-muted">{crossLabel}</span>
+            <span className="caption premium-muted">{crossLabel}</span>
             <Link
               href={otherPath}
-              className="caption inline-flex items-center gap-1 uppercase"
-              style={{ color: s.accent }}
+              className="caption inline-flex items-center gap-1"
+              style={{ color: "var(--or-ancestral)" }}
             >
               {crossCta}
               <ArrowUpRight size={13} />
             </Link>
           </div>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </section>
   );
 }

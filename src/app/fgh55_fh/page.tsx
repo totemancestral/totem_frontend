@@ -417,9 +417,6 @@ export default function AdminPage() {
             >
               <Menu size={17} />
             </button>
-            <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>
-              SENYCE PARTNERS
-            </p>
             <h1
               className="hidden text-[20px] uppercase leading-none sm:block"
               style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
@@ -617,9 +614,6 @@ function Sidebar({
           alt=""
           className="mx-auto mb-3 h-12 w-12 object-contain"
         />
-        <p className="caption uppercase text-xs" style={{ color: "var(--or-ancestral)" }}>
-          SENYCE PARTNERS
-        </p>
         <h2 className="logo-wordmark text-base mt-1">Totem Ancestral</h2>
       </div>
 
@@ -734,7 +728,7 @@ function LoginForm({
           </div>
           <div>
             <p className="eyebrow" style={{ color: "var(--or-ancestral)" }}>
-              SENYCE PARTNERS
+              Totem Ancestral
             </p>
             <h1 className="h-display mt-2 text-3xl" style={{ color: "var(--ivoire)" }}>
               Administration

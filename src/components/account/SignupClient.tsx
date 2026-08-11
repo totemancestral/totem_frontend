@@ -26,19 +26,21 @@ const copy = {
   fr: {
     firstName: "Prénom",
     firstNamePlaceholder: "Ton prénom",
+    lastName: "Nom",
+    lastNamePlaceholder: "Ton nom",
     email: "Email",
     emailPlaceholder: "ton@email.com",
     password: "Mot de passe",
-    passwordPlaceholder: "Minimum 6 caracteres",
+    passwordPlaceholder: "Minimum 6 caractères",
     submit: "Créer mon compte",
-    submitLoading: "Creation...",
+    submitLoading: "Création…",
     or: "ou",
     magic: "Recevoir un lien magique",
-    magicSending: "Envoi...",
-    confirmSent: "Email de confirmation envoye. Vérifie ta boite mail avant de continuer.",
-    magicSent: "Lien magique envoye. Vérifie ta boite mail.",
-    sessionReady: "Session ouverte. Redirection...",
-    consent: "En creant un compte, tu acceptes nos CGV et notre politique de confidentialite.",
+    magicSending: "Envoi…",
+    confirmSent: "Email de confirmation envoyé. Vérifie ta boîte mail avant de continuer.",
+    magicSent: "Lien magique envoyé. Vérifie ta boîte mail.",
+    sessionReady: "Session ouverte. Redirection…",
+    consent: "En créant un compte, tu acceptes nos CGV et notre politique de confidentialité.",
     roleLegend: "Je crée un compte",
     roleAdulte: "Adulte",
     roleJunior: "Junior",
@@ -48,6 +50,8 @@ const copy = {
   en: {
     firstName: "First name",
     firstNamePlaceholder: "Your first name",
+    lastName: "Last name",
+    lastNamePlaceholder: "Your last name",
     email: "Email",
     emailPlaceholder: "you@email.com",
     password: "Password",
@@ -76,6 +80,7 @@ export function SignupClient({ locale }: { locale: Locale }) {
   const t = copy[locale];
 
   const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -115,7 +120,7 @@ export function SignupClient({ locale }: { locale: Locale }) {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, prenom, locale, role, redirectPath }),
+        body: JSON.stringify({ email, password, prenom, nom, locale, role, redirectPath }),
       });
       if (!response.ok) {
         const data = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -173,14 +178,26 @@ export function SignupClient({ locale }: { locale: Locale }) {
       </fieldset>
 
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
-        <AuthField
-          label={t.firstName}
-          value={prenom}
-          onChange={setPrenom}
-          placeholder={t.firstNamePlaceholder}
-          autoComplete="given-name"
-          required
-        />
+        {/* Nom et prenom cote a cote, comme sur la maquette : les deux sont
+            requis pour pouvoir rattacher une oeuvre a une personne. */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <AuthField
+            label={t.firstName}
+            value={prenom}
+            onChange={setPrenom}
+            placeholder={t.firstNamePlaceholder}
+            autoComplete="given-name"
+            required
+          />
+          <AuthField
+            label={t.lastName}
+            value={nom}
+            onChange={setNom}
+            placeholder={t.lastNamePlaceholder}
+            autoComplete="family-name"
+            required
+          />
+        </div>
         <AuthField
           label={t.email}
           value={email}

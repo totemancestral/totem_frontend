@@ -32,9 +32,9 @@ const copy = {
     submitLoading: "Connexion...",
     or: "ou",
     magic: "Recevoir un lien magique",
-    magicSending: "Envoi...",
-    magicSent: "Lien magique envoye. Vérifie ta boite mail.",
-    sessionReady: "Session ouverte. Redirection...",
+    magicSending: "Envoi…",
+    magicSent: "Lien magique envoyé. Vérifie ta boîte mail.",
+    sessionReady: "Session ouverte. Redirection…",
     forgot: "Mot de passe oublie ?",
   },
   en: {

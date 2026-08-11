@@ -104,7 +104,7 @@ export function Footer({ locale }: { locale: Locale }) {
           style={{ borderColor: "rgba(216,173,77,0.10)" }}
         >
           <p className="caption" style={{ color: "rgba(226,225,238,0.55)" }}>
-            © {year} {LEGAL.company} — {t("copyright")}
+            © {year} {LEGAL.brand} — {t("copyright")}
           </p>
           <p className="caption" style={{ color: "rgba(226,225,238,0.42)" }}>
             {t("tagline")}

@@ -33,10 +33,27 @@ type Question = {
     label: string;
     placeholder: string;
     rows: number;
+    /** Champ que le visiteur doit remplir pour continuer (question d'origine). */
+    required?: boolean;
   };
   note?: string;
   canSkip?: boolean;
 };
+
+/**
+ * Longueur maximale d'un champ libre.
+ *
+ * Le griot lit ces reponses telles quelles : un pave dilue le propos et
+ * deborde la fenetre du modele. Une soixantaine de mots laisse la place a une
+ * confidence entiere sans noyer le reste du parcours.
+ */
+const MAX_FIELD_WORDS = 60;
+const MAX_FIELD_CHARS = 600;
+
+function countWords(value: string): number {
+  const trimmed = value.trim();
+  return trimmed ? trimmed.split(/\s+/).length : 0;
+}
 
 const QUESTIONS: Question[] = [
   {
@@ -94,7 +111,7 @@ const QUESTIONS: Question[] = [
       },
     ],
     field: {
-      level: "TERTIAIRE",
+      level: "SECONDAIRE",
       label: "+ ajouter une nuance",
       placeholder: "Décris le moment où tu te sens pleinement vivant(e)...",
       rows: 1,
@@ -156,7 +173,7 @@ const QUESTIONS: Question[] = [
       },
     ],
     field: {
-      level: "TERTIAIRE",
+      level: "SECONDAIRE",
       label: "+ ajouter une nuance",
       placeholder: "Comment tu gères vraiment les situations difficiles...",
       rows: 1,
@@ -196,10 +213,9 @@ const QUESTIONS: Question[] = [
   {
     n: 6,
     progress: 60,
-    note: "Cette question est la seule que tu peux choisir de ne pas répondre.",
-    canSkip: true,
+    note: "Cette question est obligatoire : le griot a besoin de ton origine pour situer l'ancêtre.",
     griot:
-      "Cette question est la seule que tu peux choisir de ne pas répondre. Mais si tu le fais, les ancêtres seront plus proches.",
+      "Remonte le fil aussi loin que tu le peux. Même un pays, une région ou une ethnie suffit à orienter le griot.",
     question: "Quelle est l'origine de tes ancêtres, aussi loin que tu le sais ?",
     choices: [
       {
@@ -221,10 +237,11 @@ const QUESTIONS: Question[] = [
     ],
     field: {
       level: "SPECIAL",
-      label: "Tu sais quelque chose de précis ?",
+      label: "Précise ton origine",
       placeholder:
-        "Un pays, une ethnie, une région que tu connais ou que tu as envie d'explorer...",
+        "Un pays, une ethnie, une région que tu connais ou dont tu te sens proche...",
       rows: 2,
+      required: true,
     },
   },
   {
@@ -283,7 +300,7 @@ const QUESTIONS: Question[] = [
       },
     ],
     field: {
-      level: "TERTIAIRE",
+      level: "SECONDAIRE",
       label: "+ ajouter une nuance",
       placeholder: "Ce que tu veux qu'on retienne de ta vie, en quelques mots...",
       rows: 1,
@@ -472,6 +489,15 @@ export function ParcoursPage() {
     return () => {
       document.body.style.overflow = originalOverflow;
       document.body.style.overscrollBehavior = originalOverscroll;
+    };
+  }, []);
+
+  // Le questionnaire demande du recueillement : la nappe musicale reste
+  // presente mais passe en retrait pendant toute la duree du parcours.
+  useEffect(() => {
+    window.dispatchEvent(new Event("totem:ambient-lower"));
+    return () => {
+      window.dispatchEvent(new Event("totem:ambient-restore"));
     };
   }, []);
 
@@ -748,7 +774,17 @@ export function ParcoursPage() {
   }
 
   const a = answers[current?.n ?? 1];
-  const canContinue = phase !== "question" ? true : !!a?.choice || (current.canSkip && a?.skipped);
+  // On avance si un choix est fait (ou la question passee), que le champ
+  // obligatoire est rempli, et que la reponse libre tient dans la limite.
+  const canContinue = (() => {
+    if (phase !== "question") return true;
+    const answered = !!a?.choice || (current.canSkip && a?.skipped);
+    if (!answered) return false;
+    const field = (a?.field ?? "").trim();
+    if (current.field.required && field.length === 0) return false;
+    if (countWords(field) > MAX_FIELD_WORDS) return false;
+    return true;
+  })();
 
   async function chooseOffer(offer: Offer) {
     if (!session) {
@@ -1143,18 +1179,16 @@ function QuestionScreen({
 }) {
   const t = useTranslations("parcours.questionUi");
   const locale = useLocale();
-  const [showTertiary, setShowTertiary] = useState(false);
   const isD = answer?.choice === "D";
   const baseRows = q.field.rows;
   const dynamicRows = isD ? Math.max(3, baseRows) : baseRows;
 
-  const showField =
-    q.field.level === "PRIORITAIRE" ||
-    q.field.level === "SECONDAIRE" ||
-    q.field.level === "SPECIAL" ||
-    (q.field.level === "TERTIAIRE" && showTertiary);
-
+  // Le champ libre est toujours visible : le visiteur doit voir qu'il peut
+  // ajouter quelque chose. Seul son caractere facultatif ou obligatoire change.
   const dLabel = isD ? t("freedom") : q.field.label;
+  const fieldRequired = Boolean(q.field.required);
+  const wordCount = countWords(answer?.field ?? "");
+  const tooManyWords = wordCount > MAX_FIELD_WORDS;
 
   return (
     <motion.section
@@ -1191,16 +1225,20 @@ function QuestionScreen({
           {q.note && (
             <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "#888" }}>{q.note}</p>
           )}
-          {q.griot && (
-            <p className="quote-italic text-[15px] leading-relaxed md:text-[18px]">✦ {q.griot}</p>
-          )}
-          <div className="section-divider" style={{ margin: "4px 0" }} />
+          {/* La question d'abord, la phrase du griot ensuite : c'est l'ordre
+              dans lequel la voix off les enonce. */}
           <h1
             className="h-display text-[25px] leading-tight md:text-[36px] lg:text-[42px]"
             style={{ color: "var(--ivoire)" }}
           >
             {q.question}
           </h1>
+          {q.griot && (
+            <>
+              <div className="section-divider" style={{ margin: "4px 0" }} />
+              <p className="quote-italic text-[15px] leading-relaxed md:text-[18px]">✦ {q.griot}</p>
+            </>
+          )}
 
           <QuestionAudio
             src={questionAudioSrc("adulte", q.n, locale)}
@@ -1249,27 +1287,8 @@ function QuestionScreen({
             })}
           </div>
 
-          {/* Free field */}
-          {q.field.level === "TERTIAIRE" && !showTertiary && (
-            <button
-              onClick={() => setShowTertiary(true)}
-              className="self-start"
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 13,
-                color: "var(--or-ancestral)",
-                textDecoration: "underline",
-                textUnderlineOffset: 4,
-                cursor: "pointer",
-                background: "none",
-                border: "none",
-              }}
-            >
-              {q.field.label}
-            </button>
-          )}
-
-          {showField && (
+          {/* Champ libre, toujours propose */}
+          {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -1277,7 +1296,7 @@ function QuestionScreen({
               className="w-full text-left"
             >
               <label
-                className="mb-2 block"
+                className="mb-2 flex flex-wrap items-baseline gap-2"
                 style={
                   q.field.level === "PRIORITAIRE" || isD || q.field.level === "SPECIAL"
                     ? {
@@ -1288,16 +1307,30 @@ function QuestionScreen({
                     : { fontFamily: "var(--font-sans)", fontSize: 13, color: "#888" }
                 }
               >
-                {dLabel}
+                <span>{dLabel}</span>
+                <span
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 11,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    color: fieldRequired ? "var(--or-ancestral)" : "#7a7a86",
+                  }}
+                >
+                  {fieldRequired ? t("required") : t("optional")}
+                </span>
               </label>
               <textarea
                 value={answer?.field ?? ""}
                 onChange={(e) => onField(e.target.value)}
                 placeholder={q.field.placeholder}
                 rows={dynamicRows}
+                maxLength={MAX_FIELD_CHARS}
+                aria-required={fieldRequired}
+                aria-invalid={tooManyWords}
                 style={{
                   background: "rgba(26,27,36,0.92)",
-                  border: "1px solid rgba(216,173,77,0.24)",
+                  border: `1px solid ${tooManyWords ? "#E07A6B" : "rgba(216,173,77,0.24)"}`,
                   borderRadius: 6,
                   padding: "10px 14px",
                   color: "var(--ivoire)",
@@ -1311,10 +1344,26 @@ function QuestionScreen({
                   outline: "none",
                 }}
                 onFocus={(e) => (e.currentTarget.style.borderColor = "#d8ad4d")}
-                onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(216,173,77,0.24)")}
+                onBlur={(e) =>
+                  (e.currentTarget.style.borderColor = tooManyWords
+                    ? "#E07A6B"
+                    : "rgba(216,173,77,0.24)")
+                }
               />
+              <p
+                className="mt-1.5 text-right"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 11,
+                  color: tooManyWords ? "#E07A6B" : "#7a7a86",
+                }}
+              >
+                {tooManyWords
+                  ? t("wordsExceeded", { max: MAX_FIELD_WORDS })
+                  : t("words", { count: wordCount, max: MAX_FIELD_WORDS })}
+              </p>
             </motion.div>
-          )}
+          }
 
           <div className="flex items-center justify-between gap-3 pt-1">
             {!isFirst ? (

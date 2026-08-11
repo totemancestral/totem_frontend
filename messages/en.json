@@ -132,7 +132,7 @@
       "privacy": "Privacy policy",
       "mentions": "Legal notice"
     },
-    "copyright": "SENYCE PARTNERS © 2026 · All rights reserved.",
+    "copyright": "All rights reserved.",
     "studioLine": "An artistic creation house. An artwork assisted by artificial intelligence."
   },
   "footer_2": "footer",
@@ -560,7 +560,7 @@
   "le_feu_ou_la_lumiere_une_flamme_un_soleil_un_eclair_quelque": "Fire or light, a flame, the sun, a flash of lightning, something that burns and gives off light.",
   "le_feu_qui_danse_dans_la_nuit_je_suis_attire_par_sa_lumiere": "The fire dancing in the night, I am drawn to its light, its unpredictable warmth, the way it transforms everything.",
   "le_griot_a_ecoute": "The Griot listened.",
-  "le_griot_parle": "The Griot speaks.",
+  "le_griot_parle": "The Griot speaks to you.",
   "le_griot_reprend_la_parole_les_questions_restantes": "The Griot speaks again. The remaining questions will shape your work.",
   "le_griot_t_a_ecoute_il_percoit_deja_ton_essence": "The Griot has heard you. He can already sense your essence.",
   "le_griot_t_a_ecoute_si_tu_veux_lui_souffler_une_nuance_il_l": "The griot has listened to you. If you want to suggest a subtle change, he’ll hear you.",
@@ -765,7 +765,7 @@
   "welcome": "Welcome",
   "parcours": {
     "intro": {
-      "title": "The griot speaks.",
+      "title": "The Griot speaks to you.",
       "body1": "There are no right or wrong answers here. There is your truth, and the truth you allow yourself to see.",
       "body2": "Answer with what you feel. Not with what you think you should say.",
       "body3": "Time does not exist here. The ancestor is waiting.",
@@ -782,7 +782,11 @@
       "audioListen": "Listen to the question",
       "audioPlaying": "Playing",
       "audioReplay": "Replay",
-      "audioHint": "The question plays automatically — tap to replay."
+      "audioHint": "The question plays automatically — tap to replay.",
+      "optional": "optional",
+      "required": "required",
+      "words": "{count} / {max} words",
+      "wordsExceeded": "Keep it under {max} words so the griot can take it all in."
     },
     "account": {
       "eyebrow": "Account creation",
@@ -951,7 +955,7 @@
           }
         ],
         "field": {
-          "level": "TERTIAIRE",
+          "level": "SECONDAIRE",
           "label": "+ add nuance",
           "placeholder": "Describe the moment when you feel fully alive...",
           "rows": 1
@@ -1011,7 +1015,7 @@
           }
         ],
         "field": {
-          "level": "TERTIAIRE",
+          "level": "SECONDAIRE",
           "label": "+ add nuance",
           "placeholder": "How do you really handle difficult situations...",
           "rows": 1
@@ -1050,9 +1054,8 @@
       {
         "n": 6,
         "progress": 60,
-        "note": "This is the only question you may choose not to answer.",
-        "canSkip": true,
-        "griot": "This is the only question you may choose not to answer. But if you do, the ancestors will be closer.",
+        "note": "This question is required: the griot needs your origin to place the ancestor.",
+        "griot": "Trace the thread as far back as you can. Even a country, a region or an ethnic group is enough to guide the griot.",
         "question": "What is the origin of your ancestors, as far back as you know?",
         "choices": [
           {
@@ -1074,9 +1077,10 @@
         ],
         "field": {
           "level": "SPECIAL",
-          "label": "Do you know something specific?",
-          "placeholder": "A country, ethnic group or region you know or want to explore...",
-          "rows": 2
+          "label": "Specify your origin",
+          "placeholder": "A country, an ethnic group, a region you know or feel close to...",
+          "rows": 2,
+          "required": true
         }
       },
       {
@@ -1133,7 +1137,7 @@
           }
         ],
         "field": {
-          "level": "TERTIAIRE",
+          "level": "SECONDAIRE",
           "label": "+ add nuance",
           "placeholder": "What you want people to remember from your life, in a few words...",
           "rows": 1

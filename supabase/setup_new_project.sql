@@ -23,6 +23,7 @@ AS $$ BEGIN NEW.updated_at = now(); RETURN NEW; END; $$;
 CREATE TABLE public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   prenom TEXT,
+  nom TEXT,
   email TEXT,
   langue TEXT NOT NULL DEFAULT 'fr',
   pays TEXT,
@@ -46,10 +47,11 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, prenom, langue)
+  INSERT INTO public.profiles (id, email, prenom, nom, langue)
   VALUES (
     NEW.id, NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'prenom', NEW.raw_user_meta_data->>'full_name', ''),
+    COALESCE(NEW.raw_user_meta_data->>'nom', ''),
     COALESCE(NEW.raw_user_meta_data->>'langue', 'fr')
   );
   RETURN NEW;

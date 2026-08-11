@@ -7,30 +7,25 @@ export type Gender = "homme" | "femme";
 
 const copy = {
   fr: {
-    eyebrow: "Dernier signe",
     title: "L'ancêtre qui vous répond",
-    body: "Le griot doit savoir à qui il donne voix : votre ancêtre était-il un homme ou une femme ? Sans cela, le récit reste au neutre.",
+    body: "Le griot doit savoir à qui il donne voix. Pour que l'ancêtre se lève à votre image, êtes-vous fils, ou fille ?",
     homme: "Un homme",
     femme: "Une femme",
-    hommeHint: "Le récit sera accordé au masculin",
-    femmeHint: "Le récit sera accordé au féminin",
   },
   en: {
-    eyebrow: "Last sign",
     title: "The ancestor who answers you",
-    body: "The griot must know whom he gives voice to: was your ancestor a man or a woman? Without this, the story stays neutral.",
+    body: "The griot must know whom he gives voice to. So the ancestor rises in your image, are you a son, or a daughter?",
     homme: "A man",
     femme: "A woman",
-    hommeHint: "The story will be written in the masculine",
-    femmeHint: "The story will be written in the feminine",
   },
 } as const;
 
 /**
- * Choix du sexe de l'ancêtre, demandé avant la dernière question du parcours.
+ * Genre du visiteur, demandé avant la dernière question du parcours.
  *
- * Le récit et le portrait sont générés au genre choisi : sans cette réponse,
- * le griot écrit au neutre et l'ancêtre reste indéterminé.
+ * Une seule réponse suffit : l'ancêtre se lève à l'image de la personne, donc
+ * le même genre commande l'accord du récit sur l'ancêtre et l'adresse au
+ * client (« Cher Fils », « Chère Fille »).
  */
 export function GenderModal({
   locale,
@@ -55,11 +50,8 @@ export function GenderModal({
         transition={{ duration: 0.35, ease: "easeOut" }}
         className="premium-panel-strong my-auto w-full max-w-md p-6 sm:p-8"
       >
-        <p className="eyebrow text-center" style={{ color: "var(--or-ancestral)" }}>
-          {t.eyebrow}
-        </p>
         <h2
-          className="h-display mt-3 text-center text-3xl uppercase"
+          className="h-display text-center text-3xl uppercase"
           style={{ color: "var(--ivoire)" }}
         >
           {t.title}
@@ -72,13 +64,11 @@ export function GenderModal({
           <GenderChoice
             icon={<Mars size={20} />}
             label={t.homme}
-            hint={t.hommeHint}
             onClick={() => onChoose("homme")}
           />
           <GenderChoice
             icon={<Venus size={20} />}
             label={t.femme}
-            hint={t.femmeHint}
             onClick={() => onChoose("femme")}
           />
         </div>
@@ -90,12 +80,10 @@ export function GenderModal({
 function GenderChoice({
   icon,
   label,
-  hint,
   onClick,
 }: {
   icon: React.ReactNode;
   label: string;
-  hint: string;
   onClick: () => void;
 }) {
   return (
@@ -111,9 +99,6 @@ function GenderChoice({
         style={{ fontFamily: "var(--font-display)", color: "var(--ivoire)" }}
       >
         {label}
-      </span>
-      <span className="text-[11px] leading-snug" style={{ color: "rgba(226,225,238,0.55)" }}>
-        {hint}
       </span>
     </button>
   );

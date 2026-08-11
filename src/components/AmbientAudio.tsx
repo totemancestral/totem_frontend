@@ -12,6 +12,8 @@ const music = "/assets/totem-music.mp3";
  */
 const CROSSFADE_S = 2.5;
 const TARGET_VOL = 0.55;
+/** Volume de la nappe pendant le questionnaire : présente, mais en retrait. */
+const LOWERED_VOL = 0.16;
 const STORAGE_KEY = "totem_ambient_enabled";
 
 export function AmbientAudio({ active }: { active: boolean }) {
@@ -26,6 +28,8 @@ export function AmbientAudio({ active }: { active: boolean }) {
   const playingRef = useRef(false);
   /** Vrai si la musique jouait avant d'être mise en veille par une voix. */
   const resumeAfterDuckRef = useRef(false);
+  /** Volume visé : abaissé pendant le questionnaire, plein le reste du temps. */
+  const levelRef = useRef(TARGET_VOL);
 
   useEffect(() => {
     playingRef.current = playing;
@@ -89,7 +93,7 @@ export function AmbientAudio({ active }: { active: boolean }) {
     a.play()
       .then(() => {
         setPlaying(true);
-        fadeTo(a, TARGET_VOL, 1800);
+        fadeTo(a, levelRef.current, 1800);
       })
       .catch(() => {
         setPlaying(false);
@@ -143,11 +147,26 @@ export function AmbientAudio({ active }: { active: boolean }) {
       if (enabledRef.current) startPlayback();
     };
 
+    // Pendant tout le questionnaire la nappe reste en fond, mais nettement plus
+    // basse : on baisse le volume vise et on y amene les deux pistes.
+    const setLevel = (target: number) => {
+      levelRef.current = target;
+      [aRef.current, bRef.current].forEach((el) => {
+        if (el && !el.paused) fadeTo(el, target, 900);
+      });
+    };
+    const lower = () => setLevel(LOWERED_VOL);
+    const restore = () => setLevel(TARGET_VOL);
+
     window.addEventListener("totem:ambient-duck", duck);
     window.addEventListener("totem:ambient-unduck", unduck);
+    window.addEventListener("totem:ambient-lower", lower);
+    window.addEventListener("totem:ambient-restore", restore);
     return () => {
       window.removeEventListener("totem:ambient-duck", duck);
       window.removeEventListener("totem:ambient-unduck", unduck);
+      window.removeEventListener("totem:ambient-lower", lower);
+      window.removeEventListener("totem:ambient-restore", restore);
     };
   }, [fadeOutAndPause, startPlayback]);
 
@@ -174,7 +193,7 @@ export function AmbientAudio({ active }: { active: boolean }) {
             nxt.volume = 0;
             nxt.muted = false;
             void nxt.play();
-            fadeTo(nxt, TARGET_VOL, CROSSFADE_S * 1000);
+            fadeTo(nxt, levelRef.current, CROSSFADE_S * 1000);
             fadeTo(cur, 0, CROSSFADE_S * 1000, () => {
               try {
                 cur.pause();

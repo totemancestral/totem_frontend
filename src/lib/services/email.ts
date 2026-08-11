@@ -57,7 +57,7 @@ export async function sendAdminAlert(sujet: string, details: string): Promise<vo
   if (!adminEmail) return;
 
   await sendTransactional({
-    to: { email: adminEmail, name: "Admin SENYCE" },
+    to: { email: adminEmail, name: "Admin Totem Ancestral" },
     subject: `[Totem] ${sujet}`,
     html: layoutEmail("Alerte Totem", `<p>${escapeHtml(details)}</p>`),
     text: details,

@@ -5,7 +5,7 @@ import "../styles.css";
 
 export const metadata: Metadata = {
   title: "Totem Ancestral",
-  description: "Plateforme digitale internationale SENYCE PARTNERS.",
+  description: "Totem Ancestral, maison de creation d'oeuvres numeriques personnelles.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

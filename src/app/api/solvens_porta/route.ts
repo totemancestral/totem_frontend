@@ -49,13 +49,16 @@ async function handleCheckout(
     );
   const supabase = createServiceClient();
 
-  // Récupérer le prénom de l'utilisateur
+  // Nom et prénom : l'œuvre porte un numéro de série et doit pouvoir être
+  // rattachée à une personne identifiée.
   const profileResult = await supabase
     .from("profiles")
-    .select("prenom")
+    .select("prenom, nom")
     .eq("id", auth.userId)
     .maybeSingle();
-  const prenom = (profileResult?.data as { prenom?: string } | null)?.prenom ?? "";
+  const profile = (profileResult?.data as { prenom?: string; nom?: string } | null) ?? null;
+  const prenom = profile?.prenom ?? "";
+  const nomComplet = [prenom, profile?.nom ?? ""].map((part) => part.trim()).filter(Boolean).join(" ");
 
   const backendAnswers = withGender(toBackendAnswers(data.answers), data.sexe);
   const { data: parcours, error: parcoursError } = await supabase
@@ -81,25 +84,22 @@ async function handleCheckout(
     return NextResponse.json({ error: "Réponses insuffisantes" }, { status: 422 });
   }
 
+  // Une seule commande en attente par visiteur : reprendre un parcours ou
+  // changer d'offre ne doit jamais laisser une commande inachevée derrière soi.
+  const reserved = await reservePendingCommande(supabase, {
+    userId: auth.userId,
+    reponsesId: parcours.id,
+    offre: toCommandeOffre(data.offre),
+    amountCents: config.amountCents,
+    locale: data.locale,
+  });
+
+  if ("error" in reserved) {
+    return NextResponse.json({ error: reserved.error }, { status: 500 });
+  }
+  const commande = reserved.commande;
+
   if (env.TOTEM_BACKEND_URL) {
-    const { data: commande, error: commandeError } = await supabase
-      .from("commandes")
-      .insert({
-        user_id: auth.userId,
-        reponses_id: parcours.id,
-        offre: toCommandeOffre(data.offre),
-        statut: "en_attente_paiement",
-        montant_cents: config.amountCents,
-        devise: "EUR",
-        langue: data.locale,
-      })
-      .select("id")
-      .single();
-
-    if (commandeError) {
-      return NextResponse.json({ error: commandeError.message }, { status: 500 });
-    }
-
     const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
     
     try {
@@ -116,7 +116,7 @@ async function handleCheckout(
           externalCommandId: commande.id,
           answers: backendAnswers,
           locale: data.locale,
-          customerName: prenom || undefined,
+          customerName: nomComplet || prenom || undefined,
           successUrl: `${origin}${pagePath(
             data.locale,
             "parcours",
@@ -141,11 +141,13 @@ async function handleCheckout(
         }
       }
       
-      console.error(`[solvens_porta] Backend returned status ${backendResponse.status}, falling back to local Stripe.`);
-      await supabase.from("commandes").delete().eq("id", commande.id);
+      // La commande reste en attente : le paiement Stripe local prend le
+      // relais sur la même ligne, sans en créer une seconde.
+      console.error(
+        `[solvens_porta] Backend returned status ${backendResponse.status}, falling back to local Stripe.`,
+      );
     } catch (err) {
       console.error("[solvens_porta] Backend fetch failed, falling back to local Stripe:", err);
-      await supabase.from("commandes").delete().eq("id", commande.id);
     }
   }
 
@@ -170,24 +172,6 @@ async function handleCheckout(
   });
 
   try {
-    const { data: commande, error: commandeError } = await supabase
-      .from("commandes")
-      .insert({
-        user_id: auth.userId,
-        reponses_id: parcours.id,
-        offre: toCommandeOffre(data.offre),
-        statut: "en_attente_paiement",
-        montant_cents: config.amountCents,
-        devise: "EUR",
-        langue: data.locale,
-      })
-      .select("id")
-      .single();
-
-    if (commandeError) {
-      return NextResponse.json({ error: commandeError.message }, { status: 500 });
-    }
-
     const metadata = buildStripeMetadata(data, auth.userId, auth.email, prenom, commande.id);
 
     const session = await stripe.checkout.sessions.create({
@@ -228,6 +212,58 @@ async function handleCheckout(
     const message = error instanceof Error ? error.message : "Erreur de paiement";
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+/**
+ * Renvoie la commande en attente de paiement du visiteur, en la creant si elle
+ * n'existe pas encore.
+ *
+ * Sans cela, chaque passage au paiement laissait une commande inachevee : un
+ * parcours repris ou une offre changee produisait deux lignes dans le tableau
+ * de bord, l'une abandonnee, l'autre honoree. Une seule commande reste ouverte
+ * par visiteur, et elle est reconduite avec l'offre choisie en dernier.
+ */
+async function reservePendingCommande(
+  supabase: ReturnType<typeof createServiceClient>,
+  input: {
+    userId: string;
+    reponsesId: string;
+    offre: ReturnType<typeof toCommandeOffre>;
+    amountCents: number;
+    locale: "fr" | "en";
+  },
+): Promise<{ commande: { id: string } } | { error: string }> {
+  const fields = {
+    reponses_id: input.reponsesId,
+    offre: input.offre,
+    montant_cents: input.amountCents,
+    devise: "EUR",
+    langue: input.locale,
+  };
+
+  const { data: existing } = await supabase
+    .from("commandes")
+    .select("id")
+    .eq("user_id", input.userId)
+    .eq("statut", "en_attente_paiement")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (existing?.id) {
+    const { error } = await supabase.from("commandes").update(fields).eq("id", existing.id);
+    if (error) return { error: error.message };
+    return { commande: { id: existing.id } };
+  }
+
+  const { data: created, error } = await supabase
+    .from("commandes")
+    .insert({ user_id: input.userId, statut: "en_attente_paiement", ...fields })
+    .select("id")
+    .single();
+
+  if (error || !created) return { error: error?.message ?? "commande_creation_failed" };
+  return { commande: { id: created.id } };
 }
 
 function buildStripeMetadata(
