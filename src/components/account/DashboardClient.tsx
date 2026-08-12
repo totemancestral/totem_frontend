@@ -14,12 +14,14 @@ import {
   Image as ImageIcon,
   KeyRound,
   LayoutDashboard,
+  Mars,
   PackageCheck,
   PlayCircle,
   Plus,
   Share2,
   Sparkles,
   UserRound,
+  Venus,
   Volume2,
   X,
 } from "lucide-react";
@@ -134,6 +136,18 @@ const copy = {
     resumeProgress: "Question {current} sur {total}",
     resumeHint: "Ta progression est sauvegardée. Reprends où tu t'es arrêté, sur n'importe quel appareil.",
     resumeCta: "Continuer",
+    gender: "Sexe",
+    genderHint:
+      "Le griot doit savoir à qui il donne voix, pour que l'ancêtre se lève à votre image.",
+    genderMale: "Un homme",
+    genderFemale: "Une femme",
+    genderUnset: "Non renseigné",
+    genderSaved: "Sexe enregistré",
+    genderFailed: "Impossible d'enregistrer le sexe",
+    unfinishedTitle: "Commande réglée, parcours à terminer",
+    unfinishedHint:
+      "Ton paiement est enregistré, mais les dernières questions n'ont jamais été reçues. Reprends le parcours : rien ne te sera facturé une seconde fois.",
+    unfinishedCta: "Terminer mon parcours",
   },
   en: {
     eyebrow: "Personal space",
@@ -197,6 +211,17 @@ const copy = {
     resumeProgress: "Question {current} of {total}",
     resumeHint: "Your progress is saved. Pick up where you left off, on any device.",
     resumeCta: "Continue",
+    gender: "Gender",
+    genderHint: "The griot must know whom he gives voice to, so the ancestor rises in your image.",
+    genderMale: "A man",
+    genderFemale: "A woman",
+    genderUnset: "Not set",
+    genderSaved: "Gender saved",
+    genderFailed: "Unable to save gender",
+    unfinishedTitle: "Order paid, journey to finish",
+    unfinishedHint:
+      "Your payment went through, but the last answers never reached us. Pick the journey back up: you will not be charged again.",
+    unfinishedCta: "Finish my journey",
   },
 } as const;
 
@@ -270,6 +295,10 @@ export function DashboardClient({
   const [oeuvres, setOeuvres] = useState<Oeuvre[]>([]);
   const [juniorTotems, setJuniorTotems] = useState<JuniorTotem[]>([]);
   const [drafts, setDrafts] = useState<ParcoursDraft[]>([]);
+  // Sexe declare : reglable ici pour les comptes crees avant qu'il ne soit
+  // demande a l'inscription.
+  const [sexe, setSexe] = useState<"homme" | "femme" | null>(null);
+  const [savingSexe, setSavingSexe] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOeuvre, setSelectedOeuvre] = useState<Oeuvre | null>(null);
@@ -301,7 +330,7 @@ export function DashboardClient({
           return;
         }
 
-        const [commandesRes, oeuvresRes, juniorRes, draftsData] = await Promise.all([
+        const [commandesRes, oeuvresRes, juniorRes, draftsData, profilRes] = await Promise.all([
           fetch("/api/ordo_tabulae", {
             headers: { authorization: `Bearer ${currentToken}` },
           }),
@@ -312,6 +341,9 @@ export function DashboardClient({
             headers: { authorization: `Bearer ${currentToken}` },
           }),
           fetchParcoursDrafts(String(currentToken)),
+          fetch("/api/personae_nota", {
+            headers: { authorization: `Bearer ${currentToken}` },
+          }),
         ]);
 
         if (!alive) return;
@@ -335,6 +367,11 @@ export function DashboardClient({
             (draft): draft is ParcoursDraft => Boolean(draft),
           ),
         );
+
+        if (profilRes.ok) {
+          const profil = (await profilRes.json()) as { sexe?: string | null };
+          if (profil.sexe === "homme" || profil.sexe === "femme") setSexe(profil.sexe);
+        }
       } catch (err) {
         if (alive) {
           const message = err instanceof Error ? err.message : t.error;
@@ -364,6 +401,13 @@ export function DashboardClient({
     ["en_attente_paiement", "paye", "en_generation"].includes(commande.statut),
   ).length;
   const composition = buildCompositionState({ commandes, oeuvres, copy: t });
+  // Commande reglee dont l'oeuvre n'est jamais arrivee : le questionnaire n'a
+  // pas ete mene a son terme. On propose de le reprendre sans repayer.
+  const unfinishedPaidOrder = commandes.find(
+    (commande) =>
+      commande.statut === "paye" &&
+      !oeuvres.some((oeuvre) => oeuvre.commande_id === commande.id),
+  );
   const [activeSection, setActiveSection] = useState<DashboardSection>(section);
   const sectionToastInitialized = useRef(false);
   const compositionStatusRef = useRef<string>("");
@@ -693,6 +737,30 @@ export function DashboardClient({
               <h1 className="h-display text-4xl" style={{ color: "var(--or-ancestral)" }}>
                 {t.latestOrders}
               </h1>
+              {unfinishedPaidOrder && (
+                <div
+                  className="premium-panel-strong flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between md:p-6"
+                  style={{ borderColor: "rgba(216,173,77,0.42)" }}
+                >
+                  <div className="flex min-w-0 flex-col gap-2">
+                    <span
+                      className="caption inline-flex items-center gap-2 uppercase"
+                      style={{ color: "var(--or-ancestral)" }}
+                    >
+                      <AlertTriangle size={13} />
+                      {t.unfinishedTitle}
+                    </span>
+                    <p className="subtext text-sm">{t.unfinishedHint}</p>
+                  </div>
+                  <Link
+                    href={`/${locale}/via_sapientiae`}
+                    className="btn-primary shrink-0 justify-center"
+                  >
+                    <PlayCircle size={15} />
+                    {t.unfinishedCta}
+                  </Link>
+                </div>
+              )}
               {drafts.map((draft) => (
                 <ResumeCard key={draft.piste} draft={draft} locale={locale} copy={t} />
               ))}
@@ -751,6 +819,72 @@ export function DashboardClient({
                   <ProfileLine label={t.email} value={user?.email ?? "-"} />
                   <ProfileLine label={t.language} value={locale.toUpperCase()} />
                 </dl>
+
+                {/* Sexe : reglable ici, notamment pour les comptes crees avant
+                    qu'il ne soit demande a l'inscription. */}
+                <div
+                  className="mt-8 border-t pt-6"
+                  style={{ borderColor: "rgba(216,173,77,0.18)" }}
+                >
+                  <p className="caption uppercase" style={{ color: "rgba(237,217,154,0.7)" }}>
+                    {t.gender}
+                  </p>
+                  <p className="mt-2 text-sm premium-muted" style={{ lineHeight: 1.5 }}>
+                    {t.genderHint}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {(["homme", "femme"] as const).map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        disabled={savingSexe}
+                        aria-pressed={sexe === value}
+                        onClick={async () => {
+                          if (!token || sexe === value) return;
+                          setSavingSexe(true);
+                          const previous = sexe;
+                          setSexe(value);
+                          try {
+                            const response = await fetch("/api/personae_nota", {
+                              method: "PATCH",
+                              headers: {
+                                "Content-Type": "application/json",
+                                authorization: `Bearer ${token}`,
+                              },
+                              body: JSON.stringify({ sexe: value }),
+                            });
+                            if (!response.ok) throw new Error("save_failed");
+                            toast.success(t.genderSaved);
+                          } catch {
+                            setSexe(previous);
+                            toast.error(t.genderFailed);
+                          } finally {
+                            setSavingSexe(false);
+                          }
+                        }}
+                        className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm uppercase tracking-wide transition-all disabled:opacity-60"
+                        style={{
+                          fontFamily: "var(--font-display)",
+                          background:
+                            sexe === value ? "rgba(216,173,77,0.14)" : "rgba(13,13,26,0.55)",
+                          boxShadow:
+                            sexe === value
+                              ? "0 0 0 1px var(--or-ancestral)"
+                              : "0 0 0 1px rgba(216,173,77,0.18)",
+                          color: sexe === value ? "var(--or-pale)" : "rgba(226,225,238,0.66)",
+                        }}
+                      >
+                        {value === "homme" ? <Mars size={15} /> : <Venus size={15} />}
+                        {value === "homme" ? t.genderMale : t.genderFemale}
+                      </button>
+                    ))}
+                  </div>
+                  {!sexe && (
+                    <p className="caption mt-2" style={{ color: "rgba(226,225,238,0.45)" }}>
+                      {t.genderUnset}
+                    </p>
+                  )}
+                </div>
                 <div
                   className="mt-8 border-t pt-6"
                   style={{ borderColor: "rgba(216,173,77,0.18)" }}
@@ -894,38 +1028,46 @@ function buildCompositionState({
   copy: { [key: string]: string };
 }): CompositionState {
   const latestOrder = commandes[0];
-  const hasDeliveredArtwork = oeuvres.some(
+  const hasAnyArtwork = oeuvres.some(
     (oeuvre) => oeuvre.statut === "livree" || oeuvre.image_url || oeuvre.pdf_url,
   );
-  const hasComposition = commandes.length > 0 || hasDeliveredArtwork;
+  const hasComposition = commandes.length > 0 || hasAnyArtwork;
 
   if (!hasComposition) {
     return { status: t.noComposition, progress: 0, events: [], hasComposition: false };
   }
 
-  const events: string[] = [];
-  if (latestOrder) events.push(`Commande #${latestOrder.id.slice(0, 8)} en generation`);
-  if (hasDeliveredArtwork) events.push("Livrables disponibles dans le dashboard");
-
-  if (hasDeliveredArtwork) {
-    return { status: t.deliveredStatus, progress: 100, events, hasComposition: true };
-  }
-  if (latestOrder?.statut === "erreur") {
-    return { status: t.errorStatus, progress: 100, events, hasComposition: true };
-  }
-  if (latestOrder?.statut === "en_generation") {
-    return { status: t.generatingStatus, progress: 88, events, hasComposition: true };
-  }
-  if (latestOrder?.statut === "paye") {
-    return { status: t.paidStatus, progress: 72, events, hasComposition: true };
+  // Le suivi porte sur la commande en cours, pas sur l'ensemble du compte :
+  // une oeuvre deja livree ne doit pas afficher une nouvelle commande a 100 %.
+  if (!latestOrder) {
+    return {
+      status: t.deliveredStatus,
+      progress: 100,
+      events: [t.deliveredStatus],
+      hasComposition: true,
+    };
   }
 
-  return {
-    status: t.draftStatus ?? "",
-    progress: 50,
-    events,
+  const artwork = oeuvres.find((oeuvre) => oeuvre.commande_id === latestOrder.id);
+  const delivered =
+    latestOrder.statut === "livree" ||
+    Boolean(artwork && (artwork.statut === "livree" || artwork.image_url || artwork.pdf_url));
+
+  const reference = `#${latestOrder.id.slice(0, 8)}`;
+  const step = (status: string, progress: number) => ({
+    status,
+    progress,
+    events: [`${t.orders} ${reference} · ${status}`],
     hasComposition: true,
-  };
+  });
+
+  if (delivered) return step(t.deliveredStatus, 100);
+  if (latestOrder.statut === "erreur") return step(t.errorStatus, 88);
+  if (latestOrder.statut === "en_generation") return step(t.generatingStatus, 88);
+  if (latestOrder.statut === "paye") return step(t.paidStatus, 72);
+  if (latestOrder.statut === "en_attente_paiement") return step(t.offerStatus, 40);
+
+  return step(t.draftStatus ?? "", 25);
 }
 
 function metadataValue(metadata: Record<string, unknown>, keys: string[]) {

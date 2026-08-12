@@ -301,8 +301,8 @@
           "price": "49",
           "subtitle": "The essential experience.",
           "features": [
-            "The narrative parchment (PDF)",
-            "The visual artwork (high-resolution PNG)",
+            "The narrative parchment",
+            "The visual artwork",
             "The numbered certificate of authenticity",
             "Delivery within 15 minutes by email"
           ],
@@ -314,9 +314,9 @@
           "price": "89",
           "subtitle": "The complete experience.",
           "features": [
-            "The narrative parchment (PDF)",
-            "The visual artwork (high-resolution PNG)",
-            "The imaginary ancestor's voice (MP3, 90s)",
+            "The narrative parchment",
+            "The visual artwork",
+            "The imaginary ancestor's voice",
             "The numbered certificate of authenticity",
             "Delivery within 15 minutes by email"
           ],
@@ -471,7 +471,7 @@
         },
         {
           "title": "Keep your TOTEM",
-          "text": "As you keep a name, as you keep a secret. It exists only through you — and will live nowhere else."
+          "text": "As you keep a name, as you keep a secret. It exists only through you, and will live nowhere else."
         }
       ],
       "timer": "15 minutes"
@@ -567,7 +567,7 @@
   "le_griot_t_ecoute": "The griot is listening to you.",
   "le_manifeste_de_la_maison_totem_ancestral": "The Totem Ancestral Manifesto.",
   "le_moment_de_la_journee_ou_tu_te_sens_vraiment_toi_meme": "The time of day when you really feel like yourself...",
-  "le_parchemin_narratif_pdf": "The Narrative Scroll (PDF)",
+  "le_parchemin_narratif_pdf": "The Narrative Scroll",
   "le_parcours_du_griot_totem_ancestral": "The Griot's Journey · Ancestral Totem",
   "le_portrait_prend_vie_dans_l_ombre": "The portrait comes to life in the shadows...",
   "le_questionnaire_dure_environ_quinze_minutes_l_uvre_est": "The questionnaire takes about fifteen minutes to complete. The results are delivered by email within fifteen minutes of submission (thirty minutes for the Family Totem).",
@@ -623,7 +623,7 @@
   "paiement_securise_visa_mastercard_apple_pay_google_pay": "Secure payment · Visa · Mastercard · Apple Pay · Google Pay · No subscription required · GDPR",
   "par_email_a_contact_totemancestral_com_ou_via_notre": "By email at contact@totemancestral.com or through our contact form. We’ll respond within 48 hours.",
   "paragraphs": "paragraphs",
-  "parchemin_narratif_pdf": "Story Scroll (PDF)",
+  "parchemin_narratif_pdf": "Story Scroll",
   "passer": "Skip →",
   "paywall": "paywall",
   "pending": "pending",
@@ -750,7 +750,7 @@
   "une_uvre_numerique_unique_assistee_par_intelligence": "A unique digital work, created with the help of artificial intelligence, inspired by African cosmogonies.",
   "unhandled": "unhandled",
   "usage": "Usage",
-  "uvre_visuelle_png_haute_resolution": "Visual artwork (high-resolution PNG)",
+  "uvre_visuelle_png_haute_resolution": "Visual artwork",
   "voir_les_offres": "View offers",
   "voix_de_l_ancetre_mp3_90s": "Voice of the Ancestor (MP3, 90 seconds)",
   "vos_donnees_servent_exclusivement_a_composer_votre_uvre": "Your data is used solely to create your artwork, deliver it to you, and follow up with you regarding the order. We do not resell or share your data for marketing purposes.",
@@ -782,7 +782,7 @@
       "audioListen": "Listen to the question",
       "audioPlaying": "Playing",
       "audioReplay": "Replay",
-      "audioHint": "The question plays automatically — tap to replay.",
+      "audioHint": "The question plays automatically, tap to replay.",
       "optional": "optional",
       "required": "required",
       "words": "{count} / {max} words",
@@ -832,8 +832,8 @@
           "delivery": "15 min",
           "includes": "3 pieces",
           "features": [
-            "Narrative parchment (PDF)",
-            "Visual artwork (high-resolution PNG)",
+            "Narrative parchment",
+            "Visual artwork",
             "Numbered certificate of authenticity",
             "Delivery within 15 minutes by email"
           ],
@@ -848,9 +848,9 @@
           "delivery": "15 min",
           "includes": "4 pieces",
           "features": [
-            "Narrative parchment (PDF)",
-            "Visual artwork (high-resolution PNG)",
-            "The imaginary ancestor's voice (MP3, 90s)",
+            "Narrative parchment",
+            "Visual artwork",
+            "The imaginary ancestor's voice",
             "Numbered certificate of authenticity",
             "Delivery within 15 minutes by email"
           ],

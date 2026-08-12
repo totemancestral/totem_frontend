@@ -22,12 +22,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Commande incomplete invalide" }, { status: 422 });
   }
 
-  const backendAnswers = withGender(toBackendAnswers(parsed.data.answers), parsed.data.sexe);
-  if (backendAnswers.length !== 10) {
+  // Le compte est le seul juge du sexe : il est declare a l'inscription et
+  // reglable dans le profil. Le questionnaire ne le transporte plus.
+  const questionAnswers = toBackendAnswers(parsed.data.answers);
+  if (questionAnswers.length < 10) {
     return NextResponse.json({ error: "Réponses incomplètes" }, { status: 422 });
   }
 
   const supabase = createServiceClient();
+  const backendAnswers = withGender(questionAnswers, await readProfileGender(supabase, auth.userId));
   const { data: parcours, error: parcoursError } = await supabase
     .from("reponses_parcours")
     .upsert(
@@ -136,6 +139,15 @@ async function completeBackendOrder(input: {
 
 /** Le sexe declare voyage comme reponse dediee : le backend le lit sous
  *  l'identifiant « sexe » et n'en tient pas compte dans le scoring. */
+/** Sexe declare sur le profil du visiteur, ou `null` s'il ne l'a pas renseigne. */
+async function readProfileGender(
+  supabase: ReturnType<typeof createServiceClient>,
+  userId: string,
+): Promise<string | null> {
+  const { data } = await supabase.from("profiles").select("sexe").eq("id", userId).maybeSingle();
+  return (data as { sexe?: string | null } | null)?.sexe ?? null;
+}
+
 function withGender(
   answers: { questionId: string; answer: string }[],
   sexe: unknown,

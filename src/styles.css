@@ -861,9 +861,14 @@
       gap: 3rem;
     }
 
+    /* `container-type: inline-size` isole la colonne du calcul de largeur
+       intrinseque : combinee a des marges automatiques, la boite se reduisait
+       a zero et le hero s'effondrait sur mobile. Une largeur explicite rend
+       les marges resolvables et rend la colonne au texte. */
     .liquid-hero-copy {
+      width: 100%;
       max-width: 700px;
-      margin: 0 auto;
+      margin-inline: auto;
       text-align: center;
     }
 

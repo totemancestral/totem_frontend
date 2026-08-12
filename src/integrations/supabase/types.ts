@@ -220,6 +220,7 @@ export type Database = {
           pays: string | null;
           nom: string | null;
           prenom: string | null;
+          sexe: string | null;
           updated_at: string;
         };
         Insert: {
@@ -230,6 +231,7 @@ export type Database = {
           pays?: string | null;
           nom?: string | null;
           prenom?: string | null;
+          sexe?: string | null;
           updated_at?: string;
         };
         Update: {
@@ -240,6 +242,7 @@ export type Database = {
           pays?: string | null;
           nom?: string | null;
           prenom?: string | null;
+          sexe?: string | null;
           updated_at?: string;
         };
         Relationships: [];

@@ -25,7 +25,13 @@ export async function GET(request: Request) {
 
   if (error) {
     if (error.code === "PGRST116") {
-      return NextResponse.json({ prenom: null, nom: null, email: auth.email, langue: "fr" });
+      return NextResponse.json({
+        prenom: null,
+        nom: null,
+        sexe: null,
+        email: auth.email,
+        langue: "fr",
+      });
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -42,7 +48,16 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Corps de requête invalide" }, { status: 422 });
   }
 
-  const { prenom, nom, langue } = body as { prenom?: string; nom?: string; langue?: string };
+  const { prenom, nom, sexe, langue } = body as {
+    prenom?: string;
+    nom?: string;
+    sexe?: string;
+    langue?: string;
+  };
+
+  if (sexe !== undefined && sexe !== "homme" && sexe !== "femme") {
+    return NextResponse.json({ error: "Sexe invalide" }, { status: 422 });
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -59,6 +74,7 @@ export async function PATCH(request: Request) {
   const update: Record<string, string> = {};
   if (prenom !== undefined) update.prenom = prenom;
   if (nom !== undefined) update.nom = nom;
+  if (sexe !== undefined) update.sexe = sexe;
   if (langue !== undefined) update.langue = langue;
 
   if (Object.keys(update).length === 0) {

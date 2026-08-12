@@ -71,11 +71,11 @@ const copy = {
     manifest: {
       eyebrow: "Notre démarche",
       title: "Le manifeste en trois temps",
-      body: "Pourquoi cette maison existe — et ce qu'elle refuse d'être.",
+      body: "Pourquoi cette maison existe, et ce qu'elle refuse d'être.",
       items: [
         {
           title: "Une œuvre, pas un test",
-          body: "TOTEM ANCESTRAL est une œuvre, pas un test de personnalité. Chaque parole confiée au griot devient un récit, un visage — jamais un résultat, jamais un score.",
+          body: "TOTEM ANCESTRAL est une œuvre, pas un test de personnalité. Chaque parole confiée au griot devient un récit, un visage, jamais un résultat, jamais un score.",
           image: traverserEcoute,
         },
         {
@@ -85,7 +85,7 @@ const copy = {
         },
         {
           title: "L'imaginaire, pas la science",
-          body: "Nous n'exhumons pas un arbre généalogique. Nous réveillons l'ancêtre qui sommeille en vous — celui que l'histoire vous a refusé — celui qui, lui, n'est jamais parti.",
+          body: "Nous n'exhumons pas un arbre généalogique. Nous réveillons l'ancêtre qui sommeille en vous, celui que l'histoire vous a refusé, celui qui, lui, n'est jamais parti.",
           image: oeuvreVisuelle,
         },
       ],
@@ -103,15 +103,15 @@ const copy = {
       body: "Le parcours commence par une écoute simple, puis la maison compose et livre votre coffret.",
       items: [
         {
-          title: "01 — Le griot prend la parole",
+          title: "01. Le griot prend la parole",
           body: "Vos réponses reflètent qui vous êtes.",
         },
         {
-          title: "02 — L'œuvre prend forme",
+          title: "02. L'œuvre prend forme",
           body: "La maison TOTEM la compose pièce par pièce.",
         },
         {
-          title: "03 — Votre TOTEM vous rejoint",
+          title: "03. Votre TOTEM vous rejoint",
           body: "Il n'existe qu'une fois et désormais, il existe pour vous.",
         },
       ],
@@ -162,7 +162,7 @@ const copy = {
           tag: "Le chemin le plus suivi",
           badge: "Le plus choisi",
           featured: true,
-          body: "La création dans sa plénitude — le récit, le visage, la voix.",
+          body: "La création dans sa plénitude : le récit, le visage, la voix.",
           features: ["Création complète", "Voix rituelle", "Tirage Fine Art en option"],
           cta: "Révéler mon Totem",
         },
@@ -186,7 +186,7 @@ const copy = {
       title: "Une maison de création",
       paragraphs: [
         "TOTEM ANCESTRAL est une maison de création née à Paris, au carrefour de l'art et des mémoires africaines.",
-        "Nous ne sommes ni archivistes, ni devins, ni généalogistes. Nous sommes des passeurs — entre ce que vous êtes et ce que vous auriez pu être, entre aujourd'hui et les soixante mille ans qui vous précèdent.",
+        "Nous ne sommes ni archivistes, ni devins, ni généalogistes. Nous sommes des passeurs, entre ce que vous êtes et ce que vous auriez pu être, entre aujourd'hui et les soixante mille ans qui vous précèdent.",
       ],
     },
     testimonials: {
@@ -231,23 +231,23 @@ const copy = {
       items: [
         {
           q: "Chaque œuvre est-elle unique ?",
-          a: "Oui. Chaque Totem naît de votre récit, de ce que vous seul confiez au griot. Il n'existe pas deux créations identiques — votre œuvre porte un numéro, comme un nom propre gravé une seule fois.",
+          a: "Oui. Chaque Totem naît de votre récit, de ce que vous seul confiez au griot. Il n'existe pas deux créations identiques : votre œuvre porte un numéro, comme un nom propre gravé une seule fois.",
         },
         {
           q: "Est-ce un test ADN ?",
-          a: "Non. Nous n'exhumons pas un arbre généalogique et ne procédons à aucune analyse biologique. TOTEM ANCESTRAL explore la mémoire spirituelle et culturelle, non la mémoire génétique — une quête artistique et symbolique de vos racines, un miroir narratif, pas un rapport scientifique. Le détail de notre méthode de création figure dans nos CGV.",
+          a: "Non. Nous n'exhumons pas un arbre généalogique et ne procédons à aucune analyse biologique. TOTEM ANCESTRAL explore la mémoire spirituelle et culturelle, non la mémoire génétique : une quête artistique et symbolique de vos racines, un miroir narratif, pas un rapport scientifique. Le détail de notre méthode de création figure dans nos CGV.",
         },
         {
           q: "Comment recevoir mon Totem ?",
-          a: "Après votre traversée du questionnaire — environ quinze minutes — votre œuvre est façonnée puis déposée dans votre espace, le lieu où elle vous attend et demeure. Selon la formule choisie, un tirage Fine Art vous est ensuite expédié.",
+          a: "Après votre traversée du questionnaire, environ quinze minutes, votre œuvre est façonnée puis déposée dans votre espace, le lieu où elle vous attend et demeure. Selon la formule choisie, un tirage Fine Art vous est ensuite expédié.",
         },
         {
           q: "Mes données sont-elles protégées ?",
-          a: "Oui. Vos réponses servent uniquement à composer votre œuvre — elles ne sont ni vendues, ni partagées. Le détail complet du traitement de vos données figure dans notre page Confidentialité.",
+          a: "Oui. Vos réponses servent uniquement à composer votre œuvre : elles ne sont ni vendues, ni partagées. Le détail complet du traitement de vos données figure dans notre page Confidentialité.",
         },
         {
           q: "Puis-je offrir un Totem sans que la personne réponde elle-même au questionnaire ?",
-          a: "Oui. Vous pouvez répondre en son nom, ou lui offrir l'accès pour qu'elle traverse elle-même l'expérience — le choix vous appartient.",
+          a: "Oui. Vous pouvez répondre en son nom, ou lui offrir l'accès pour qu'elle traverse elle-même l'expérience : le choix vous appartient.",
         },
       ],
     },
@@ -402,7 +402,7 @@ const copy = {
           tag: "The most travelled path",
           badge: "Most chosen",
           featured: true,
-          body: "The creation in full — the story, the face, the voice.",
+          body: "The creation in full: the story, the face, the voice.",
           features: ["Complete creation", "Ritual voice", "Fine Art print as an option"],
           cta: "Reveal my Totem",
         },
@@ -583,7 +583,9 @@ function TriptychCard({
       >
         {String(index + 1).padStart(2, "0")}
       </span>
-      <div className="mt-auto pr-20">
+      {/* Sur mobile la vignette remonte a hauteur du numero : reserver sa
+          largeur a cote du texte etranglait le paragraphe sur un ecran etroit. */}
+      <div className="mt-auto pr-0 md:pr-20">
         <h3 className="h-display text-3xl md:text-4xl" style={{ color: "var(--ivoire)" }}>
           {title}
         </h3>
@@ -595,7 +597,7 @@ function TriptychCard({
         src={image}
         alt=""
         loading="lazy"
-        className="absolute bottom-7 right-7 h-20 w-20 rounded-sm border object-cover grayscale"
+        className="absolute right-7 top-7 h-16 w-16 rounded-sm border object-cover grayscale md:bottom-7 md:top-auto md:h-20 md:w-20"
         style={{ borderColor: "rgba(216,173,77,0.28)", filter: "grayscale(1) brightness(0.72)" }}
       />
     </article>

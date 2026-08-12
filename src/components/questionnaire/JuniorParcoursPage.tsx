@@ -28,7 +28,7 @@ import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { authPath } from "@/lib/routes";
 import { QuestionAudio } from "./QuestionAudio";
 import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
-import { GenderModal, type Gender } from "./GenderModal";
+import { type Gender } from "./GenderModal";
 import {
   clearParcoursDraft,
   fetchParcoursDrafts,
@@ -100,7 +100,7 @@ const copy = {
     listen: "Écouter la question",
     playing: "Lecture en cours",
     replay: "Réécouter",
-    audioHint: "La question se joue automatiquement — appuie pour reecouter.",
+    audioHint: "La question se joue automatiquement, appuie pour réécouter.",
     questions: [
       {
         title: "Quand tu entres quelque part, tu es plutôt...",
@@ -222,7 +222,7 @@ const copy = {
     listen: "Listen to the question",
     playing: "Playing",
     replay: "Replay",
-    audioHint: "The question plays automatically — tap to replay.",
+    audioHint: "The question plays automatically, tap to replay.",
     questions: [
       {
         title: "When you enter a place, you are more like...",
@@ -315,9 +315,10 @@ export function JuniorParcoursPage() {
   const { session } = useSupabaseSession();
   const [started, setStarted] = useState(false);
   const [index, setIndex] = useState(0);
+  // Le sexe est declare a la creation du compte et reglable dans le profil :
+  // le questionnaire ne l'interrompt plus. On le garde pour les brouillons
+  // enregistres avant ce changement.
   const [gender, setGender] = useState<Gender | null>(null);
-  // Le sexe est demande juste avant la derniere question.
-  const [askGender, setAskGender] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [answers, setAnswers] = useState<Record<number, JuniorAnswer>>({});
   const [result, setResult] = useState<JuniorResult | null>(() => {
@@ -832,13 +833,7 @@ export function JuniorParcoursPage() {
                 <button
                   type="button"
                   className="btn-primary"
-                  onClick={() => {
-                    if (index === 3 && !gender) {
-                      setAskGender(true);
-                      return;
-                    }
-                    setIndex((currentIndex) => currentIndex + 1);
-                  }}
+                  onClick={() => setIndex((currentIndex) => currentIndex + 1)}
                   disabled={!canContinue || loading}
                 >
                   {t.next as string}
@@ -878,16 +873,6 @@ export function JuniorParcoursPage() {
         )}
       </section>
 
-      {askGender && (
-        <GenderModal
-          locale={locale}
-          onChoose={(choice) => {
-            setGender(choice);
-            setAskGender(false);
-            setIndex((currentIndex) => currentIndex + 1);
-          }}
-        />
-      )}
     </main>
   );
 }

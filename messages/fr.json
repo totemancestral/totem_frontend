@@ -301,8 +301,8 @@
           "price": "49",
           "subtitle": "L'expérience essentielle.",
           "features": [
-            "Le Parchemin narratif (PDF)",
-            "L'œuvre visuelle (PNG haute résolution)",
+            "Le Parchemin narratif",
+            "L'œuvre visuelle",
             "Le Certificat d'authenticité numéroté",
             "Livraison sous 15 minutes par email"
           ],
@@ -314,9 +314,9 @@
           "price": "89",
           "subtitle": "L'expérience complète.",
           "features": [
-            "Le Parchemin narratif (PDF)",
-            "L'œuvre visuelle (PNG haute résolution)",
-            "La Voix de l'ancêtre imaginaire (MP3, 90s)",
+            "Le Parchemin narratif",
+            "L'œuvre visuelle",
+            "La Voix de l'ancêtre imaginaire",
             "Le Certificat d'authenticité numéroté",
             "Livraison sous 15 minutes par email"
           ],
@@ -471,7 +471,7 @@
         },
         {
           "title": "Gardez votre TOTEM",
-          "text": "Comme on garde un nom, comme on garde un secret. Il n'existe qu'à travers vous — et ne vivra nulle part ailleurs."
+          "text": "Comme on garde un nom, comme on garde un secret. Il n'existe qu'à travers vous, et ne vivra nulle part ailleurs."
         }
       ],
       "timer": "15 minutes"
@@ -538,7 +538,7 @@
   "l_uvre_est_elle_imprimable": "L'œuvre est-elle imprimable ?",
   "l_uvre_est_livree_par_email_sous_quinze_minutes_trente": "L'œuvre est livrée par email sous quinze minutes (trente minutes pour Totem Famille) après validation du questionnaire.",
   "l_uvre_se_compose": "L'œuvre se compose.",
-  "l_uvre_visuelle_png_haute_resolution": "L'Œuvre visuelle (PNG haute résolution)",
+  "l_uvre_visuelle_png_haute_resolution": "L'Œuvre visuelle",
   "la_colere_est_sacree_elle_dit_ce_qui_compte_vraiment_ce_qui": "La colère est sacrée. Elle dit ce qui compte vraiment. Ce qui te met en colère révèle ce à quoi tu tiens le plus.",
   "la_commande_est_validee_apres_reception_du_paiement": "La commande est validée après réception du paiement intégral. Un email de confirmation est envoyé immédiatement.",
   "la_destruction_de_la_nature_de_la_beaute_de_la_memoire_de": "La destruction, de la nature, de la beauté, de la mémoire, de ce qui a pris des siècles à construire.",
@@ -551,7 +551,7 @@
   "la_terre_sous_mes_pieds_les_racines_les_pierres_les_forets": "La terre sous mes pieds, les racines, les pierres, les forêts épaisses, ce qui dure et qui tient.",
   "la_trace_que_tu_veux_laisser_dans_le_monde": "La trace que tu veux laisser dans le monde ?",
   "la_trahison_et_le_mensonge_l_hypocrisie_les_gens_qui_jouent": "La trahison et le mensonge. L'hypocrisie. Les gens qui jouent un rôle plutôt que d'être vrais.",
-  "la_voix_de_l_ancetre_imaginaire_mp3_90s": "La Voix de l'ancêtre imaginaire (MP3, 90s)",
+  "la_voix_de_l_ancetre_imaginaire_mp3_90s": "La Voix de l'ancêtre imaginaire",
   "la_voix_de_l_ancetre_se_leve": "La voix de l'ancêtre se lève...",
   "le_c_ur_de_la_collection": "Le cœur de la collection",
   "le_c_ur_de_la_collection_2": "LE CŒUR DE LA COLLECTION",
@@ -567,7 +567,7 @@
   "le_griot_t_ecoute": "Le griot t'écoute.",
   "le_manifeste_de_la_maison_totem_ancestral": "Le manifeste de la maison Totem Ancestral.",
   "le_moment_de_la_journee_ou_tu_te_sens_vraiment_toi_meme": "Le moment de la journée où tu te sens vraiment toi-même...",
-  "le_parchemin_narratif_pdf": "Le Parchemin narratif (PDF)",
+  "le_parchemin_narratif_pdf": "Le Parchemin narratif",
   "le_parcours_du_griot_totem_ancestral": "Le Parcours du Griot · Totem Ancestral",
   "le_portrait_prend_vie_dans_l_ombre": "Le portrait prend vie dans l'ombre...",
   "le_questionnaire_dure_environ_quinze_minutes_l_uvre_est": "Le questionnaire dure environ quinze minutes. L'œuvre est livrée par email sous quinze minutes après validation (trente minutes pour le Totem Famille).",
@@ -623,7 +623,7 @@
   "paiement_securise_visa_mastercard_apple_pay_google_pay": "Paiement sécurisé · Visa · Mastercard · Apple Pay · Google Pay · Aucun abonnement · RGPD",
   "par_email_a_contact_totemancestral_com_ou_via_notre": "Par email à contact@totemancestral.com ou via notre formulaire de contact. Nous répondons sous 48h.",
   "paragraphs": "paragraphs",
-  "parchemin_narratif_pdf": "Parchemin narratif (PDF)",
+  "parchemin_narratif_pdf": "Parchemin narratif",
   "passer": "Passer →",
   "paywall": "paywall",
   "pending": "pending",
@@ -750,9 +750,9 @@
   "une_uvre_numerique_unique_assistee_par_intelligence": "Une œuvre numérique unique, assistée par intelligence artificielle, inspirée des cosmogonies africaines.",
   "unhandled": "unhandled",
   "usage": "Usage",
-  "uvre_visuelle_png_haute_resolution": "Œuvre visuelle (PNG haute résolution)",
+  "uvre_visuelle_png_haute_resolution": "Œuvre visuelle",
   "voir_les_offres": "Voir les offres",
-  "voix_de_l_ancetre_mp3_90s": "Voix de l'ancêtre (MP3, 90s)",
+  "voix_de_l_ancetre_mp3_90s": "Voix de l'ancêtre",
   "vos_donnees_servent_exclusivement_a_composer_votre_uvre": "Vos données servent exclusivement à composer votre œuvre, vous la livrer et assurer le suivi commercial. Aucune revente, aucun partage marketing.",
   "vos_droits": "Vos droits",
   "vos_reponses_au_questionnaire_sont_conservees_de_maniere": "Vos réponses au questionnaire sont conservées de manière chiffrée pour vous permettre de récupérer votre œuvre. Vous pouvez demander leur suppression à tout moment.",
@@ -782,7 +782,7 @@
       "audioListen": "Écouter la question",
       "audioPlaying": "Lecture en cours",
       "audioReplay": "Réécouter",
-      "audioHint": "La question se joue automatiquement — appuie pour réécouter.",
+      "audioHint": "La question se joue automatiquement, appuie pour réécouter.",
       "optional": "facultatif",
       "required": "obligatoire",
       "words": "{count} / {max} mots",
@@ -832,8 +832,8 @@
           "delivery": "15 min",
           "includes": "3 pièces",
           "features": [
-            "Le Parchemin narratif (PDF)",
-            "L'Œuvre visuelle (PNG haute résolution)",
+            "Le Parchemin narratif",
+            "L'Œuvre visuelle",
             "Le Certificat d'authenticité numéroté",
             "Livraison sous 15 minutes par email"
           ],
@@ -848,9 +848,9 @@
           "delivery": "15 min",
           "includes": "4 pièces",
           "features": [
-            "Le Parchemin narratif (PDF)",
-            "L'Œuvre visuelle (PNG haute résolution)",
-            "La Voix de l'ancêtre imaginaire (MP3, 90s)",
+            "Le Parchemin narratif",
+            "L'Œuvre visuelle",
+            "La Voix de l'ancêtre imaginaire",
             "Le Certificat d'authenticité numéroté",
             "Livraison sous 15 minutes par email"
           ],

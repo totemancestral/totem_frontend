@@ -53,14 +53,17 @@ async function handleCheckout(
   // rattachée à une personne identifiée.
   const profileResult = await supabase
     .from("profiles")
-    .select("prenom, nom")
+    .select("prenom, nom, sexe")
     .eq("id", auth.userId)
     .maybeSingle();
-  const profile = (profileResult?.data as { prenom?: string; nom?: string } | null) ?? null;
+  const profile =
+    (profileResult?.data as { prenom?: string; nom?: string; sexe?: string | null } | null) ?? null;
   const prenom = profile?.prenom ?? "";
   const nomComplet = [prenom, profile?.nom ?? ""].map((part) => part.trim()).filter(Boolean).join(" ");
 
-  const backendAnswers = withGender(toBackendAnswers(data.answers), data.sexe);
+  // Le sexe vient du profil, declare a l'inscription : le questionnaire ne le
+  // demande plus en cours de route.
+  const backendAnswers = withGender(toBackendAnswers(data.answers), profile?.sexe ?? null);
   const { data: parcours, error: parcoursError } = await supabase
     .from("reponses_parcours")
     .upsert(

@@ -7,6 +7,7 @@ type SignupPayload = {
   password?: string;
   prenom?: string;
   nom?: string;
+  sexe?: string;
   locale?: string;
   role?: string;
   redirectPath?: string;
@@ -31,12 +32,21 @@ export async function POST(request: Request) {
   const nextPath = safeRedirectPath(payload.redirectPath, locale);
   const redirectTo = `${getRequestOrigin(request)}/${locale}/confirmatio?next=${encodeURIComponent(nextPath)}`;
   const role = payload.role === "junior" ? "junior" : "adulte";
-  // Nom et prenom sont collectes des la creation du compte : chaque oeuvre
-  // porte un numero de serie et doit pouvoir etre rattachee a une personne
-  // identifiee.
-  const metadata: { prenom: string; nom: string; langue: "fr" | "en"; role: string } = {
+  // Nom, prenom et sexe sont collectes des la creation du compte : chaque
+  // oeuvre porte un numero de serie et doit pouvoir etre rattachee a une
+  // personne identifiee, et le sexe accorde le recit sans qu'on ait a
+  // interrompre le questionnaire pour le demander.
+  const sexe = payload.sexe === "homme" || payload.sexe === "femme" ? payload.sexe : "";
+  const metadata: {
+    prenom: string;
+    nom: string;
+    sexe: string;
+    langue: "fr" | "en";
+    role: string;
+  } = {
     prenom: payload.prenom?.trim() || email.split("@")[0],
     nom: payload.nom?.trim() ?? "",
+    sexe,
     langue: locale,
     role,
   };

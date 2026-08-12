@@ -2,9 +2,9 @@ import { Check, Minus } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 
 const rows: { label: string; values: (boolean | string)[] }[] = [
-  { label: "Parchemin narratif (PDF)", values: [true, true, true] },
-  { label: "Œuvre visuelle (PNG haute résolution)", values: [true, true, true] },
-  { label: "Voix de l'ancêtre (MP3, 90s)", values: [false, true, true] },
+  { label: "Parchemin narratif", values: [true, true, true] },
+  { label: "Œuvre visuelle", values: [true, true, true] },
+  { label: "Voix de l'ancêtre", values: [false, true, true] },
   { label: "Certificat d'authenticité numéroté", values: [true, true, true] },
   { label: "Nombre de coffrets", values: ["1", "1", "3"] },
   { label: "Carte cadeau gratuite", values: [true, true, true] },

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { Mail, Mars, ShieldCheck, Sparkles, Venus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { hasAdminRole } from "@/lib/admin-client";
@@ -28,6 +28,10 @@ const copy = {
     firstNamePlaceholder: "Ton prénom",
     lastName: "Nom",
     lastNamePlaceholder: "Ton nom",
+    genderLegend: "Le griot doit savoir à qui il donne voix",
+    genderHint: "Pour que l'ancêtre se lève à votre image.",
+    genderMale: "Un homme",
+    genderFemale: "Une femme",
     email: "Email",
     emailPlaceholder: "ton@email.com",
     password: "Mot de passe",
@@ -52,6 +56,10 @@ const copy = {
     firstNamePlaceholder: "Your first name",
     lastName: "Last name",
     lastNamePlaceholder: "Your last name",
+    genderLegend: "The griot must know whom he gives voice to",
+    genderHint: "So the ancestor rises in your image.",
+    genderMale: "A man",
+    genderFemale: "A woman",
     email: "Email",
     emailPlaceholder: "you@email.com",
     password: "Password",
@@ -81,6 +89,8 @@ export function SignupClient({ locale }: { locale: Locale }) {
 
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");
+  // Le sexe est demande ici, une seule fois, plutot qu'au milieu du parcours.
+  const [sexe, setSexe] = useState<"homme" | "femme" | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -120,7 +130,7 @@ export function SignupClient({ locale }: { locale: Locale }) {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, prenom, nom, locale, role, redirectPath }),
+        body: JSON.stringify({ email, password, prenom, nom, sexe, locale, role, redirectPath }),
       });
       if (!response.ok) {
         const data = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -198,6 +208,27 @@ export function SignupClient({ locale }: { locale: Locale }) {
             required
           />
         </div>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="caption uppercase premium-muted">{t.genderLegend}</legend>
+          <p className="caption premium-muted" style={{ opacity: 0.75 }}>
+            {t.genderHint}
+          </p>
+          <div className="mt-1 grid grid-cols-2 gap-2">
+            <GenderOption
+              active={sexe === "homme"}
+              onClick={() => setSexe("homme")}
+              icon={<Mars size={16} />}
+              label={t.genderMale}
+            />
+            <GenderOption
+              active={sexe === "femme"}
+              onClick={() => setSexe("femme")}
+              icon={<Venus size={16} />}
+              label={t.genderFemale}
+            />
+          </div>
+        </fieldset>
+
         <AuthField
           label={t.email}
           value={email}
@@ -231,7 +262,7 @@ export function SignupClient({ locale }: { locale: Locale }) {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !sexe}
           className="btn-primary w-full disabled:cursor-wait disabled:opacity-60"
         >
           {loading ? t.submitLoading : t.submit}
@@ -273,6 +304,36 @@ export function SignupClient({ locale }: { locale: Locale }) {
         </Link>
       </p>
     </AuthShell>
+  );
+}
+
+function GenderOption({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className="inline-flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm uppercase tracking-wide transition-all"
+      style={{
+        fontFamily: "var(--font-display)",
+        background: active ? "rgba(216,173,77,0.14)" : "rgba(13,13,26,0.55)",
+        boxShadow: active ? "0 0 0 1px var(--or-ancestral)" : "0 0 0 1px rgba(216,173,77,0.18)",
+        color: active ? "var(--or-pale)" : "rgba(226,225,238,0.66)",
+      }}
+    >
+      <span style={{ color: active ? "var(--or-ancestral)" : "inherit" }}>{icon}</span>
+      {label}
+    </button>
   );
 }
 

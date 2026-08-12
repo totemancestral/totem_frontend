@@ -11,7 +11,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { apiPath, authPath } from "@/lib/routes";
 import { QuestionAudio } from "./QuestionAudio";
-import { GenderModal, type Gender } from "./GenderModal";
+import { type Gender } from "./GenderModal";
 import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
 import {
   clearParcoursDraft,
@@ -420,9 +420,10 @@ export function ParcoursPage() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
+  // Le sexe est declare a la creation du compte et reglable dans le profil :
+  // le questionnaire ne l'interrompt plus pour le demander. On le conserve ici
+  // uniquement pour les brouillons enregistres avant ce changement.
   const [gender, setGender] = useState<Gender | null>(null);
-  // Le sexe est demande juste avant la derniere question, pas au demarrage.
-  const [askGender, setAskGender] = useState(false);
   const [account, setAccount] = useState<AccountDraft>({ prenom: "", email: "" });
   const [session, setSession] = useState<Session | null>(null);
   const [hasUnlockedRest, setHasUnlockedRest] = useState(false);
@@ -629,6 +630,38 @@ export function ParcoursPage() {
     };
   }, [session]);
 
+  // Rattachement d'une commande deja payee dont le questionnaire n'a pas ete
+  // mene a son terme. Sans cela, une commande reglee mais restee incomplete
+  // n'avait aucun moyen de repartir : le visiteur voyait un paiement passe et
+  // rien qui vienne, et il aurait fallu repayer pour recommencer.
+  useEffect(() => {
+    if (!session || paidCommandId) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const response = await fetch(apiPath("commandes"), {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+        const commandes = (await response.json()) as { id: string; statut: string }[];
+        const enCours = commandes.find(
+          (commande) => commande.statut === "paye" || commande.statut === "en_generation",
+        );
+        if (cancelled || !enCours) return;
+        setPaidCommandId(enCours.id);
+        setHasUnlockedRest(true);
+      } catch {
+        /* hors ligne : le parcours continue normalement */
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [paidCommandId, session]);
+
   // Sauvegarde serveur, temporisee pour ne pas ecrire a chaque frappe.
   useEffect(() => {
     if (!session || !draftSyncReady) return;
@@ -754,12 +787,6 @@ export function ParcoursPage() {
     }
     if (current.n === 10) {
       setPhase("final-transition");
-      return;
-    }
-    // Avant d'ouvrir la derniere question, le griot demande le sexe de
-    // l'ancetre : sans lui, le recit resterait au neutre.
-    if (current.n === 9 && !gender) {
-      setAskGender(true);
       return;
     }
     setIndex((i) => i + 1);
@@ -954,16 +981,6 @@ export function ParcoursPage() {
         )}
       </AnimatePresence>
 
-      {askGender && (
-        <GenderModal
-          locale={locale}
-          onChoose={(choice) => {
-            setGender(choice);
-            setAskGender(false);
-            setIndex((i) => i + 1);
-          }}
-        />
-      )}
     </div>
   );
 }
@@ -1577,8 +1594,8 @@ const offers = [
     delivery: "15 min",
     includes: "3 pièces",
     features: [
-      "Le Parchemin narratif (PDF)",
-      "L'Œuvre visuelle (PNG haute résolution)",
+      "Le Parchemin narratif",
+      "L'Œuvre visuelle",
       "Le Certificat d'authenticité numéroté",
       "Livraison sous 15 minutes par email",
     ],
@@ -1595,9 +1612,9 @@ const offers = [
     delivery: "15 min",
     includes: "4 pièces",
     features: [
-      "Le Parchemin narratif (PDF)",
-      "L'Œuvre visuelle (PNG haute résolution)",
-      "La Voix de l'ancêtre imaginaire (MP3, 90s)",
+      "Le Parchemin narratif",
+      "L'Œuvre visuelle",
+      "La Voix de l'ancêtre imaginaire",
       "Le Certificat d'authenticité numéroté",
       "Livraison sous 15 minutes par email",
     ],
