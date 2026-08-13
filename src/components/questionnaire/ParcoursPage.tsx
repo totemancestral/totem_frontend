@@ -213,9 +213,9 @@ const QUESTIONS: Question[] = [
   {
     n: 6,
     progress: 60,
-    canSkip: true,
+    note: "Cette question est obligatoire : le griot a besoin de ton origine pour situer l'ancêtre.",
     griot:
-      "Cette question est la seule que tu peux choisir de ne pas répondre. Mais si tu le fais, les ancêtres seront plus proches.",
+      "Remonte le fil aussi loin que tu le peux. Même un pays, une région ou une ethnie suffit à orienter le griot.",
     question: "Quelle est l'origine de tes ancêtres, aussi loin que tu le sais ?",
     choices: [
       {
@@ -237,10 +237,11 @@ const QUESTIONS: Question[] = [
     ],
     field: {
       level: "SPECIAL",
-      label: "Tu sais quelque chose de précis ?",
+      label: "Précise ton origine",
       placeholder:
-        "Un pays, une ethnie, une région que tu connais ou que tu as envie d'explorer...",
+        "Un pays, une ethnie, une région que tu connais ou dont tu te sens proche...",
       rows: 2,
+      required: true,
     },
   },
   {
