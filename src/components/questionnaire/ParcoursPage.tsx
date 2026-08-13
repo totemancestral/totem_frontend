@@ -213,35 +213,34 @@ const QUESTIONS: Question[] = [
   {
     n: 6,
     progress: 60,
-    note: "Cette question est obligatoire : le griot a besoin de ton origine pour situer l'ancêtre.",
+    canSkip: true,
     griot:
-      "Remonte le fil aussi loin que tu le peux. Même un pays, une région ou une ethnie suffit à orienter le griot.",
+      "Cette question est la seule que tu peux choisir de ne pas répondre. Mais si tu le fais, les ancêtres seront plus proches.",
     question: "Quelle est l'origine de tes ancêtres, aussi loin que tu le sais ?",
     choices: [
       {
         letter: "A",
-        text: "Afrique de l'Ouest, Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et environs.",
+        text: "Afrique de l'Ouest : Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et environs.",
       },
       {
         letter: "B",
-        text: "Afrique centrale ou australe, Congo, Cameroun, Angola, Afrique du Sud et environs.",
+        text: "Afrique Centrale, de l'Est ou du Sud : Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et environs.",
       },
       {
         letter: "C",
-        text: "Afrique de l'Est, Kenya, Tanzanie, Éthiopie, Somalie et environs.",
+        text: "Caraïbes, Amériques ou diaspora africaine : une origine africaine probable mais indéterminée.",
       },
       {
         letter: "D",
-        text: "Origine indéterminée, l'Afrique entière m'appelle.",
+        text: "Europe, Asie, Océanie ou toute autre région : je suis ici pour découvrir mes racines africaines profondes.",
       },
     ],
     field: {
       level: "SPECIAL",
-      label: "Précise ton origine",
+      label: "Tu sais quelque chose de précis ?",
       placeholder:
-        "Un pays, une ethnie, une région que tu connais ou dont tu te sens proche...",
+        "Un pays, une ethnie, une région que tu connais ou que tu as envie d'explorer...",
       rows: 2,
-      required: true,
     },
   },
   {

@@ -1054,34 +1054,33 @@
       {
         "n": 6,
         "progress": 60,
-        "note": "This question is required: the griot needs your origin to place the ancestor.",
-        "griot": "Trace the thread as far back as you can. Even a country, a region or an ethnic group is enough to guide the griot.",
-        "question": "What is the origin of your ancestors, as far back as you know?",
+        "griot": "This is the only question you may choose not to answer. But if you do answer it, the ancestors will stand closer.",
+        "question": "Where do your ancestors come from, as far back as you know?",
         "choices": [
           {
             "letter": "A",
-            "text": "West Africa, Senegal, Mali, Guinea, Ivory Coast, Nigeria, Ghana, Benin and surrounding areas."
+            "text": "West Africa: Senegal, Mali, Guinea, Ivory Coast, Nigeria, Ghana, Benin and thereabouts."
           },
           {
             "letter": "B",
-            "text": "Central or Southern Africa, Congo, Cameroon, Angola, South Africa and surrounding areas."
+            "text": "Central, East or Southern Africa: Congo, Kenya, Tanzania, Ethiopia, South Africa and thereabouts."
           },
           {
             "letter": "C",
-            "text": "East Africa, Kenya, Tanzania, Ethiopia, Somalia and surrounding areas."
+            "text": "Caribbean, the Americas or the African diaspora: an African origin, likely but undetermined."
           },
           {
             "letter": "D",
-            "text": "Undetermined origin, the whole of Africa calls me."
+            "text": "Europe, Asia, Oceania or anywhere else: I am here to uncover my deep African roots."
           }
         ],
         "field": {
           "level": "SPECIAL",
-          "label": "Specify your origin",
-          "placeholder": "A country, an ethnic group, a region you know or feel close to...",
-          "rows": 2,
-          "required": true
-        }
+          "label": "Do you know something precise?",
+          "placeholder": "A country, an ethnic group, a region you know or want to explore...",
+          "rows": 2
+        },
+        "canSkip": true
       },
       {
         "n": 7,
