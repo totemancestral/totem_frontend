@@ -639,7 +639,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut", delay: 0.1 }}
-            className="liquid-hero-title h-display mt-8 whitespace-nowrap leading-[0.9]"
+            className="liquid-hero-title h-display mt-8 leading-[0.9]"
             style={{ color: "var(--ivoire)" }}
             aria-label={t.hero.title}
           >

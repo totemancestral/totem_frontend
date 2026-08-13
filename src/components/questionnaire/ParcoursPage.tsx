@@ -435,6 +435,8 @@ export function ParcoursPage() {
   const filledRef = useRef<Set<number>>(new Set());
   const completionStartedRef = useRef(false);
   const restartRequested = searchParams.get("restart") === "1";
+  /** Reprise d'une commande reglee dont le questionnaire n'a jamais abouti. */
+  const finishRequested = searchParams.get("terminer") === "1";
   // Sauvegarde du parcours : l'horodatage de la copie locale sert d'arbitre
   // face au brouillon serveur, pour que l'appareil ou l'on a repondu en
   // dernier gagne. `draftSyncReady` empeche d'ecraser un bon brouillon avec
@@ -634,8 +636,12 @@ export function ParcoursPage() {
   // mene a son terme. Sans cela, une commande reglee mais restee incomplete
   // n'avait aucun moyen de repartir : le visiteur voyait un paiement passe et
   // rien qui vienne, et il aurait fallu repayer pour recommencer.
+  //
+  // La reprise doit etre demandee explicitement, depuis le tableau de bord :
+  // l'adopter d'office deverrouillait le parcours pour tout compte portant une
+  // commande payee, et le paiement n'etait alors plus propose a la question 4.
   useEffect(() => {
-    if (!session || paidCommandId) return;
+    if (!finishRequested || !session || paidCommandId) return;
     let cancelled = false;
 
     (async () => {
@@ -660,7 +666,7 @@ export function ParcoursPage() {
     return () => {
       cancelled = true;
     };
-  }, [paidCommandId, session]);
+  }, [finishRequested, paidCommandId, session]);
 
   // Sauvegarde serveur, temporisee pour ne pas ecrire a chaque frappe.
   useEffect(() => {

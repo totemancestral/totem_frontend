@@ -753,7 +753,7 @@ export function DashboardClient({
                     <p className="subtext text-sm">{t.unfinishedHint}</p>
                   </div>
                   <Link
-                    href={`/${locale}/via_sapientiae`}
+                    href={`/${locale}/via_sapientiae?terminer=1`}
                     className="btn-primary shrink-0 justify-center"
                   >
                     <PlayCircle size={15} />
