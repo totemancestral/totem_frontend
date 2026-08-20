@@ -1,27 +1,24 @@
+/**
+ * Profils, prompts et fallbacks V3. Le scoring FETA vit dans `feta-scoring.ts`
+ * (source de vérité, copiée dans totem_backend/src/totem/feta-scoring.ts).
+ */
+import { scoreAdultFeta, scoreJuniorFeta } from "./feta-scoring";
+export type {
+  AdultArchetypeId,
+  ChoiceLetter,
+  FetaDimension,
+  FetaScores,
+  JuniorTotemId,
+} from "./feta-scoring";
+import type { ChoiceLetter, FetaDimension, FetaScores, JuniorTotemId } from "./feta-scoring";
+
 export type Locale = "fr" | "en";
-export type ChoiceLetter = "A" | "B" | "C" | "D";
-export type FetaDimension = "F" | "E" | "T" | "A";
-export type FetaScores = Record<FetaDimension, number>;
 
 export type TotemAnswer = {
   choice?: ChoiceLetter;
   field?: string;
   skipped?: boolean;
 };
-
-export type AdultArchetypeId =
-  | "lion"
-  | "lionne"
-  | "rhinoceros"
-  | "crocodile"
-  | "serpent"
-  | "dauphin"
-  | "elephant"
-  | "baobab"
-  | "zebre"
-  | "perroquet"
-  | "aigle"
-  | "leopard";
 
 export type AdultArchetype = {
   id: AdultArchetypeId;
@@ -71,71 +68,6 @@ export type AdultPromptBundle = {
   };
 };
 
-const ZERO_SCORES: FetaScores = { F: 0, E: 0, T: 0, A: 0 };
-const DIMENSIONS: FetaDimension[] = ["F", "E", "T", "A"];
-
-const ADULT_SCORING: Record<number, Record<ChoiceLetter, FetaScores>> = {
-  1: {
-    A: { F: 3, E: 0, T: 0, A: 0 },
-    B: { F: 0, E: 3, T: 0, A: 0 },
-    C: { F: 0, E: 0, T: 3, A: 0 },
-    D: { F: 0, E: 0, T: 0, A: 3 },
-  },
-  2: {
-    A: { F: 3, E: 0, T: 1, A: 0 },
-    B: { F: 1, E: 1, T: 0, A: 2 },
-    C: { F: 0, E: 2, T: 2, A: 0 },
-    D: { F: 0, E: 2, T: 0, A: 2 },
-  },
-  3: {
-    A: { F: 6, E: 0, T: 2, A: 0 },
-    B: { F: 0, E: 4, T: 0, A: 4 },
-    C: { F: 0, E: 2, T: 6, A: 0 },
-    D: { F: 2, E: 0, T: 0, A: 6 },
-  },
-  4: {
-    A: { F: 3, E: 0, T: 1, A: 0 },
-    B: { F: 0, E: 2, T: 0, A: 2 },
-    C: { F: 1, E: 0, T: 3, A: 0 },
-    D: { F: 0, E: 3, T: 0, A: 1 },
-  },
-  5: {
-    A: { F: 2, E: 0, T: 1, A: 1 },
-    B: { F: 3, E: 0, T: 0, A: 0 },
-    C: { F: 0, E: 1, T: 2, A: 1 },
-    D: { F: 0, E: 3, T: 0, A: 1 },
-  },
-  6: {
-    A: { F: 1.5, E: 0, T: 0, A: 1.5 },
-    B: { F: 0, E: 1.5, T: 1.5, A: 0 },
-    C: { F: 1.5, E: 0, T: 1.5, A: 0 },
-    D: { F: 0.5, E: 0.5, T: 0.5, A: 0.5 },
-  },
-  7: {
-    A: { F: 6, E: 0, T: 2, A: 0 },
-    B: { F: 2, E: 0, T: 0, A: 6 },
-    C: { F: 2, E: 2, T: 4, A: 0 },
-    D: { F: 0, E: 6, T: 0, A: 2 },
-  },
-  8: {
-    A: { F: 2, E: 0, T: 3, A: 0 },
-    B: { F: 2, E: 0, T: 2, A: 1 },
-    C: { F: 0, E: 2, T: 2, A: 1 },
-    D: { F: 0, E: 2, T: 0, A: 3 },
-  },
-  9: {
-    A: { F: 0, E: 3, T: 0, A: 0 },
-    B: { F: 0, E: 0, T: 0, A: 3 },
-    C: { F: 3, E: 0, T: 0, A: 0 },
-    D: { F: 0, E: 0, T: 3, A: 0 },
-  },
-  10: {
-    A: { F: 6, E: 0, T: 2, A: 0 },
-    B: { F: 0, E: 6, T: 0, A: 2 },
-    C: { F: 0, E: 0, T: 6, A: 0 },
-    D: { F: 2, E: 0, T: 0, A: 6 },
-  },
-};
 
 export const ADULT_ARCHETYPES: Record<AdultArchetypeId, AdultArchetype> = {
   lion: {
@@ -272,98 +204,93 @@ export const ADULT_ARCHETYPES: Record<AdultArchetypeId, AdultArchetype> = {
   },
 };
 
-const ADULT_ATTRIBUTION: Record<FetaDimension, Record<FetaDimension, AdultArchetypeId>> = {
-  F: { A: "lion", T: "lionne", E: "rhinoceros", F: "lion" },
-  E: { T: "crocodile", A: "serpent", F: "dauphin", E: "serpent" },
-  T: { F: "elephant", E: "baobab", A: "zebre", T: "elephant" },
-  A: { E: "perroquet", F: "aigle", T: "zebre", A: "aigle" },
-};
-
 const PRENOMS_A = [
-  "Kwame",
-  "Kofi",
-  "Ama",
-  "Abena",
-  "Yaw",
-  "Akua",
-  "Kojo",
-  "Adwoa",
-  "Seun",
-  "Temi",
-  "Yemi",
-  "Bisi",
-  "Femi",
-  "Kemi",
-  "Sola",
-  "Tobi",
-  "Emeka",
-  "Chidi",
-  "Ngozi",
-  "Amara",
-  "Amani",
-  "Baraka",
-  "Dalila",
-  "Farida",
-  "Jabari",
-  "Kamau",
-  "Lulu",
-  "Makena",
-  "Nia",
-  "Rafiki",
-  "Lomba",
-  "Maka",
-  "Nkosi",
-  "Sangi",
-  "Zola",
-  "Bayo",
-  "Dayo",
-  "Kani",
-  "Lewa",
-  "Mora",
+  "Kwame", "Kofi", "Amara", "Seun", "Yemi", "Bisi", "Femi", "Kemi", "Sola", "Tobi",
+  "Emeka", "Chidi", "Ngozi", "Amani", "Baraka", "Dalila", "Jabari", "Kamau", "Makena", "Nia",
+  "Lomba", "Nkosi", "Zola", "Dayo", "Imani", "Fatou", "Lamine", "Mariama", "Oumar", "Aicha",
+  "Ibrahim", "Kadija", "Rokhaya", "Samba", "Bongi", "Dineo", "Fumani", "Jomo", "Vusi", "Xola",
 ];
 
 const PRENOMS_B = [
-  "Aicha",
-  "Fatou",
-  "Ibrahim",
-  "Kadija",
-  "Lamine",
-  "Mariama",
-  "Oumar",
-  "Rokhaya",
-  "Samba",
-  "Tidiane",
-  "Ayasha",
-  "Bongi",
-  "Chanda",
-  "Dineo",
-  "Enoch",
-  "Fumani",
-  "Gugu",
-  "Hawa",
-  "Imani",
-  "Jomo",
-  "Kais",
-  "Lola",
-  "Manu",
+  "Soro",
+  "Themba",
+  "Adaeze",
+  "Kwabena",
   "Nala",
   "Oba",
-  "Pita",
-  "Rami",
-  "Soro",
-  "Tara",
+  "Sekou",
+  "Nomvula",
   "Ugo",
-  "Vusi",
   "Wata",
-  "Xola",
-  "Yara",
-  "Zara",
+  "Zawadi",
+  "Adisa",
   "Akou",
   "Baki",
   "Cela",
   "Dara",
   "Elan",
+  "Pita",
+  "Rafiki",
+  "Sangi",
+  "Maka",
+  "Lewa",
+  "Mora",
+  "Kani",
+  "Bayo",
+  "Ayasha",
+  "Chanda",
+  "Enoch",
+  "Hawa",
+  "Tidiane",
+  "Gugu",
+  "Kojo",
+  "Abena",
+  "Yaw",
+  "Akua",
+  "Adwoa",
+  "Farida",
+  "Kesi",
+  "Lulu",
+  "Wole",
 ];
+
+const PRENOMS_A_MASCULINS = new Set([
+  "Kwame", "Kofi", "Seun", "Yemi", "Femi", "Tobi", "Emeka", "Chidi",
+  "Baraka", "Jabari", "Kamau", "Nkosi", "Dayo", "Lamine", "Oumar", "Ibrahim",
+  "Samba", "Fumani", "Jomo", "Vusi",
+]);
+const PRENOMS_B_MASCULINS = new Set([
+  "Soro", "Themba", "Kwabena", "Oba", "Sekou", "Ugo", "Adisa", "Baki",
+  "Elan", "Pita", "Rafiki", "Sangi", "Mora", "Kani", "Bayo", "Enoch",
+  "Tidiane", "Kojo", "Yaw", "Wole",
+]);
+
+type ProfileGender = "homme" | "femme" | null;
+
+function readProfileGender(answers: Record<string, unknown>): ProfileGender {
+  const value = answers.sexe;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "homme" || normalized === "male" || normalized === "masculin") return "homme";
+    if (normalized === "femme" || normalized === "female" || normalized === "feminin" || normalized === "féminin") return "femme";
+  }
+  return null;
+}
+
+function namesForProfileGender(
+  names: readonly string[],
+  gender: ProfileGender,
+  masculine: ReadonlySet<string>,
+): string[] {
+  if (!gender) return [...names];
+  return names.filter((name) => (gender === "homme") === masculine.has(name));
+}
+
+function adaptTitleForGender(title: string, gender: ProfileGender): string {
+  if (gender === "femme") return title.replace(/^Né\b/, "Née");
+  if (gender === "homme") return title.replace(/^Née\b/, "Né");
+  return title;
+}
 
 const TITLE_SERIES: Record<string, string[]> = {
   air: [
@@ -549,55 +476,12 @@ export function scoreAdultAnswers(answers: Record<string, unknown>): {
   secondary: FetaDimension;
   archetype: AdultArchetype;
 } {
-  const scores: FetaScores = { ...ZERO_SCORES };
-
-  for (let question = 1; question <= 10; question += 1) {
-    const choice = getChoice(answers[String(question)]);
-    if (!choice) continue;
-
-    const score = ADULT_SCORING[question]?.[choice];
-    if (!score) continue;
-
-    for (const dimension of DIMENSIONS) {
-      scores[dimension] += score[dimension];
-    }
-  }
-
-  const allEqual = DIMENSIONS.every((dimension) => scores[dimension] === scores.F);
-  if (allEqual) {
-    return {
-      scores,
-      dominant: "T",
-      secondary: "E",
-      archetype: ADULT_ARCHETYPES.baobab,
-    };
-  }
-
-  const sorted = sortDimensions(scores);
-  let dominant = sorted[0].dimension;
-
-  if (sorted[0].score === sorted[1].score) {
-    const tied = sorted
-      .filter((item) => item.score === sorted[0].score)
-      .map((item) => item.dimension);
-    dominant =
-      dominantFromQuestion(answers, 7, tied) ??
-      dominantFromQuestion(answers, 3, tied) ??
-      sorted[0].dimension;
-  } else if (sorted[0].score - sorted[1].score < 3) {
-    dominant = dominantFromQuestion(answers, 5) ?? sorted[0].dimension;
-  }
-
-  const secondary =
-    sortDimensions(scores).find((item) => item.dimension !== dominant)?.dimension ?? dominant;
-  const archetypeId =
-    ADULT_ATTRIBUTION[dominant][secondary] ?? ADULT_ATTRIBUTION[dominant][dominant];
-
+  const scored = scoreAdultFeta(answers);
   return {
-    scores,
-    dominant,
-    secondary,
-    archetype: ADULT_ARCHETYPES[archetypeId],
+    scores: scored.scores,
+    dominant: scored.dominant,
+    secondary: scored.secondary,
+    archetype: ADULT_ARCHETYPES[scored.archetypeId],
   };
 }
 
@@ -611,10 +495,19 @@ export function createAdultTotemProfile(input: {
 }): AdultTotemProfile {
   const now = input.now ?? new Date();
   const scored = scoreAdultAnswers(input.answers);
+  const gender = readProfileGender(input.answers);
   const series = TITLE_SERIES[TITLE_SERIES_BY_ARCHETYPE[scored.archetype.id]];
-  const prenomA = pickSeeded(PRENOMS_A, input.seed, "prenom-a");
-  const prenomB = pickSeeded(PRENOMS_B, input.seed, "prenom-b");
-  const title = pickSeeded(series, input.seed, "title");
+  const prenomA = pickSeeded(
+    namesForProfileGender(PRENOMS_A, gender, PRENOMS_A_MASCULINS),
+    input.seed,
+    "prenom-a",
+  );
+  const prenomB = pickSeeded(
+    namesForProfileGender(PRENOMS_B, gender, PRENOMS_B_MASCULINS),
+    input.seed,
+    "prenom-b",
+  );
+  const title = adaptTitleForGender(pickSeeded(series, input.seed, "title"), gender);
   const nomComplet = `${prenomA}-${prenomB}, ${title}`;
 
   return {
@@ -801,20 +694,6 @@ export function buildAdultFallbackParchment(
   ].join("\n\n");
 }
 
-export type JuniorTotemId =
-  | "kwame_aigle"
-  | "amara_lionne"
-  | "zara_leopard"
-  | "kemi_serpent"
-  | "seun_elephant"
-  | "aida_panthere"
-  | "kofi_buffle"
-  | "nala_grue"
-  | "bakari_crocodile"
-  | "fatou_faucon"
-  | "dayo_lion"
-  | "imani_tortue";
-
 export type JuniorProfile = {
   scores: FetaScores;
   dominant: FetaDimension;
@@ -860,46 +739,6 @@ export type JuniorPromptBundle = {
     caption: string;
     messageDefi: string;
   };
-};
-
-const JUNIOR_SCORING: Record<number, Record<ChoiceLetter, FetaScores>> = {
-  1: {
-    A: { F: 3, E: 0, T: 0, A: 1 },
-    B: { F: 0, E: 3, T: 1, A: 0 },
-    C: { F: 0, E: 1, T: 0, A: 3 },
-    D: { F: 2, E: 0, T: 0, A: 2 },
-  },
-  2: {
-    A: { F: 0, E: 1, T: 3, A: 0 },
-    B: { F: 1, E: 0, T: 1, A: 3 },
-    C: { F: 0, E: 3, T: 0, A: 1 },
-    D: { F: 2, E: 0, T: 1, A: 2 },
-  },
-  3: {
-    A: { F: 0, E: 2, T: 0, A: 2 },
-    B: { F: 1, E: 0, T: 3, A: 0 },
-    C: { F: 0, E: 0, T: 1, A: 3 },
-    D: { F: 3, E: 1, T: 0, A: 0 },
-  },
-  4: {
-    A: { F: 0, E: 2, T: 1, A: 1 },
-    B: { F: 2, E: 0, T: 2, A: 0 },
-    C: { F: 0, E: 1, T: 0, A: 3 },
-    D: { F: 3, E: 1, T: 0, A: 0 },
-  },
-  5: {
-    A: { F: 1, E: 0, T: 0, A: 3 },
-    B: { F: 3, E: 0, T: 1, A: 0 },
-    C: { F: 0, E: 0, T: 3, A: 1 },
-    D: { F: 0, E: 3, T: 0, A: 1 },
-  },
-};
-
-const JUNIOR_ATTRIBUTION: Record<FetaDimension, Record<FetaDimension, JuniorTotemId>> = {
-  F: { A: "dayo_lion", E: "zara_leopard", T: "kofi_buffle", F: "amara_lionne" },
-  E: { A: "kemi_serpent", T: "bakari_crocodile", F: "aida_panthere", E: "imani_tortue" },
-  T: { F: "seun_elephant", A: "nala_grue", E: "imani_tortue", T: "seun_elephant" },
-  A: { F: "kwame_aigle", E: "fatou_faucon", T: "kwame_aigle", A: "fatou_faucon" },
 };
 
 export const JUNIOR_TOTEMS: Record<JuniorTotemId, JuniorTotem> = {
@@ -1002,28 +841,7 @@ export const JUNIOR_TOTEMS: Record<JuniorTotemId, JuniorTotem> = {
 };
 
 export function scoreJuniorAnswers(answers: Record<string, unknown>): JuniorProfile {
-  const scores: FetaScores = { ...ZERO_SCORES };
-
-  for (let question = 1; question <= 5; question += 1) {
-    const choice = getChoice(answers[String(question)]);
-    if (!choice) continue;
-    const score = JUNIOR_SCORING[question]?.[choice];
-    if (!score) continue;
-    for (const dimension of DIMENSIONS) {
-      scores[dimension] += score[dimension];
-    }
-  }
-
-  const sorted = sortDimensions(scores);
-  const dominant = sorted[0].dimension;
-  const secondary = sorted.find((item) => item.dimension !== dominant)?.dimension ?? dominant;
-
-  return {
-    scores,
-    dominant,
-    secondary,
-    totemId: JUNIOR_ATTRIBUTION[dominant][secondary] ?? JUNIOR_ATTRIBUTION[dominant][dominant],
-  };
+  return scoreJuniorFeta(answers);
 }
 
 export function createJuniorTotemProfile(input: {
@@ -1041,8 +859,16 @@ export function createJuniorTotemProfile(input: {
     input.seed,
     "junior-title",
   );
-  const prenomA = pickSeeded(PRENOMS_A, input.seed, "junior-prenom-a");
-  const prenomB = pickSeeded(PRENOMS_B, input.seed, "junior-prenom-b");
+  const prenomA = pickSeeded(
+    namesForProfileGender(PRENOMS_A, input.gender ?? null, PRENOMS_A_MASCULINS),
+    input.seed,
+    "junior-prenom-a",
+  );
+  const prenomB = pickSeeded(
+    namesForProfileGender(PRENOMS_B, input.gender ?? null, PRENOMS_B_MASCULINS),
+    input.seed,
+    "junior-prenom-b",
+  );
 
   return {
     ...scored,
@@ -1080,71 +906,21 @@ export function extractStrictJson(raw: string): Record<string, unknown> | null {
 
 type TotemArtworkVisual = {
   animalEn: string;
-  leftFaceFr: string;
-  leftFaceEn: string;
 };
 
 const TOTEM_ARTWORK_VISUALS: Record<AdultArchetypeId, TotemArtworkVisual> = {
-  lion: {
-    animalEn: "lion",
-    leftFaceFr: "visage de lion réaliste avec crinière noire et regard perçant",
-    leftFaceEn: "realistic lion face with a black mane and piercing gaze",
-  },
-  lionne: {
-    animalEn: "lioness",
-    leftFaceFr: "visage de lionne réaliste avec regard protecteur et pelage ocre",
-    leftFaceEn: "realistic lioness face with a protective gaze and ochre fur",
-  },
-  rhinoceros: {
-    animalEn: "rhinoceros",
-    leftFaceFr: "visage de rhinocéros réaliste avec corne massive et peau gravée",
-    leftFaceEn: "realistic rhinoceros face with a massive horn and engraved skin",
-  },
-  crocodile: {
-    animalEn: "crocodile",
-    leftFaceFr: "visage de crocodile réaliste avec écailles sombres et regard ancien",
-    leftFaceEn: "realistic crocodile face with dark scales and an ancient gaze",
-  },
-  serpent: {
-    animalEn: "serpent",
-    leftFaceFr: "visage de serpent royal réaliste avec écailles profondes et regard hypnotique",
-    leftFaceEn: "realistic royal serpent face with deep scales and a hypnotic gaze",
-  },
-  dauphin: {
-    animalEn: "dolphin",
-    leftFaceFr: "visage de dauphin réaliste avec reflets bleus et regard lumineux",
-    leftFaceEn: "realistic dolphin face with blue reflections and a luminous gaze",
-  },
-  elephant: {
-    animalEn: "elephant",
-    leftFaceFr: "visage d'éléphant réaliste avec défenses sculpturales et regard ancestral",
-    leftFaceEn: "realistic elephant face with sculptural tusks and ancestral gaze",
-  },
-  baobab: {
-    animalEn: "baobab",
-    leftFaceFr: "visage anthropomorphe de baobab réaliste avec écorce massive et racines sculptées",
-    leftFaceEn: "realistic anthropomorphic baobab face with massive bark and carved roots",
-  },
-  zebre: {
-    animalEn: "zebra",
-    leftFaceFr: "visage de zèbre réaliste avec rayures nettes et regard calme",
-    leftFaceEn: "realistic zebra face with sharp stripes and a calm gaze",
-  },
-  perroquet: {
-    animalEn: "parrot",
-    leftFaceFr: "visage de perroquet réaliste avec plumage vert et or et regard vif",
-    leftFaceEn: "realistic parrot face with green and gold plumage and a vivid gaze",
-  },
-  aigle: {
-    animalEn: "eagle",
-    leftFaceFr: "visage d'aigle réaliste avec bec royal et regard perçant",
-    leftFaceEn: "realistic eagle face with a royal beak and piercing gaze",
-  },
-  leopard: {
-    animalEn: "leopard",
-    leftFaceFr: "visage de léopard réaliste avec taches sombres et regard précis",
-    leftFaceEn: "realistic leopard face with dark rosettes and a precise gaze",
-  },
+  lion: { animalEn: "lion" },
+  lionne: { animalEn: "lioness" },
+  rhinoceros: { animalEn: "rhinoceros" },
+  crocodile: { animalEn: "crocodile" },
+  serpent: { animalEn: "serpent" },
+  dauphin: { animalEn: "dolphin" },
+  elephant: { animalEn: "elephant" },
+  baobab: { animalEn: "baobab" },
+  zebre: { animalEn: "zebra" },
+  perroquet: { animalEn: "parrot" },
+  aigle: { animalEn: "eagle" },
+  leopard: { animalEn: "leopard" },
 };
 
 export function buildTotemArtworkImagePrompt(input: {
@@ -1158,29 +934,26 @@ export function buildTotemArtworkImagePrompt(input: {
   const seed = numericSeed(input.seed);
   const keywords = input.personalityKeywords?.filter(Boolean).slice(0, 5).join(", ");
   const frame = input.visualFrame ? visualFrameDescription(input.visualFrame) : "";
-  const animalDescriptor =
+  const animalDescriptor = visual.animalEn;
+  const maskDirection =
     input.language === "en"
-      ? visual.animalEn
-      : visual.leftFaceFr.replace(/^visage de |^visage d'|^visage anthropomorphe de /, "");
-  const splitFace =
-    input.language === "en"
-      ? "split-face fusion on the totem head: left half realistic animal face, right half stylized Fang Ngil mask with white eyes and geometric motifs, seamless central merge"
-      : "fusion du visage du totem : moitie gauche visage animal realiste, moitie droite masque Ngil Fang stylise aux yeux blancs et motifs geometriques, fusion harmonieuse sur l'axe central";
+      ? `single hand-carved Fang Ngil wooden mask, the only subject, with sculpted ornaments evoking the ${animalDescriptor} totem without depicting a living body`
+      : `masque Ngil Fang sculpte en bois, seul sujet de l'image, avec des ornements sculptes qui evoquent le totem ${animalDescriptor} sans representer de corps vivant`;
 
   return [
+    maskDirection,
     input.language === "en"
-      ? `premium ancestral totem sculpture, full-body statue of ${animalDescriptor}, single centered subject on ritual black-and-gold pedestal`
-      : `sculpture totemique ancestrale premium, statue complete de ${animalDescriptor}, sujet unique centre sur socle rituel noir et or`,
+      ? "noble, majestic, glamorous museum-grade art object, rugged ancestral material quality but never grotesque"
+      : "objet d'art museal, noble, majestueux, glamour et precieux, matiere ancestrale rude mais jamais repoussante",
     input.language === "en"
-      ? "engraved African geometric ornaments, ebony and ancient gold materials"
-      : "ornements geometriques africains ciselés, matiere ebene et dorure ancienne",
-    splitFace,
+      ? "aged ivory kaolin, natural wood grain, visible hand tools, restrained ancestral gold, ochre and indigo accents, deep black shadows"
+      : "kaolin ivoire patine, grain naturel du bois, traces d'outil visibles, or ancestral discret, accents ocre et indigo, ombres noir profond",
     input.language === "en"
-      ? "dark mystical atmosphere, dramatic cinematic lighting, museum-grade render, ultra detailed, high resolution 8k"
-      : "ambiance sombre mystique, eclairage cinematographique dramatique, rendu musee, ultra detaille, haute resolution 8k",
+      ? "controlled studio still life, dark pedestal, frontal or slight three-quarter view, elegant dramatic museum lighting, vertical 3:4"
+      : "nature morte d'atelier controlee, socle sombre, vue frontale ou leger trois-quarts, eclairage museal dramatique et elegant, vertical 3:4",
     input.language === "en"
-      ? "no human, no human bust, no human torso, no person, no text, no logo, no watermark"
-      : "aucun humain, aucun buste humain, aucun torse humain, aucun personnage, sans texte, sans logo, sans watermark",
+      ? "no human being, no human face, no portrait, no human silhouette, no body, no torso, no bust, no animal body, no split face, no collage, no text, no logo, no watermark"
+      : "aucun etre humain, aucun visage humain, aucun portrait, aucune silhouette humaine, aucun corps, aucun torse, aucun buste, aucun corps animal, aucune moitie de visage, aucun collage, sans texte, sans logo, sans watermark",
     keywords ? `personality keywords: ${keywords}` : "",
     frame ? `composition: ${frame}` : "",
     `--ar 3:4 --stylize 250 --v 6 --seed ${seed}`,
@@ -1578,7 +1351,9 @@ REGLES STRICTES :
 · Conditionnel doux : "il aurait vecu", JAMAIS "tu es" pour l'ancetre
 · Jamais de verite scientifique ou ethnique — c'est une fable
 · Inspirer des cosmogonies du peuple sans reciter un mythe authentique connu
-· Vocabulaire premium : pas de superlatifs, pas d'emojis, pas d'anglicismes
+· Vocabulaire precis, sobre et humain : pas de superlatifs, pas d'emojis, pas d'anglicismes, pas de marqueur de generation automatique
+· Relire les accords, l'orthographe et la ponctuation avant de repondre. Les enchainements doivent rester coherents et singuliers.
+· Ne jamais citer de divinite, de priere, de rituel ou de formule sacree. Cette oeuvre est une fable artistique, non une genealogie, une divination ou une verite historique, ethnique ou scientifique.
 · Eviter les cliches : pas de "pieds dans la terre rouge", pas de "yeux remplis de mystere"
 · Si Langue = en : composer en anglais, meme ton, cadence biblique simplifiee
 
@@ -1616,7 +1391,8 @@ REGLES STRICTES :
 · Phrases courtes — faciliter la diction
 · Pas de chiffres en chiffres
 · Pauses : "..." ou retour a la ligne
-· Ton : pose, grave, doux, sans pathos ni grandiloquence
+· Ton : pose, grave, chaleureux et doux, sans pathos ni grandiloquence
+· Diction : articulation nette, prononciation naturelle, respirations courtes et pauses apres les phrases fortes. La voix reste humaine, sans effet theatral ni marqueur de synthese.
 · Si Langue = en : composer en anglais, style King James simplifie
 
 REPONSE — Format JSON STRICT :
@@ -1657,16 +1433,16 @@ References : Vladimir Cybil Charlier + Kerry James Marshall + Aboudia + masques 
 Pas de realisme photographique. Pas de cartoonesque. Pas d'AI flat.
 
 FORMAT VISUEL OBLIGATOIRE :
-Sculpture totemique ancestrale de type objet d'art : animal entier sur socle rituel noir et or, materiaux ebene et dorure ancienne, details geometriques africains. Le visage de la tete du totem est fusionne : moitie gauche animal realiste, moitie droite masque Ngil Fang stylise, fusion harmonieuse sur l'axe central. Aucun corps humain, aucun torse humain, aucun buste humain.
+Objet d'art ancestral : un masque Ngil Fang sculpte en bois, seul sujet de l'image, pose sur un socle rituel noir et or. Les volumes et ornements du masque evoquent l'animal totem sans representer d'animal vivant. Matiere noble, rude et patinee, mais elegante, glamour, splendide et majestueuse. Aucun visage humain, aucun portrait, aucune silhouette humaine, aucun corps humain, aucun corps animal.
 
 BASE DE PROMPT A CONSERVER :
 ${visualPrompt}
 
 REGLES :
 - PONCTUATION : jamais de tiret (-) ni de tiret cadratin (—) entre des mots ou des idees, ni devant un numero. Ponctuation francaise correcte uniquement.
-· Fusion du visage obligatoire sur la tete du totem : animal realiste a gauche, masque Ngil Fang a droite
-· Sujet principal obligatoire : l'animal-sculpture complet, pas un portrait humain
-· Aucun humain, aucun torse, aucun buste, aucun personnage
+· Sujet principal obligatoire : le masque Ngil Fang seul, aucun animal vivant et aucun portrait
+· Le masque doit evoquer ${profile.archetype.english} uniquement par ses motifs, volumes et ornements
+· Aucun humain, aucun visage humain, aucun torse, aucun buste, aucun personnage, aucun corps animal
 · Pas de texte dans l'image, pas de logos
 · Format vertical 3:4 obligatoire
 · Parametres obligatoires : --ar 3:4 --stylize 250 --v 6
@@ -1810,30 +1586,6 @@ function getChoice(value: unknown): ChoiceLetter | null {
   const answer = value as TotemAnswer;
   if (answer.skipped) return null;
   return answer.choice && ["A", "B", "C", "D"].includes(answer.choice) ? answer.choice : null;
-}
-
-function dominantFromQuestion(
-  answers: Record<string, unknown>,
-  question: number,
-  allowed?: FetaDimension[],
-): FetaDimension | null {
-  const choice = getChoice(answers[String(question)]);
-  if (!choice) return null;
-  const scores = ADULT_SCORING[question]?.[choice];
-  if (!scores) return null;
-  const sorted = sortDimensions(scores);
-  const dimension = sorted[0].dimension;
-  if (allowed && !allowed.includes(dimension)) return null;
-  return dimension;
-}
-
-function sortDimensions(scores: FetaScores) {
-  return DIMENSIONS.map((dimension) => ({ dimension, score: scores[dimension] })).sort(
-    (left, right) => {
-      if (right.score !== left.score) return right.score - left.score;
-      return DIMENSIONS.indexOf(left.dimension) - DIMENSIONS.indexOf(right.dimension);
-    },
-  );
 }
 
 function pickSeeded<T>(items: readonly T[], seed: string, salt: string): T {

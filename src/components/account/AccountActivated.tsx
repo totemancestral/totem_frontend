@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
@@ -27,7 +28,7 @@ const copy = {
 
 /** N'accepte qu'un chemin interne (évite les redirections ouvertes). */
 function safeNext(raw: string | null, locale: Locale): string {
-  if (raw && raw.startsWith("/") && !raw.startsWith("//")) return raw;
+  if (raw && raw.startsWith(`/${locale}/`) && !raw.startsWith("//")) return raw;
   return `/${locale}/domus_animi`;
 }
 
@@ -36,14 +37,23 @@ export function AccountActivated({ locale }: { locale: Locale }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = safeNext(searchParams.get("next"), locale);
-  const [count, setCount] = useState(4);
 
   useEffect(() => {
-    const tick = setInterval(() => setCount((current) => Math.max(0, current - 1)), 1000);
-    const to = setTimeout(() => router.replace(next), 4000);
+    let alive = true;
+    const redirectIfSessionReady = () => {
+      if (alive) router.replace(next);
+    };
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) redirectIfSessionReady();
+    });
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) redirectIfSessionReady();
+    });
+
     return () => {
-      clearInterval(tick);
-      clearTimeout(to);
+      alive = false;
+      data.subscription.unsubscribe();
     };
   }, [next, router]);
 
@@ -82,9 +92,7 @@ export function AccountActivated({ locale }: { locale: Locale }) {
           {t.cta}
           <ArrowRight size={16} />
         </Link>
-        <p className="caption premium-soft">
-          {count > 0 ? `${t.redirecting} ${count}s…` : "…"}
-        </p>
+        <p className="caption premium-soft">{t.redirecting}</p>
       </motion.div>
     </section>
   );

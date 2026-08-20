@@ -1,3 +1,7 @@
+/**
+ * DEPRECATED — pipeline Edge Functions + R2, supersédé par totem_backend NestJS.
+ * Ne pas lancer. Le CI ne l'exécute pas.
+ */
 import { createClient } from "@supabase/supabase-js";
 import WebSocket from "ws";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";

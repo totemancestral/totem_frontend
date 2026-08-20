@@ -156,11 +156,19 @@ export function SignupClient({ locale }: { locale: Locale }) {
 
   // Sécurité UX : si Supabase a émis la session (auto-confirm), on redirige.
   useEffect(() => {
+    let alive = true;
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user?.id) setNotice(t.sessionReady);
+      if (!session?.user?.id || !alive) return;
+      setNotice(t.sessionReady);
+      void hasAdminRole(session.user.id).then((isAdmin) => {
+        if (alive) router.replace(isAdmin ? ADMIN_PATH : redirectPath);
+      });
     });
-    return () => data.subscription.unsubscribe();
-  }, [t.sessionReady]);
+    return () => {
+      alive = false;
+      data.subscription.unsubscribe();
+    };
+  }, [redirectPath, router, t.sessionReady]);
 
   return (
     <AuthShell locale={locale} kind="signup" role={role} otherPath={otherPath}>

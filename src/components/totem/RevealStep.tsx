@@ -11,6 +11,7 @@ import { Seal } from "./Seal";
 type Phase = "closed" | "spin" | "settle" | "opening" | "content";
 
 interface RevealData {
+  locale?: "fr" | "en";
   userName: string;
   totemName: string;
   totemImage: string;
@@ -63,6 +64,7 @@ export function RevealStep({ data, pdfRef, onBack, onShare, onClan }: RevealStep
   const reduce = useReducedMotion();
   const [phase, setPhase] = useState<Phase>(reduce ? "content" : "closed");
   const [downloading, setDownloading] = useState(false);
+  const [audioPlaying, setAudioPlaying] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
@@ -293,6 +295,30 @@ export function RevealStep({ data, pdfRef, onBack, onShare, onClan }: RevealStep
               ))}
 
               <Block>
+                {data.audioUrl && (
+                  <div className="mt-5 flex w-full flex-col items-center gap-2">
+                    <audio
+                      className="w-full max-w-md"
+                      controls
+                      src={data.audioUrl}
+                      onPlay={() => {
+                        setAudioPlaying(true);
+                        window.dispatchEvent(new Event("totem:ambient-duck"));
+                      }}
+                      onPause={() => {
+                        setAudioPlaying(false);
+                        window.dispatchEvent(new Event("totem:ambient-unduck"));
+                      }}
+                      onEnded={() => {
+                        setAudioPlaying(false);
+                        window.dispatchEvent(new Event("totem:ambient-unduck"));
+                      }}
+                    />
+                    <span className="sr-only" aria-live="polite">
+                      {audioPlaying ? "Audio en lecture" : "Audio en pause"}
+                    </span>
+                  </div>
+                )}
                 <div className="mt-5 flex justify-center">
                   <Seal size={72} />
                 </div>

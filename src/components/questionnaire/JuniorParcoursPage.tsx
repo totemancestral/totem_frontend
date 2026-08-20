@@ -9,7 +9,6 @@ import {
   ArrowRight,
   Bird,
   CreditCard,
-  Download,
   Facebook,
   Flame,
   Footprints,
@@ -19,7 +18,6 @@ import {
   Shield,
   Sparkles,
   Trees,
-  Volume2,
   Waves,
   Zap,
 } from "lucide-react";
@@ -66,8 +64,6 @@ type JuniorResult = {
     messageDefi: string;
   };
   imageUrl?: string;
-  pdfUrl?: string;
-  audioUrl?: string;
 };
 
 type Question = {
@@ -321,18 +317,13 @@ export function JuniorParcoursPage() {
   const [gender, setGender] = useState<Gender | null>(null);
   const [firstName, setFirstName] = useState("");
   const [answers, setAnswers] = useState<Record<number, JuniorAnswer>>({});
-  const [result, setResult] = useState<JuniorResult | null>(() => {
-    if (typeof window === "undefined") return null;
-    const stored = sessionStorage.getItem("junior_reveal");
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [result, setResult] = useState<JuniorResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   // Carte de partage composee dans le navigateur, puis stockee avec l'oeuvre.
   const [cardUrl, setCardUrl] = useState<string | null>(null);
   const [cardDataUrl, setCardDataUrl] = useState<string | null>(null);
-  const [cardFailed, setCardFailed] = useState(false);
   // Sauvegarde serveur du parcours, pour reprendre depuis un autre appareil.
   const [draftSyncReady, setDraftSyncReady] = useState(false);
   const draftRestoredRef = useRef(false);
@@ -410,9 +401,6 @@ export function JuniorParcoursPage() {
       sessionStorage.setItem("junior_answers", JSON.stringify(apiAnswers));
       sessionStorage.setItem("junior_firstName", firstName);
       sessionStorage.setItem("junior_locale", locale);
-      if (payload.reveal) {
-        sessionStorage.setItem("junior_reveal", JSON.stringify(payload.reveal));
-      }
 
       window.location.href = payload.checkoutUrl;
     } catch (nextError) {
@@ -422,26 +410,35 @@ export function JuniorParcoursPage() {
     }
   }
 
-  const restoreResultFromCache = useCallback(() => {
-    if (result) return;
-    const cachedReveal = sessionStorage.getItem("junior_reveal");
-    if (cachedReveal) {
-      try {
-        const parsed = JSON.parse(cachedReveal);
-        setResult(parsed);
-        sessionStorage.removeItem("junior_reveal");
-      } catch {}
-    }
-  }, [result]);
-
   const checkoutSuccess = searchParams.get("checkout");
   const checkoutSessionId = searchParams.get("session_id");
 
+  const restorePaidReveal = useCallback(async () => {
+    if (result || !session?.access_token || !checkoutSessionId) return;
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `/api/iuvenis_signum/result?session_id=${encodeURIComponent(checkoutSessionId)}`,
+        { headers: { Authorization: `Bearer ${session.access_token}` } },
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.reveal) {
+        throw new Error(payload?.error || t.error);
+      }
+      setResult(payload.reveal as JuniorResult);
+      sessionStorage.removeItem("junior_reveal");
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : t.error);
+    } finally {
+      setLoading(false);
+    }
+  }, [checkoutSessionId, result, session?.access_token, t.error]);
+
   useEffect(() => {
     if (checkoutSuccess === "success" && checkoutSessionId) {
-      restoreResultFromCache();
+      void restorePaidReveal();
     }
-  }, [checkoutSessionId, checkoutSuccess, restoreResultFromCache]);
+  }, [checkoutSessionId, checkoutSuccess, restorePaidReveal]);
 
   // Reprise du parcours junior : on rouvre le questionnaire la ou l'enfant
   // s'etait arrete, meme depuis un autre appareil.
@@ -509,8 +506,8 @@ export function JuniorParcoursPage() {
     void clearParcoursDraft(session.access_token, "junior");
   }, [result, session]);
 
-  // Composition de la carte des que le totem est revele : elle sert a la fois
-  // d'illustration de l'oeuvre et de visuel a publier.
+  // Composition d'une carte de partage locale, sans la confondre avec
+  // l'image du totem generee et stockee par le backend.
   useEffect(() => {
     if (!result || cardDataUrl) return;
     let alive = true;
@@ -525,9 +522,6 @@ export function JuniorParcoursPage() {
         reader.readAsDataURL(blob);
       })
       .catch(() => {
-        // Sans carte, la revelation reste complete : on n'affiche simplement
-        // pas de visuel a partager, et l'oeuvre est enregistree sans image.
-        if (alive) setCardFailed(true);
       });
     return () => {
       alive = false;
@@ -535,37 +529,8 @@ export function JuniorParcoursPage() {
   }, [result, cardDataUrl, locale]);
 
   useEffect(() => {
-    if (!result || saved || !session?.access_token) return;
-    // On attend la carte pour l'enregistrer avec l'oeuvre. `cardFailed` evite
-    // d'attendre indefiniment si sa composition a echoue.
-    if (!cardDataUrl && !cardFailed) return;
-    const cachedAnswers = sessionStorage.getItem("junior_answers");
-    let persistedAnswers = apiAnswers;
-    if (cachedAnswers) {
-      try {
-        persistedAnswers = JSON.parse(cachedAnswers) as typeof apiAnswers;
-      } catch {
-        persistedAnswers = apiAnswers;
-      }
-    }
-    fetch("/api/iuvenis_signum/save", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        ...result,
-        answers: persistedAnswers,
-        firstName: firstName || result.firstName,
-        locale,
-        checkoutSessionId: sessionStorage.getItem("junior_checkout_session") || undefined,
-        imageDataUrl: cardDataUrl ?? undefined,
-      }),
-    }).then((res) => {
-      if (res.ok) setSaved(true);
-    }).catch(() => {});
-  }, [apiAnswers, cardDataUrl, cardFailed, firstName, locale, result, saved, session]);
+    if (result) setSaved(true);
+  }, [result]);
 
   if (result) {
     const shareUrl = "https://totem-ancestral.com";
@@ -575,7 +540,7 @@ export function JuniorParcoursPage() {
     const facebookUrl = `https://facebook.com/sharer/sharer.php?quote=${encodeURIComponent(shareText)}&u=${encodeURIComponent(shareUrl)}`;
 
     return (
-      <main className="premium-page min-h-screen overflow-hidden px-5 pb-16 pt-28 md:px-8">
+      <main className="premium-page min-h-screen overflow-x-hidden overflow-y-auto px-5 pb-[max(4rem,env(safe-area-inset-bottom))] pt-28 md:px-8">
         <GoldParticles count={20} />
         <section className="relative z-10 mx-auto grid max-w-[1120px] gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="border p-6" style={{ borderColor: "rgba(216,173,77,0.24)" }}>
@@ -609,20 +574,6 @@ export function JuniorParcoursPage() {
               <ResultStat label="Attribut" value={result.attribut} />
               <ResultStat label="Animal" value={result.totem.animal} />
             </dl>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {result.audioUrl && (
-                <a href={result.audioUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary text-xs">
-                  <Volume2 size={14} />
-                  Audio
-                </a>
-              )}
-              {result.pdfUrl && (
-                <a href={result.pdfUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary text-xs">
-                  <Download size={14} />
-                  PDF
-                </a>
-              )}
-            </div>
             <JuniorShareBlock
               locale={locale}
               cardUrl={cardUrl}
@@ -663,7 +614,7 @@ export function JuniorParcoursPage() {
   }
 
   return (
-    <main className="premium-page min-h-screen overflow-hidden px-5 pb-16 pt-28 md:px-8">
+    <main className="premium-page min-h-screen overflow-x-hidden overflow-y-auto px-5 pb-[max(4rem,env(safe-area-inset-bottom))] pt-28 md:px-8">
       <GoldParticles count={24} />
       <section className="relative z-10 mx-auto max-w-[1120px]">
         <div

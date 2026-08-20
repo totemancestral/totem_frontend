@@ -1,64 +1,26 @@
 const ANIMAL_VISUALS: Record<string, { fr: string; en: string }> = {
-  lion: {
-    fr: "lion réaliste avec crinière noire et regard perçant",
-    en: "realistic lion with a black mane and piercing gaze",
-  },
-  lionne: {
-    fr: "lionne réaliste avec regard protecteur et traits royaux",
-    en: "realistic lioness with a protective gaze and royal features",
-  },
-  rhinoceros: {
-    fr: "rhinocéros réaliste avec corne sculpturale et peau minérale",
-    en: "realistic rhinoceros with a sculptural horn and mineral skin",
-  },
-  crocodile: {
-    fr: "crocodile réaliste avec écailles profondes et regard ancien",
-    en: "realistic crocodile with deep scales and ancient gaze",
-  },
-  serpent: {
-    fr: "serpent réaliste avec écailles vert sombre et regard hypnotique",
-    en: "realistic serpent with dark green scales and hypnotic gaze",
-  },
-  dauphin: {
-    fr: "dauphin réaliste avec peau bleutée et regard lumineux",
-    en: "realistic dolphin with bluish skin and luminous gaze",
-  },
-  elephant: {
-    fr: "éléphant réaliste avec défenses sculpturales et regard ancestral",
-    en: "realistic elephant with sculptural tusks and ancestral gaze",
-  },
-  baobab: {
-    fr: "baobab réaliste avec écorce massive et racines sculptées",
-    en: "realistic baobab with massive bark and carved roots",
-  },
-  zebre: {
-    fr: "zèbre réaliste avec rayures nettes et regard calme",
-    en: "realistic zebra with sharp stripes and a calm gaze",
-  },
-  perroquet: {
-    fr: "perroquet réaliste avec plumage vert et or et regard vif",
-    en: "realistic parrot with green and gold plumage and a vivid gaze",
-  },
-  aigle: {
-    fr: "aigle réaliste avec bec royal et regard perçant",
-    en: "realistic eagle with a royal beak and piercing gaze",
-  },
-  leopard: {
-    fr: "léopard réaliste avec taches sombres et regard précis",
-    en: "realistic leopard with dark rosettes and a precise gaze",
-  },
+  lion: { fr: "lion", en: "lion" },
+  lionne: { fr: "lionne", en: "lioness" },
+  rhinoceros: { fr: "rhinocéros", en: "rhinoceros" },
+  crocodile: { fr: "crocodile", en: "crocodile" },
+  serpent: { fr: "serpent", en: "serpent" },
+  dauphin: { fr: "dauphin", en: "dolphin" },
+  elephant: { fr: "éléphant", en: "elephant" },
+  baobab: { fr: "baobab", en: "baobab" },
+  zebre: { fr: "zèbre", en: "zebra" },
+  perroquet: { fr: "perroquet", en: "parrot" },
+  aigle: { fr: "aigle", en: "eagle" },
+  leopard: { fr: "léopard", en: "leopard" },
 };
 
 function buildImagePrompt(archetypeId: string, langue: "fr" | "en", seed?: string): string {
-  const visual = ANIMAL_VISUALS[archetypeId];
+  const visual = ANIMAL_VISUALS[archetypeId] ?? ANIMAL_VISUALS.lion;
   const seedParam = seed ? ` --seed ${numericSeed(seed)}` : "";
-  const animal = visual?.[langue] ?? (langue === "fr" ? `${archetypeId} réaliste` : `realistic ${archetypeId}`);
-
-  if (langue === "fr") {
-    return `Sculpture totemique ancestrale premium, statue complete de ${animal}, sujet unique centre sur socle rituel noir et or, ornements geometriques africains ciselés, matiere ebene et dorure ancienne, tete du totem fusionnee en deux : moitie gauche visage animal realiste, moitie droite masque Ngil Fang stylise avec motifs geometriques et yeux blancs, fusion harmonieuse sur l'axe central du visage, arriere-plan sombre mystique, eclairage cinematographique dramatique, tres detaille, rendu musee, haute resolution 8k, aucun humain, aucun buste humain, aucun torse humain, aucun personnage --ar 3:4 --stylize 250 --v 6${seedParam}`;
-  }
-
-  return `Premium ancestral totem sculpture, full-body statue of a ${animal}, single centered subject on a ritual black-and-gold pedestal, engraved African geometric ornaments, ebony-like material with ancient golden inlays, split-face fusion on the totem head: left half realistic animal face, right half stylized Fang Ngil mask with white eyes and geometric motifs, seamless central merge, dark mystical background, dramatic cinematic lighting, museum-grade render, ultra-detailed, high resolution 8k, no human, no human bust, no human torso, no person --ar 3:4 --stylize 250 --v 6${seedParam}`;
+  const animal = visual[langue];
+  const common = langue === "fr"
+    ? `Masque Ngil Fang sculpte en bois, seul sujet de l'image, objet d'art premium qui evoque le ${animal} par ses volumes et ornements sans representer d'animal vivant, socle rituel noir et or, kaolin ivoire patine, grain naturel du bois, traces d'outil, or ancestral discret, accents ocre et indigo, ombres profondes, lumiere d'atelier museal, composition verticale 3:4, aucun etre humain, aucun visage humain, aucun portrait, aucune silhouette humaine, aucun corps animal, aucune moitie de visage, aucun collage, aucun texte, aucun logo, aucun watermark`
+    : `Single hand-carved Fang Ngil wooden mask, the only subject, a premium art object evoking the ${animal} through sculpted volumes and ornaments without depicting a living animal, black-and-gold ritual pedestal, aged ivory kaolin, natural wood grain, visible hand tools, restrained ancestral gold, ochre and indigo accents, deep shadows, museum studio light, vertical 3:4 composition, no human, no human face, no portrait, no human silhouette, no animal body, no split face, no collage, no text, no logo, no watermark`;
+  return `${common}${seedParam}`;
 }
 
 function numericSeed(seed: string): number {
@@ -71,7 +33,7 @@ function numericSeed(seed: string): number {
 
 Deno.serve(async (req) => {
   try {
-    const { archetypeId, langue = "fr", prompt, seed } = await req.json();
+    const { archetypeId, langue = "fr", seed } = await req.json();
 
     const openaiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openaiKey) {
@@ -81,17 +43,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    const providedPrompt = typeof prompt === "string" ? prompt.trim() : "";
-
-    if (!archetypeId && !providedPrompt) {
-      return new Response(JSON.stringify({ error: "archetypeId ou prompt requis" }), {
+    if (typeof archetypeId !== "string" || !ANIMAL_VISUALS[archetypeId]) {
+      return new Response(JSON.stringify({ error: "archetypeId hors catalogue" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
     const l = (langue === "en" ? "en" : "fr") as "fr" | "en";
-    const finalPrompt = providedPrompt || buildImagePrompt(archetypeId, l, seed);
+    const finalPrompt = buildImagePrompt(archetypeId, l, seed);
 
     const response = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",

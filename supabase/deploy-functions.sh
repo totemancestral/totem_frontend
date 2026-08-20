@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# DEPRECATED — ne plus déployer. Le pipeline vit dans totem_backend (NestJS).
 set -euo pipefail
 
 echo "=== Déploiement des Edge Functions Supabase ==="

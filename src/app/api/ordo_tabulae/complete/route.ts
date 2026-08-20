@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
 import { authenticateRequest, createServiceClient } from "@/lib/server-auth";
 import type { Json } from "@/integrations/supabase/types";
+import { adultIndicators, toAdultBackendAnswers, type AdultBackendAnswer } from "@/lib/adult-answers";
 
 const completeSchema = z.object({
   commandeId: z.string().uuid(),
@@ -11,7 +12,7 @@ const completeSchema = z.object({
   locale: z.enum(["fr", "en"]),
 });
 
-type BackendAnswer = { questionId: string; answer: string };
+type BackendAnswer = AdultBackendAnswer;
 
 export async function POST(request: Request) {
   const auth = await authenticateRequest(request);
@@ -24,8 +25,8 @@ export async function POST(request: Request) {
 
   // Le compte est le seul juge du sexe : il est declare a l'inscription et
   // reglable dans le profil. Le questionnaire ne le transporte plus.
-  const questionAnswers = toBackendAnswers(parsed.data.answers);
-  if (questionAnswers.length < 10) {
+  const questionAnswers = toAdultBackendAnswers(parsed.data.answers, true);
+  if (questionAnswers.some((answer) => !answer.answer)) {
     return NextResponse.json({ error: "Réponses incomplètes" }, { status: 422 });
   }
 
@@ -83,6 +84,8 @@ export async function POST(request: Request) {
     commandeId: parsed.data.commandeId,
     answers: backendAnswers,
     locale: parsed.data.locale,
+    questionnaireVersion: "griot-v2",
+    indicators: adultIndicators(parsed.data.answers),
   });
 
   if (!result.ok) {
@@ -98,6 +101,8 @@ async function completeBackendOrder(input: {
   commandeId: string;
   answers: BackendAnswer[];
   locale: "fr" | "en";
+  questionnaireVersion: string;
+  indicators: Record<string, boolean>;
 }): Promise<{ ok: true; payload: unknown } | { ok: false; status: number; error: string }> {
   let lastStatus = 502;
   let lastError = "backend_complete_failed";
@@ -114,6 +119,8 @@ async function completeBackendOrder(input: {
           externalCommandId: input.commandeId,
           answers: input.answers,
           locale: input.locale,
+          questionnaireVersion: input.questionnaireVersion,
+          indicators: input.indicators,
         }),
       });
 

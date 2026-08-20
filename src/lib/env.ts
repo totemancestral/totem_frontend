@@ -22,11 +22,6 @@ export const serverEnvSchema = z
     RESEND_FROM_EMAIL: z.string().email().optional(),
     RESEND_FROM_NAME: z.string().optional(),
 
-    // Anthropic / Claude — utilisé directement par le flux Junior (optionnel : fallback déterministe sinon)
-    ANTHROPIC_API_KEY: z.string().optional(),
-    ANTHROPIC_MODEL: z.string().optional(),
-    ANTHROPIC_MODEL_JUNIOR: z.string().optional(),
-
     // Admin
     ADMIN_EMAIL: z.string().email().optional(),
 
@@ -34,6 +29,10 @@ export const serverEnvSchema = z
     NEXT_PUBLIC_SITE_URL: optionalUrl,
     SITE_URL: optionalUrl,
     TOTEM_BACKEND_URL: optionalUrl,
+
+    // Rate-limit partagé (optionnel). Sans ces clés, repli in-memory par isolate.
+    UPSTASH_REDIS_URL: optionalUrl,
+    UPSTASH_REDIS_TOKEN: z.string().min(1).optional(),
   })
   .superRefine((env, ctx) => {
     if (!isProduction) return;

@@ -35,37 +35,35 @@
 
 ## Parcours Junior
 
-- 5 questions visuelles A/B/C/D, résultat immédiat sans paiement
-- Prénom optionnel utilisé en session uniquement
-- Scoring FETA Junior déterministe avant toute génération IA
-- Les prompts J1-J4 restent côté serveur et ne sont pas envoyés au client
-- Fallback local obligatoire si Claude ou l'Edge Function est indisponible
-- Aucun stockage Supabase dédié tant que la formule Junior reste gratuite/virale
+- 5 questions visuelles A/B/C/D, **paiement Stripe 9,99 €** (compte requis)
+- Scoring FETA Junior déterministe (`feta-scoring.ts`) après confirmation de paiement
+- Aucune génération IA Junior n'est exécutée côté frontend ; scoring et révélation FETA restent dans NestJS
+- Persistance : commande `offre=junior` + oeuvre après paiement
 
 ## Paiement Stripe
 
-- Stripe Checkout + Stripe Tax (`automatic_tax: true`)
-- Price IDs en variables d'environnement
-- Metadata compacte : réponses, prénom, userId, email, offre, locale
-- Webhook : body brut `request.text()`, HMAC vérifié, idempotent (stripe_session_id)
-- Réponse rapide 200, pipeline asynchrone
+- Stripe Checkout + Stripe Tax (`automatic_tax: true`) via le backend Nest
+- Montants via `price_data` (pas de Price IDs) : constantes `offers.ts` / `prices.ts`
+- Webhook : body brut `request.text()`, HMAC vérifié côté Nest, proxifié par le BFF
+- Réponse rapide 202, pipeline asynchrone
+- Pas de second moteur Stripe dans Next si Nest est down
 
 ## Pipeline IA
 
 - Ordre : scoring FETA V3 → prompts A1-A5 → Texte → Image + Audio (parallèle) → PDF → Upload → Email
 - Le pipeline adulte local utilise les 12 archétypes, le nom ancestral composé et les variantes narrative/visuelle déterministes par seed commande
 - Les prompts complets restent côté serveur et ne sont pas persistés dans les métadonnées client
-- Retry : backoff ciblé sur les appels SENYCE et les étapes critiques déjà branchées
+- Retry : 3 tentatives côté worker Redis puis statut `erreur`
 - Échec final : statut `erreur`, log `erreurs_pipeline`, alerte admin
-- Fallback texte : Claude direct → Edge Function Supabase → SENYCE → contenu local
-- Junior : Claude J1-J4 optionnel → fallback déterministe local
+- Fallback texte : déterministe si Claude indisponible (backend)
+- Junior : révélation FETA déterministe dans NestJS après confirmation du paiement
 
 ## Stockage / Livraison
 
 - Fichiers dans `totems/{commandeId}/{type}/{nom}`
-- PDFs : URLs signées (7 jours max R2)
-- Images/audio : URLs publiques R2
-- Statut `livree` seulement si PDF présent sur R2
+- PDFs : URLs signées (7 jours max, Supabase Storage `totem-deliveries`)
+- Images/audio : URLs signées via le backend (`GET /totem-assets/:token`)
+- Statut `livree` seulement si le PDF est présent dans le bucket Supabase
 - Emails via Resend, templates FR/EN dans le code
 
 ## Auth / Autorisation
@@ -87,4 +85,4 @@
 ## Déploiement
 
 - Vercel, branche `main`
-- `.env.example` référence, variables requises en production : Supabase, Stripe, R2, Resend, ADMIN_EMAIL
+- `.env.example` référence, variables requises en production : Supabase, Stripe, backend Nest, Resend, ADMIN_EMAIL

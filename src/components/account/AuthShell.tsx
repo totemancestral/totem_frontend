@@ -188,20 +188,21 @@ export function AuthShell({
 
           {children}
 
-          <div
-            className="flex flex-wrap items-center justify-center gap-2 border-t pt-4"
-            style={{ borderColor: "rgba(216,173,77,0.18)" }}
+          <Link
+            href={otherPath}
+            className="flex flex-wrap items-center justify-center gap-2 border-t pt-4 transition-opacity hover:opacity-80"
+            style={{ borderColor: "rgba(216,173,77,0.18)", textDecoration: "none" }}
+            aria-label={`${crossLabel} ${crossCta}`}
           >
             <span className="caption premium-muted">{crossLabel}</span>
-            <Link
-              href={otherPath}
+            <span
               className="caption inline-flex items-center gap-1"
               style={{ color: "var(--or-ancestral)" }}
             >
               {crossCta}
               <ArrowUpRight size={13} />
-            </Link>
-          </div>
+            </span>
+          </Link>
         </div>
       </motion.div>
     </section>

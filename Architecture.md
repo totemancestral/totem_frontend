@@ -1,6 +1,6 @@
 # TOTEM ANCESTRAL — Architecture Logicielle
 
-Document interne. Reflete l'etat reel du code au 2026-07-20.
+Document interne. Reflete l'etat reel du code au 2026-08-14.
 
 ## Vue d'ensemble : deux depots
 
@@ -8,7 +8,7 @@ Le produit est reparti sur deux depots aux responsabilites distinctes.
 
 | Depot | Role | Deploiement |
 | ----- | ---- | ----------- |
-| `totem-project` (frontend) | UI, i18n, auth, parcours, admin, **BFF/proxy** vers le backend, flux Junior (IA directe + fallback) | Vercel (Next.js) |
+| `totem-project` (frontend) | UI, i18n, auth, parcours, admin, **BFF/proxy** vers le backend (pas de Stripe Checkout local) | Vercel (Next.js) |
 | `totem_backend` (backend) | **Moteur de generation** : Stripe Checkout, webhook, file d'attente, pipeline IA, stockage, email de livraison, miroir Supabase | Render (Docker, NestJS) |
 
 Point cle : **le pipeline de generation (texte/image/audio/PDF) s'execute entierement dans le backend NestJS**. Le frontend orchestre le parcours utilisateur et delegue paiement + generation au backend.
@@ -22,9 +22,9 @@ Point cle : **le pipeline de generation (texte/image/audio/PDF) s'execute entier
 | i18n      | next-intl (fr/en, prefixe `/fr`, `/en`)                 |
 | UI        | Tailwind CSS v4, Radix/shadcn, Motion, GSAP, Recharts (admin) |
 | Auth/DB   | Supabase (Auth + PostgreSQL + RLS)                      |
-| Paiement  | Delegue au backend (fallback Stripe Checkout local)     |
+| Paiement  | Delegue au backend NestJS uniquement (echec explicite si Nest est down)     |
 | Emails    | Resend (formulaire de contact)                          |
-| IA Junior | Claude (Anthropic) en direct + fallback deterministe    |
+| IA Junior | Scoring FETA deterministe dans NestJS               |
 
 ## Stack backend (`totem_backend`)
 
@@ -32,12 +32,12 @@ Point cle : **le pipeline de generation (texte/image/audio/PDF) s'execute entier
 | --------- | ------------------------------------------------------- |
 | Framework | NestJS 11, Express                                      |
 | ORM/DB    | Prisma 6 sur PostgreSQL Supabase                        |
-| File      | File d'attente sur Upstash Redis + worker de polling    |
+| File      | Upstash Redis REST + worker de polling crash-safe (LMOVE/ACK, pas BullMQ) |
 | Paiement  | Stripe Checkout + webhook HMAC                          |
 | Texte     | Anthropic (Claude)                                      |
 | Image/Audio | OpenAI (images + TTS)                                  |
 | PDF       | pdf-lib (parchemin multi-page)                          |
-| Stockage  | Supabase Storage prive (`totem-deliveries`)             |
+| Stockage  | Supabase Storage prive (`totem-deliveries`)            |
 | Emails    | Resend (livraison + alertes)                            |
 
 ## Flux utilisateur (adulte)
@@ -45,7 +45,7 @@ Point cle : **le pipeline de generation (texte/image/audio/PDF) s'execute entier
 ```
 Landing -> Parcours (10 questions) -> Compte Supabase -> Choix offre
 -> POST /api/checkout (front) : cree la `commande` puis delegue au backend POST /checkout
-   (fallback Stripe local si le backend echoue)
+   (si Nest est down : erreur claire, aucun second Stripe)
 -> Paiement Stripe Checkout
 -> Webhook Stripe -> /api/webhook-stripe (front, proxy) -> backend POST /webhooks/stripe
 -> Worker backend : texte -> image couverture -> image recit -> audio -> PDF
@@ -56,11 +56,13 @@ Landing -> Parcours (10 questions) -> Compte Supabase -> Choix offre
 ## Flux Junior
 
 ```
-Junior -> 5 questions visuelles -> Scoring FETA Junior (front) -> Revelation immediate
--> Textes de partage -> Defi ami
+Junior -> compte obligatoire -> 5 questions visuelles -> POST /api/iuvenis_signum/checkout
+-> Nest POST /checkout (offer=junior, 9,99 €) -> Stripe
+-> retour success -> GET /api/iuvenis_signum/result (revelation seulement si paye)
+-> save oeuvre
 ```
 
-Le flux Junior calcule le scoring localement (`src/lib/totem-v3.ts`) et appelle **Claude en direct** (`ANTHROPIC_API_KEY`) pour enrichir la revelation ; sans cle, un fallback deterministe local prend le relais. Une version payante existe via `POST /api/iuvenis_signum/checkout`.
+Le scoring FETA Junior vit dans `src/lib/feta-scoring.ts` (copie backend `src/totem/feta-scoring.ts`). La revelation n'est pas renvoyee avant confirmation de paiement.
 
 ## Mapping des offres (important)
 
@@ -69,8 +71,8 @@ Deux vocabulaires coexistent et doivent rester synchronises :
 | UI / Backend NestJS | Colonne Supabase `commandes.offre` (ENUM `offre_type`) | Prix   |
 | ------------------- | ------------------------------------------------------ | ------ |
 | `origine`           | `essentiel`                                            | 49 €   |
-| `ancestral`         | `signature`                                            | 89 €   |
-| `famille`           | `heritage`                                             | 199 €  |
+| `ancestral`         | `signature`                                            | 99 €   |
+| `famille`           | `heritage`                                             | 219 €  |
 | `junior`            | `junior` (depuis migration 20260720000000)             | 9,99 € |
 
 Le frontend convertit `origine/ancestral/famille` -> `essentiel/signature/heritage` avant tout `insert` dans `commandes`.
@@ -89,8 +91,8 @@ Le frontend convertit `origine/ancestral/famille` -> `essentiel/signature/herita
 | `POST /api/ordo_tabulae/complete`      | Finalisation commande (delegue au backend)     |
 | `GET /api/opera_artificis`             | Oeuvres utilisateur                            |
 | `POST /api/epistula_missa`             | Formulaire de contact (Resend)                 |
-| `POST /api/iuvenis_signum`             | Revelation Junior immediate                    |
-| `POST /api/iuvenis_signum/checkout`    | Checkout Junior payant                         |
+| `POST /api/iuvenis_signum/checkout`    | Checkout Junior via Nest `POST /checkout`  |
+| `GET /api/iuvenis_signum/result`       | Revelation Junior apres paiement confirme  |
 | `GET /api/iuvenis_signum/totems`       | Liste des totems Junior sauvegardes            |
 | `POST /api/iuvenis_signum/save`        | Sauvegarde d'un totem Junior                   |
 | `POST /api/iuvenis_signum/share`       | Partage d'un totem Junior                      |
@@ -105,9 +107,10 @@ Le frontend convertit `origine/ancestral/famille` -> `essentiel/signature/herita
 | ------------------------- | -------------------------------------- |
 | `POST /checkout`          | Cree une session Stripe Checkout       |
 | `POST /orders/complete`   | Finalise une commande                  |
+| `GET /orders/session/:id` | Retourne la commande Junior payee       |
 | `POST /orders/retry`      | Relance pipeline (admin)               |
 | `POST /webhooks/stripe`   | Verifie et traite les webhooks Stripe  |
-| `POST /junior`            | Revelation Junior                      |
+| `POST /junior/reveal`     | Legacy/compatibilite (non utilise par le flux paye) |
 | `GET /totem-assets/:token`| Sert un artefact prive signe           |
 | `GET /health/live`        | Healthcheck                            |
 | `GET /health/ready`       | Healthcheck de disponibilite           |
@@ -117,8 +120,9 @@ Le frontend convertit `origine/ancestral/famille` -> `essentiel/signature/herita
 - Secrets : `.env*` ignores, validation Zod stricte en production (Supabase, Stripe, prix, ADMIN_EMAIL, **TOTEM_BACKEND_URL** requis)
 - Webhook : HMAC verifie cote backend via `stripe.webhooks.constructEvent`
 - RLS : actif sur toutes les tables applicatives
-- Headers : HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
-- Admin : controle serveur par role Supabase `user_roles.role = admin`
+- Headers : HSTS, CSP (`connect-src` inclut le backend Render + localhost), X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+- Rate-limit BFF : Upstash Redis si `UPSTASH_REDIS_*` sont poses, sinon in-memory par isolate (documente)
+- Admin : controle serveur par role Supabase `user_roles.role = admin` (URL obfusquee `/fgh55_fh`, pas de secret)
 - Auth : Bearer token JWT Supabase sur toutes les API sensibles
 
 ## Donnees
@@ -128,27 +132,28 @@ Le frontend convertit `origine/ancestral/famille` -> `essentiel/signature/herita
 
 ## Legacy / deprecie
 
-- **Cloudflare R2** : supprime du frontend (le stockage est desormais Supabase Storage cote backend). Plus aucune reference dans le code front.
-- **APIs SENYCE / OpenAI cote front** : supprimees de la config env (le backend gere image/audio via OpenAI).
-- **Edge Functions Supabase** (`supabase/functions/*`) : conservees comme deployables autonomes mais **supersedees** par le pipeline backend. `generate-junior` reste un miroir du flux Junior frontend.
-- **Code legacy TanStack/Vite** (`src/routes/`, `src/router.tsx` s'il subsiste) : exclu du build.
+- **Cloudflare R2** : retire du stockage de production (le stockage est desormais Supabase Storage cote backend). Les anciens scripts de test sont conserves comme deprecated.
+- **APIs SENYCE / OpenAI cote front** : supprimees de la configuration de production (le backend gere image/audio via OpenAI).
+- **Edge Functions Supabase** (`supabase/functions/*`) : **deprecated**, voir `supabase/functions/DEPRECATED.md`. Supersedees par Nest.
+- **Scripts R2 / pipeline local** (`scripts/test-r2.mjs`, `run-pipeline.mjs`, `test-pdf*.tsx`) : deprecated, non lances par la CI et non utilises en production.
+- **`ParchmentPdfDocument`** : apercu HTML dashboard uniquement ; le PDF livre = pdf-lib backend. `@react-pdf/renderer` retire des dependances.
 
 ## Dette technique connue
 
-- Logique d'archetypes/scoring FETA dupliquee entre front (`src/lib/totem-v3.ts`) et back (`src/totem/totem-animals.ts`, `totem-v3-pipeline.ts`) — risque de derive (couvert par des tests de contrat).
-- Deux vocabulaires d'offres (voir mapping ci-dessus).
-- Composant `ParchmentPdfDocument` (@react-pdf/renderer) cote front conserve alors que le PDF livre est genere par le backend (pdf-lib).
+- Scoring FETA : module `src/lib/feta-scoring.ts` copie dans `totem_backend/src/totem/feta-scoring.ts` + vecteurs golden alignes des deux cotes. `totem-v3.ts` reste les prompts/profils.
+- Deux vocabulaires d'offres (voir mapping ci-dessus). Catalogue unique : 49 / 99 / 219 / 9,99 € (`offers.ts` / `prices.ts`).
+- Workspace pnpm : uniquement ce repo (`totem-parchemin`). Le backend est un depot sibling separe (`../totem_backend`).
 
 ## Generation IA V3 — structure reelle
 
-Les specs (Doc 07) decrivent 9 prompts. L'implementation en respecte le fond avec deux choix structurants :
+Les specs (Doc 07) decrivent 9 prompts. L'implementation en respecte le fond avec deux choix structurants. Le flux Junior paye ne depend pas d'un appel Claude cote frontend : le scoring et la revelation sont calcules deterministiquement dans NestJS a partir de FETA.
 
 | Flux | Structure reelle | Modele | Fournisseurs |
 | ---- | ---------------- | ------ | ------------ |
 | Adulte (A1–A5) | **1 appel Claude consolide** (JSON `a1`..`a5`) + fallback deterministe | `claude-opus-4-5` | Texte : Anthropic · Image : **OpenAI gpt-image** · Audio : **OpenAI TTS** (`onyx`) |
-| Junior (J1–J4) | **Cascade de 4 appels** enchainee, chaque sortie alimente la suivante + fallback | `claude-sonnet-4-6` | Anthropic (texte) |
+| Junior (J1–J4) | **Revelation FETA deterministe** dans NestJS | — | Aucun appel IA dans le flux paye |
 
-- Scoring, archetype et nom ancestral compose sont **deterministes** (imposes par la matrice FETA + tirage seede) ; Claude ne fait que composer/valider les textes.
+- Scoring, archetype et nom ancestral compose sont **deterministes** (imposes par la matrice FETA + tirage seede) ; le flux adulte utilise Claude pour composer les textes, tandis que Junior renvoie le payload calcule apres paiement.
 - Les prompts image sont **descriptifs en langage naturel** pour OpenAI gpt-image (le ratio est gere par le parametre `size`, pas par une syntaxe Midjourney `--ar/--stylize/--v`).
 - Audio : OpenAI TTS est la solution retenue (pas ElevenLabs). Voir Doc 07 pour l'intention initiale.
 

@@ -1,3 +1,7 @@
+/**
+ * DEPRECATED — PDF expérimental @react-pdf/renderer + R2. Le PDF livré est
+ * généré par le backend (pdf-lib). Ne pas lancer.
+ */
 import React from "react";
 import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import { writeFileSync, readFileSync } from "fs";

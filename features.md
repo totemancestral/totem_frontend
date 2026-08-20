@@ -49,30 +49,28 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 
 | Fonctionnalite             | Etat | Notes                                                       |
 | -------------------------- | ---- | ----------------------------------------------------------- |
-| Parcours Junior public     | Fait | `/[locale]/iuvenis_signum`, 5 questions visuelles           |
-| Scoring FETA Junior        | Fait | 5 questions, 4 dimensions, attribution 12 totems            |
-| Prompts Junior J1-J4       | Fait | Générés côté serveur, cascade Claude optionnelle            |
-| Fallback déterministe      | Fait | Nom, phrase, attribut, Clan et partage sans dépendance IA   |
-| API Next Junior            | Fait | `POST /api/iuvenis_signum` avec validation Zod/rate limit   |
-| Edge Function Junior       | Fait | `supabase/functions/generate-junior`                        |
-| Backend Junior             | Fait | `backend/TOTEM`, endpoint `POST /junior`                    |
-| Stockage Junior            | N/A  | Prénom optionnel en session; pas de persistance dédiée      |
+| Parcours Junior public     | Fait | `/[locale]/iuvenis_signum`, 5 questions visuelles, **compte + Stripe 9,99 €** |
+| Scoring FETA Junior        | Fait | Module partagé `feta-scoring.ts` (copie backend)            |
+| API Next Junior            | Fait | Checkout via Nest `POST /checkout`, révélation après paiement |
+| Edge Function Junior       | Deprecated | `supabase/functions/generate-junior` — ne plus déployer     |
+| Backend Junior             | Fait | `totem_backend`, `POST /checkout` offer=junior ; résultat payant via `GET /orders/session/:id` (`/junior/reveal` conservé en legacy) |
 
 ## 4. Offres et pricing
 
 | Fonctionnalite                    | Etat    | Notes                                    |
 | --------------------------------- | ------- | ---------------------------------------- |
-| Trois offres                      | Fait    | Origine 49€, Ancestral 89€, Famille 199€ |
+| Trois offres                      | Fait    | Origine 49€, Révélation/Ancestral 99€, Famille 219€ (mapping ENUM essentiel/signature/heritage) |
 | Pricing responsive                | Fait    | Teste 430x932                            |
-| Mapping Stripe Price IDs          | Fait    | `STRIPE_PRICE_*` env vars                |
+| Catalogue prix                    | Fait    | Constantes `offers.ts` (front) / `prices.ts` (back), identiques |
 | Offre Famille multi-destinataires | A faire | Complexite phase 2                       |
 
 ## 5. Paiement
 
 | Fonctionnalite             | Etat | Notes                                          |
 | -------------------------- | ---- | ---------------------------------------------- |
-| Creation Checkout          | Fait | `/api/checkout` Stripe Checkout + metadata     |
-| Stripe Tax                 | Fait | `automatic_tax: true`                          |
+| Creation Checkout          | Fait | BFF `POST /api/checkout` → Nest `POST /checkout` uniquement |
+| Stripe Tax                 | Fait | `automatic_tax: true` (Nest)                                |
+| Fallback Stripe local      | Supprime | Si Nest est down : erreur claire, pas de second moteur    |
 | Metadata complet           | Fait | reponses, prenom, userId, email, offre, locale |
 | Webhook signe              | Fait | HMAC verification avec `constructEvent`        |
 | Idempotence webhook        | Fait | Doublon `stripe_session_id`                    |
@@ -89,25 +87,21 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 
 | Fonctionnalite              | Etat    | Notes                                                           |
 | --------------------------- | ------- | --------------------------------------------------------------- |
-| Service pipeline            | Fait    | `generateCoffret` complet                                       |
-| Retry backoff               | Fait    | 1s/3s avec retry 2                                              |
-| Texte parchemin Claude      | Fait    | `callClaudeForTexte` via Anthropic API (ton mystique/ancestral) |
-| API Texte SENYCE            | Fait    | Fallback si Claude indisponible                                 |
-| API Image SENYCE            | Fait    | POST avec retry + download -> R2                                |
-| API Audio SENYCE            | Fait    | POST avec retry + download -> R2                                |
-| Parallelisation image/audio | Fait    | Promise.all                                                     |
-| Generation PDF              | Fait    | Parchemin + Certificat avec @react-pdf/renderer                 |
-| Erreurs pipeline            | Fait    | Table `erreurs_pipeline` + alertes admin                        |
-| Telechargement assets -> R2 | Fait    | URLs SENYCE -> R2 pour stockage persistant                      |
-| SLA 15 minutes              | Partiel | Depend du backend (timeout Vercel)                              |
+| Service pipeline            | Fait    | NestJS `TotemWorker` + file Redis crash-safe (LMOVE/ACK)    |
+| Retry backoff               | Fait    | 3 tentatives puis statut erreur                             |
+| Texte parchemin Claude      | Fait    | Anthropic via backend                                       |
+| Image / audio               | Fait    | OpenAI gpt-image + TTS via backend                          |
+| Generation PDF              | Fait    | pdf-lib côté backend                                        |
+| Stockage                    | Fait    | Supabase Storage `totem-deliveries` (plus de R2 / SENYCE)   |
+| SLA 15 minutes              | Partiel | Depend du backend Render                                    |
 
 ## 7. Stockage et livraison
 
 | Fonctionnalite              | Etat | Notes                       |
 | --------------------------- | ---- | --------------------------- |
-| Client R2                   | Fait | `getR2Client` S3 compatible |
-| Upload fichiers             | Fait | PNG, MP3, PDF vers R2       |
-| URLs signees PDF            | Fait | 7 jours expiration R2       |
+| Client R2                   | Supprime | Stockage = Supabase Storage backend |
+| Upload fichiers             | Fait     | PNG, MP3, PDF vers Supabase Storage |
+| URLs signees PDF            | Fait     | `GET /totem-assets/:token` backend  |
 | Mise a jour commande/oeuvre | Fait | URLs + statut livree        |
 | Client Resend               | Fait | Client HTTP Resend          |
 | Email livraison             | Fait | Template FR/EN              |
@@ -151,7 +145,8 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 | Webhook HMAC         | Fait | `stripe.webhooks.constructEvent`                     |
 | RLS                  | Fait | Toutes tables sensibles                              |
 | Bandeau cookies RGPD | Fait | `CookieConsent`                                      |
-| CSP                  | Fait | Supabase, Stripe, Resend, R2 whitelisted             |
+| CSP                  | Fait | Supabase, Stripe, backend Render (`TOTEM_BACKEND_URL`) |
+| Rate-limit BFF       | Fait | Upstash Redis si configure, sinon in-memory par isolate |
 
 ## 11. Tests et CI
 
@@ -168,8 +163,9 @@ Statuts : `Fait` | `Partiel` | `Placeholder` | `A faire`
 | ------------------------------------------------ | ------------------------------------------ |
 | Documentation features.md                        | A jour                                     |
 | Documentation Architecture.md                    | A jour                                     |
-| Logique archetypes/scoring dupliquee front/back  | Present (couvert par tests de contrat)     |
-| Deux vocabulaires d'offres (mapping)             | Present (helper centralise)                |
-| ParchmentPdfDocument (@react-pdf) cote front     | Present (PDF livre genere par le backend)  |
-| Client R2 / config SENYCE-OpenAI cote front      | Supprime (nettoyage 2026-07)               |
-| Route dupliquee `strix_nuntius`                  | Supprimee (2026-07)                        |
+| Logique archetypes/scoring dupliquee front/back  | Reduit (module `feta-scoring.ts` + copie backend + golden tests) |
+| Deux vocabulaires d'offres (mapping)             | Present (helper centralise, 49/99/219/9,99)  |
+| ParchmentPdfDocument (HTML dashboard)            | Present (PDF livre = pdf-lib backend)        |
+| Client R2 / SENYCE / Edge Functions              | Deprecated (voir Architecture.md)            |
+| Fallback Stripe local BFF                        | Supprime                                     |
+| pnpm-workspace `totem_backend` hors repo         | Corrige (deux depots separes)                |

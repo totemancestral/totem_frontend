@@ -57,9 +57,9 @@
   "chaque_uvre_porte_un_numero_une_signature_un_certificat": "Chaque œuvre porte un numéro, une signature, un certificat. Elle ne sera jamais\n            reproduite, ni rééditée, ni revendue. Elle est votre exemplaire dans la collection en\n            cours.",
   "checking": "checking",
   "choisir": "Choisir",
-  "choisir_199": "Choisir · 199€",
+  "choisir_219": "Choisir · 219 €",
   "choisir_49": "Choisir · 49€",
-  "choisir_89": "Choisir · 89€",
+  "choisir_89": "Choisir · 99€",
   "choisis_comment_recevoir_ton_uvre_pour_continuer_la": "Choisis comment recevoir ton œuvre pour continuer la composition.",
   "choisis_ton_offre_pour_continuer": "Choisis ton offre pour continuer.",
   "choix_du_coffret": "Choix du coffret",
@@ -311,7 +311,7 @@
         },
         {
           "name": "Totem Ancestral",
-          "price": "89",
+          "price": "99",
           "subtitle": "L'expérience complète.",
           "features": [
             "Le Parchemin narratif",
@@ -326,7 +326,7 @@
         },
         {
           "name": "Totem Famille",
-          "price": "199",
+          "price": "219",
           "subtitle": "L'expérience à partager.",
           "features": [
             "Trois œuvres TOTEM ANCESTRAL complètes",
@@ -725,7 +725,7 @@
   "trois_destinataires": "Trois destinataires",
   "trois_destinataires_au_choix": "Trois destinataires au choix",
   "trois_manieres_de_recevoir_l_uvre_totem_ancestral_comparees": "Trois manières de recevoir l'œuvre Totem Ancestral, comparées en détail.",
-  "trois_offres_totem_origine_49_totem_ancestral_89_totem": "Trois offres : Totem Origine (49€), Totem Ancestral (89€), Totem Famille (199€). Chaque œuvre est numérotée, signée et accompagnée d'un certificat d'authenticité.",
+  "trois_offres_totem_origine_49_totem_ancestral_89_totem": "Trois offres : Totem Origine (49€), Totem Révélation (99€), Totem Famille (219€). Chaque œuvre est numérotée, signée et accompagnée d'un certificat d'authenticité.",
   "trois_uvres_totem_ancestral_completes": "Trois œuvres TOTEM ANCESTRAL complètes",
   "tu_as_choisi_la_liberte_le_griot_voudrait_comprendre_la": "Tu as choisi la liberté. Le griot voudrait comprendre la tienne, en une phrase.",
   "tu_offres_au_griot_une_matiere_rare_ton_uvre_s_enrichit": "Tu offres au griot une matière rare. Ton œuvre s'enrichit.",
@@ -765,7 +765,7 @@
   "welcome": "welcome",
   "parcours": {
     "intro": {
-      "title": "Le Griot vous parle.",
+      "title": "Le Griot parle.",
       "body1": "Il n'y a pas de bonnes ou de mauvaises réponses ici. Il y a ta vérité, et celle que tu t'autorises à voir.",
       "body2": "Réponds avec ce que tu ressens. Pas avec ce que tu crois devoir répondre.",
       "body3": "Le temps n'existe pas ici. L'ancêtre attend.",
@@ -934,7 +934,7 @@
       {
         "n": 2,
         "progress": 20,
-        "griot": "",
+        "griot": "Je veux savoir où tu te trouves — vraiment. Pas ce que tu fais, mais où tu vis.",
         "question": "Dans quel moment te sens-tu le plus vivant(e) ?",
         "choices": [
           {
@@ -955,7 +955,7 @@
           }
         ],
         "field": {
-          "level": "SECONDAIRE",
+          "level": "TERTIAIRE",
           "label": "+ ajouter une nuance",
           "placeholder": "Décris le moment où tu te sens pleinement vivant(e)...",
           "rows": 1
@@ -1015,7 +1015,7 @@
           }
         ],
         "field": {
-          "level": "SECONDAIRE",
+          "level": "TERTIAIRE",
           "label": "+ ajouter une nuance",
           "placeholder": "Comment tu gères vraiment les situations difficiles...",
           "rows": 1
@@ -1059,11 +1059,11 @@
         "choices": [
           {
             "letter": "A",
-            "text": "Afrique de l'Ouest : Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et environs."
+            "text": "Afrique de l'Ouest : Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et les terres voisines."
           },
           {
             "letter": "B",
-            "text": "Afrique Centrale, de l'Est ou du Sud : Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et environs."
+            "text": "Afrique Centrale, de l'Est ou du Sud : Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et les terres voisines."
           },
           {
             "letter": "C",
@@ -1077,11 +1077,11 @@
         "field": {
           "level": "SPECIAL",
           "label": "Précise ton origine",
-          "placeholder": "Un pays, une ethnie, une région que tu connais ou dont tu te sens proche...",
-          "rows": 2,
-          "required": true
+          "placeholder": "Un pays, une ethnie, une région que tu connais ou dont tu te sens proche, ou que tu as envie d'explorer...",
+          "rows": 2
         },
-        "note": "Cette question est obligatoire : le griot a besoin de ton origine pour situer l'ancêtre."
+        "note": "Cette question est la seule que tu peux choisir de ne pas répondre. Mais si tu le fais — les ancêtres seront plus proches.",
+        "canSkip": true
       },
       {
         "n": 7,
@@ -1137,7 +1137,7 @@
           }
         ],
         "field": {
-          "level": "SECONDAIRE",
+          "level": "TERTIAIRE",
           "label": "+ ajouter une nuance",
           "placeholder": "Ce que tu veux qu'on retienne de ta vie, en quelques mots...",
           "rows": 1

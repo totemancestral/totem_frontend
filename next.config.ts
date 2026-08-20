@@ -3,6 +3,19 @@ import type { NextConfig } from "next";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+const backendConnectSrc = [
+  "https://totem-backend-o3v4.onrender.com",
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
+try {
+  if (process.env.TOTEM_BACKEND_URL) {
+    backendConnectSrc.push(new URL(process.env.TOTEM_BACKEND_URL).origin);
+  }
+} catch {
+  // URL invalide : on garde les origines connues.
+}
+
 const cspDirectives = {
   "default-src": ["'self'"],
   "script-src": ["'self'", "'unsafe-eval'", "'unsafe-inline'"],
@@ -10,7 +23,12 @@ const cspDirectives = {
   "img-src": ["'self'", "data:", "blob:", "https:"],
   "font-src": ["'self'", "data:", "https:"],
   "media-src": ["'self'", "https:", "blob:"],
-  "connect-src": ["'self'", "https://*.supabase.co", "https://api.stripe.com"],
+  "connect-src": [
+    "'self'",
+    "https://*.supabase.co",
+    "https://api.stripe.com",
+    ...Array.from(new Set(backendConnectSrc)),
+  ],
   "frame-src": ["'self'", "https://js.stripe.com"],
   "frame-ancestors": ["'none'"],
 };

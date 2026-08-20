@@ -26,8 +26,9 @@ export function AmbientAudio({ active }: { active: boolean }) {
   const [enabled, setEnabled] = useState(true);
   const [playing, setPlaying] = useState(false);
   const playingRef = useRef(false);
-  /** Vrai si la musique jouait avant d'être mise en veille par une voix. */
-  const resumeAfterDuckRef = useRef(false);
+  /** Nombre de voix actuellement en lecture. */
+  const duckCountRef = useRef(0);
+  const routeLoweredRef = useRef(false);
   /** Volume visé : abaissé pendant le questionnaire, plein le reste du temps. */
   const levelRef = useRef(TARGET_VOL);
 
@@ -133,30 +134,31 @@ export function AmbientAudio({ active }: { active: boolean }) {
     startPlayback();
   }, [active, enabled, playing, startPlayback]);
 
-  // Mise en veille pendant une voix du parcours : la question doit s'entendre
-  // seule, sans la nappe musicale par-dessus. La musique reprend ensuite, mais
-  // seulement si elle jouait avant (on ne la démarre jamais de force).
+  // Pendant une voix, la nappe reste en lecture et baisse seulement son gain.
+  // Un compteur evite qu'une ancienne question ne restaure le volume trop tot.
   useEffect(() => {
-    const duck = () => {
-      resumeAfterDuckRef.current = playingRef.current;
-      if (playingRef.current) fadeOutAndPause();
-    };
-    const unduck = () => {
-      if (!resumeAfterDuckRef.current) return;
-      resumeAfterDuckRef.current = false;
-      if (enabledRef.current) startPlayback();
-    };
-
-    // Pendant tout le questionnaire la nappe reste en fond, mais nettement plus
-    // basse : on baisse le volume vise et on y amene les deux pistes.
     const setLevel = (target: number) => {
       levelRef.current = target;
       [aRef.current, bRef.current].forEach((el) => {
         if (el && !el.paused) fadeTo(el, target, 900);
       });
     };
-    const lower = () => setLevel(LOWERED_VOL);
-    const restore = () => setLevel(TARGET_VOL);
+    const duck = () => {
+      duckCountRef.current += 1;
+      setLevel(0.04);
+    };
+    const unduck = () => {
+      duckCountRef.current = Math.max(0, duckCountRef.current - 1);
+      if (duckCountRef.current === 0) setLevel(routeLoweredRef.current ? LOWERED_VOL : TARGET_VOL);
+    };
+    const lower = () => {
+      routeLoweredRef.current = true;
+      setLevel(LOWERED_VOL);
+    };
+    const restore = () => {
+      routeLoweredRef.current = false;
+      if (duckCountRef.current === 0) setLevel(TARGET_VOL);
+    };
 
     window.addEventListener("totem:ambient-duck", duck);
     window.addEventListener("totem:ambient-unduck", unduck);

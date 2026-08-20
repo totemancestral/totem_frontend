@@ -1,3 +1,7 @@
+/**
+ * DEPRECATED — Cloudflare R2 n'est plus utilisé (stockage = Supabase Storage côté Nest).
+ * Ne pas lancer. Conservé uniquement comme archive locale.
+ */
 import {
   S3Client,
   ListBucketsCommand,

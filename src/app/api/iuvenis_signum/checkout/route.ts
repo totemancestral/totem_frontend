@@ -1,17 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import Stripe from "stripe";
 import { getServerEnv } from "@/lib/env";
-import { authenticateRequest } from "@/lib/server-auth";
+import { authenticateRequest, createServiceClient } from "@/lib/server-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { pagePath } from "@/lib/routes";
-import { JUNIOR_AMOUNT_CENTS, JUNIOR_LABEL } from "@/lib/offers";
-import {
-  buildJuniorPromptBundle,
-  createJuniorTotemProfile,
-  extractStrictJson,
-  type JuniorTotemProfile,
-} from "@/lib/totem-v3";
+import { JUNIOR_AMOUNT_CENTS, JUNIOR_COMMANDE_OFFRE } from "@/lib/offers";
 
 const answerSchema = z.object({
   choice: z.enum(["A", "B", "C", "D"]),
@@ -20,7 +13,15 @@ const answerSchema = z.object({
 const juniorSchema = z.object({
   firstName: z.string().trim().max(40).optional(),
   sexe: z.enum(["homme", "femme"]).nullish(),
-  answers: z.record(z.string(), answerSchema),
+  answers: z
+    .object({
+      "1": answerSchema,
+      "2": answerSchema,
+      "3": answerSchema,
+      "4": answerSchema,
+      "5": answerSchema,
+    })
+    .strict(),
   locale: z.enum(["fr", "en"]).optional(),
 });
 
@@ -29,222 +30,102 @@ export async function POST(request: Request) {
     const auth = await authenticateRequest(request);
     if (auth instanceof NextResponse) return auth;
 
-    const rateLimitResponse = rateLimit(request, 10, 60_000);
+    const rateLimitResponse = await rateLimit(request, 10, 60_000);
     if (rateLimitResponse) return rateLimitResponse;
 
-    const body = await request.json().catch(() => null);
-    if (!body || typeof body !== "object") {
-      return NextResponse.json({ error: "Requête invalide" }, { status: 422 });
+    const parsed = juniorSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Profil Junior invalide" }, { status: 422 });
     }
 
+
     const env = getServerEnv();
+    if (!env.TOTEM_BACKEND_URL) {
+      return NextResponse.json(
+        { error: "Le moteur de paiement n'est pas disponible. Réessaie dans un instant." },
+        { status: 503 },
+      );
+    }
 
-    const typed = body as { locale?: string };
-    const locale = typed.locale === "en" ? "en" : "fr";
-
+    const locale = parsed.data.locale === "en" ? "en" : "fr";
     const origin = (env.NEXT_PUBLIC_SITE_URL || env.SITE_URL || "http://localhost:3000").replace(
       /\/$/,
       "",
     );
 
-    if (!env.STRIPE_SECRET_KEY) {
+    const supabase = createServiceClient();
+    const { data: commande, error: commandeError } = await supabase
+      .from("commandes")
+      .insert({
+        user_id: auth.userId,
+        offre: JUNIOR_COMMANDE_OFFRE,
+        statut: "en_attente_paiement",
+        montant_cents: JUNIOR_AMOUNT_CENTS,
+        devise: "EUR",
+        langue: locale,
+      })
+      .select("id")
+      .single();
+
+    if (commandeError || !commande) {
+      return NextResponse.json({ error: "Erreur préparation commande" }, { status: 500 });
+    }
+
+    const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
+    try {
+      const backendResponse = await fetch(`${backendUrl}/checkout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: request.headers.get("authorization") ?? "",
+        },
+        body: JSON.stringify({
+          offer: "junior",
+          externalCommandId: commande.id,
+          firstName: parsed.data.firstName,
+          answers: parsed.data.answers,
+          locale,
+          successUrl: `${origin}${pagePath(locale, "junior", "checkout=success&session_id={CHECKOUT_SESSION_ID}")}`,
+          cancelUrl: `${origin}${pagePath(locale, "junior", "checkout=cancelled")}`,
+        }),
+      });
+
+      const backendPayload = (await backendResponse.json().catch(() => null)) as {
+        id?: string;
+        url?: string | null;
+      } | null;
+
+      if (backendResponse.ok && backendPayload?.url) {
+        return NextResponse.json({
+          checkoutUrl: backendPayload.url,
+          checkoutSessionId: backendPayload.id,
+          commandeId: commande.id,
+        });
+      }
+
+      console.error(
+        `[iuvenis_signum/checkout] Backend checkout failed (${backendResponse.status})`,
+        backendPayload,
+      );
       return NextResponse.json(
-        { error: "Le paiement junior n'est pas configuré" },
+        {
+          error:
+            "Le paiement est temporairement indisponible. Aucun débit n'a été effectué. Réessaie dans un instant.",
+        },
+        { status: backendResponse.status >= 400 ? backendResponse.status : 502 },
+      );
+    } catch (err) {
+      console.error("[iuvenis_signum/checkout] Backend fetch failed:", err);
+      return NextResponse.json(
+        {
+          error:
+            "Le moteur de paiement est injoignable. Aucun débit n'a été effectué. Réessaie dans un instant.",
+        },
         { status: 503 },
       );
     }
-
-    const parsed = juniorSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ error: "Profil Junior invalide" }, { status: 422 });
-    }
-
-    const completed = countJuniorAnswers(parsed.data.answers);
-    if (completed !== 5) {
-      return NextResponse.json({ error: "Les cinq réponses Junior sont requises" }, { status: 422 });
-    }
-
-    const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-      apiVersion: "2026-02-25.clover",
-    });
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "eur",
-            unit_amount: JUNIOR_AMOUNT_CENTS,
-            product_data: { name: JUNIOR_LABEL },
-          },
-        },
-      ],
-      customer_email: auth.email,
-      success_url: `${origin}${pagePath(locale, "junior", "checkout=success&session_id={CHECKOUT_SESSION_ID}")}`,
-      cancel_url: `${origin}${pagePath(locale, "junior", "checkout=cancelled")}`,
-      metadata: {
-        userId: auth.userId,
-        email: auth.email,
-        offer: "junior",
-      },
-    });
-
-    const seed = crypto.randomUUID();
-    let profile = createJuniorTotemProfile({
-      firstName: parsed.data.firstName,
-      gender: parsed.data.sexe ?? null,
-      answers: parsed.data.answers,
-      seed,
-    });
-
-    let bundle = buildJuniorPromptBundle({ profile, answers: parsed.data.answers });
-    let nomComplet = profile.nomComplet;
-    let phrase = bundle.fallback.phrase;
-    let attribut = bundle.fallback.attribut;
-    let messageClan = bundle.fallback.messageClan;
-    let caption = bundle.fallback.caption;
-    let messageDefi = bundle.fallback.messageDefi;
-
-    if (env.ANTHROPIC_API_KEY) {
-      const aiProfile = await generateJuniorWithClaude(
-        env.ANTHROPIC_API_KEY,
-        profile,
-        parsed.data.answers,
-      );
-      profile = aiProfile.profile;
-      bundle = aiProfile.bundle;
-      nomComplet = aiProfile.nomComplet;
-      phrase = aiProfile.phrase;
-      attribut = aiProfile.attribut;
-      messageClan = aiProfile.messageClan;
-      caption = aiProfile.caption;
-      messageDefi = aiProfile.messageDefi;
-    }
-
-    let reveal: {
-      type: "junior";
-      seed: string;
-      orderNumber: number;
-      firstName?: string;
-      scores: Record<string, number>;
-      dominant: string;
-      secondary: string;
-      totem: { name: string; animal: string; colors: string[]; quality: string };
-      nomComplet: string;
-      phrase: string;
-      attribut: string;
-      messageClan: string;
-      share: { caption: string; messageDefi: string };
-      imageUrl?: string;
-      pdfUrl?: string;
-      audioUrl?: string;
-    } = {
-      type: "junior",
-      seed,
-      orderNumber: profile.orderNumber,
-      firstName: profile.firstName,
-      scores: profile.scores,
-      dominant: profile.dominant,
-      secondary: profile.secondary,
-      totem: profile.totem,
-      nomComplet,
-      phrase,
-      attribut,
-      messageClan,
-      share: { caption, messageDefi },
-    };
-
-    return NextResponse.json({
-      checkoutUrl: session.url,
-      checkoutSessionId: session.id,
-      reveal,
-    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erreur interne";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
-
-function countJuniorAnswers(answers: Record<string, { choice: "A" | "B" | "C" | "D" }>) {
-  return Array.from({ length: 5 }, (_, index) => answers[String(index + 1)]?.choice).filter(Boolean)
-    .length;
-}
-
-async function generateJuniorWithClaude(
-  apiKey: string,
-  initialProfile: JuniorTotemProfile,
-  answers: Record<string, { choice: "A" | "B" | "C" | "D" }>,
-) {
-  let profile = initialProfile;
-  let bundle = buildJuniorPromptBundle({ profile, answers });
-  let nomComplet = profile.nomComplet;
-  let phrase = bundle.fallback.phrase;
-  let attribut = bundle.fallback.attribut;
-  let messageClan = bundle.fallback.messageClan;
-  let caption = bundle.fallback.caption;
-  let messageDefi = bundle.fallback.messageDefi;
-
-  const j1 = await callClaudeJson(apiKey, bundle.promptJ1, 400);
-  const aiName = readString(j1, "nom_complet");
-  if (aiName) {
-    nomComplet = aiName;
-    profile = { ...profile, nomComplet };
-    bundle = buildJuniorPromptBundle({ profile, answers });
-  }
-
-  const j2 = await callClaudeJson(apiKey, bundle.promptJ2, 400);
-  phrase = readString(j2, "phrase") || phrase;
-
-  const j3 = await callClaudeJson(apiKey, bundle.promptJ3, 400);
-  attribut = readString(j3, "attribut") || attribut;
-  messageClan = readString(j3, "message_clan") || messageClan;
-
-  const refreshedBundle = buildJuniorPromptBundle({ profile, answers });
-  const j4 = await callClaudeJson(
-    apiKey,
-    refreshedBundle.promptJ4
-      .replace(bundle.fallback.phrase, phrase)
-      .replace(bundle.fallback.attribut, attribut),
-    500,
-  );
-  caption = readString(j4, "caption") || caption;
-  messageDefi = readString(j4, "message_defi") || messageDefi;
-
-  return { profile, bundle: refreshedBundle, nomComplet, phrase, attribut, messageClan, caption, messageDefi };
-}
-
-async function callClaudeJson(
-  apiKey: string,
-  prompt: string,
-  maxTokens: number,
-): Promise<Record<string, unknown> | null> {
-  try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: process.env.ANTHROPIC_MODEL_JUNIOR || process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
-        max_tokens: maxTokens,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-
-    if (!response.ok) return null;
-
-    const result = (await response.json()) as { content?: { type: string; text?: string }[] };
-    const text = result.content?.[0]?.text ?? "";
-    return extractStrictJson(text);
-  } catch {
-    return null;
-  }
-}
-
-function readString(payload: Record<string, unknown> | null, key: string) {
-  const value = payload?.[key];
-  return typeof value === "string" && value.trim() ? value.trim() : "";
 }

@@ -1,3 +1,7 @@
+/**
+ * DEPRECATED — vérification R2. Le stockage est désormais Supabase Storage.
+ * Ne pas lancer.
+ */
 import { createClient } from "@supabase/supabase-js";
 import WebSocket from "ws";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";

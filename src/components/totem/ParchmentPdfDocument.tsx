@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Aperçu visuel du parchemin dans le dashboard (HTML), pas le PDF livré.
+ * Le PDF client est généré par totem_backend (pdf-lib). Ne pas réintroduire
+ * @react-pdf/renderer ici.
+ */
 import { forwardRef } from "react";
 import type { StorySection } from "@/lib/totem-v3";
 
@@ -68,7 +73,7 @@ function PdfPage({ children }: { children: React.ReactNode }) {
 const H = ({ children, size = 34 }: { children: React.ReactNode; size?: number }) => (
   <h2
     style={{
-      fontFamily: "Times-Roman, serif",
+      fontFamily: "var(--font-display)",
       fontWeight: 700,
       fontSize: size,
       letterSpacing: "0.14em",
@@ -85,7 +90,7 @@ const H = ({ children, size = 34 }: { children: React.ReactNode; size?: number }
 const Hand = ({ children, size = 27 }: { children: React.ReactNode; size?: number }) => (
   <p
     style={{
-      fontFamily: "Georgia, serif",
+      fontFamily: "var(--font-hand)",
       fontSize: size,
       lineHeight: 1.55,
       color: "#2c1d0c",
@@ -128,7 +133,7 @@ export const ParchmentPdfDocument = forwardRef<HTMLDivElement, { data: PdfDocume
             <H size={40}>Totem Ancestral</H>
             <p
               style={{
-                fontFamily: "Times-Roman, serif",
+                fontFamily: "var(--font-display)",
                 fontStyle: "italic",
                 fontSize: 18,
                 color: "#5a4526",
@@ -161,20 +166,20 @@ export const ParchmentPdfDocument = forwardRef<HTMLDivElement, { data: PdfDocume
             <H size={26}>{data.totemName}</H>
             <p
               style={{
-                fontFamily: "Georgia, serif",
+                fontFamily: "var(--font-hand)",
                 fontSize: 30,
                 color: "#2c1d0c",
                 margin: 0,
               }}
             >
-              Prepare pour {data.userName}
+              Préparé pour {data.userName}
             </p>
           </div>
         </PdfPage>
 
         <PdfPage>
           <div style={{ textAlign: "center", marginTop: 8 }}>
-            <H>Le Recit</H>
+            <H>Le Récit</H>
             <Rule />
           </div>
           <div style={{ flex: 1, marginTop: 10 }}>
@@ -182,7 +187,7 @@ export const ParchmentPdfDocument = forwardRef<HTMLDivElement, { data: PdfDocume
               <div key={s.title} style={{ marginBottom: 20 }}>
                 <h3
                   style={{
-                    fontFamily: "Times-Roman, serif",
+                    fontFamily: "var(--font-display)",
                     fontWeight: 700,
                     fontSize: 20,
                     color: "#5a4526",
@@ -207,7 +212,7 @@ export const ParchmentPdfDocument = forwardRef<HTMLDivElement, { data: PdfDocume
                 <div key={s.title} style={{ marginBottom: 20 }}>
                   <h3
                     style={{
-                      fontFamily: "Times-Roman, serif",
+                      fontFamily: "var(--font-display)",
                       fontWeight: 700,
                       fontSize: 20,
                       color: "#5a4526",
@@ -242,7 +247,7 @@ export const ParchmentPdfDocument = forwardRef<HTMLDivElement, { data: PdfDocume
                 <span
                   style={{
                     color: "#FFCD6E",
-                    fontFamily: "Times-Roman, serif",
+                    fontFamily: "var(--font-display)",
                     fontSize: 22,
                     fontWeight: "bold",
                   }}

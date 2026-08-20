@@ -1,5 +1,6 @@
 import { Check, Minus } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
+import { ADULT_OFFERS, formatEuro } from "@/lib/offers";
 
 const rows: { label: string; values: (boolean | string)[] }[] = [
   { label: "Parchemin narratif", values: [true, true, true] },
@@ -13,9 +14,9 @@ const rows: { label: string; values: (boolean | string)[] }[] = [
 ];
 
 const offers = [
-  { name: "Origine", price: "49€", featured: false },
-  { name: "Ancestral", price: "89€", featured: true },
-  { name: "Famille", price: "199€", featured: false },
+  { name: "Origine", price: formatEuro(ADULT_OFFERS.origine.amountCents), featured: false },
+  { name: "Révélation", price: formatEuro(ADULT_OFFERS.ancestral.amountCents), featured: true },
+  { name: "Famille", price: formatEuro(ADULT_OFFERS.famille.amountCents), featured: false },
 ];
 
 function Cell({ v }: { v: boolean | string }) {

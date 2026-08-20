@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
 import { authenticateRequest, createServiceClient } from "@/lib/server-auth";
@@ -7,6 +6,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { pagePath } from "@/lib/routes";
 import { ADULT_OFFERS, toCommandeOffre } from "@/lib/offers";
 import type { Json } from "@/integrations/supabase/types";
+import { adultIndicators, toAdultBackendAnswers } from "@/lib/adult-answers";
 
 const checkoutSchema = z.object({
   offre: z.enum(["origine", "ancestral", "famille"]),
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const auth = await authenticateRequest(request);
     if (auth instanceof NextResponse) return auth;
 
-    const rateLimitResponse = rateLimit(request, 10, 60_000);
+    const rateLimitResponse = await rateLimit(request, 10, 60_000);
     if (rateLimitResponse) return rateLimitResponse;
 
     const parsed = checkoutSchema.safeParse(await request.json().catch(() => null));
@@ -63,7 +63,7 @@ async function handleCheckout(
 
   // Le sexe vient du profil, declare a l'inscription : le questionnaire ne le
   // demande plus en cours de route.
-  const backendAnswers = withGender(toBackendAnswers(data.answers), profile?.sexe ?? null);
+  const backendAnswers = withGender(toAdultBackendAnswers(data.answers), profile?.sexe ?? null);
   const { data: parcours, error: parcoursError } = await supabase
     .from("reponses_parcours")
     .upsert(
@@ -102,118 +102,74 @@ async function handleCheckout(
   }
   const commande = reserved.commande;
 
-  if (env.TOTEM_BACKEND_URL) {
-    const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
-    
-    try {
-      const backendResponse = await fetch(`${backendUrl}/checkout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: request.headers.get("authorization") ?? "",
-        },
-        body: JSON.stringify({
-          userId: auth.userId,
-          email: auth.email,
-          offer: data.offre,
-          externalCommandId: commande.id,
-          answers: backendAnswers,
-          locale: data.locale,
-          customerName: nomComplet || prenom || undefined,
-          successUrl: `${origin}${pagePath(
-            data.locale,
-            "parcours",
-            `checkout=success&session_id={CHECKOUT_SESSION_ID}&commande_id=${commande.id}`,
-          )}`,
-          cancelUrl: `${origin}${pagePath(data.locale, "parcours", "checkout=cancelled")}`,
-        }),
-      });
-
-      if (backendResponse.ok) {
-        const backendPayload = (await backendResponse.json().catch(() => null)) as {
-          id?: string;
-          url?: string | null;
-        } | null;
-
-        if (backendPayload?.url) {
-          return NextResponse.json({
-            checkoutUrl: backendPayload.url,
-            checkoutSessionId: backendPayload.id,
-            commandeId: commande.id,
-          });
-        }
-      }
-      
-      // La commande reste en attente : le paiement Stripe local prend le
-      // relais sur la même ligne, sans en créer une seconde.
-      console.error(
-        `[solvens_porta] Backend returned status ${backendResponse.status}, falling back to local Stripe.`,
-      );
-    } catch (err) {
-      console.error("[solvens_porta] Backend fetch failed, falling back to local Stripe:", err);
-    }
-  }
-
-  if (!env.STRIPE_SECRET_KEY) {
+  if (!env.TOTEM_BACKEND_URL) {
     return NextResponse.json(
-      { error: "Le paiement n'est pas configuré. Contacte l'équipe technique." },
+      { error: "Le moteur de paiement n'est pas disponible. Réessaie dans un instant." },
       { status: 503 },
     );
   }
 
-  try {
-    await supabase
-      .from("reponses_parcours")
-      .update({ termine: backendAnswers.length >= 10 })
-      .eq("id", parcours.id);
-  } catch {
-    // Non bloquant — le parcours continue meme si la sauvegarde echoue
-  }
+  const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
 
-  const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-    apiVersion: "2026-02-25.clover",
+  try {
+    const backendResponse = await fetch(`${backendUrl}/checkout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: request.headers.get("authorization") ?? "",
+      },
+      body: JSON.stringify({
+        userId: auth.userId,
+        email: auth.email,
+        offer: data.offre,
+        externalCommandId: commande.id,
+        answers: backendAnswers,
+        locale: data.locale,
+        questionnaireVersion: "griot-v2",
+        indicators: adultIndicators(data.answers),
+        customerName: nomComplet || prenom || undefined,
+        successUrl: `${origin}${pagePath(
+          data.locale,
+          "parcours",
+          `checkout=success&session_id={CHECKOUT_SESSION_ID}&commande_id=${commande.id}`,
+        )}`,
+        cancelUrl: `${origin}${pagePath(data.locale, "parcours", "checkout=cancelled")}`,
+      }),
+    });
+
+    const backendPayload = (await backendResponse.json().catch(() => null)) as {
+      id?: string;
+      url?: string | null;
+    } | null;
+
+    if (backendResponse.ok && backendPayload?.url) {
+      return NextResponse.json({
+        checkoutUrl: backendPayload.url,
+        checkoutSessionId: backendPayload.id,
+        commandeId: commande.id,
   });
+}
 
-  try {
-    const metadata = buildStripeMetadata(data, auth.userId, auth.email, prenom, commande.id);
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "eur",
-            unit_amount: config.amountCents,
-            product_data: { name: config.label },
-          },
-        },
-      ],
-      automatic_tax: { enabled: true },
-      customer_email: auth.email,
-      metadata,
-      payment_intent_data: { metadata },
-      success_url: `${origin}${pagePath(
-        data.locale,
-        "parcours",
-        `checkout=success&session_id={CHECKOUT_SESSION_ID}&commande_id=${commande.id}`,
-      )}`,
-      cancel_url: `${origin}${pagePath(data.locale, "parcours", "checkout=cancelled")}`,
-    });
-
-    await supabase
-      .from("commandes")
-      .update({ stripe_session_id: session.id })
-      .eq("id", commande.id);
-
-    return NextResponse.json({
-      checkoutUrl: session.url,
-      checkoutSessionId: session.id,
-      commandeId: commande.id,
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Erreur de paiement";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error(
+      `[solvens_porta] Backend checkout failed (${backendResponse.status})`,
+      backendPayload,
+    );
+    return NextResponse.json(
+      {
+        error:
+          "Le paiement est temporairement indisponible. Aucun débit n'a été effectué. Réessaie dans un instant.",
+      },
+      { status: backendResponse.status >= 400 ? backendResponse.status : 502 },
+    );
+  } catch (err) {
+    console.error("[solvens_porta] Backend fetch failed:", err);
+    return NextResponse.json(
+      {
+        error:
+          "Le moteur de paiement est injoignable. Aucun débit n'a été effectué. Réessaie dans un instant.",
+      },
+      { status: 503 },
+    );
   }
 }
 
@@ -269,40 +225,6 @@ async function reservePendingCommande(
   return { commande: { id: created.id } };
 }
 
-function buildStripeMetadata(
-  data: z.infer<typeof checkoutSchema>,
-  userId: string,
-  email: string,
-  prenom: string,
-  commandeId: string,
-) {
-  const metadata: Record<string, string> = {
-    userId,
-    email,
-    prenom,
-    commandeId,
-    locale: data.locale,
-    offre: data.offre,
-    reponses: trimMetadataValue(JSON.stringify(data.answers)),
-  };
-
-  for (let index = 1; index <= 10; index += 1) {
-    const val = trimMetadataValue(formatAnswer(data.answers[String(index)]));
-    if (val) {
-      metadata[`q${index}`] = val;
-    }
-  }
-
-  return metadata;
-}
-
-function formatAnswer(value: unknown) {
-  if (!value || typeof value !== "object") return "";
-  const answer = value as { choice?: string; field?: string; skipped?: boolean };
-  if (answer.skipped) return "skipped";
-  return [answer.choice, answer.field?.trim()].filter(Boolean).join(" | ");
-}
-
 /** Le sexe declare voyage comme reponse dediee : le backend le lit sous
  *  l'identifiant « sexe » et n'en tient pas compte dans le scoring. */
 function withGender(
@@ -312,16 +234,4 @@ function withGender(
   const value = typeof sexe === "string" ? sexe.trim().toLowerCase() : "";
   if (value !== "homme" && value !== "femme") return answers;
   return [...answers, { questionId: "sexe", answer: value }];
-}
-
-function toBackendAnswers(answers: Record<string, unknown>) {
-  return Array.from({ length: 10 }, (_, index) => {
-    const questionId = `q${index + 1}`;
-    const answer = formatAnswer(answers[String(index + 1)]).trim();
-    return answer ? { questionId, answer } : null;
-  }).filter((answer): answer is { questionId: string; answer: string } => Boolean(answer));
-}
-
-function trimMetadataValue(value: string) {
-  return value.length > 480 ? `${value.slice(0, 477)}...` : value;
 }

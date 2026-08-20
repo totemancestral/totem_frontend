@@ -19,6 +19,7 @@ import {
   isNewer,
   saveParcoursDraft,
 } from "@/lib/parcours-draft";
+import { ADULT_OFFERS, FAMILLE_COMPARE_AT_CENTS, formatEuro } from "@/lib/offers";
 
 type FieldLevel = "PRIORITAIRE" | "SECONDAIRE" | "TERTIAIRE" | "SPECIAL";
 
@@ -90,7 +91,8 @@ const QUESTIONS: Question[] = [
   {
     n: 2,
     progress: 20,
-    griot: "",
+    griot:
+      "Je veux savoir où tu te trouves — vraiment. Pas ce que tu fais, mais où tu vis.",
     question: "Dans quel moment te sens-tu le plus vivant(e) ?",
     choices: [
       {
@@ -111,7 +113,7 @@ const QUESTIONS: Question[] = [
       },
     ],
     field: {
-      level: "SECONDAIRE",
+      level: "TERTIAIRE",
       label: "+ ajouter une nuance",
       placeholder: "Décris le moment où tu te sens pleinement vivant(e)...",
       rows: 1,
@@ -173,7 +175,7 @@ const QUESTIONS: Question[] = [
       },
     ],
     field: {
-      level: "SECONDAIRE",
+      level: "TERTIAIRE",
       label: "+ ajouter une nuance",
       placeholder: "Comment tu gères vraiment les situations difficiles...",
       rows: 1,
@@ -213,18 +215,18 @@ const QUESTIONS: Question[] = [
   {
     n: 6,
     progress: 60,
-    note: "Cette question est obligatoire : le griot a besoin de ton origine pour situer l'ancêtre.",
+    note: "Cette question est la seule que tu peux choisir de ne pas répondre. Mais si tu le fais — les ancêtres seront plus proches.",
     griot:
       "Remonte le fil aussi loin que tu le peux. Même un pays, une région ou une ethnie suffit à orienter le griot.",
     question: "Quelle est l'origine de tes ancêtres, aussi loin que tu le sais ?",
     choices: [
       {
         letter: "A",
-        text: "Afrique de l'Ouest : Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et environs.",
+        text: "Afrique de l'Ouest : Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et les terres voisines.",
       },
       {
         letter: "B",
-        text: "Afrique Centrale, de l'Est ou du Sud : Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et environs.",
+        text: "Afrique Centrale, de l'Est ou du Sud : Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et les terres voisines.",
       },
       {
         letter: "C",
@@ -239,10 +241,10 @@ const QUESTIONS: Question[] = [
       level: "SPECIAL",
       label: "Précise ton origine",
       placeholder:
-        "Un pays, une ethnie, une région que tu connais ou dont tu te sens proche...",
+        "Un pays, une ethnie, une région que tu connais ou dont tu te sens proche, ou que tu as envie d'explorer...",
       rows: 2,
-      required: true,
     },
+    canSkip: true,
   },
   {
     n: 7,
@@ -300,7 +302,7 @@ const QUESTIONS: Question[] = [
       },
     ],
     field: {
-      level: "SECONDAIRE",
+      level: "TERTIAIRE",
       label: "+ ajouter une nuance",
       placeholder: "Ce que tu veux qu'on retienne de ta vie, en quelques mots...",
       rows: 1,
@@ -778,15 +780,18 @@ export function ParcoursPage() {
   }
 
   function setChoice(c: "A" | "B" | "C" | "D") {
-    setAnswers((a) => ({ ...a, [current.n]: { ...a[current.n], choice: c } }));
+    setAnswers((a) => ({ ...a, [current.n]: { ...a[current.n], choice: c, skipped: false } }));
   }
 
   function setField(v: string) {
     setAnswers((a) => ({ ...a, [current.n]: { ...a[current.n], field: v } }));
-    triggerNudge(current.n, v);
   }
 
-  function next() {
+  function next(forceSkipped = false) {
+    const currentAnswer = forceSkipped
+      ? { ...answers[current.n], skipped: true }
+      : answers[current.n];
+    if (!currentAnswer?.skipped) triggerNudge(current.n, currentAnswer?.field ?? "");
     if (current.n === 4 && !hasUnlockedRest) {
       setPhase("paywall-transition");
       return;
@@ -915,6 +920,7 @@ export function ParcoursPage() {
             onPrev={previous}
             canContinue={!!canContinue}
             isFirst={index === 0}
+            totalQuestions={questions.length}
           />
         )}
         {phase === "account" && (
@@ -1189,25 +1195,33 @@ function QuestionScreen({
   onPrev,
   canContinue,
   isFirst,
+  totalQuestions,
 }: {
   q: Question;
   answer?: Answer;
   onChoice: (c: "A" | "B" | "C" | "D") => void;
   onField: (v: string) => void;
   onSkip: () => void;
-  onNext: () => void;
+  onNext: (forceSkipped?: boolean) => void;
   onPrev: () => void;
   canContinue: boolean;
   isFirst: boolean;
+  totalQuestions: number;
 }) {
   const t = useTranslations("parcours.questionUi");
   const locale = useLocale();
   const isD = answer?.choice === "D";
   const baseRows = q.field.rows;
   const dynamicRows = isD ? Math.max(3, baseRows) : baseRows;
+  const [tertiaryVisible, setTertiaryVisible] = useState(
+    q.field.level !== "TERTIAIRE" || Boolean(answer?.field) || isD,
+  );
 
-  // Le champ libre est toujours visible : le visiteur doit voir qu'il peut
-  // ajouter quelque chose. Seul son caractere facultatif ou obligatoire change.
+  useEffect(() => {
+    if (isD || answer?.field) setTertiaryVisible(true);
+  }, [answer?.field, isD]);
+
+  const showField = q.field.level !== "TERTIAIRE" || tertiaryVisible;
   const dLabel = isD ? t("freedom") : q.field.label;
   const fieldRequired = Boolean(q.field.required);
   const wordCount = countWords(answer?.field ?? "");
@@ -1231,7 +1245,7 @@ function QuestionScreen({
                 letterSpacing: "0.18em",
               }}
             >
-              {t("count", { current: q.n, total: 10 })}
+              {t("count", { current: q.n, total: totalQuestions })}
             </p>
             <span
               style={{
@@ -1310,8 +1324,18 @@ function QuestionScreen({
             })}
           </div>
 
-          {/* Champ libre, toujours propose */}
-          {
+          {q.field.level === "TERTIAIRE" && !tertiaryVisible && (
+            <button
+              type="button"
+              onClick={() => setTertiaryVisible(true)}
+              className="w-fit text-left text-sm italic"
+              style={{ color: "var(--or-pale)", background: "none", border: "none" }}
+            >
+              {q.field.label}
+            </button>
+          )}
+
+          {showField && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -1386,7 +1410,7 @@ function QuestionScreen({
                   : t("words", { count: wordCount, max: MAX_FIELD_WORDS })}
               </p>
             </motion.div>
-          }
+          )}
 
           <div className="flex items-center justify-between gap-3 pt-1">
             {!isFirst ? (
@@ -1412,7 +1436,7 @@ function QuestionScreen({
                 <button
                   onClick={() => {
                     onSkip();
-                    onNext();
+                    onNext(true);
                   }}
                   style={{
                     fontFamily: "var(--font-sans)",
@@ -1593,8 +1617,8 @@ const offers = [
   {
     id: "origine",
     name: "ORIGINE",
-    amountCents: 4900,
-    price: "49€",
+    amountCents: ADULT_OFFERS.origine.amountCents,
+    price: formatEuro(ADULT_OFFERS.origine.amountCents),
     sub: "L'expérience essentielle.",
     bestFor: "Premier voyage",
     delivery: "15 min",
@@ -1611,8 +1635,8 @@ const offers = [
   {
     id: "ancestral",
     name: "RÉVÉLATION",
-    amountCents: 9900,
-    price: "99€",
+    amountCents: ADULT_OFFERS.ancestral.amountCents,
+    price: formatEuro(ADULT_OFFERS.ancestral.amountCents),
     sub: "L'expérience complète.",
     bestFor: "Coffret complet",
     delivery: "15 min",
@@ -1630,9 +1654,9 @@ const offers = [
   {
     id: "famille",
     name: "FAMILLE",
-    amountCents: 21900,
-    price: "219€",
-    compareAtPrice: "297€",
+    amountCents: ADULT_OFFERS.famille.amountCents,
+    price: formatEuro(ADULT_OFFERS.famille.amountCents),
+    compareAtPrice: formatEuro(FAMILLE_COMPARE_AT_CENTS),
     sub: "L'expérience à partager.",
     bestFor: "Trois destinataires",
     delivery: "30 min",

@@ -8,7 +8,8 @@ import { scoreAdultAnswers, scoreJuniorAnswers } from "../src/lib/totem-v3";
  * fera échouer ces tests — c'est le garde-fou anti-dérive front/back.
  *
  * Si une évolution est INTENTIONNELLE, régénérer les valeurs attendues et
- * répliquer le changement côté backend (totem_backend).
+ * répliquer le changement dans `src/lib/feta-scoring.ts` ET
+ * `totem_backend/src/totem/feta-scoring.ts`.
  */
 
 const vec = (choices: string[]) =>

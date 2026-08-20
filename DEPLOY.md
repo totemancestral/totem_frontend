@@ -5,22 +5,22 @@
 Le projet est désormais orienté **Next.js App Router sur Vercel**, conformément au document d'architecture.
 
 - Framework Vercel : `nextjs`
-- Install command : `npm ci`
-- Build command : `npm run build`
+- Install command : `pnpm install --frozen-lockfile`
+- Build command : `pnpm build`
 - Runtime API : routes `src/app/api/*`
 - i18n : routes canoniques `/fr/*` et `/en/*` via `next-intl`
 
 ## Développement local
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 ## Variables d'environnement
 
 Les variables publiques doivent utiliser le préfixe `NEXT_PUBLIC_`.
-Les secrets Stripe, Supabase service, Cloudflare R2, Resend et SENYCE APIs doivent rester côté serveur uniquement.
+Les secrets Stripe, Supabase service, Resend et les clés du backend doivent rester côté serveur uniquement. Le stockage de production et le pipeline sont gérés par NestJS et Supabase Storage.
 
 Voir `src/lib/env.ts` pour le schéma typé de référence.
 
