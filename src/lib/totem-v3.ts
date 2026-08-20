@@ -10,7 +10,13 @@ export type {
   FetaScores,
   JuniorTotemId,
 } from "./feta-scoring";
-import type { ChoiceLetter, FetaDimension, FetaScores, JuniorTotemId } from "./feta-scoring";
+import type {
+  AdultArchetypeId,
+  ChoiceLetter,
+  FetaDimension,
+  FetaScores,
+  JuniorTotemId,
+} from "./feta-scoring";
 
 export type Locale = "fr" | "en";
 

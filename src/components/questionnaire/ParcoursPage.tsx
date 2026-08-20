@@ -1451,7 +1451,7 @@ function QuestionScreen({
                 </button>
               )}
               <button
-                onClick={onNext}
+                onClick={() => onNext()}
                 disabled={!canContinue}
                 className="btn-primary"
                 style={{

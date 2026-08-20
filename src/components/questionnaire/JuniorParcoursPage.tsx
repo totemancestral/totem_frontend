@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Bird,
   CreditCard,
+  Download,
   Facebook,
   Flame,
   Footprints,
