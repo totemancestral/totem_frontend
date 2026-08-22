@@ -85,7 +85,7 @@ export async function POST(request: Request) {
           firstName: parsed.data.firstName,
           answers: parsed.data.answers,
           locale,
-          successUrl: `${origin}/${locale}/domus_animi?checkout=success&session_id={CHECKOUT_SESSION_ID}&type=junior`,
+          successUrl: `${origin}/${locale}/iuvenis_signum?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
           cancelUrl: `${origin}${pagePath(locale, "junior", "checkout=cancelled")}`,
         }),
       });
