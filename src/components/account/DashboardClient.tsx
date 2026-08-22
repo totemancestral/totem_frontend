@@ -369,9 +369,27 @@ export function DashboardClient({
           throw new Error("Erreur chargement œuvres");
         }
 
-        const commandesData: Commande[] = await commandesRes.json();
-        const oeuvresData: Oeuvre[] = await oeuvresRes.json();
-        const juniorData: JuniorTotem[] = juniorRes.ok ? await juniorRes.json() : [];
+        let commandesData: Commande[] = await commandesRes.json();
+        let oeuvresData: Oeuvre[] = await oeuvresRes.json();
+        let juniorData: JuniorTotem[] = juniorRes.ok ? await juniorRes.json() : [];
+
+        const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+        const checkoutSessionId = urlParams?.get("session_id");
+        if (checkoutSessionId && (!oeuvresData.length || juniorData.length === 0)) {
+          const res = await fetch(`/api/iuvenis_signum/result?session_id=${encodeURIComponent(checkoutSessionId)}`, {
+            headers: { authorization: `Bearer ${currentToken}` },
+          }).catch(() => null);
+          if (res?.ok) {
+            const [refreshedCmd, refreshedOev, refreshedJnr] = await Promise.all([
+              fetch("/api/ordo_tabulae", { headers: { authorization: `Bearer ${currentToken}` } }).then((r) => r.json()),
+              fetch("/api/opera_artificis", { headers: { authorization: `Bearer ${currentToken}` } }).then((r) => r.json()),
+              fetch("/api/iuvenis_signum/totems", { headers: { authorization: `Bearer ${currentToken}` } }).then((r) => r.json()),
+            ]).catch(() => [[], [], []]);
+            if (refreshedCmd?.length) commandesData = refreshedCmd;
+            if (refreshedOev?.length) oeuvresData = refreshedOev;
+            if (refreshedJnr?.length) juniorData = refreshedJnr;
+          }
+        }
 
         setCommandes(commandesData);
         setOeuvres(oeuvresData);
@@ -1105,7 +1123,10 @@ function buildCompositionState({
   if (delivered) return step(t.deliveredStatus, 100);
   if (latestOrder.statut === "erreur") return step(t.errorStatus, 88);
   if (latestOrder.statut === "en_generation") return step(t.generatingStatus, 88);
-  if (latestOrder.statut === "paye") return step(t.paidStatus, 72);
+  if (latestOrder.statut === "paye") {
+    if (latestOrder.offre === "junior") return step(t.generatingStatus, 92);
+    return step(t.paidStatus, 72);
+  }
   if (latestOrder.statut === "en_attente_paiement") return step(t.offerStatus, 40);
 
   return step(t.draftStatus ?? "", 25);
