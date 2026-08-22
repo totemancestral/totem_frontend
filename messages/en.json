@@ -1054,34 +1054,33 @@
       {
         "n": 6,
         "progress": 60,
-        "griot": "Trace the thread as far back as you can. Even a country, a region or an ethnic group is enough to guide the griot.",
-        "question": "Where do your ancestors come from, as far back as you know?",
+        "griot": "Close your eyes. Imagine a place you have never set foot on — yet already feels familiar. Which one is it?",
+        "question": "Which land do you recognize, without ever having seen it?",
         "choices": [
           {
             "letter": "A",
-            "text": "West Africa: Senegal, Mali, Guinea, Ivory Coast, Nigeria, Ghana, Benin and neighboring lands."
+            "text": "A boundless savanna, baobab trees against the sky, the beat of a drum carried by the warm wind."
           },
           {
             "letter": "B",
-            "text": "Central, East or Southern Africa: Congo, Kenya, Tanzania, Ethiopia, South Africa and neighboring lands."
+            "text": "A dense and humid forest, immense lakes, mountains guarding the silence of origins."
           },
           {
             "letter": "C",
-            "text": "Caribbean, the Americas or the African diaspora: an African origin, likely but undetermined."
+            "text": "A shore where the sea mingles with a hundred voices from afar, a land shaped by crossings."
           },
           {
             "letter": "D",
-            "text": "Europe, Asia, Oceania or anywhere else: I am here to uncover my deep African roots."
+            "text": "A distant land, a different climate, a place you cannot yet name."
           }
         ],
         "field": {
           "level": "SPECIAL",
-          "label": "Specify your origin",
-          "placeholder": "A country, an ethnic group, a region you know or feel close to, or want to explore...",
+          "label": "Specify this land if you wish",
+          "placeholder": "A country, a region, a feeling, or a place you imagine...",
           "rows": 2,
-          "required": true
-        },
-        "note": "This question is required: the griot needs your origin to place the ancestor."
+          "required": false
+        }
       },
       {
         "n": 7,

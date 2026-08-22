@@ -1054,34 +1054,33 @@
       {
         "n": 6,
         "progress": 60,
-        "griot": "Remonte le fil aussi loin que tu le peux. Même un pays, une région ou une ethnie suffit à orienter le griot.",
-        "question": "Quelle est l'origine de tes ancêtres, aussi loin que tu le sais ?",
+        "griot": "Ferme les yeux. Imagine un lieu que tu n'as jamais foulé — et qui pourtant te semble déjà familier. Lequel est-ce ?",
+        "question": "Quelle terre reconnais-tu, sans jamais l'avoir vue ?",
         "choices": [
           {
             "letter": "A",
-            "text": "Afrique de l'Ouest : Sénégal, Mali, Guinée, Côte d'Ivoire, Nigeria, Ghana, Bénin et les terres voisines."
+            "text": "Une savane à perte de vue, des baobabs contre le ciel, le battement d'un tambour porté par le vent chaud."
           },
           {
             "letter": "B",
-            "text": "Afrique Centrale, de l'Est ou du Sud : Congo, Kenya, Tanzanie, Éthiopie, Afrique du Sud et les terres voisines."
+            "text": "Une forêt dense et humide, des lacs immenses, des montagnes qui gardent le silence des origines."
           },
           {
             "letter": "C",
-            "text": "Caraïbes, Amériques ou diaspora africaine : une origine africaine probable mais indéterminée."
+            "text": "Un rivage où la mer se mêle à cent voix venues d'ailleurs, une terre façonnée par les traversées."
           },
           {
             "letter": "D",
-            "text": "Europe, Asie, Océanie ou toute autre région : je suis ici pour découvrir mes racines africaines profondes."
+            "text": "Une terre lointaine, un climat différent, un lieu que tu ne sais pas encore nommer."
           }
         ],
         "field": {
           "level": "SPECIAL",
-          "label": "Précise ton origine",
-          "placeholder": "Un pays, une ethnie, une région que tu connais ou dont tu te sens proche, ou que tu as envie d'explorer...",
+          "label": "Précise cette terre si tu le souhaites",
+          "placeholder": "Un pays, une région, une sensation ou un lieu que tu imagines...",
           "rows": 2,
-          "required": true
-        },
-        "note": "Cette question est obligatoire : le griot a besoin de ton origine pour situer l'ancêtre."
+          "required": false
+        }
       },
       {
         "n": 7,
