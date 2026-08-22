@@ -11,9 +11,9 @@ const music = "/assets/totem-music.mp3";
  * the ambient sound manually from the fixed button.
  */
 const CROSSFADE_S = 2.5;
-const TARGET_VOL = 0.55;
+const TARGET_VOL = 0.65;
 /** Volume de la nappe pendant le questionnaire : présente, mais en retrait. */
-const LOWERED_VOL = 0.25;
+const LOWERED_VOL = 0.35;
 const STORAGE_KEY = "totem_ambient_enabled";
 
 export function AmbientAudio({ active }: { active: boolean }) {
@@ -145,7 +145,7 @@ export function AmbientAudio({ active }: { active: boolean }) {
     };
     const duck = () => {
       duckCountRef.current += 1;
-      setLevel(0.08);
+      setLevel(0.20);
     };
     const unduck = () => {
       duckCountRef.current = Math.max(0, duckCountRef.current - 1);

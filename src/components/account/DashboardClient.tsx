@@ -42,7 +42,7 @@ const ADMIN_PATH = "/fgh55_fh";
 type Commande = {
   id: string;
   user_id: string;
-  offre: "essentiel" | "signature" | "heritage";
+  offre: "essentiel" | "signature" | "heritage" | "junior" | string;
   statut: "en_attente_paiement" | "paye" | "en_generation" | "livree" | "erreur" | "remboursee";
   montant_cents: number;
   devise: string;
@@ -281,7 +281,7 @@ export function DashboardClient({
           ? "Payment confirmed! Your artwork is being created."
           : "Paiement confirmé ! Ton œuvre est en cours de création.",
       );
-      router.replace(`/${locale}/tabula_munera`, { scroll: false });
+      router.replace(`/${locale}/domus_animi`, { scroll: false });
     }
   }, [checkoutStatus, locale, router]);
   const { session, user, loading: authLoading } = useSupabaseSession();
@@ -375,10 +375,15 @@ export function DashboardClient({
         setCommandes(commandesData);
         setOeuvres(oeuvresData);
         setJuniorTotems(juniorData);
+        const hasPaidJunior =
+          juniorData.length > 0 ||
+          commandesData.some(
+            (c) => c.offre === "junior" && ["paye", "en_generation", "livree"].includes(c.statut),
+          );
         setDrafts(
-          [draftsData.adulte, draftsData.junior].filter(
-            (draft): draft is ParcoursDraft => Boolean(draft),
-          ),
+          [draftsData.adulte, draftsData.junior]
+            .filter((draft): draft is ParcoursDraft => Boolean(draft))
+            .filter((draft) => !(draft.piste === "junior" && hasPaidJunior)),
         );
 
         if (profilRes.ok) {
@@ -418,6 +423,7 @@ export function DashboardClient({
   // pas ete mene a son terme. On propose de le reprendre sans repayer.
   const unfinishedPaidOrder = commandes.find(
     (commande) =>
+      commande.offre !== "junior" &&
       commande.statut === "paye" &&
       !oeuvres.some((oeuvre) => oeuvre.commande_id === commande.id),
   );

@@ -973,28 +973,12 @@ export function JuniorParcoursPage() {
                   <button
                     type="button"
                     className="btn-primary"
-                    onClick={startCheckout}
-                    disabled={!canContinue || loading}
+                    onClick={() => setShowPaywall(true)}
+                    disabled={!canContinue}
                   >
-                    {loading ? (
-                      <>
-                        <Loader size={16} className="animate-spin" />
-                        {t.loading as string}
-                      </>
-                    ) : (
-                      <>
-                        {t.reveal as string}
-                        <Sparkles size={16} />
-                      </>
-                    )}
+                    <span>{locale === "fr" ? "Voir mon Totem Junior" : "View my Junior Totem"}</span>
+                    <ArrowRight size={16} />
                   </button>
-                  <span
-                    className="inline-flex items-center gap-1.5 text-xs"
-                    style={{ color: "rgba(245,240,232,0.55)" }}
-                  >
-                    <CreditCard size={13} />
-                    {locale === "fr" ? "Paiement sécurisé · 9,99 €" : "Secure payment · €9.99"}
-                  </span>
                 </div>
               )}
             </div>

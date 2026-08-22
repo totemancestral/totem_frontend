@@ -742,24 +742,41 @@ export function ParcoursPage() {
       Authorization: `Bearer ${session.access_token}`,
     };
 
-    if (!paidCommandId) {
+    let targetId = paidCommandId;
+    if (!targetId) {
+      try {
+        const cmdRes = await fetch(apiPath("commandes"), { headers, cache: "no-store" });
+        if (cmdRes.ok) {
+          const list = (await cmdRes.json()) as { id: string; statut: string; offre?: string }[];
+          const paid = list.find((c) => c.offre !== "junior" && ["paye", "en_generation"].includes(c.statut));
+          if (paid) {
+            targetId = paid.id;
+            setPaidCommandId(paid.id);
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    if (targetId) {
+      const response = await fetch(apiPath("commandes", "/complete"), {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ commandeId: targetId, answers, sexe: gender, locale }),
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error || "complete_order_failed");
+      }
+      void clearParcoursDraft(session.access_token, "adulte");
+    } else {
       await fetch(apiPath("parcours", "/reponses"), {
         method: "POST",
         headers,
         body: JSON.stringify({ reponses: answers, sexe: gender, termine: true, langue: locale }),
       });
-      return;
-    }
-
-    const response = await fetch(apiPath("commandes", "/complete"), {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ commandeId: paidCommandId, answers, sexe: gender, locale }),
-    });
-
-    if (!response.ok) {
-      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      throw new Error(payload?.error || "complete_order_failed");
     }
   }, [answers, gender, locale, paidCommandId, session]);
 
