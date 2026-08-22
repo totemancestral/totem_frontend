@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Check, Minus } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 import { ADULT_OFFERS, formatEuro } from "@/lib/offers";
@@ -30,7 +31,7 @@ function Cell({ v }: { v: boolean | string }) {
   return <span style={{ color: "var(--ivoire)" }}>{v}</span>;
 }
 
-export function OffersPage() {
+export function OffersPage({ locale = "fr" }: { locale?: string }) {
   return (
     <>
       <PageHero
@@ -118,11 +119,12 @@ export function OffersPage() {
                       className="pt-8 px-4 text-center"
                       style={{ background: o.featured ? "rgba(201,168,76,0.04)" : "transparent" }}
                     >
-                      <button
+                      <Link
+                        href={`/${locale}/via_sapientiae`}
                         className={o.featured ? "btn-primary w-full" : "btn-secondary w-full"}
                       >
                         Choisir
-                      </button>
+                      </Link>
                     </td>
                   ))}
                 </tr>

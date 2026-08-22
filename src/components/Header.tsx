@@ -8,15 +8,17 @@ import type { Session } from "@supabase/supabase-js";
 import { LogOut, Menu, UserRound, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { hasAdminRole } from "@/lib/admin-client";
-import { authPath } from "@/lib/routes";
+import { authPath, pagePath } from "@/lib/routes";
 
 type Locale = "fr" | "en";
 
-const nav = [
-  { to: "/", hash: "#experience", labelKey: "experience" },
-  { to: "/", hash: "#offres", labelKey: "offers" },
-  { to: "/", hash: "#faq", labelKey: "faq" },
-];
+function getNavItems(locale: Locale) {
+  return [
+    { href: `/${locale}#experience`, labelKey: "experience" },
+    { href: pagePath(locale, "offres"), labelKey: "offers" },
+    { href: `/${locale}#faq`, labelKey: "faq" },
+  ];
+}
 
 function getAccountNav(locale: Locale) {
   const labels =
@@ -110,8 +112,8 @@ export function Header({ locale }: { locale: Locale }) {
   const composeHref = session
     ? juniorSession
       ? `/${locale}/iuvenis_signum`
-      : `/${locale}/via_sapientiae?restart=1`
-    : authPath(locale, "signup", `/${locale}/via_sapientiae?restart=1`);
+      : `/${locale}/via_sapientiae`
+    : authPath(locale, "signup", `/${locale}/via_sapientiae`);
 
   const openDashboardMenu = () => {
     if (typeof window === "undefined") return;
@@ -317,10 +319,10 @@ export function Header({ locale }: { locale: Locale }) {
         ) : (
           <>
             <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-10 md:flex">
-              {nav.map((item) => (
+              {getNavItems(locale).map((item) => (
                 <Link
                   key={item.labelKey}
-                  href={item.to === "/" ? `/${locale}${item.hash}` : `/${locale}${item.to}`}
+                  href={item.href}
                   className="subtext text-[12px] uppercase transition-colors hover:text-or"
                   style={{ color: "color-mix(in srgb, var(--ivoire) 72%, transparent)" }}
                 >
@@ -417,10 +419,10 @@ export function Header({ locale }: { locale: Locale }) {
               </>
             ) : (
               <>
-                {nav.map((item) => (
+                {getNavItems(locale).map((item) => (
                   <Link
                     key={item.labelKey}
-                    href={item.to === "/" ? `/${locale}${item.hash}` : `/${locale}${item.to}`}
+                    href={item.href}
                     onClick={() => setOpen(false)}
                     className="subtext text-sm uppercase"
                     style={{ color: "var(--ivoire)" }}

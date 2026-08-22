@@ -215,7 +215,7 @@ const QUESTIONS: Question[] = [
   {
     n: 6,
     progress: 60,
-    note: "Cette question est la seule que tu peux choisir de ne pas répondre. Mais si tu le fais — les ancêtres seront plus proches.",
+    note: "Cette question est obligatoire : le griot a besoin de ton origine pour situer l'ancêtre.",
     griot:
       "Remonte le fil aussi loin que tu le peux. Même un pays, une région ou une ethnie suffit à orienter le griot.",
     question: "Quelle est l'origine de tes ancêtres, aussi loin que tu le sais ?",
@@ -243,8 +243,8 @@ const QUESTIONS: Question[] = [
       placeholder:
         "Un pays, une ethnie, une région que tu connais ou dont tu te sens proche, ou que tu as envie d'explorer...",
       rows: 2,
+      required: true,
     },
-    canSkip: true,
   },
   {
     n: 7,
@@ -444,6 +444,7 @@ export function ParcoursPage() {
   // dernier gagne. `draftSyncReady` empeche d'ecraser un bon brouillon avec
   // l'etat vide du tout premier rendu.
   const localDraftUpdatedAtRef = useRef<string | null>(null);
+  const localRestoreReadyRef = useRef(false);
   const [draftSyncReady, setDraftSyncReady] = useState(false);
   const draftRestoredRef = useRef(false);
   const draftDiscardedRef = useRef(restartRequested);
@@ -541,13 +542,23 @@ export function ParcoursPage() {
         phase?: Phase;
         updatedAt?: string;
       };
+      const restoredAnswers = { ...(saved.answers ?? {}) };
+      const q6 = restoredAnswers[6];
+      if (q6?.skipped) {
+        restoredAnswers[6] = { ...q6, skipped: false };
+      }
       localDraftUpdatedAtRef.current = saved.updatedAt ?? null;
-      if (saved.answers) setAnswers(saved.answers);
+      if (Object.keys(restoredAnswers).length > 0) setAnswers(restoredAnswers);
       if (saved.gender) setGender(saved.gender);
       if (saved.account) setAccount(saved.account);
       if (typeof saved.hasUnlockedRest === "boolean") setHasUnlockedRest(saved.hasUnlockedRest);
       if (typeof saved.paidCommandId === "string") setPaidCommandId(saved.paidCommandId);
-      if (typeof saved.index === "number") setIndex(saved.index);
+      if (typeof saved.index === "number") {
+        const restoredIndex = Math.min(Math.max(saved.index, 0), questions.length - 1);
+        setIndex(restoredAnswers[6]?.skipped === false && !restoredAnswers[6]?.field?.trim()
+          ? 5
+          : restoredIndex);
+      }
       if (saved.phase && saved.phase !== "waiting") {
         if (
           saved.hasUnlockedRest &&
@@ -561,12 +572,15 @@ export function ParcoursPage() {
       }
     } catch {
       /* ignore corrupted storage */
+    } finally {
+      localRestoreReadyRef.current = true;
+      setDraftSyncReady(true);
     }
-  }, []);
+  }, [questions.length]);
 
   // Persist progress to localStorage on every change
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !localRestoreReadyRef.current) return;
     const updatedAt = new Date().toISOString();
     localDraftUpdatedAtRef.current = updatedAt;
     try {
@@ -592,7 +606,7 @@ export function ParcoursPage() {
   // recupere le brouillon serveur et on l'applique s'il est plus recent que la
   // copie locale. Un parcours commence sur ordinateur reprend ainsi sur mobile.
   useEffect(() => {
-    if (!session || draftRestoredRef.current) return;
+    if (!session || !draftSyncReady || draftRestoredRef.current) return;
     draftRestoredRef.current = true;
 
     if (draftDiscardedRef.current) {
@@ -609,13 +623,20 @@ export function ParcoursPage() {
         if (cancelled) return;
         const draft = drafts.adulte;
         if (draft && isNewer(draft.updatedAt, localDraftUpdatedAtRef.current)) {
-          setAnswers(draft.answers as Record<number, Answer>);
+          const restoredAnswers = { ...(draft.answers as Record<number, Answer>) };
+          if (restoredAnswers[6]?.skipped) {
+            restoredAnswers[6] = { ...restoredAnswers[6], skipped: false };
+          }
+          setAnswers(restoredAnswers);
           if (draft.sexe) setGender(draft.sexe);
           if (typeof draft.hasUnlockedRest === "boolean") {
             setHasUnlockedRest(draft.hasUnlockedRest);
           }
           if (typeof draft.paidCommandId === "string") setPaidCommandId(draft.paidCommandId);
-          setIndex(draft.index);
+          const restoredIndex = Math.min(Math.max(draft.index, 0), questions.length - 1);
+          setIndex(restoredAnswers[6]?.skipped === false && !restoredAnswers[6]?.field?.trim()
+            ? 5
+            : restoredIndex);
           // On ne restaure jamais un ecran d'attente : le visiteur reprend sur
           // une question, ou sur le paiement s'il n'a pas encore paye.
           if (draft.phase && draft.phase !== "waiting") {
@@ -1230,8 +1251,8 @@ function QuestionScreen({
   return (
     <motion.section
       {...fadeSlide}
-      className="relative flex min-h-0 items-center justify-center overflow-y-auto px-4 pb-6 pt-24 md:px-6 md:pb-8 md:pt-28 lg:overflow-hidden"
-      style={{ height: "100svh" }}
+      className="relative flex min-h-[100svh] items-start justify-start overflow-y-auto px-4 pb-8 pt-24 md:min-h-0 md:items-center md:justify-center md:px-6 md:pb-8 md:pt-28 lg:overflow-hidden"
+      style={{ minHeight: "100svh" }}
     >
       <div className="grid min-h-full w-full max-w-[1180px] grid-rows-[auto_1fr] gap-4 py-4 md:h-full md:min-h-0 md:grid-cols-[0.86fr_1.14fr] md:grid-rows-1 md:gap-6 md:py-0 lg:max-h-[760px] lg:gap-10">
         <div className="flex min-h-0 flex-col justify-center gap-3 text-left md:overflow-hidden lg:gap-5 lg:pr-4">

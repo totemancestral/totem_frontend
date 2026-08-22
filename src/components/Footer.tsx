@@ -8,7 +8,7 @@ type Locale = "fr" | "en";
 export function Footer({ locale }: { locale: Locale }) {
   const brand = useTranslations("brand");
   const t = useTranslations("footer");
-  const composeHref = authPath(locale, "signup", `/${locale}/via_sapientiae?restart=1`);
+  const composeHref = authPath(locale, "signup", `/${locale}/via_sapientiae`);
   const year = new Date().getFullYear();
   const labels =
     locale === "en"
@@ -58,7 +58,7 @@ export function Footer({ locale }: { locale: Locale }) {
             <Link href={composeHref} className="footer-link">
               {labels.order}
             </Link>
-            <Link href={`/${locale}#offres`} className="footer-link">
+            <Link href={pagePath(locale, "offres")} className="footer-link">
               {labels.offers}
             </Link>
             <Link href={`/${locale}#faq`} className="footer-link">

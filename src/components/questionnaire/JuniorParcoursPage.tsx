@@ -411,35 +411,80 @@ export function JuniorParcoursPage() {
     }
   }
 
-  const checkoutSuccess = searchParams.get("checkout");
+  const checkoutStatus = searchParams.get("checkout");
   const checkoutSessionId = searchParams.get("session_id");
 
-  const restorePaidReveal = useCallback(async () => {
+  useEffect(() => {
+    if (checkoutStatus === "cancelled") {
+      setError(
+        locale === "en"
+          ? "Payment cancelled. You can try again whenever you are ready."
+          : "Paiement annulé. Tu peux réessayer lorsque tu le souhaites.",
+      );
+      router.replace(`/${locale}/iuvenis_signum`, { scroll: false });
+    }
+  }, [checkoutStatus, locale, router]);
+
+  const pollPaidReveal = useCallback(async () => {
     if (result || !session?.access_token || !checkoutSessionId) return;
     setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/iuvenis_signum/result?session_id=${encodeURIComponent(checkoutSessionId)}`,
-        { headers: { Authorization: `Bearer ${session.access_token}` } },
-      );
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.reveal) {
+    setError(null);
+
+    const maxAttempts = 15;
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+      attempts += 1;
+      try {
+        const response = await fetch(
+          `/api/iuvenis_signum/result?session_id=${encodeURIComponent(checkoutSessionId)}`,
+          { headers: { Authorization: `Bearer ${session.access_token}` } },
+        );
+        const payload = await response.json().catch(() => null);
+
+        if (response.ok && payload?.reveal) {
+          setResult(payload.reveal as JuniorResult);
+          sessionStorage.removeItem("junior_reveal");
+          setLoading(false);
+          router.replace(`/${locale}/iuvenis_signum`, { scroll: false });
+          return;
+        }
+
+        if (response.status === 202 || response.status === 402 || response.status === 404) {
+          await new Promise((res) => setTimeout(res, 2500));
+          continue;
+        }
+
         throw new Error(payload?.error || t.error);
+      } catch (nextError) {
+        if (attempts >= maxAttempts) {
+          setError(
+            nextError instanceof Error
+              ? nextError.message
+              : (locale === "en"
+                  ? "Generation is taking longer than expected. Tap retry to attempt loading your totem again."
+                  : "La génération prend plus de temps que prévu. Réessaie d'afficher ton totem."),
+          );
+          setLoading(false);
+          return;
+        }
+        await new Promise((res) => setTimeout(res, 2500));
       }
-      setResult(payload.reveal as JuniorResult);
-      sessionStorage.removeItem("junior_reveal");
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : t.error);
-    } finally {
-      setLoading(false);
     }
-  }, [checkoutSessionId, result, session?.access_token, t.error]);
+
+    setLoading(false);
+    setError(
+      locale === "en"
+        ? "Generation is taking longer than expected. Tap retry to attempt loading your totem again."
+        : "La génération prend plus de temps que prévu. Réessaie d'afficher ton totem.",
+    );
+  }, [checkoutSessionId, locale, result, router, session?.access_token, t.error]);
 
   useEffect(() => {
-    if (checkoutSuccess === "success" && checkoutSessionId) {
-      void restorePaidReveal();
+    if (checkoutStatus === "success" && checkoutSessionId) {
+      void pollPaidReveal();
     }
-  }, [checkoutSessionId, checkoutSuccess, restorePaidReveal]);
+  }, [checkoutSessionId, checkoutStatus, pollPaidReveal]);
 
   // Reprise du parcours junior : on rouvre le questionnaire la ou l'enfant
   // s'etait arrete, meme depuis un autre appareil.

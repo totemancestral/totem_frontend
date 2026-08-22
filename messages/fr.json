@@ -1078,10 +1078,10 @@
           "level": "SPECIAL",
           "label": "Précise ton origine",
           "placeholder": "Un pays, une ethnie, une région que tu connais ou dont tu te sens proche, ou que tu as envie d'explorer...",
-          "rows": 2
+          "rows": 2,
+          "required": true
         },
-        "note": "Cette question est la seule que tu peux choisir de ne pas répondre. Mais si tu le fais — les ancêtres seront plus proches.",
-        "canSkip": true
+        "note": "Cette question est obligatoire : le griot a besoin de ton origine pour situer l'ancêtre."
       },
       {
         "n": 7,

@@ -1078,10 +1078,10 @@
           "level": "SPECIAL",
           "label": "Specify your origin",
           "placeholder": "A country, an ethnic group, a region you know or feel close to, or want to explore...",
-          "rows": 2
+          "rows": 2,
+          "required": true
         },
-        "note": "This is the only question you may choose not to answer. But if you do, the ancestors will be closer.",
-        "canSkip": true
+        "note": "This question is required: the griot needs your origin to place the ancestor."
       },
       {
         "n": 7,

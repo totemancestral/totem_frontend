@@ -32,11 +32,24 @@ export async function GET(request: Request) {
       offer?: string;
       juniorPayload?: Record<string, unknown> | null;
       imageUrl?: string | null;
+      status?: string;
       error?: string;
     } | null;
 
     if (response.status === 402 || payload?.paid === false) {
       return NextResponse.json({ error: "Paiement non confirmé" }, { status: 402 });
+    }
+    if (payload?.status === "error") {
+      return NextResponse.json(
+        { error: payload.error || "Échec de la génération du totem Junior" },
+        { status: 500 },
+      );
+    }
+    if (
+      response.status === 202 ||
+      (response.ok && (payload?.status === "processing" || payload?.status === "pending"))
+    ) {
+      return NextResponse.json({ error: "Révélation Junior en préparation" }, { status: 202 });
     }
     if (!response.ok || !payload) {
       return NextResponse.json(
@@ -45,7 +58,7 @@ export async function GET(request: Request) {
       );
     }
     if (payload.offer !== "junior" || !payload.juniorPayload) {
-      return NextResponse.json({ error: "Révélation Junior indisponible" }, { status: 404 });
+      return NextResponse.json({ error: "Révélation Junior en préparation" }, { status: 202 });
     }
 
     return NextResponse.json({

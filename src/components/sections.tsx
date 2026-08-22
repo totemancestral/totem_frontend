@@ -517,7 +517,7 @@ function useLandingCopy() {
 
 function journeyHref(locale: Locale) {
   // Accès direct au parcours : le compte n'est demandé qu'au moment du paiement.
-  return `/${locale}/via_sapientiae?restart=1`;
+  return `/${locale}/via_sapientiae`;
 }
 
 function juniorHref(locale: Locale) {

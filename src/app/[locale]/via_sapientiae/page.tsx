@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ParcoursPage } from "@/components/questionnaire/ParcoursPage";
 
 export const metadata: Metadata = {
@@ -8,5 +9,20 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ParcoursPage />;
+  return (
+    <Suspense fallback={<JourneyFallback />}>
+      <ParcoursPage />
+    </Suspense>
+  );
+}
+
+function JourneyFallback() {
+  return (
+    <main
+      className="flex min-h-[100svh] items-center justify-center px-5"
+      style={{ background: "var(--nuit-profonde)", color: "var(--ivoire)" }}
+    >
+      Chargement…
+    </main>
+  );
 }

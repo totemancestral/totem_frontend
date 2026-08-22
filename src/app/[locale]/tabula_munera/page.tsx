@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { OffersPage } from "@/components/pages/OffersPage";
 
 export const metadata: Metadata = {
   title: "Les offres · Totem Ancestral",
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  redirect(`/${locale}#offres`);
+  return <OffersPage locale={locale} />;
 }
