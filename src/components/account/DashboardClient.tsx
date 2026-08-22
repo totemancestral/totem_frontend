@@ -302,6 +302,7 @@ export function DashboardClient({
     scores: Record<string, number>;
     dominant: string;
     secondary: string;
+    imageUrl?: string;
   };
 
   const [commandes, setCommandes] = useState<Commande[]>([]);
@@ -711,38 +712,59 @@ export function DashboardClient({
                     {juniorTotems.map((totem) => (
                       <article
                         key={totem.id}
-                        className="border p-4"
-                        style={{ borderColor: "rgba(216,173,77,0.22)" }}
+                        className="overflow-hidden rounded-2xl border flex flex-col justify-between"
+                        style={{ borderColor: "rgba(216,173,77,0.22)", background: "rgba(13,13,26,0.65)" }}
                       >
-                        <p
-                          className="subtext text-[11px] uppercase"
-                          style={{ color: "rgba(237,217,154,0.56)" }}
-                        >
-                          #{String(totem.orderNumber).padStart(6, "0")}
-                        </p>
-                        <h3
-                          className="mt-1 text-xl uppercase"
-                          style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
-                        >
-                          {totem.totemName}
-                        </h3>
-                        <p className="mt-2 text-sm" style={{ color: "rgba(245,240,232,0.7)" }}>
-                          {totem.phrase}
-                        </p>
-                        <div
-                          className="mt-3 flex items-center gap-4 text-xs"
-                          style={{ color: "rgba(237,217,154,0.5)" }}
-                        >
-                          <span>{totem.quality}</span>
+                        {totem.imageUrl ? (
+                          <div className="aspect-[4/3] w-full overflow-hidden bg-black/40">
+                            <img
+                              src={totem.imageUrl}
+                              alt={totem.totemName}
+                              className="h-full w-full object-cover transition-transform hover:scale-105 duration-500"
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            className="flex aspect-[4/3] w-full items-center justify-center"
+                            style={{ background: "var(--ombre-doree)" }}
+                          >
+                            <Sparkles size={32} color="var(--or-ancestral)" />
+                          </div>
+                        )}
+                        <div className="p-5 flex flex-col gap-2 flex-1 justify-between">
+                          <div>
+                            <p
+                              className="subtext text-[11px] uppercase"
+                              style={{ color: "rgba(237,217,154,0.56)" }}
+                            >
+                              #{String(totem.orderNumber).padStart(6, "0")}
+                            </p>
+                            <h3
+                              className="mt-1 text-xl uppercase"
+                              style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
+                            >
+                              {totem.totemName}
+                            </h3>
+                            <p className="mt-2 text-sm leading-relaxed" style={{ color: "rgba(245,240,232,0.78)" }}>
+                              "{totem.phrase}"
+                            </p>
+                            <div
+                              className="mt-3 flex items-center gap-2 text-xs"
+                              style={{ color: "var(--or-ancestral)" }}
+                            >
+                              <Sparkles size={13} />
+                              <span>{totem.quality}</span>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            className="btn-secondary mt-4 w-full"
+                            onClick={() => shareJuniorTotem(totem)}
+                          >
+                            <Share2 size={14} />
+                            Partager mon Totem
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          className="btn-secondary mt-3 w-full"
-                          onClick={() => shareJuniorTotem(totem)}
-                        >
-                          <Share2 size={14} />
-                          Partager
-                        </button>
                       </article>
                     ))}
                   </div>

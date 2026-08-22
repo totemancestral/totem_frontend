@@ -4,6 +4,8 @@ import type { NextConfig } from "next";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const backendConnectSrc = [
+  "https://api.totemancestral.com",
+  "https://totem-ancestral-backend.onrender.com",
   "https://totem-backend-o3v4.onrender.com",
   "http://localhost:3000",
   "http://localhost:3001",

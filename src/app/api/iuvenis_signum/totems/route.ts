@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   const supabase = createServiceClient();
   const { data: oeuvres } = await supabase
     .from("oeuvres")
-    .select("id, nom_totem, recit, metadata, created_at, numero_serie")
+    .select("id, nom_totem, recit, metadata, created_at, numero_serie, image_url")
     .eq("user_id", auth.userId)
     .eq("statut", "livree")
     .not("metadata->>type", "is", null)
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
       return {
         id: o.id,
         totemName: o.nom_totem || "Totem Junior",
-        quality: (meta.totem as Record<string, unknown> | null)?.quality ?? "",
+        quality: (meta.totem as Record<string, unknown> | null)?.quality ?? (meta.attribut as string) ?? "",
         phrase: o.recit || "",
         orderNumber: (meta.orderNumber as number) || 0,
         shareCount: 0,
@@ -52,6 +52,7 @@ export async function GET(request: Request) {
         scores: (meta.scores ?? {}) as Record<string, number>,
         dominant: (meta.dominant as string) || "",
         secondary: (meta.secondary as string) || "",
+        imageUrl: o.image_url || ((meta.imageUrl as string) ?? undefined),
       };
     });
 
