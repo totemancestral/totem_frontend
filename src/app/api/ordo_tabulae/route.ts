@@ -1,23 +1,12 @@
 import { NextResponse } from "next/server";
-import { authenticateRequest } from "@/lib/server-auth";
+import { authenticateRequest, createServiceClient } from "@/lib/server-auth";
 import { getServerEnv } from "@/lib/env";
 
 export async function GET(request: Request) {
   const auth = await authenticateRequest(request);
   if (auth instanceof NextResponse) return auth;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.json({ error: "Configuration Supabase manquante" }, { status: 500 });
-  }
-
-  const { createClient } = await import("@supabase/supabase-js");
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-    global: { headers: { authorization: request.headers.get("authorization") ?? "" } },
-  });
+  const supabase = createServiceClient();
 
   let { data, error } = await supabase
     .from("commandes")
@@ -40,7 +29,7 @@ export async function GET(request: Request) {
     await Promise.allSettled(
       pendingOrders.map(async (cmd) => {
         try {
-          await fetch(`${backendUrl}/orders/session/${encodeURIComponent(cmd.stripe_session_id)}`, {
+          await fetch(`${backendUrl}/orders/session/${encodeURIComponent(cmd.stripe_session_id || "")}`, {
             headers: { authorization: request.headers.get("authorization") ?? "" },
           });
         } catch {
