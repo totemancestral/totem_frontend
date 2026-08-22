@@ -85,7 +85,7 @@ export async function POST(request: Request) {
           firstName: parsed.data.firstName,
           answers: parsed.data.answers,
           locale,
-          successUrl: `${origin}${pagePath(locale, "junior", "checkout=success&session_id={CHECKOUT_SESSION_ID}")}`,
+          successUrl: `${origin}/${locale}/tabula_munera?checkout=success&session_id={CHECKOUT_SESSION_ID}&type=junior`,
           cancelUrl: `${origin}${pagePath(locale, "junior", "checkout=cancelled")}`,
         }),
       });

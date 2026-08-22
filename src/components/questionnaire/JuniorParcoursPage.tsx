@@ -94,6 +94,20 @@ const copy = {
     clan: "Clan",
     quality: "Qualité",
     error: "Impossible de révéler le totem Junior pour le moment.",
+    paywallEyebrow: "✦ TOTEM JUNIOR",
+    paywallTitle: "Ton signe est prêt à être révélé",
+    paywallSubtitle: "Le Griot a assemblé tes 5 choix sacrés. Découvre ton totem d'énergie et défie ton clan.",
+    paywallPrice: "9,99 €",
+    paywallPriceSub: "Paiement unique · Accès immédiat dans ton espace",
+    paywallCta: "Révéler mon Totem Junior (9,99 €)",
+    paywallBack: "Revoir mes réponses",
+    continueToOffer: "Voir mon Totem Junior",
+    paywallFeatures: [
+      "Animal totem et élément dominant révélés",
+      "Nom ancestral sacré et attribut de puissance",
+      "Message personnalisé et bénédiction du clan",
+      "Carte de défi exclusive à partager avec tes amis",
+    ],
     listen: "Écouter la question",
     playing: "Lecture en cours",
     replay: "Réécouter",
@@ -216,6 +230,20 @@ const copy = {
     clan: "Clan",
     quality: "Quality",
     error: "The Junior totem cannot be revealed right now.",
+    paywallEyebrow: "✦ TOTEM JUNIOR",
+    paywallTitle: "Your sign is ready to be revealed",
+    paywallSubtitle: "The Griot has woven your 5 sacred choices. Unlock your totem and share your energy with your clan.",
+    paywallPrice: "€9.99",
+    paywallPriceSub: "One-time payment · Instant access in your dashboard",
+    paywallCta: "Reveal my Junior Totem (€9.99)",
+    paywallBack: "Review my answers",
+    continueToOffer: "See my Junior Totem",
+    paywallFeatures: [
+      "Totem animal and dominant element revealed",
+      "Unique ancestral name and power attribute",
+      "Personalized clan message and blessing",
+      "Exclusive challenge card to share with friends",
+    ],
     listen: "Listen to the question",
     playing: "Playing",
     replay: "Replay",
@@ -311,6 +339,7 @@ export function JuniorParcoursPage() {
   const searchParams = useSearchParams();
   const { session } = useSupabaseSession();
   const [started, setStarted] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [index, setIndex] = useState(0);
   // Le sexe est declare a la creation du compte et reglable dans le profil :
   // le questionnaire ne l'interrompt plus. On le garde pour les brouillons
@@ -353,6 +382,7 @@ export function JuniorParcoursPage() {
       });
     }
     setStarted(false);
+    setShowPaywall(false);
     setIndex(0);
     setFirstName("");
     setAnswers({});
@@ -577,6 +607,108 @@ export function JuniorParcoursPage() {
   useEffect(() => {
     if (result) setSaved(true);
   }, [result]);
+
+  if (showPaywall && !result) {
+    return (
+      <main className="premium-page min-h-screen overflow-x-hidden overflow-y-auto px-5 pb-[max(4rem,env(safe-area-inset-bottom))] pt-28 md:px-8">
+        <GoldParticles count={20} />
+        <div className="relative z-10 mx-auto max-w-[680px]">
+          <div
+            className="rounded-3xl border p-8 md:p-12 text-center"
+            style={{
+              borderColor: "rgba(216,173,77,0.32)",
+              background: "rgba(17,17,26,0.94)",
+              boxShadow: "0 30px 100px rgba(0,0,0,0.6)",
+            }}
+          >
+            <span
+              className="subtext inline-block mb-3 text-[12px] uppercase tracking-[0.2em]"
+              style={{ color: "var(--or-ancestral)" }}
+            >
+              {t.paywallEyebrow as string}
+            </span>
+            <h1
+              className="text-3xl md:text-5xl uppercase leading-[1.05]"
+              style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}
+            >
+              {t.paywallTitle as string}
+            </h1>
+            <p className="mt-4 text-base" style={{ color: "rgba(245,240,232,0.78)" }}>
+              {t.paywallSubtitle as string}
+            </p>
+
+            <div
+              className="mt-8 rounded-2xl border p-6 text-left"
+              style={{
+                borderColor: "rgba(216,173,77,0.22)",
+                background: "rgba(13,13,26,0.65)",
+              }}
+            >
+              <div className="flex items-baseline justify-between border-b pb-4" style={{ borderColor: "rgba(216,173,77,0.18)" }}>
+                <div>
+                  <h2 className="text-xl font-bold uppercase" style={{ color: "var(--ivoire)" }}>
+                    Totem Junior
+                  </h2>
+                  <p className="text-xs mt-1" style={{ color: "rgba(245,240,232,0.6)" }}>
+                    {t.paywallPriceSub as string}
+                  </p>
+                </div>
+                <div className="text-3xl font-bold" style={{ color: "var(--or-pale)", fontFamily: "var(--font-display)" }}>
+                  {t.paywallPrice as string}
+                </div>
+              </div>
+
+              <ul className="mt-5 space-y-3">
+                {((t.paywallFeatures as string[]) || []).map((feat, idx) => (
+                  <li key={idx} className="flex items-center gap-3 text-sm" style={{ color: "var(--ivoire)" }}>
+                    <Sparkles size={16} style={{ color: "var(--or-ancestral)", flexShrink: 0 }} />
+                    <span>{feat}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {error && (
+              <p className="mt-5 border px-4 py-3 text-sm text-left" style={{ borderColor: "#8B2000", color: "#F0DFA0" }}>
+                {error}
+              </p>
+            )}
+
+            <div className="mt-8 flex flex-col gap-3">
+              <button
+                type="button"
+                className="btn-primary w-full py-4 text-base"
+                onClick={startCheckout}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader size={18} className="animate-spin" />
+                    {t.loading as string}
+                  </>
+                ) : (
+                  <>
+                    {t.paywallCta as string}
+                    <Sparkles size={18} />
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className="btn-secondary w-full py-3 text-sm"
+                onClick={() => setShowPaywall(false)}
+                disabled={loading}
+              >
+                <ArrowLeft size={16} />
+                {t.paywallBack as string}
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   if (result) {
     const shareUrl = "https://totem-ancestral.com";

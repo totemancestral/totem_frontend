@@ -80,7 +80,7 @@ const copy = {
   },
 } as const;
 
-const VISUAL = "/assets/oeuvre-visuelle-voix.jpg";
+const VISUAL = "/assets/oeuvre-visuelle-voix.webp";
 
 export function AuthShell({
   locale,
@@ -108,7 +108,7 @@ export function AuthShell({
 
   return (
     <section
-      className="premium-page relative flex w-full items-center justify-center overflow-hidden px-4 py-20 md:px-8 md:py-16"
+      className="premium-page relative flex w-full items-center justify-center overflow-hidden px-4 pt-32 pb-20 md:px-8 md:pt-36 md:pb-24"
       style={{ background: "var(--nuit-profonde)", minHeight: "100svh" }}
     >
       <div

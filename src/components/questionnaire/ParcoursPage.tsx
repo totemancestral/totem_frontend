@@ -92,7 +92,7 @@ const QUESTIONS: Question[] = [
     n: 2,
     progress: 20,
     griot:
-      "Je veux savoir où tu te trouves — vraiment. Pas ce que tu fais, mais où tu vis.",
+      "Je veux savoir où tu te trouves, vraiment. Pas ce que tu fais, mais où tu vis.",
     question: "Dans quel moment te sens-tu le plus vivant(e) ?",
     choices: [
       {
@@ -216,7 +216,7 @@ const QUESTIONS: Question[] = [
     n: 6,
     progress: 60,
     griot:
-      "Ferme les yeux. Imagine un lieu que tu n'as jamais foulé — et qui pourtant te semble déjà familier. Lequel est-ce ?",
+      "Ferme les yeux. Imagine un lieu que tu n'as jamais foulé, et qui pourtant te semble déjà familier. Lequel est-ce ?",
     question: "Quelle terre reconnais-tu, sans jamais l'avoir vue ?",
     choices: [
       {

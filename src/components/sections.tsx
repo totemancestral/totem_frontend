@@ -9,8 +9,8 @@ import { LiquidGlassPreview } from "@/components/liquid-glass/LiquidGlassPreview
 import { authPath } from "@/lib/routes";
 
 const totemLogo = "/assets/totem-logo.png";
-const oeuvreParchemin = "/assets/oeuvre-parchemin.jpg";
-const oeuvreVisuelle = "/assets/oeuvre-visuelle-voix.jpg";
+const oeuvreParchemin = "/assets/oeuvre-parchemin.webp";
+const oeuvreVisuelle = "/assets/oeuvre-visuelle-voix.webp";
 const traverserPose = "/assets/avant-traverser-1-posez-le-monde.png";
 const traverserEcoute = "/assets/avant-traverser-2-ouvrez-les-oreilles.png";
 const traverserParole = "/assets/avant-traverser-3-parlez-vrai.png";
@@ -503,10 +503,10 @@ const galleryImages = [
   traverserEcoute,
   traverserParole,
   traverserGarde,
-  "/assets/consigne-1-posture.jpg",
-  "/assets/consigne-2-volume.jpg",
-  "/assets/consigne-3-coeur.jpg",
-  "/assets/consigne-4-heritage.jpg",
+  "/assets/consigne-1-posture.webp",
+  "/assets/consigne-2-volume.webp",
+  "/assets/consigne-3-coeur.webp",
+  "/assets/consigne-4-heritage.webp",
 ];
 
 function useLandingCopy() {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { motion } from "motion/react";
 import {
@@ -271,6 +271,19 @@ export function DashboardClient({
   section?: DashboardSection;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const checkoutStatus = searchParams.get("checkout");
+
+  useEffect(() => {
+    if (checkoutStatus === "success") {
+      toast.success(
+        locale === "en"
+          ? "Payment confirmed! Your artwork is being created."
+          : "Paiement confirmé ! Ton œuvre est en cours de création.",
+      );
+      router.replace(`/${locale}/tabula_munera`, { scroll: false });
+    }
+  }, [checkoutStatus, locale, router]);
   const { session, user, loading: authLoading } = useSupabaseSession();
   const t = copy[locale];
   const signinRedirect = useMemo(
