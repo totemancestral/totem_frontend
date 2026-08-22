@@ -99,8 +99,8 @@ export function SignupClient({ locale }: { locale: Locale }) {
   const [error, setError] = useState<string | null>(null);
 
   const [role, setRole] = useState<AuthRole>(() => parseRole(searchParams.get("role")));
-  const defaultRedirect = role === "junior" ? `/${locale}/iuvenis_signum` : dashboardPath(locale);
-  const redirectPath = searchParams.get("redirect") || defaultRedirect;
+  const redirectParam = searchParams.get("redirect");
+  const effectiveRedirect = redirectParam || (role === "junior" ? `/${locale}/iuvenis_signum` : dashboardPath(locale));
   const otherPath = useMemo(() => {
     const redirect = searchParams.get("redirect");
     const base = authPath(locale, "signin", redirect ?? undefined);
@@ -114,12 +114,12 @@ export function SignupClient({ locale }: { locale: Locale }) {
     let alive = true;
     (async () => {
       const isAdmin = await hasAdminRole(userId);
-      if (alive) router.replace(isAdmin ? ADMIN_PATH : redirectPath);
+      if (alive) router.replace(isAdmin ? ADMIN_PATH : effectiveRedirect);
     })();
     return () => {
       alive = false;
     };
-  }, [existingSession, redirectPath, router]);
+  }, [existingSession, effectiveRedirect, router]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -130,7 +130,7 @@ export function SignupClient({ locale }: { locale: Locale }) {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, prenom, nom, sexe, locale, role, redirectPath }),
+        body: JSON.stringify({ email, password, prenom, nom, sexe, locale, role, redirectPath: effectiveRedirect }),
       });
       if (!response.ok) {
         const data = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -148,7 +148,7 @@ export function SignupClient({ locale }: { locale: Locale }) {
     setMagicLoading(true);
     setError(null);
     setNotice(null);
-    const result = await sendMagicLink({ email, locale, redirectPath });
+    const result = await sendMagicLink({ email, locale, redirectPath: effectiveRedirect });
     if (result.ok) setNotice(t.magicSent);
     else setError(result.error);
     setMagicLoading(false);
@@ -161,14 +161,14 @@ export function SignupClient({ locale }: { locale: Locale }) {
       if (!session?.user?.id || !alive) return;
       setNotice(t.sessionReady);
       void hasAdminRole(session.user.id).then((isAdmin) => {
-        if (alive) router.replace(isAdmin ? ADMIN_PATH : redirectPath);
+        if (alive) router.replace(isAdmin ? ADMIN_PATH : effectiveRedirect);
       });
     });
     return () => {
       alive = false;
       data.subscription.unsubscribe();
     };
-  }, [redirectPath, router, t.sessionReady]);
+  }, [effectiveRedirect, router, t.sessionReady]);
 
   return (
     <AuthShell locale={locale} kind="signup" role={role} otherPath={otherPath}>

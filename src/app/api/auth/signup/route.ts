@@ -29,9 +29,10 @@ export async function POST(request: Request) {
 
   // Après confirmation de l'email, l'utilisateur atterrit sur la page
   // « compte activé », qui le redirige ensuite vers sa destination.
-  const nextPath = safeRedirectPath(payload.redirectPath, locale);
-  const redirectTo = `${getRequestOrigin(request)}/${locale}/confirmatio?next=${encodeURIComponent(nextPath)}`;
   const role = payload.role === "junior" ? "junior" : "adulte";
+  const defaultNext = role === "junior" ? `/${locale}/iuvenis_signum` : `/${locale}/domus_animi`;
+  const nextPath = safeRedirectPath(payload.redirectPath, locale, defaultNext);
+  const redirectTo = `${getRequestOrigin(request)}/${locale}/confirmatio?next=${encodeURIComponent(nextPath)}`;
   // Nom, prenom et sexe sont collectes des la creation du compte : chaque
   // oeuvre porte un numero de serie et doit pouvoir etre rattachee a une
   // personne identifiee, et le sexe accorde le recit sans qu'on ait a
@@ -145,8 +146,8 @@ function getRequestOrigin(request: Request) {
   return url.origin;
 }
 
-function safeRedirectPath(path: string | undefined, locale: "fr" | "en") {
-  if (!path || !path.startsWith(`/${locale}/`)) return `/${locale}/domus_animi`;
-  if (path.startsWith(`/${locale}/janua_vitae`)) return `/${locale}/domus_animi`;
+function safeRedirectPath(path: string | undefined, locale: "fr" | "en", defaultPath = `/${locale}/domus_animi`) {
+  if (!path || !path.startsWith(`/${locale}/`)) return defaultPath;
+  if (path.startsWith(`/${locale}/janua_vitae`)) return defaultPath;
   return path;
 }
