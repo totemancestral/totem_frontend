@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { IntroVideo } from "@/components/IntroVideo";
 import { AmbientAudio } from "@/components/AmbientAudio";
 import { CookieConsent } from "@/components/CookieConsent";
+import { MaintenanceCover } from "@/components/MaintenanceCover";
 import { Toaster } from "@/components/ui/sonner";
 import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
@@ -37,6 +38,7 @@ export function ClientChrome({ children, locale }: { children: ReactNode; locale
         overflowX: "clip",
       }}
     >
+      <MaintenanceCover locale={locale} />
       {isHome && <IntroVideo />}
       <Header locale={locale} />
       <main style={{ maxWidth: "100%", overflowX: "clip" }}>{children}</main>
