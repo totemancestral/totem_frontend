@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+/* Couleurs : PAS "inline", pour que les classes (bg-nuit, text-or...)
+   gardent une référence vivante à la variable, et puissent être
+   redéfinies localement section par section (voir ApresLeTotem.tsx). */
+@theme {
+  --color-nuit: #0D0D1A;
+  --color-indigo: #1A1A2E;
+  --color-ombre: #2D2D1A;
+  --color-or: #C9A84C;
+  --color-orpale: #EDD99A;
+  --color-ivoire: #FEFCF0;
+  --color-gris: #555555;
+  --color-grisclair: #888888;
+}
+
+/* Polices : "inline" est correct ici, ce sont des variables stables
+   fournies par next/font, elles n'ont pas besoin d'être redéfinies. */
+@theme inline {
+  --font-display: var(--font-cormorant-garamond);
+  --font-body: var(--font-inter);
+}
+
+
+body {
+  background: var(--color-nuit);
+  color: var(--color-ivoire);
+  font-family: var(--font-body);
+}
+
+/* Zoom lent et continu (photo du Hero). Tailwind peut appeler cette animation
+   via une classe utilitaire arbitraire : animate-[kenburns_16s_ease-in-out_infinite_alternate] */
+@keyframes kenburns {
+  from {
+    transform: scale(1) translate(0, 0);
+  }
+  to {
+    transform: scale(1.12) translate(-2%, -1.5%);
+  }
+}
+
+/* Rotation lente et continue (motif décoratif du CTA final).
+   animate-[spin-slow_90s_linear_infinite] */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Anneau qui pulse et s'estompe (icône de confirmation de paiement).
+   animate-[pulse-ring_2.4s_ease-out_infinite] */
+@keyframes pulse-ring {
+  from {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* Flottement des cauris avant le tirage (écran de consultation).
+   Trois variantes utilisées en alternance sur les 6 coquillages. */
+@keyframes cauri-float-1 {
+  0%, 100% { transform: translateY(0px) rotate(-6deg); }
+  50% { transform: translateY(-18px) rotate(4deg); }
+}
+@keyframes cauri-float-2 {
+  0%, 100% { transform: translateY(-10px) rotate(9deg); }
+  50% { transform: translateY(12px) rotate(-5deg); }
+}
+@keyframes cauri-float-3 {
+  0%, 100% { transform: translateY(6px) rotate(-4deg); }
+  50% { transform: translateY(-16px) rotate(7deg); }
+}
+
+/* Pulsation douce du texte d'instruction ("Touchez l'écran...").
+   animate-[instr-pulse_2.4s_ease-in-out_infinite] */
+@keyframes instr-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Léger flottement du rouleau de parchemin fermé (page Œuvre), invite au clic.
+   animate-[scroll-float_5s_ease-in-out_infinite] */
+@keyframes scroll-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+
+@keyframes totem-3d {
+  0% {
+    transform:
+      perspective(1200px)
+      rotateX(0deg)
+      rotateY(-7deg)
+      rotateZ(0deg)
+      translate3d(0, 0, 0)
+      scale(0.90);
+  }
+
+  20% {
+    transform:
+      perspective(1200px)
+      rotateX(2deg)
+      rotateY(-4deg)
+      rotateZ(0.5deg)
+      translate3d(4px, -3px, 15px)
+      scale(1.005);
+  }
+
+  50% {
+    transform:
+      perspective(1200px)
+      rotateX(-2deg)
+      rotateY(7deg)
+      rotateZ(-0.5deg)
+      translate3d(-4px, 2px, 25px)
+      scale(0.900);
+  }
+
+  75% {
+    transform:
+      perspective(1200px)
+      rotateX(1deg)
+      rotateY(3deg)
+      rotateZ(0.3deg)
+      translate3d(2px, -1px, 12px)
+      scale(1.00);
+  }
+
+  100% {
+    transform:
+      perspective(1200px)
+      rotateX(0deg)
+      rotateY(-7deg)
+      rotateZ(0deg)
+      translate3d(0, 0, 0)
+      scale(0.90);
+  }
+}
+
+.animate-totem-3d {
+  animation: totem-3d 10s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* Système de révélation au scroll (titres, cartes, photos, blocs de texte).
+   Piloté en JS par components/ui/Reveal.tsx (IntersectionObserver) plutôt
+   que par "animation-timeline: view()" pour rester compatible partout. */
+.reveal {
+  opacity: 0;
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+.reveal-up {
+  transform: translateY(48px);
+  filter: blur(6px);
+}
+.reveal-left {
+  transform: translateX(-64px);
+  filter: blur(6px);
+}
+.reveal-right {
+  transform: translateX(64px);
+  filter: blur(6px);
+}
+.reveal-scale {
+  transform: scale(0.92);
+  filter: blur(6px);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: none;
+    transform: none;
+    filter: none;
+    opacity: 1;
+  }
+}

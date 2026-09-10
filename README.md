@@ -1,63 +1,36 @@
-# TOTEM ANCESTRAL
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Frontend Next.js de TOTEM Ancestral. Le moteur de génération IA vit dans le dépôt sibling `../totem_backend` (NestJS). Les deux dépôts sont **séparés** : ne pas les relier via `pnpm-workspace.yaml`.
+## Getting Started
 
-## Stack
-
-Next.js 16, React 19, TypeScript, Tailwind 4, next-intl (FR/EN), Supabase (Auth + PostgreSQL + RLS), Resend (contact). Paiement Stripe et pipeline (texte/image/audio/PDF) : **uniquement** le backend NestJS.
-
-## Catalogue
-
-Constantes dans `src/lib/offers.ts` (doit rester identique à `totem_backend/src/totem/prices.ts`) :
-
-| UI / Nest     | ENUM `commandes.offre` | Prix    |
-| ------------- | ---------------------- | ------- |
-| origine       | essentiel              | 49 €    |
-| ancestral     | signature              | 99 €    |
-| famille       | heritage               | 219 €   |
-| junior        | junior                 | 9,99 €  |
-
-## Démarrage
+First, run the development server:
 
 ```bash
-cp .env.example .env.local   # remplir les valeurs
-pnpm install
-pnpm dev                      # http://localhost:3000/fr
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-`TOTEM_BACKEND_URL` est requis en production. Sans backend, le checkout échoue clairement (pas de Stripe local de secours).
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Scripts
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-| Commande             | Description                 |
-| -------------------- | --------------------------- |
-| `pnpm dev`           | Développement               |
-| `pnpm build`         | Build production            |
-| `pnpm type-check`    | TypeScript                  |
-| `pnpm lint`          | ESLint + Prettier           |
-| `pnpm test`          | Vitest                      |
-| `pnpm i18n:sync`     | Synchronisation traductions |
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Architecture
+## Learn More
 
-- `src/app/` — Routes Next.js App Router
-- `src/app/api/` — BFF (proxy checkout/webhook vers Nest, Supabase, Junior, admin)
-- `src/lib/offers.ts` — catalogue prix
-- `src/lib/feta-scoring.ts` — scoring FETA (copie dans le backend)
-- `src/lib/totem-v3.ts` — prompts/profils V3
-- `supabase/migrations/` — Schéma et RLS
+To learn more about Next.js, take a look at the following resources:
 
-Voir `Architecture.md` pour le détail.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-## Flux principal (adulte)
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-1. Landing → Parcours 10 questions
-2. Auth Supabase → Choix offre
-3. `/api/checkout` : crée la commande puis **délègue** à Nest `POST /checkout`
-4. Paiement Stripe → Webhook proxifié vers Nest
-5. Pipeline backend : texte → image → audio → PDF → Supabase Storage → email
-6. Dashboard utilisateur
+## Deploy on Vercel
 
-## Flux Junior
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Compte obligatoire → 5 questions → `/api/iuvenis_signum/checkout` → Nest `POST /checkout` (9,99 €) → Stripe → révélation **après** paiement (`GET /api/iuvenis_signum/result`).
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

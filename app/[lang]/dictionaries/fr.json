@@ -1,0 +1,729 @@
+{
+  "seo": {
+    "siteName": "Totem Ancestral",
+    "defaultTitle": "Totem Ancestral — L'œuvre qui révèle l'ancêtre en vous",
+    "defaultDescription": "Un récit, un masque et une voix, nés de votre personnalité et des cosmogonies africaines. Une œuvre d'art numérique unique et numérotée — pas un test scientifique.",
+    "ogDescription": "Qui étiez-vous, avant d'être qui vous êtes ? Une œuvre unique, tissée dans la langue des origines, nourrie des cosmogonies africaines, qui révèle l'ancêtre qui sommeille en vous.",
+    "offres": {
+      "title": "Nos offres",
+      "description": "Origine, Ancestral ou Famille : découvrez les trois formats de l'œuvre Totem Ancestral et choisissez celui qui correspond à votre quête."
+    },
+    "laMaison": {
+      "title": "La Maison",
+      "description": "Studio artistique fondé à Paris par SENYCE PARTNERS, Totem Ancestral crée des œuvres numériques uniques, fables personnelles inspirées des cosmogonies africaines."
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "description": "Tout savoir sur l'expérience Totem Ancestral : nature de l'œuvre, délais, formats, protection des données et unicité de chaque création."
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Une question, une commande ou une confidence avant la traversée ? Écrivez à la maison Totem Ancestral, réponse sous 48 heures ouvrées."
+    }
+  },
+  "nav": {
+    "logo": "Totem Ancestral",
+    "links": {
+      "offres": "Les offres",
+      "maison": "La maison",
+      "faq": "FAQ"
+    },
+    "compose": "Composer"
+  },
+  "hero": {
+    "tagLabel": "Archétype",
+    "tagNumber": "N° 001",
+    "tagCaption": "12 archétypes ancestraux",
+    "leadIn": "Votre âme lointaine, africaine, réincarnée.",
+    "title": "TOTEM ANCESTRAL",
+    "description": "Qui étiez-vous, avant d'être qui vous êtes ? Une œuvre unique, tissée dans la langue des origines, qui vous ramène à la source. Nourrie des cosmogonies africaines, elle révèle l'ancêtre qui sommeille en vous.",
+    "cta": "Commencer mon voyage",
+    "microCaption": "Quinze minutes. Une œuvre pour toute une vie."
+  },
+  "avantDetreVous": {
+    "eyebrow": "Avant d'être vous",
+    "leadIn": "Avant d'être vous, qui étiez-vous ?",
+    "title": "Qui étiez-vous ?",
+    "intro": "Il y avait quelqu'un. Il y a toujours quelqu'un.",
+    "cards": [
+      {
+        "title": "Soixante mille ans",
+        "text": "Il y a soixante mille ans, vos ancêtres ont quitté l'Afrique. D'autres ont vécu sous d'autres cieux, murmuré d'autres langues, taillé d'autres masques. D'autres sont restés. Ce chemin-là aussi vous appartient."
+      },
+      {
+        "title": "L'ancêtre resté",
+        "text": "TOTEM ANCESTRAL réveille l'ancêtre que l'histoire n'a pas emporté. Celui qui est resté dans la terre rouge, dans le bruit du tam-tam, dans le regard du griot."
+      },
+      {
+        "title": "Le miroir",
+        "text": "Un voyage à l'intérieur du temps. Un cadeau qui traverse les générations. Un miroir qui ne ment pas."
+      }
+    ]
+  },
+  "apresLeTotem": {
+    "eyebrow": "Après le Totem",
+    "title": "Ton ancêtre a un mot pour toi cette semaine",
+    "lead": "Le questionnaire vous a révélé votre clan. La Consultation le laisse vous parler encore — même voix, même univers, le même archétype.",
+    "text": "Pas un nouveau test, pas un fil d'actualité à faire défiler : un geste bref et espacé, une fois par semaine. Les cauris tombent, et l'ancêtre répond. Un rituel, pas une notification.",
+    "cta": "Composer mon Totem"
+  },
+  "manifeste": {
+    "eyebrow": "Notre démarche",
+    "title": "Le manifeste en trois temps",
+    "intro": "Pourquoi cette maison existe, et ce qu'elle refuse d'être.",
+    "points": [
+      {
+        "title": "Une œuvre, pas un test",
+        "text": "TOTEM ANCESTRAL est une œuvre, pas un test de personnalité. Chaque parole confiée au griot devient un récit, un visage, jamais un résultat, jamais un score."
+      },
+      {
+        "title": "L'unicité, pas la série",
+        "text": "Ce qui est fait ne sera jamais refait. Votre œuvre porte un numéro comme un nom propre gravé une seule fois, pour un seul vivant."
+      },
+      {
+        "title": "L'imaginaire, pas la science",
+        "text": "Nous n'exhumons pas un arbre généalogique. Nous réveillons l'ancêtre qui sommeille en vous, celui que l'histoire vous a refusé, celui qui, lui, n'est jamais parti."
+      }
+    ]
+  },
+  "leSeuil": {
+    "eyebrow": "Le seuil",
+    "leadIn": "15 minutes,",
+    "title": "avant de traverser",
+    "intro": "Quatre gestes pour recevoir ce qui vient.",
+    "gestes": [
+      {
+        "title": "Posez le monde",
+        "text": "Installez-vous comme devant un feu, la nuit, quand les anciens parlent.",
+        "image": "/images/totem-mask-texture.jpg",
+        "imageFirst": true
+      },
+      {
+        "title": "Ouvrez les oreilles",
+        "text": "L'ancêtre a traversé soixante mille ans pour vous parler, entendez-le.",
+        "image": "/images/totem-mask-pendant.jpg",
+        "imageFirst": false
+      },
+      {
+        "title": "Parlez vrai",
+        "text": "Le griot ne veut pas de bonne réponse. Il veut la vôtre, celle qui vient de plus loin que la mémoire.",
+        "image": "/images/totem-mask-mouth.jpg",
+        "imageFirst": true
+      },
+      {
+        "title": "Gardez votre TOTEM",
+        "text": "Comme on garde un nom, comme on garde un secret. Il n'existe qu'à travers vous, et ne vivra nulle part ailleurs.",
+        "image": "/images/totem-mask.jpg",
+        "imageFirst": false
+      }
+    ]
+  },
+  "offres": {
+    "eyebrow": "Offrandes",
+    "title": "Trois manières de recevoir l'œuvre",
+    "intro": "Choisissez le format qui convient le mieux à votre quête et à votre héritage.",
+    "items": [
+      {
+        "tag": "Porte d'entrée",
+        "title": "Origine",
+        "lead": "Le premier pas vers votre source.",
+        "price": "49 €",
+        "priceCaption": "Prix indicatif",
+        "features": [
+          "Création personnalisée",
+          "Un coffret que vous seul pouvez ouvrir",
+          "Un lieu à vous, où votre œuvre demeure"
+        ],
+        "button": "Commencer le voyage",
+        "variant": "outline",
+        "featured": false
+      },
+      {
+        "tag": "Le plus choisi",
+        "title": "Révélation",
+        "lead": "La création dans sa plénitude : le récit, le visage, la voix.",
+        "price": "99 €",
+        "priceCaption": "Prix indicatif",
+        "features": [
+          "Création complète",
+          "Voix rituelle",
+          "Tirage Fine Art en option"
+        ],
+        "button": "Révéler mon Totem",
+        "variant": "gold",
+        "featured": true
+      },
+      {
+        "tag": "Offre cadeau",
+        "title": "Famille",
+        "lead": "Pour des racines qui se partagent.",
+        "price": "219 €",
+        "priceCaption": "Prix indicatif",
+        "features": [
+          "Trois coffrets, un seul récit d'origine",
+          "Trois âmes, une même origine",
+          "Livrés ensemble, portés à vie"
+        ],
+        "button": "Réunir ma famille",
+        "variant": "outline",
+        "featured": false
+      }
+    ],
+    "footerText": "Chaque Totem Ancestral est une création unique, façonnée spécialement pour vous à partir de votre récit.",
+    "giftLine": "✦ CARTE CADEAU GRATUITE À CHAQUE COMMANDE · PAIEMENTS INTERNATIONAUX · RGPD ✦"
+  },
+  "offresComparatif": {
+    "eyebrow": "Comparatif",
+    "title": "Les coffrets côte à côte",
+    "columns": [
+      { "name": "Origine", "price": "49 €", "featured": false },
+      { "name": "Révélation", "price": "99 €", "featured": true },
+      { "name": "Famille", "price": "219 €", "featured": false }
+    ],
+    "rows": [
+      { "label": "Parchemin narratif", "values": [true, true, true] },
+      { "label": "Œuvre visuelle", "values": [true, true, true] },
+      { "label": "Voix de l'ancêtre", "values": [false, true, true] },
+      { "label": "Certificat d'authenticité numéroté", "values": [true, true, true] },
+      { "label": "Nombre de coffrets", "values": ["1", "1", "3"] },
+      { "label": "Carte cadeau gratuite", "values": [true, true, true] },
+      { "label": "Délai de livraison", "values": ["15 min", "15 min", "30 min"] },
+      { "label": "Support prioritaire", "values": [false, false, true] }
+    ]
+  },
+  "totemVivant": {
+    "eyebrow": "Abonnement",
+    "title": "Totem Vivant",
+    "lead": "Pour que votre œuvre continue de respirer.",
+    "text": "Un message audio inédit de votre ancêtre, livré chaque saison. Quatre fois par an, votre œuvre s'enrichit d'une nouvelle parole.",
+    "price": "+9 €",
+    "priceUnit": "/ an",
+    "caption": "À ajouter à toute commande Ancestral ou Famille."
+  },
+  "offreJunior": {
+    "eyebrow": "Le parcours Junior",
+    "title": "Une formule unique, pensée pour eux",
+    "intro": "Sans paliers à choisir : cinq questions, un Totem express, pour les plus jeunes explorateurs de leur héritage.",
+    "badge": "Formule unique",
+    "cardTitle": "Totem Junior",
+    "lead": "Cinq questions, un Totem express à leur image.",
+    "price": "9,99 €",
+    "priceCaption": "Prix fixe",
+    "features": [
+      "Création personnalisée, en cinq questions seulement",
+      "Un Totem à leur image, à partager avec leurs amis",
+      "Consentement d'un parent ou tuteur légal requis"
+    ],
+    "button": "Composer le Totem Junior"
+  },
+  "ceQueVousRecevez": {
+    "eyebrow": "L'œuvre",
+    "title": "Ce que vous recevez",
+    "intro": "Cinq pièces, livrées ensemble, composant l'intégralité de votre Totem Ancestral.",
+    "items": [
+      { "label": "Le Parchemin" },
+      { "label": "La Voix" },
+      { "label": "Le Visage" },
+      { "label": "La Carte ancestrale" },
+      { "label": "Le Certificat" }
+    ]
+  },
+  "inscription": {
+    "eyebrow": "Le seuil ( Créer mon compte )",
+    "title": "Ouvre ton passage",
+    "subtitle": "Créer un compte",
+    "quoteLine1": "Le griot doit savoir à qui il donne voix",
+    "quoteLine2": "Pour que l'ancêtre se lève à votre image.",
+    "pathLabel": "Votre parcours",
+    "pathAdulte": "Adulte",
+    "pathAdulteDesc": "Parcours complet · parchemin, audio & image",
+    "pathJunior": "Junior",
+    "pathJuniorDesc": "Totem express · cinq questions, défie tes amis",
+    "firstNameLabel": "Prénom",
+    "firstNamePlaceholder": "Votre prénom",
+    "lastNameLabel": "Nom",
+    "lastNamePlaceholder": "Votre nom",
+    "genderLabel": "Genre",
+    "genderMale": "Un homme",
+    "genderFemale": "Une femme",
+    "emailLabel": "Email",
+    "emailPlaceholder": "vous@exemple.com",
+    "passwordLabel": "Mot de passe",
+    "submit": "Créer mon compte",
+    "magicLink": "Recevoir un lien magique",
+    "signupLine": "Déjà un compte ?",
+    "signupLink": "Se connecter",
+    "legalLinks": ["CGV", "Confidentialité", "Mentions"]
+  },
+  "verification": {
+    "eyebrow": "Le seuil ( Vérification )",
+    "title": "Un signe vous attend",
+    "subtitle": "Confirmez votre compte",
+    "quoteLine1": "Nous avons confié un message à votre courrier.",
+    "quoteLine2": "Ouvrez-le pour que votre passage s'achève.",
+    "emailIntro": "Un email de confirmation a été envoyé à",
+    "emailExample": "vous@exemple.com",
+    "linkExpired": "Ce lien n'est plus valide ou a déjà été utilisé. Demande un nouvel email ci-dessous.",
+    "text": "Cliquez sur le lien qu'il contient pour activer votre compte et commencer votre voyage. Pensez à vérifier vos courriers indésirables.",
+    "resendButton": "Renvoyer l'email",
+    "changeEmailLink": "Modifier mon adresse",
+    "legalLinks": ["CGV", "Confidentialité", "Mentions"]
+  },
+  "connexion": {
+    "eyebrow": "Le seuil ( Connexion )",
+    "title": "Revenir au seuil",
+    "subtitle": "Se connecter",
+    "quoteLine1": "Le griot se souvient de vous.",
+    "quoteLine2": "Le chemin reste ouvert.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "vous@exemple.com",
+    "passwordLabel": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "submit": "Se connecter",
+    "magicLink": "Recevoir un lien magique",
+    "magicLinkSent": "Lien envoyé. Vérifie ta boîte mail.",
+    "magicLinkEmailRequired": "Renseigne ton email ci-dessus d'abord.",
+    "signupLine": "Pas encore de compte ?",
+    "signupLink": "Créer mon compte",
+    "legalLinks": ["CGV", "Confidentialité", "Mentions"]
+  },
+  "motDePasseOublie": {
+    "eyebrow": "Le seuil ( Mot de passe oublié )",
+    "requestTitle": "Retrouver le chemin",
+    "updateTitle": "Nouveau mot de passe",
+    "requestText": "Entrez votre email pour recevoir un lien de réinitialisation.",
+    "updateText": "Choisissez un nouveau mot de passe pour rouvrir votre espace.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "vous@exemple.com",
+    "passwordLabel": "Nouveau mot de passe",
+    "sendButton": "Envoyer le lien",
+    "updateButton": "Mettre à jour",
+    "sentNotice": "Lien envoyé. Vérifiez votre boîte mail.",
+    "updatedNotice": "Mot de passe mis à jour. Redirection…",
+    "backLink": "Retour à la connexion",
+    "legalLinks": ["CGV", "Confidentialité", "Mentions"]
+  },
+  "paiement": {
+    "cancel": "Annuler",
+    "eyebrow": "Le seuil ( Paiement )",
+    "title": "Votre Totem prend forme",
+    "text": "Dernière étape avant que le griot ne commence l'écriture de votre œuvre.",
+    "archetypeLabel": "Archétype attribué",
+    "archetypeValue": "Le Lion Ancestral",
+    "payButton": "Payer en toute sécurité",
+    "secureNote": "Paiement sécurisé via Stripe · Chiffrement SSL",
+    "legalLinks": ["CGV", "Confidentialité", "Mentions"],
+    "adulte": {
+      "offerName": "Offre Révélation",
+      "offerDesc": "La création dans sa plénitude : le récit, le visage, la voix.",
+      "price": "89 €",
+      "priceCaption": "indicatif",
+      "consent1Before": "J'ai lu et j'accepte les ",
+      "consent1Middle": " et la ",
+      "consent1After": ".",
+      "cgvLink": "CGV",
+      "privacyLink": "Politique de confidentialité",
+      "consent2": "Je comprends que mon Totem Ancestral est une œuvre unique et personnalisée, non remboursable une fois la création lancée.",
+      "consent3": "J'autorise Totem Ancestral à utiliser les informations transmises pour la création exclusive de mon œuvre."
+    },
+    "junior": {
+      "badgeJunior": "Parcours Junior",
+      "offerName": "Offre Junior",
+      "offerDesc": "Une formule unique et complète, pensée pour les plus jeunes.",
+      "price": "9,99 €",
+      "priceCaption": "prix fixe",
+      "consent1Before": "Je confirme, en tant que parent ou tuteur légal, avoir lu et accepté les ",
+      "consent1Middle": " et la ",
+      "consent1After": ".",
+      "cgvLink": "CGV",
+      "privacyLink": "Politique de confidentialité",
+      "consent2": "Je comprends que ce Totem Ancestral est une œuvre unique et personnalisée, non remboursable une fois la création lancée.",
+      "consent3": "J'autorise Totem Ancestral à utiliser les informations transmises pour la création exclusive de cette œuvre."
+    }
+  },
+  "parcours": {
+    "badgeJunior": "Parcours Junior",
+    "later": "Reprendre plus tard",
+    "questionLabel": "Question",
+    "audioListen": "Écouter la question",
+    "audioPlaying": "Lecture en cours",
+    "audioPaused": "En pause",
+    "audioRestart": "Réécouter depuis le début",
+    "audioPlayAction": "Lire l'audio",
+    "audioPauseAction": "Mettre l'audio en pause",
+    "wordMorePlaceholder": "Un mot de plus ? (optionnel)",
+    "introTitle": "Le griot parle.",
+    "introParagraph1": "Il n'y a pas de bonnes ou de mauvaises réponses ici. Il y a ta vérité, et celle que tu t'autorises à voir.",
+    "introParagraph2": "Réponds avec ce que tu ressens. Pas avec ce que tu crois devoir répondre.",
+    "introParagraph3": "Le temps n'existe pas ici. L'ancêtre attend.",
+    "introCta": "Je commence mon voyage",
+    "back": "Retour",
+    "continueLabel": "Continuer",
+    "revealLabel": "Révéler mon Totem",
+    "incompleteError": "Réponds à toutes les questions avant de continuer.",
+    "questionsAdulte": [
+      { "griot": "Ferme les yeux un instant. Pense à la nature, à ce qui t'attire sans que tu puisses l'expliquer.", "q": "Quel élément naturel t'appelle le plus profondément ?", "options": ["Le feu qui danse dans la nuit, je suis attiré par sa lumière, sa chaleur imprévisible, sa façon de tout transformer.", "L'eau qui coule sans jamais s'arrêter, rivière, océan, pluie, je reviens toujours vers elle.", "La terre sous mes pieds, les racines, les pierres, les forêts épaisses, ce qui dure et qui tient.", "Le vent qui emporte tout, l'espace ouvert, les hauteurs, l'horizon qu'on ne peut pas attraper."], "fieldLabel": "Autre chose ?", "fieldPlaceholder": "Un élément, un paysage, une sensation qui n'est pas dans la liste..." },
+      { "griot": "Je veux savoir où tu te trouves, vraiment. Pas ce que tu fais, mais où tu vis.", "q": "Dans quel moment te sens-tu le plus vivant(e) ?", "options": ["Quand je protège quelqu'un, quand je me bats pour ce qui est juste, quand je suis au cœur de l'action.", "Quand je crée quelque chose, une idée, une œuvre, un projet, quand mes mains donnent vie à ma vision.", "Quand je suis entouré(e) de ceux que j'aime, dans le rire, dans le partage, dans le lien.", "Quand je suis seul(e) dans la nature ou dans le silence, quand j'observe, quand je comprends, quand je vois loin."], "fieldLabel": "+ ajouter une nuance", "fieldPlaceholder": "Décris le moment où tu te sens pleinement vivant(e)..." },
+      { "griot": "Écoute bien. Ce que les autres voient en toi, sans que tu le demandes, c'est souvent ce que tu refuses de voir toi-même.", "q": "Ce que les autres voient en toi, sans que tu le leur demandes ?", "options": ["Une force. Une présence. Quelqu'un vers qui on se tourne quand ça va mal, ou quand il faut décider.", "Une sagesse. Un regard différent. Quelqu'un qui dit les choses que les autres n'osent pas formuler.", "Une douceur. Une chaleur. Quelqu'un qui accueille, qui écoute, qui rend les gens meilleurs.", "Une liberté. Une originalité. Quelqu'un qu'on n'arrive pas vraiment à enfermer dans une case."], "fieldLabel": "Le griot t'a écouté. Si tu veux lui souffler une nuance, il l'entendra.", "fieldPlaceholder": "Une phrase qu'on te dit souvent, que tu aimes ou que tu n'aimes pas entendre..." },
+      { "griot": "L'épreuve révèle. Pas ce qu'on dit qu'on ferait, ce qu'on fait vraiment.", "q": "Face à une épreuve, comment réagis-tu vraiment ?", "options": ["Je fonce. J'agis. Je préfère me tromper dans l'action que rester immobile dans le doute.", "Je recule, j'observe, j'analyse, puis je choisis le moment et l'endroit où frapper juste.", "Je cherche les autres, je construis des alliances, je crée du soutien autour de moi.", "Je rentre en moi-même, je cherche la réponse dans le silence avant de la chercher dehors."], "fieldLabel": "+ ajouter une nuance", "fieldPlaceholder": "Comment tu gères vraiment les situations difficiles..." },
+      { "griot": "Il y a une heure dans la journée où tout semble plus clair. Une heure où tu es vraiment toi.", "q": "À quelle heure ton âme se réveille-t-elle vraiment ?", "options": ["À l'aube, quand le monde est encore silence et que tout est possible, avant que les autres arrivent.", "En plein jour, dans le feu de l'action, du mouvement, des rencontres, du bruit vivant.", "Au crépuscule, quand la lumière change, quand les frontières s'estompent, quand on peut réfléchir.", "Dans la nuit, quand le monde dort et que je suis enfin seul(e) avec mes pensées les plus profondes."], "fieldLabel": "Ton heure à toi ?", "fieldPlaceholder": "Le moment de la journée où tu te sens vraiment toi-même..." },
+      { "griot": "Ferme les yeux. Imagine un lieu que tu n'as jamais foulé, et qui pourtant te semble déjà familier. Lequel est-ce ?", "q": "Quelle terre reconnais-tu, sans jamais l'avoir vue ?", "options": ["Une savane à perte de vue, des baobabs contre le ciel, le battement d'un tambour porté par le vent chaud.", "Une forêt dense et humide, des lacs immenses, des montagnes qui gardent le silence des origines.", "Un rivage où la mer se mêle à cent voix venues d'ailleurs, une terre façonnée par les traversées.", "Une terre lointaine, un climat différent, un lieu que tu ne sais pas encore nommer."], "fieldLabel": "Précise cette terre si tu le souhaites", "fieldPlaceholder": "Un pays, une région, une sensation ou un lieu que tu imagines..." },
+      { "griot": "La colère est sacrée. Elle dit ce qui compte vraiment. Ce qui te met en colère révèle ce à quoi tu tiens le plus.", "q": "Ce qui met le feu en toi, ta colère la plus profonde ?", "options": ["L'injustice. Voir les faibles écrasés par les puissants. Voir la vérité bafouée. Voir les droits piétinés.", "La médiocrité acceptée. Les gens qui se contentent de peu. Le gâchis de potentiel. L'abandon des rêves.", "La trahison et le mensonge. L'hypocrisie. Les gens qui jouent un rôle plutôt que d'être vrais.", "La destruction, de la nature, de la beauté, de la mémoire, de ce qui a pris des siècles à construire."], "fieldLabel": "Les ancêtres écoutent mieux ceux qui osent les mots qu'ils gardent pour eux.", "fieldPlaceholder": "Ce qui te met vraiment hors de toi, ce contre quoi tu te bats intérieurement..." },
+      { "griot": "Imagine que dans cent ans, quelqu'un parle de toi. Qu'est-ce qu'il dit ?", "q": "La trace que tu veux laisser dans le monde ?", "options": ["J'ai protégé. J'ai défendu. J'ai rendu le monde plus juste pour ceux qui viendront après moi.", "J'ai créé. J'ai bâti quelque chose qui durera, une œuvre, une entreprise, une idée, un héritage.", "J'ai connecté. J'ai rassemblé les gens. J'ai créé des liens là où il n'y en avait pas.", "J'ai révélé. J'ai dit des vérités que personne n'osait dire. J'ai ouvert des yeux."], "fieldLabel": "+ ajouter une nuance", "fieldPlaceholder": "Ce que tu veux qu'on retienne de ta vie, en quelques mots..." },
+      { "griot": "Les rêves parlent. Pas littéralement, mais symboliquement. Qu'est-ce qui revient dans ton monde intérieur ?", "q": "Ton symbole intérieur, ce qui revient dans tes rêves ou ta vie ?", "options": ["L'eau, une rivière, un océan, une pluie, quelque chose qui coule, qui emporte, qui purifie.", "La hauteur, une falaise, un sommet, un vol, une vision d'en haut, une perspective que les autres n'ont pas.", "Le feu ou la lumière, une flamme, un soleil, un éclair, quelque chose qui brûle et qui illumine.", "Les racines ou la forêt, des arbres, de la terre, des chemins anciens, quelque chose de profond et de durable."], "fieldLabel": "Ton symbole à toi ?", "fieldPlaceholder": "Une image, un rêve récurrent, un symbole qui revient souvent dans ta vie..." },
+      { "griot": "Dernière question. La plus importante. L'ancêtre te regarde. Il voit ta vie entière. Pas ce que tu as fait, mais ce que tu portes.", "q": "Si un ancêtre pouvait regarder ta vie, qu'est-ce qu'il verrait ?", "options": ["Un guerrier qui n'a pas encore trouvé sa vraie bataille. Une force immense qui attend le bon moment.", "Un sage qui parle trop peu. Une sagesse profonde que le monde a besoin d'entendre davantage.", "Un cœur qui aime trop fort et pas assez lui-même. Une générosité qui parfois s'oublie.", "Un esprit libre dans un corps qui essaie de rentrer dans des cases. Une âme trop grande pour les limites qu'on lui impose."], "fieldLabel": "Dis-lui maintenant ce que tu n'as jamais dit à voix haute.", "fieldPlaceholder": "Une confidence, une vérité, un mot, quelque chose que tu n'as jamais dit à voix haute..." }
+    ],
+    "questionsJunior": [
+      { "q": "Quand tu entres quelque part, tu es plutôt...", "options": ["Une flamme qui s'impose", "Une vague qui s'adapte", "Une ombre qui observe", "Un éclair qui surprend"] },
+      { "q": "Ton endroit de puissance, c'est...", "options": ["La forêt profonde", "Le sommet d'une montagne", "L'océan sans fond", "La savane à l'aube"] },
+      { "q": "Sans même y penser, tu sais...", "options": ["Lire les gens", "Protéger ceux que tu aimes", "Trouver un chemin", "Faire bouger les autres"] },
+      { "q": "Ce que les autres ne voient pas en toi...", "options": ["Tu gardes tout à l'intérieur", "Tu te bats seul", "Tu t'adaptes aux gens", "Tu ressens tout trop fort"] },
+      { "q": "La nuit, ce qui te traverse...", "options": ["Voler au-dessus de tout", "Chasser ce que tu veux", "Tenir quelque chose debout", "Comprendre l'invisible"] }
+    ]
+  },
+  "confirmation": {
+    "eyebrow": "Paiement confirmé",
+    "title": "Le voyage commence.",
+    "quote": "Le griot a reçu votre offrande. Votre ancêtre prend forme.",
+    "offerLabel": "Offre",
+    "archetypeLabel": "Archétype",
+    "archetypeValue": "Le Lion Ancestral",
+    "orderNumberLabel": "Numéro de commande",
+    "orderNumberValue": "N° TTM-2026-B7241C9",
+    "statusTitle": "Composition en cours…",
+    "statusText": "Votre Totem sera prêt dans environ quinze minutes. Vous recevrez un email dès qu'il sera prêt à être découvert.",
+    "button": "Retourner à mon espace",
+    "buttonReady": "Découvrir mon Totem",
+    "legalLinks": ["CGV", "Confidentialité", "Contact"]
+  },
+  "legalPage": {
+    "backToHome": "Retour à l'accueil",
+    "eyebrow": "Document légal",
+    "footerLinks": ["CGV", "Confidentialité", "Mentions", "Contact"]
+  },
+  "cgv": {
+    "title": "Conditions générales de vente",
+    "subtitle": "Les règles applicables à toute commande sur Totem Ancestral.",
+    "lastUpdated": "Dernière mise à jour : 22 juillet 2026",
+    "articles": [
+      { "title": "Article 1 — Objet et champ d'application", "body": ["Les présentes conditions générales de vente (CGV) encadrent toute commande d'œuvres numériques personnalisées Totem Ancestral, éditées par SENYCE PARTNERS (SARL), passée sur le site totemancestral.com. Toute commande implique l'acceptation pleine et entière des présentes CGV, opposables au client dans leur version en vigueur au jour de la commande."] },
+      { "title": "Article 2 — Identité du vendeur", "body": ["Le site est édité par SENYCE PARTNERS, SARL au capital de 19 000 €, dont le siège social est situé au 4 avenue Laurent Cely, 92600 Asnières-sur-Seine. Contact : ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
+      { "title": "Article 3 — Produits et nature artistique", "body": ["Selon l'offre choisie, vous recevez un parchemin PDF, une œuvre visuelle PNG haute résolution, et, pour Ancestral et Famille, un fichier audio MP3 de 90 secondes de la voix de l'ancêtre imaginaire, ainsi qu'un certificat d'authenticité numéroté. Ces créations ne constituent ni un test ADN, ni une recherche généalogique, ni une prestation divinatoire, médicale ou juridique."] },
+      { "title": "Article 4 — Prix et paiement", "body": ["Les prix sont indiqués en euros toutes taxes comprises et affichés avant validation de la commande. L'offre Junior est proposée à 9,99 €. Le paiement s'effectue de manière sécurisée via Stripe. SENYCE PARTNERS ne conserve aucune donnée bancaire complète. La commande est ferme après encaissement complet et confirmation des informations nécessaires à la composition."] },
+      { "title": "Article 5 — Commande et composition", "body": ["La commande s'accompagne d'un questionnaire créatif permettant la personnalisation de l'œuvre. Elle est validée après réception du paiement intégral ; un email de confirmation est envoyé immédiatement. La maison se réserve le droit de refuser une commande en cas de fraude suspectée, de contenu manifestement illicite, ou d'impossibilité technique."] },
+      { "title": "Article 6 — Livraison", "body": ["L'œuvre est livrée par email sous quinze minutes (trente minutes pour l'offre Famille) après validation du questionnaire. Si une difficulté technique empêche la livraison, l'œuvre est recomposée ou remboursée intégralement."] },
+      { "title": "Article 7 — Droit de rétractation", "body": ["Les œuvres étant confectionnées selon les indications du client et nettement personnalisées, et s'agissant de contenus numériques fournis immédiatement, le client renonce expressément à son droit de rétractation dès le lancement de la composition, conformément à l'article L.221-28 du Code de la consommation. Avant ce lancement, le client dispose du délai légal de quatorze jours."] },
+      { "title": "Article 8 — Garanties légales", "body": ["Le consommateur bénéficie de la garantie légale de conformité (articles L.217-3 et suivants du Code de la consommation) et de la garantie contre les vices cachés (articles 1641 et suivants du Code civil). En cas de fichier manquant, illisible ou de défaut de livraison imputable au service, SENYCE PARTNERS procède à une nouvelle mise à disposition ou à un remboursement. Les appréciations subjectives liées au style, au ton ou à l'interprétation artistique ne constituent pas, à elles seules, un défaut de conformité."] },
+      { "title": "Article 9 — Propriété intellectuelle", "body": ["L'ensemble des contenus du site demeure la propriété de SENYCE PARTNERS. Un droit d'usage personnel est octroyé au client pour l'œuvre qui lui est livrée."] },
+      { "title": "Article 10 — Données personnelles", "body": ["Les données personnelles sont traitées conformément à la ", { "text": "Politique de confidentialité", "href": "/confidentialite" }, ", disponible sur le site."] },
+      { "title": "Article 11 — Médiation et droit applicable", "body": ["Les présentes CGV sont régies par le droit français. En cas de litige, le client adresse d'abord une réclamation à ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, ". À défaut de solution amiable, le consommateur peut recourir gratuitement à un médiateur de la consommation : CM2C — Centre de la Médiation de la Consommation de Conciliateurs de Justice, 14 rue Saint-Jean, 75017 Paris — cm2c.net, conformément aux articles L.611-1 et suivants du Code de la consommation."] }
+    ]
+  },
+  "confidentialite": {
+    "title": "Politique de confidentialité",
+    "subtitle": "Comment Totem Ancestral protège les données liées à votre œuvre.",
+    "lastUpdated": "Dernière mise à jour : 22 juillet 2026",
+    "articles": [
+      { "title": "1. Responsable du traitement", "body": ["Le responsable du traitement des données personnelles collectées sur ce site est SENYCE PARTNERS, SARL. Pour toute question relative à vos données, contactez ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
+      { "title": "2. Données collectées", "body": ["Nous collectons votre prénom, votre email, vos réponses au questionnaire, le choix de votre offre, l'état de votre commande, ainsi que certains identifiants techniques (session, langue) et vos informations de livraison. Les données bancaires sont traitées directement par Stripe et ne sont jamais stockées sur nos serveurs."] },
+      { "title": "3. Finalités et bases légales", "body": ["Ces données sont utilisées pour créer votre compte, composer votre œuvre, générer et livrer les fichiers correspondants, assurer le support client et prévenir la fraude. Ces traitements reposent sur l'exécution du contrat, notre intérêt légitime, nos obligations légales et, le cas échéant, votre consentement."] },
+      { "title": "4. Destinataires et sous-traitants", "body": ["Vos données peuvent être transmises à nos sous-traitants techniques : Supabase (authentification et stockage), Stripe (paiements), Resend (envoi d'emails), ainsi qu'à des prestataires d'intelligence artificielle (Anthropic, OpenAI) pour la composition de votre œuvre."] },
+      { "title": "5. Transferts hors Union européenne", "body": ["Certains de nos prestataires opèrent en dehors de l'Union européenne. Ces transferts sont encadrés par des garanties conformes au RGPD, notamment des clauses contractuelles types."] },
+      { "title": "6. Durées de conservation", "body": ["Vos données sont conservées pendant la durée de notre relation, puis archivées conformément à nos obligations légales, notamment comptables (jusqu'à dix ans). Vous pouvez demander leur suppression dans la mesure permise par la loi."] },
+      { "title": "7. Mineurs (parcours Junior)", "body": ["Le parcours Junior s'adresse à un public jeune. La création d'un compte et toute commande doivent être réalisées par un parent ou un titulaire de l'autorité parentale, qui consent au traitement des données de l'enfant. SENYCE PARTNERS ne collecte pas sciemment de données d'un mineur sans ce consentement ; toute demande de suppression peut être adressée à ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
+      { "title": "8. Sécurité", "body": ["Nous mettons en œuvre des accès sécurisés, un stockage protégé et des connexions chiffrées (HTTPS) pour garantir la sécurité de vos données."] },
+      { "title": "9. Cookies", "body": ["Ce site n'utilise que des cookies techniques, nécessaires à son bon fonctionnement. Aucun cookie publicitaire n'est utilisé."] },
+      { "title": "10. Vos droits", "body": ["Conformément au RGPD, vous disposez des droits d'accès, de rectification, d'effacement, de limitation, d'opposition, de portabilité et du droit de définir des directives relatives au sort de vos données après votre décès. Vous pouvez retirer votre consentement à tout moment. Pour les exercer, écrivez à ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, ". Vous pouvez également introduire une réclamation auprès de la CNIL (3 Place de Fontenoy, TSA 80715, 75334 Paris Cedex 07 — www.cnil.fr)."] }
+    ]
+  },
+  "mentions": {
+    "title": "Mentions légales",
+    "subtitle": "Informations relatives à l'éditeur et au service Totem Ancestral.",
+    "lastUpdated": "Dernière mise à jour : 22 juillet 2026",
+    "articles": [
+      { "title": "1. Éditeur du site", "body": ["Le présent site est édité par SENYCE PARTNERS, SARL au capital de 19 000 €, dont le siège social est situé au 4 avenue Laurent Cely, 92600 Asnières-sur-Seine. Immatriculation : 833 978 554 R.C.S. Nanterre. N° TVA intracommunautaire : FR27833978554. Contact : ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
+      { "title": "2. Directeur de la publication", "body": ["AGOSSOU Adimagbolo, représentant légal de SENYCE PARTNERS."] },
+      { "title": "3. Hébergement", "body": ["Le service repose sur les prestataires d'hébergement suivants : Application web — Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis. Services applicatifs (API) — Render (Render, Inc.), 525 Brannan St, Suite 300, San Francisco, CA 94107, États-Unis. Base de données, authentification et stockage des fichiers — Supabase, Inc., 970 Toa Payoh North, Singapour. Ces prestataires peuvent héberger des données hors de l'Union européenne. Voir la Politique de confidentialité pour les garanties encadrant ces transferts."] },
+      { "title": "4. Propriété intellectuelle", "body": ["L'ensemble des contenus présents sur ce site — textes, visuels, identité de marque, interface, parcours, formulations, prompts, fichiers générés, charte graphique et signes distinctifs — est protégé par le droit de la propriété intellectuelle et demeure la propriété de SENYCE PARTNERS ou de ses ayants droit. Toute reproduction, extraction, diffusion, revente ou exploitation commerciale non autorisée est interdite. Le client bénéficie d'un droit d'usage personnel sur l'œuvre qu'il a commandée."] },
+      { "title": "5. Nature du service", "body": ["Totem Ancestral est une œuvre de fiction artistique personnalisée, inspirée des cosmogonies africaines et assistée par intelligence artificielle. Le service ne constitue pas un test ADN, une vérité généalogique, un diagnostic, ni un conseil juridique, médical ou spirituel."] },
+      { "title": "6. Données personnelles & cookies", "body": ["Le traitement des données personnelles et l'usage des cookies sont détaillés dans notre ", { "text": "Politique de confidentialité", "href": "/confidentialite" }, ". Pour toute demande relative à vos données, écrivez à ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
+      { "title": "7. Médiation de la consommation", "body": ["Conformément aux articles L.611-1 et suivants du Code de la consommation, le client consommateur peut recourir gratuitement à un médiateur de la consommation en vue de la résolution amiable d'un litige. Médiateur compétent : CM2C — Centre de la Médiation de la Consommation de Conciliateurs de Justice, 14 rue Saint-Jean, 75017 Paris — cm2c.net. Une réclamation préalable doit être adressée à contact@totemancestral.com avant toute saisine."] },
+      { "title": "8. Signalement & contact", "body": ["Pour toute réclamation ou signalement, vous pouvez nous contacter à l'adresse ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] }
+    ]
+  },
+  "contact": {
+    "eyebrow": "Contact",
+    "title": "Écrire à la maison",
+    "quote": "Pour toute question, toute demande, toute confidence.",
+    "intro": "Pour une question, une commande, un cadeau ou une confidence avant la traversée. Réponse habituelle sous 48 heures ouvrées. Pour une commande existante, indiquez l'email utilisé et le numéro d'œuvre si vous l'avez déjà reçu.",
+    "firstNameLabel": "Prénom",
+    "firstNamePlaceholder": "Votre prénom",
+    "emailLabel": "Email",
+    "emailPlaceholder": "vous@exemple.com",
+    "subjectLabel": "Sujet",
+    "subjectPlaceholder": "Commande, cadeau, livraison ou demande particulière",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Écrivez-nous votre demande. Plus le contexte est clair, plus la réponse sera juste.",
+    "submit": "Envoyer",
+    "sentNotice": "Message envoyé. Nous vous répondons sous 48h ouvrées.",
+    "errorNotice": "Envoi impossible pour le moment. Réessayez ou écrivez-nous directement.",
+    "directEmailPrefix": "Ou écrivez directement à ",
+    "directEmail": "contact@totemancestral.com",
+    "legalLinks": ["CGV", "Confidentialité", "Mentions"],
+    "tagline": "Le portrait imaginaire de l'Africain que vous auriez pu être."
+  },
+  "espaceNav": {
+    "logout": "Déconnexion",
+    "navAccueil": "Accueil",
+    "navCommandes": "Commandes",
+    "navOeuvres": "Œuvres",
+    "navConsultations": "Consultations",
+    "navProfil": "Profil",
+    "composeButton": "+ Composer une œuvre"
+  },
+  "espaceOeuvres": {
+    "eyebrow": "Votre espace",
+    "title": "Vos œuvres",
+    "recitLabel": "Récit",
+    "imageLabel": "Image",
+    "audioLabel": "Audio",
+    "emptyText": "Vous n'avez pas encore d'œuvre livrée."
+  },
+  "commandes": {
+    "eyebrow": "Votre espace",
+    "title": "Vos commandes",
+    "dateLabel": "Date",
+    "offerLabel": "Offre",
+    "priceLabel": "Montant",
+    "statusDelivered": "Livrée",
+    "statusPending": "En attente de paiement",
+    "statusGenerating": "En composition",
+    "statusError": "Erreur",
+    "statusRefunded": "Remboursée",
+    "emptyText": "Vous n'avez pas encore de commande."
+  },
+  "profil": {
+    "eyebrow": "Votre espace",
+    "title": "Votre profil",
+    "genderMale": "Un homme",
+    "genderFemale": "Une femme",
+    "firstNameLabel": "Prénom",
+    "lastNameLabel": "Nom",
+    "emailLabel": "Email",
+    "newEmailLabel": "Nouvel email",
+    "newEmailPlaceholder": "Laisser vide pour ne pas changer",
+    "emailChangeNotice": "Vérifie ta nouvelle adresse pour confirmer le changement.",
+    "genderLabel": "Genre",
+    "languageLabel": "Langue",
+    "editButton": "Modifier mes informations",
+    "oldPasswordLabel": "Ancien mot de passe",
+    "newPasswordLabel": "Nouveau mot de passe",
+    "saveButton": "Enregistrer les modifications",
+    "cancelButton": "Annuler",
+    "dangerTitle": "Zone sensible",
+    "dangerText": "La suppression de votre compte est définitive et entraîne la perte de l'accès à vos œuvres, commandes et créations passées. Cette action ne peut pas être annulée.",
+    "deleteButton": "Supprimer mon compte",
+    "deleteConfirmLabel": "Pour confirmer, tapez SUPPRIMER ci-dessous.",
+    "deleteConfirmWord": "SUPPRIMER",
+    "deleteConfirmButton": "Supprimer définitivement",
+    "deleteCancelButton": "Annuler",
+    "deleteError": "Suppression impossible pour le moment."
+  },
+  "oeuvre": {
+    "eyebrow": "Votre œuvre",
+    "backToSpace": "Mon espace",
+    "youAreLabel": "Vous êtes",
+    "archetypeName": "Le Lion Ancestral",
+    "orderInfo": "Œuvre N° TTM-2026-B7241C9 · Livrée le 28 août 2026",
+    "loadingText": "Le griot achève l'écriture de votre parchemin…",
+    "openPrompt": "Touchez le parchemin pour le déplier.",
+    "parcheminTitle": "Le Parchemin",
+    "sections": [
+      {
+        "title": "L'Éveil",
+        "text": "Il y a soixante mille ans, avant que les continents ne s'éloignent les uns des autres dans la mémoire des hommes, un ancêtre a marché sur une terre rouge, la crinière du vent dans les yeux."
+      },
+      {
+        "title": "Le Sang & la Terre",
+        "text": "On dit qu'il ne courait jamais — il avançait, et le monde s'écartait devant lui. Sa force ne rugissait pas ; elle se taisait, patiente, comme un feu qui couve sous la cendre."
+      },
+      {
+        "title": "La Voie",
+        "text": "Vous portez ce feu-là. Le Lion Ancestral ne conquiert pas par la vitesse, mais par la certitude tranquille de sa place dans le monde. Là où d'autres cherchent, vous savez déjà."
+      }
+    ],
+    "voiceLabel": "La Voix",
+    "audioListen": "Écouter la voix",
+    "audioPlaying": "Lecture en cours",
+    "audioPaused": "En pause",
+    "audioRestart": "Réécouter depuis le début",
+    "audioPlayAction": "Lire l'audio",
+    "audioPauseAction": "Mettre l'audio en pause",
+    "downloadMapButton": "Télécharger la Carte ancestrale",
+    "downloadCertButton": "Télécharger le Certificat",
+    "shareButton": "Partager mon Totem",
+    "shareCopied": "Lien copié !"
+  },
+  "espace": {
+    "eyebrow": "Votre espace",
+    "title": "Votre semaine, en un regard",
+    "intro": "Vos œuvres et vos dernières consultations, réunies au même endroit.",
+    "statusLabel": "Cette semaine",
+    "statusText": "Votre consultation est disponible.",
+    "discoverButton": "Découvrir ma lecture",
+    "gridLabel": "Vos œuvres et vos lectures",
+    "recitLabel": "Récit",
+    "imageLabel": "Image",
+    "audioLabel": "Audio",
+    "emptyText": "Vos œuvres apparaîtront ici une fois votre premier Totem composé."
+  },
+  "consultations": {
+    "eyebrow": "Votre espace",
+    "title": "Le fil de vos semaines",
+    "intro": "Chaque semaine, une question, un tirage de cauris, une lecture. Vos réponses passées restent consultables ici.",
+    "statusLabel": "Cette semaine",
+    "statusText": "Votre consultation est disponible.",
+    "discoverButton": "Découvrir ma lecture",
+    "historyLabel": "Vos consultations passées",
+    "history": [
+      { "title": "Apaisé", "week": "Semaine du 17 août 2026", "reading": "« Les cauris se sont posés tournés vers l'intérieur — une semaine à passer close, comme la graine avant la pousse. N'ouvrez pas encore ce que vous portez. »" },
+      { "title": "En doute", "week": "Semaine du 10 août 2026", "reading": "« Trois cauris, trois directions différentes — le signe d'un choix qui ne se laissera pas presser. Ce que vous hésitez à trancher s'éclairera avant vendredi. »" },
+      { "title": "En combat", "week": "Semaine du 3 août 2026", "reading": "« Les cauris tombent ouverts, tournés vers le ciel — une semaine favorable à l'action. Ce que vous entamez maintenant portera plus loin que vous ne l'imaginez. »" }
+    ]
+  },
+  "consultationQuestion": {
+    "cancel": "Annuler",
+    "eyebrow": "Consultation de la semaine",
+    "title": "Comment te sens-tu, avant de tirer ?",
+    "subtitle": "Une seule réponse, avant que les cauris ne tombent.",
+    "options": ["Apaisé", "En doute", "En combat"],
+    "privacyNote": "Vos réponses restent entre vous et le griot.",
+    "nextButton": "Consulter les cauris"
+  },
+  "consultationTirage": {
+    "quit": "Quitter",
+    "eyebrow": "Consultation de la semaine",
+    "instruction": "Touchez l'écran pour interroger les cauris.",
+    "readingLabel": "La lecture du jour",
+    "reading": "« Six cauris tombent — quatre tournés vers le ciel, deux vers la terre. Les anciens y liraient une semaine de mouvement contenu : ce que vous avez semé commence à porter, mais la récolte demande encore de la patience. Accueillez ce qui se présente à vous en milieu de semaine — une porte que vous n'attendiez pas. »",
+    "resetLink": "Tirer à nouveau",
+    "backLink": "Voir mes consultations"
+  },
+  "laMaison": {
+    "eyebrow": "Qui nous sommes",
+    "title": "Une maison de création",
+    "paragraphs": [
+      "TOTEM ANCESTRAL est une maison de création née à Paris, au carrefour de l'art et des mémoires africaines.",
+      "Nous ne sommes ni archivistes, ni devins, ni généalogistes. Nous sommes des passeurs, entre ce que vous êtes et ce que vous auriez pu être, entre aujourd'hui et les soixante mille ans qui vous précèdent."
+    ],
+    "readMore": "Découvrir notre manifeste →"
+  },
+  "laMaisonPage": {
+    "eyebrow": "La maison",
+    "title": "La maison",
+    "subtitle": "Le manifeste de la maison Totem Ancestral.",
+    "intro": "TOTEM ANCESTRAL est une maison de création artistique fondée à Paris par SENYCE PARTNERS. Nous composons des œuvres numériques uniques, des fables personnelles inspirées des cosmogonies africaines, assistées par intelligence artificielle.",
+    "sections": [
+      {
+        "title": "Ce que nous croyons",
+        "paragraphs": [
+          "Nous croyons que chaque être humain mérite une histoire qui lui ressemble. Pas une vérité. Une fable. Une œuvre qui célèbre, qui interroge, qui transmet.",
+          "Nous croyons que l'intelligence artificielle, mise au service de la sensibilité artistique, peut produire des objets de mémoire, pas des contenus."
+        ]
+      },
+      {
+        "title": "Ce que nous ne faisons pas",
+        "paragraphs": [
+          "Nous ne faisons pas de la science. Pas de la généalogie. Pas de la divination. Pas de l'identité. Pas du folklore.",
+          "Nous faisons des œuvres. Pour célébrer un proche. Pour s'offrir un voyage intérieur. Pour nourrir l'imagination."
+        ]
+      },
+      {
+        "title": "Notre exigence",
+        "paragraphs": [
+          "Chaque œuvre porte un numéro, une signature, un certificat. Elle ne sera jamais reproduite, ni rééditée, ni revendue. Elle est votre exemplaire dans la collection en cours.",
+          "Notre standard de référence est celui des maisons de parfumerie de niche et de la haute joaillerie : la rareté, l'élégance, la justesse du geste."
+        ]
+      }
+    ],
+    "closingQuote": "« Une œuvre n'est jamais finie. Elle est seulement abandonnée à celui qui la reçoit. »"
+  },
+  "temoignages": {
+    "eyebrow": "Ils ont traversé",
+    "title": "Ce qu'ils en ont ramené",
+    "lead": "",
+    "intro": "Découvrez les récits de ceux qui ont déjà éveillé leur Totem.",
+    "prevLabel": "Témoignage précédent",
+    "nextLabel": "Témoignage suivant",
+    "items": [
+      { "quote": "J'ai pleuré en lisant le Parchemin. Ça ne ressemblait à rien d'autre. Une émotion brute.", "name": "Aïcha", "city": "Dakar", "img": "/images/totem-mask-crown.jpg" },
+      { "quote": "La Voix m'a donné des frissons. On dirait que mon ancêtre me connaissait vraiment.", "name": "Kwame", "city": "Accra", "img": "/images/totem-mask-face.jpg" },
+      { "quote": "Je m'attendais à un gadget. J'ai reçu un héritage.", "name": "Sékou", "city": "Abidjan", "img": "/images/totem-mask-detail.jpg" },
+      { "quote": "Le coffret Famille nous a réunis autour d'une histoire commune, enfin écrite.", "name": "Fatou", "city": "Bamako", "img": "/images/totem-mask-mouth.jpg" },
+      { "quote": "Le Visage trône maintenant dans mon salon. C'est mon Totem, mon héritage.", "name": "Naomi", "city": "London", "img": "/images/totem-mask-texture.jpg" },
+      { "quote": "Quinze minutes comme promis, et un objet que je garderai toute ma vie.", "name": "Idris", "city": "Lagos", "img": "/images/totem-mask-pendant.jpg" }
+    ]
+  },
+  "faq": {
+    "eyebrow": "Questions fréquentes",
+    "title": "Éclaircir le mystère",
+    "lead": "",
+    "intro": "Les réponses essentielles avant de confier votre matière au griot.",
+    "items": [
+      { "question": "Chaque œuvre est-elle unique ?", "answer": "Oui. Chaque Totem naît de votre récit, de ce que vous seul confiez au griot. Il n'existe pas deux créations identiques : votre œuvre porte un numéro, comme un nom propre gravé une seule fois.", "img": "/images/totem-mask-crown.jpg" },
+      { "question": "Est-ce un test ADN ?", "answer": "Non. Nous n'exhumons pas un arbre généalogique et ne procédons à aucune analyse biologique. TOTEM ANCESTRAL explore la mémoire spirituelle et culturelle, non la mémoire génétique : une quête artistique et symbolique de vos racines, un miroir narratif, pas un rapport scientifique. Le détail de notre méthode de création figure dans nos CGV.", "img": "/images/totem-mask-face.jpg" },
+      { "question": "Comment recevoir mon Totem ?", "answer": "Après votre traversée du questionnaire, environ quinze minutes, votre œuvre est façonnée puis déposée dans votre espace, le lieu où elle vous attend et demeure. Selon la formule choisie, un tirage Fine Art vous est ensuite expédié.", "img": "/images/totem-mask-detail.jpg" },
+      { "question": "Mes données sont-elles protégées ?", "answer": "Oui. Vos réponses servent uniquement à composer votre œuvre : elles ne sont ni vendues, ni partagées. Le détail complet du traitement de vos données figure dans notre page Confidentialité.", "img": "/images/totem-mask-texture.jpg" },
+      { "question": "Puis-je offrir un Totem sans que la personne réponde elle-même au questionnaire ?", "answer": "Oui. Vous pouvez répondre en son nom, ou lui offrir l'accès pour qu'elle traverse elle-même l'expérience : le choix vous appartient.", "img": "/images/totem-mask-pendant.jpg" }
+    ],
+    "seeAll": "Voir toutes les questions →"
+  },
+  "faqPage": {
+    "eyebrow": "FAQ",
+    "title": "Questions fréquentes",
+    "subtitle": "Questions fréquentes sur l'expérience Totem Ancestral.",
+    "categories": [
+      {
+        "title": "La nature de l'œuvre",
+        "items": [
+          { "question": "S'agit-il d'un test ADN ou généalogique ?", "answer": "Non. Totem Ancestral n'est ni un test ADN, ni un service de généalogie. C'est une fable artistique : une œuvre numérique inspirée de vos réponses à dix questions intimes, composée pour célébrer un imaginaire, pas pour révéler une vérité." },
+          { "question": "Chaque œuvre est-elle vraiment unique ?", "answer": "Oui. Chaque coffret porte un numéro, une signature et un certificat d'authenticité. Aucune œuvre n'est jamais reproduite, rééditée ou revendue." },
+          { "question": "L'IA remplace-t-elle l'artiste ?", "answer": "Non. Nos directions artistiques composent les cadres, les références, les mouvements narratifs. L'intelligence artificielle est notre outil, pas notre auteur." }
+        ]
+      },
+      {
+        "title": "L'expérience pratique",
+        "items": [
+          { "question": "Combien de temps prend la composition ?", "answer": "Le questionnaire dure environ quinze minutes. L'œuvre est livrée par email sous quinze minutes après validation (trente minutes pour le Totem Famille)." },
+          { "question": "Sous quel format reçoit-on l'œuvre ?", "answer": "Vous recevez un parchemin PDF, une œuvre visuelle PNG haute résolution, et, pour Ancestral et Famille, un fichier audio MP3 de 90 secondes." },
+          { "question": "Puis-je offrir une œuvre ?", "answer": "Absolument. Chaque commande inclut une carte cadeau gratuite, et vous pouvez désigner un destinataire au moment du paiement." }
+        ]
+      },
+      {
+        "title": "La technique",
+        "items": [
+          { "question": "L'œuvre est-elle imprimable ?", "answer": "Oui. L'œuvre visuelle est livrée en très haute résolution, encadrable, imprimable jusqu'au format A2." },
+          { "question": "Mes données sont-elles protégées ?", "answer": "Vos réponses sont utilisées uniquement pour composer votre œuvre, puis archivées de manière sécurisée. Conformité RGPD complète." }
+        ]
+      },
+      {
+        "title": "La maison",
+        "items": [
+          { "question": "Qui est derrière Totem Ancestral ?", "answer": "Totem Ancestral est une maison de création artistique fondée à Paris par SENYCE PARTNERS, à la croisée des cosmogonies africaines, de la littérature et des arts numériques." },
+          { "question": "Comment vous contacter ?", "answer": "Par email à contact@totemancestral.com ou via notre formulaire de contact. Nous répondons sous 48h." }
+        ]
+      }
+    ]
+  },
+  "ctaFinal": {
+    "title": "Votre ancêtre vous attend.",
+    "text": "Quinze minutes pour l'éveiller. Une vie entière pour le porter.",
+    "cta": "Commencer mon voyage"
+  },
+  "footer": {
+    "wordmark": "TOTEM ANCESTRAL",
+    "links": ["Commander", "Offres", "La Maison", "FAQ", "Contact", "CGV", "Confidentialité", "Mentions"],
+    "copyright": "© 2026 Totem Ancestral-Tous droits réservés.",
+    "tagline": "Le portrait imaginaire de l'Africain que vous auriez pu être."
+  }
+}

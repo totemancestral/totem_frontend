@@ -1,69 +1,41 @@
-# Logs
-logs
-*.log
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+.pnpm-debug.log*
 
-node_modules
-.next
-dist
-dist-ssr
-.output
-.vinxi
-.tanstack/**
-.nitro
-.env
-.env.*
-!.env.example
-*.local
-*.tsbuildinfo
+# env files (can opt-in for committing if needed)
+.env*
 
-# Wrangler / Cloudflare
-.wrangler/
-.dev.vars
-
-# Legacy TanStack routes (removed)
-src/routes/
-src/router.tsx
-src/routeTree.gen.ts
-src/start.ts
-src/server.ts
-vite.config.ts
-
-# Legacy auth (unused in production)
-src/lib/local-auth.ts
-
-# Legacy integrations (unused)
-src/integrations/lovable/
-src/integrations/supabase/auth-attacher.ts
-src/integrations/supabase/auth-middleware.ts
-
-# Duplicated assets (all served from public/assets/)
-src/assets/
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# vercel
 .vercel
 
-# Backend clones live in their own Git repositories.
-backend/
-totem_backend/
-
-# Supabase CLI binaries
-supabase/cli
-supabase/supabase
-supabase/supabase-go
-supabase/.temp/
-secrets.txt
-.env*
+# typescript
+*.tsbuildinfo
+next-env.d.ts
