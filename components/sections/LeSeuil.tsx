@@ -30,9 +30,9 @@ export default function LeSeuil({ dict }: { dict: Dictionary["leSeuil"] }) {
                   src={geste.image}
                   alt=""
                   fill
-                  className="object-cover grayscale contrast-[1.15] brightness-110 mix-blend-luminosity"
+                  className="object-cover grayscale contrast-[1.1] brightness-105"
                 />
-                <div className="absolute inset-0 bg-or mix-blend-color" />
+                <div className="absolute inset-0 bg-or opacity-45 mix-blend-color" />
               </Reveal>
               <Reveal variant={geste.imageFirst ? "right" : "left"} delay={100} className="flex flex-col gap-3">
                 <h3 className="text-xl font-medium text-ivoire">{geste.title}</h3>

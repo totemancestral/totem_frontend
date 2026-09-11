@@ -48,9 +48,9 @@ export function LeSeuilPinned({ gestes }: { gestes: Geste[] }) {
                 alt=""
                 fill
                 sizes="(min-width: 1024px) 576px, 100vw"
-                className="object-cover grayscale contrast-[1.15] brightness-110 mix-blend-luminosity"
+                className="object-cover grayscale contrast-[1.1] brightness-105"
               />
-              <div className="absolute inset-0 bg-or mix-blend-color" />
+              <div className="absolute inset-0 bg-or opacity-45 mix-blend-color" />
             </div>
           ))}
         </div>
