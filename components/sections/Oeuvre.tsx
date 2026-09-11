@@ -15,6 +15,7 @@ type OeuvreData = {
   image_url: string | null;
   audio_url: string | null;
   pdf_url: string | null;
+  certificate_url: string | null;
   numero_serie: string | null;
   statut: string;
   created_at: string;
@@ -377,9 +378,9 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                   {dict.downloadMapButton}
                 </a>
               )}
-              {data.pdf_url && (
+              {data.certificate_url && (
                 <a
-                  href={data.pdf_url}
+                  href={data.certificate_url}
                   target="_blank"
                   rel="noreferrer"
                   className="border border-ombre px-6 py-3.5 text-sm text-ivoire transition-colors duration-300 hover:border-or hover:text-or"
