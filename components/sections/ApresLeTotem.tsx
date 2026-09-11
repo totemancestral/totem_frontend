@@ -53,7 +53,7 @@ export default function ApresLeTotem({ dict, lang }: { dict: Dictionary["apresLe
         <Reveal variant="right" className="relative h-[300px] w-full flex-1 overflow-hidden border border-ombre lg:h-[560px]">
           {/* fond clair : traitement "encre sur papier" (multiply, sans surcouche dorée) */}
           <Image
-            src="/images/totem-mask-pendant.jpg"
+            src="/images/cauris_image.png"
             alt=""
             fill
             className="object-cover grayscale contrast-[1.15] mix-blend-multiply"

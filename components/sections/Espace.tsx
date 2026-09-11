@@ -21,6 +21,48 @@ export default function Espace({ dict, lang }: Props) {
         <p className="mt-1 max-w-lg text-sm text-grisclair">{dict.intro}</p>
       </div>
 
+      {/* aperçu rapide : mêmes chiffres que les pages Œuvres/Commandes,
+          présentés en cartes pour donner un point d'entrée direct depuis
+          l'accueil. */}
+      <div className="mt-9 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Link
+          href={`/${lang}/oeuvres`}
+          className="flex flex-col gap-3 border border-ombre bg-indigo p-5 transition-colors hover:border-or"
+        >
+          <span className="flex h-9 w-9 items-center justify-center border border-ombre text-or">
+            <svg width="16" height="18" viewBox="0 0 200 320" fill="none" stroke="currentColor" strokeWidth="10" strokeLinejoin="round" strokeLinecap="round">
+              <polygon points="100,8 145,36 162,120 152,190 130,255 100,312 70,255 48,190 38,120 55,36" />
+            </svg>
+          </span>
+          <span className="text-xs uppercase tracking-wide text-grisclair">{dict.worksCardLabel}</span>
+          <span className="font-display text-2xl text-ivoire">{works.length}</span>
+        </Link>
+
+        <Link
+          href={`/${lang}/commandes`}
+          className="flex flex-col gap-3 border border-ombre bg-indigo p-5 transition-colors hover:border-or"
+        >
+          <span className="flex h-9 w-9 items-center justify-center border border-ombre text-or">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3">
+              <rect x="1.5" y="4" width="13" height="10.5" />
+              <path d="M1.5 4 8 0.5 14.5 4" />
+              <path d="M1.5 4 8 7.5 14.5 4" />
+              <line x1="8" y1="7.5" x2="8" y2="14.5" />
+            </svg>
+          </span>
+          <span className="text-xs uppercase tracking-wide text-grisclair">{dict.ordersCardLabel}</span>
+          <span className="font-display text-2xl text-ivoire">{(commandes ?? []).length}</span>
+        </Link>
+
+        <Link
+          href={`/${lang}/offres`}
+          className="flex flex-col items-center justify-center gap-2 border border-dashed border-ombre p-5 text-grisclair transition-colors hover:border-or hover:text-or"
+        >
+          <span className="flex h-9 w-9 items-center justify-center border border-ombre text-xl leading-none">+</span>
+          <span className="text-center text-xs uppercase tracking-wide">{dict.composeCardLabel}</span>
+        </Link>
+      </div>
+
       {/* carte de statut : la consultation hebdomadaire est un rituel sur un
           Totem déjà composé — ne pas la montrer avant qu'il en existe un. */}
       {works.length > 0 && (
