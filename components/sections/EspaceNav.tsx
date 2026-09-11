@@ -128,7 +128,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
           une colonne — comme le reste du site, mais avec une marge un peu
           plus généreuse (dashboard = besoin de plus de respiration). */}
       <div className="shrink-0 border-b border-ombre">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-7 lg:px-24">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-7 lg:px-20">
           <Brand lang={lang} size={20} />
 
           {/* liens de droite : réservés au bureau */}
@@ -169,7 +169,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
           la sidebar s'aligne et se déplace avec la même marge que le reste
           du site, au lieu de rester collée au bord de l'écran. */}
       <div className="min-h-0 flex-1 overflow-hidden">
-        <div className="mx-auto flex h-full max-w-7xl overflow-hidden px-0 lg:px-24">
+        <div className="mx-auto flex h-full max-w-7xl overflow-hidden px-0 lg:px-20">
           {/* sidebar : à onglets, réservée au bureau, fixe sur toute la hauteur du rail */}
           <aside className="hidden w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-ombre bg-indigo lg:flex">
             <nav className="flex flex-col gap-1 p-6">
