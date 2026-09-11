@@ -30,7 +30,10 @@ function letterFromIndex(idx: number): AdultAnswerState["choice"] {
 export default function ParcoursGriot({ dict, lang, variant }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const offre = searchParams.get("offre") ?? "ancestral";
+  // null = aucune offre choisie avant de commencer (ex: entré via "Composer"
+  // dans la nav) : dans ce cas on demande le choix après les questions,
+  // plutôt que de retomber silencieusement sur "ancestral".
+  const offre = searchParams.get("offre");
   const questions = variant === "junior" ? dict.questionsJunior : dict.questionsAdulte;
 
   const [phase, setPhase] = useState<"intro" | "question">("intro");
@@ -52,7 +55,10 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
     supabase.auth.getSession().then(({ data }) => {
       if (!alive) return;
       if (!data.session) {
-        const returnPath = variant === "junior" ? `/${lang}/parcours-junior` : `/${lang}/parcours?offre=${offre}`;
+        const returnPath =
+          variant === "junior"
+            ? `/${lang}/parcours-junior`
+            : `/${lang}/parcours${offre ? `?offre=${offre}` : ""}`;
         router.replace(`/${lang}/connexion?redirect=${encodeURIComponent(returnPath)}`);
         return;
       }
@@ -161,7 +167,9 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
         router.push(`/${lang}/paiement-junior`);
       } else {
         sessionStorage.setItem(DRAFT_KEY, JSON.stringify(answers));
-        router.push(`/${lang}/paiement?offre=${offre}`);
+        // Offre déjà choisie avant de commencer (venu de /offres) : on
+        // respecte ce choix. Sinon, on demande maintenant.
+        router.push(offre ? `/${lang}/paiement?offre=${offre}` : `/${lang}/choisir-offre`);
       }
     } finally {
       setSubmitting(false);
@@ -213,7 +221,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
             </span>
           )}
         </div>
-        <Link href={`/${lang}`} className="text-xs uppercase tracking-[0.14em] text-grisclair">
+        <Link href={`/${lang}/espace`} className="text-xs uppercase tracking-[0.14em] text-grisclair">
           {dict.later}
         </Link>
       </div>

@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
+import { PasswordField } from "@/components/ui/PasswordField";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
+import { isStrongPassword } from "@/lib/password";
 
 // aligné sur l'ordre de dict.motDePasseOublie.legalLinks (CGV, Confidentialité, Mentions)
 const legalHrefs = ["/cgv", "/confidentialite", "/mentions"];
@@ -88,9 +90,15 @@ export default function MotDePasseOublie({
 
   async function updatePassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setLoading(true);
     setError(null);
     setNotice(null);
+
+    if (!isStrongPassword(password)) {
+      setError("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.");
+      return;
+    }
+
+    setLoading(true);
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
@@ -159,19 +167,17 @@ export default function MotDePasseOublie({
                 />
               </label>
             ) : (
-              <label className="flex flex-col gap-2">
-                <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.passwordLabel}</span>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="new-password"
-                  minLength={8}
-                  maxLength={128}
-                  required
-                  className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire"
-                />
-              </label>
+              <PasswordField
+                label={dict.passwordLabel}
+                name="password"
+                value={password}
+                onChange={setPassword}
+                autoComplete="new-password"
+                minLength={8}
+                maxLength={128}
+                required
+                showRequirements
+              />
             )}
           </div>
 

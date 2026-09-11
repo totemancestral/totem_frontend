@@ -5,13 +5,13 @@ const content: Record<Locale, { eyebrow: string; title: string; subtitle: string
     eyebrow: "Le sanctuaire se recueille",
     title: "Maintenance en cours.",
     subtitle: "Nous peaufinons quelque chose pour vous.",
-    text: "Le site est momentanément indisponible pendant une mise à jour. Merci de revenir dans quelques instants.",
+    text: "Le site est momentanément indisponible pendant une mise à jour. Merci de revenir dans quelques heures.",
   },
   en: {
     eyebrow: "The sanctuary is in meditation",
     title: "Under maintenance.",
     subtitle: "We're polishing something for you.",
-    text: "The site is temporarily unavailable during an update. Please check back shortly.",
+    text: "The site is temporarily unavailable during an update. Please check back in a few hours.",
   },
 };
 

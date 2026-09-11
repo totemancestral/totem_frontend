@@ -3,10 +3,19 @@ import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
 import { createPublicAuthClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
+import { isStrongPassword } from "@/lib/password";
 
 const signupSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(255),
-  password: z.string().min(8).max(128),
+  password: z
+    .string()
+    .min(8)
+    .max(128)
+    // Revalide côté serveur la même règle que le formulaire (une majuscule,
+    // une minuscule, un chiffre) : la validation client peut être contournée.
+    .refine(isStrongPassword, {
+      message: "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.",
+    }),
   prenom: z.string().trim().max(80).optional(),
   nom: z.string().trim().max(80).optional(),
   sexe: z.enum(["homme", "femme"]).optional(),

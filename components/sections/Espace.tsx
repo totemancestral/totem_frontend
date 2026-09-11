@@ -38,9 +38,12 @@ export default function Espace({ dict, lang }: Props) {
           <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.gridLabel}</p>
         </div>
 
-        {!commandes && !error && <p className="text-sm text-grisclair">…</p>}
-        {(error || works.length === 0) && commandes && (
-          <p className="text-sm text-grisclair">{dict.emptyText}</p>
+        {commandes === null && !error && <p className="text-sm text-grisclair">…</p>}
+        {(commandes !== null || error) && works.length === 0 && (
+          <div className="flex flex-col items-start gap-4">
+            <p className="text-sm text-grisclair">{dict.emptyText}</p>
+            <Button href={`/${lang}/parcours`}>{dict.resumeButton}</Button>
+          </div>
         )}
 
         {works.length > 0 && (

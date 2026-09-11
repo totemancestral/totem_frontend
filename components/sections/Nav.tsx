@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase/client";
 import type { Locale, getDictionary } from "@/app/[lang]/dictionaries";
 
 type NavProps = {
@@ -14,6 +15,7 @@ type NavProps = {
 export default function Nav({ lang, dict }: NavProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
   // L'URL actuelle (ex: "/fr/offres"), pour savoir quel lien est "actif".
   const pathname = usePathname();
   const offresIsActive = pathname === `/${lang}/offres`;
@@ -25,6 +27,23 @@ export default function Nav({ lang, dict }: NavProps) {
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // Permet au bouton "Composer" de se muer en "Mon espace" pour quelqu'un
+  // déjà connecté, plutôt que de le renvoyer vers une inscription qu'il a
+  // déjà faite.
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (alive) setLoggedIn(Boolean(data.session));
+    });
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      setLoggedIn(Boolean(session));
+    });
+    return () => {
+      alive = false;
+      subscription.subscription.unsubscribe();
     };
   }, []);
 
@@ -97,10 +116,10 @@ export default function Nav({ lang, dict }: NavProps) {
           </div>
           <Button
             variant="outline"
-            href={`/${lang}/inscription`}
+            href={loggedIn ? `/${lang}/espace` : `/${lang}/inscription`}
             className={isLight ? "text-nuit!" : ""}
           >
-            {dict.nav.compose}
+            {loggedIn ? dict.nav.mySpace : dict.nav.compose}
           </Button>
         </div>
 
@@ -162,8 +181,13 @@ export default function Nav({ lang, dict }: NavProps) {
               EN
             </Link>
           </div>
-          <Button variant="outline" href={`/${lang}/inscription`} onClick={closeMenu} className="text-nuit!">
-            {dict.nav.compose}
+          <Button
+            variant="outline"
+            href={loggedIn ? `/${lang}/espace` : `/${lang}/inscription`}
+            onClick={closeMenu}
+            className="text-nuit!"
+          >
+            {loggedIn ? dict.nav.mySpace : dict.nav.compose}
           </Button>
         </div>
       )}

@@ -11,8 +11,13 @@ import { supabase } from "@/lib/supabase/client";
 const DRAFT_KEY = "totem:parcours:answers";
 const JUNIOR_DRAFT_KEY = "totem:parcours:junior:answers";
 
+// aligné sur l'ordre de dict.offres.items (Origine, Révélation/Ancestral, Famille) —
+// même liste que Offres.tsx, pour retrouver le bon tarif à afficher ici.
+const OFFER_IDS = ["origine", "ancestral", "famille"] as const;
+
 type Props = {
   dict: Dictionary["paiement"];
+  offresDict: Dictionary["offres"];
   lang: Locale;
   variant: "adulte" | "junior";
 };
@@ -32,10 +37,19 @@ const ivoireScope = {
   "--color-grisclair": "#948C78",
 } as CSSProperties;
 
-export default function Paiement({ dict, lang, variant }: Props) {
+export default function Paiement({ dict, offresDict, lang, variant }: Props) {
   const searchParams = useSearchParams();
   const offre = searchParams.get("offre") ?? "ancestral";
   const offer = dict[variant];
+  // Le récapitulatif doit refléter l'offre réellement choisie (Origine /
+  // Révélation / Famille), pas un tarif fixe — sinon l'écran de paiement
+  // affiche un prix différent de celui qui sera effectivement débité.
+  const offerIndex = OFFER_IDS.indexOf(offre as (typeof OFFER_IDS)[number]);
+  const adultOffre = offresDict.items[offerIndex >= 0 ? offerIndex : 1];
+  const summary =
+    variant === "junior"
+      ? { name: offer.offerName, desc: offer.offerDesc, price: offer.price, priceCaption: offer.priceCaption }
+      : { name: adultOffre.title, desc: adultOffre.lead, price: adultOffre.price, priceCaption: adultOffre.priceCaption };
   const [c1, setC1] = useState(false);
   const [c2, setC2] = useState(false);
   const [c3, setC3] = useState(false);
@@ -147,12 +161,12 @@ export default function Paiement({ dict, lang, variant }: Props) {
                 <div className="absolute inset-0 bg-or mix-blend-color" />
               </div>
               <div className="flex flex-1 flex-col gap-1">
-                <span className="font-display text-2xl text-ivoire">{offer.offerName}</span>
-                <span className="text-sm text-grisclair">{offer.offerDesc}</span>
+                <span className="font-display text-2xl text-ivoire">{summary.name}</span>
+                <span className="text-sm text-grisclair">{summary.desc}</span>
               </div>
               <div className="shrink-0 text-right">
-                <span className="font-display text-[28px] text-ivoire">{offer.price}</span>
-                <p className="mt-0.5 text-xs text-grisclair">{offer.priceCaption}</p>
+                <span className="font-display text-[28px] text-ivoire">{summary.price}</span>
+                <p className="mt-0.5 text-xs text-grisclair">{summary.priceCaption}</p>
               </div>
             </div>
             <div className="flex items-center justify-between px-7 py-5">
@@ -243,7 +257,7 @@ export default function Paiement({ dict, lang, variant }: Props) {
               allChecked && !loading ? "cursor-pointer opacity-100" : "pointer-events-none opacity-40"
             }`}
           >
-            {loading ? "…" : `${dict.payButton} — ${offer.price}`}
+            {loading ? "…" : `${dict.payButton} — ${summary.price}`}
           </button>
 
           <div className="flex items-center justify-center gap-2.5">

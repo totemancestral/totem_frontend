@@ -28,7 +28,8 @@
       "maison": "The house",
       "faq": "FAQ"
     },
-    "compose": "Compose"
+    "compose": "Compose",
+    "mySpace": "My space"
   },
   "hero": {
     "tagLabel": "Archetype",
@@ -406,7 +407,7 @@
     "subtitle": "The rules applicable to every order placed on Totem Ancestral.",
     "lastUpdated": "Last updated: July 22, 2026",
     "articles": [
-      { "title": "Article 1 — Purpose and scope", "body": ["These general terms and conditions of sale (T&Cs) govern any order of personalized Totem Ancestral digital works, published by SENYCE PARTNERS (SARL), placed on the site totemancestral.com. Any order implies full and complete acceptance of these T&Cs, binding on the client in the version in force on the day of the order."] },
+      { "title": "Article 1 — Purpose and scope", "body": ["These general terms and conditions of sale (T&Cs) govern any order of personalized Totem Ancestral digital works, published by SENYCE PARTNERS (SARL), placed on the site totem-ancestral.com. Any order implies full and complete acceptance of these T&Cs, binding on the client in the version in force on the day of the order."] },
       { "title": "Article 2 — Identity of the seller", "body": ["This site is published by SENYCE PARTNERS, a French SARL with capital of €19,000, whose registered office is located at 4 avenue Laurent Cely, 92600 Asnières-sur-Seine, France. Contact: ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
       { "title": "Article 3 — Products and artistic nature", "body": ["Depending on the offer chosen, you receive a PDF parchment, a high-resolution PNG visual artwork, and, for Ancestral and Family, a 90-second MP3 audio file of the imaginary ancestor's voice, along with a numbered certificate of authenticity. These creations constitute neither a DNA test, nor genealogical research, nor a divinatory, medical, or legal service."] },
       { "title": "Article 4 — Price and payment", "body": ["Prices are shown in euros, all taxes included, and displayed before the order is confirmed. The Junior offer is priced at €9.99. Payment is processed securely via Stripe. SENYCE PARTNERS retains no complete banking data. The order is final once payment is fully collected and the information needed for composition is confirmed."] },
@@ -575,7 +576,8 @@
     "recitLabel": "Story",
     "imageLabel": "Image",
     "audioLabel": "Audio",
-    "emptyText": "Your works will appear here once your first Totem is composed."
+    "emptyText": "Your works will appear here once your first Totem is composed.",
+    "resumeButton": "Resume my journey"
   },
   "consultations": {
     "eyebrow": "Your space",

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
+import { PasswordField } from "@/components/ui/PasswordField";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 
@@ -132,24 +133,22 @@ export default function Connexion({ dict, lang }: { dict: Dictionary["connexion"
               />
             </label>
 
-            <label className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.passwordLabel}</span>
                 <Link href={`/${lang}/mot-de-passe-oublie`} className="text-xs text-or">
                   {dict.forgotPassword}
                 </Link>
               </div>
-              <input
-                type="password"
+              <PasswordField
                 name="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={setPassword}
                 autoComplete="current-password"
                 required
                 maxLength={128}
-                className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire"
               />
-            </label>
+            </div>
           </div>
 
           {error && (

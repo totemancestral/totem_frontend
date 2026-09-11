@@ -28,7 +28,8 @@
       "maison": "La maison",
       "faq": "FAQ"
     },
-    "compose": "Composer"
+    "compose": "Composer",
+    "mySpace": "Mon espace"
   },
   "hero": {
     "tagLabel": "Archétype",
@@ -406,7 +407,7 @@
     "subtitle": "Les règles applicables à toute commande sur Totem Ancestral.",
     "lastUpdated": "Dernière mise à jour : 22 juillet 2026",
     "articles": [
-      { "title": "Article 1 — Objet et champ d'application", "body": ["Les présentes conditions générales de vente (CGV) encadrent toute commande d'œuvres numériques personnalisées Totem Ancestral, éditées par SENYCE PARTNERS (SARL), passée sur le site totemancestral.com. Toute commande implique l'acceptation pleine et entière des présentes CGV, opposables au client dans leur version en vigueur au jour de la commande."] },
+      { "title": "Article 1 — Objet et champ d'application", "body": ["Les présentes conditions générales de vente (CGV) encadrent toute commande d'œuvres numériques personnalisées Totem Ancestral, éditées par SENYCE PARTNERS (SARL), passée sur le site totem-ancestral.com. Toute commande implique l'acceptation pleine et entière des présentes CGV, opposables au client dans leur version en vigueur au jour de la commande."] },
       { "title": "Article 2 — Identité du vendeur", "body": ["Le site est édité par SENYCE PARTNERS, SARL au capital de 19 000 €, dont le siège social est situé au 4 avenue Laurent Cely, 92600 Asnières-sur-Seine. Contact : ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
       { "title": "Article 3 — Produits et nature artistique", "body": ["Selon l'offre choisie, vous recevez un parchemin PDF, une œuvre visuelle PNG haute résolution, et, pour Ancestral et Famille, un fichier audio MP3 de 90 secondes de la voix de l'ancêtre imaginaire, ainsi qu'un certificat d'authenticité numéroté. Ces créations ne constituent ni un test ADN, ni une recherche généalogique, ni une prestation divinatoire, médicale ou juridique."] },
       { "title": "Article 4 — Prix et paiement", "body": ["Les prix sont indiqués en euros toutes taxes comprises et affichés avant validation de la commande. L'offre Junior est proposée à 9,99 €. Le paiement s'effectue de manière sécurisée via Stripe. SENYCE PARTNERS ne conserve aucune donnée bancaire complète. La commande est ferme après encaissement complet et confirmation des informations nécessaires à la composition."] },
@@ -575,7 +576,8 @@
     "recitLabel": "Récit",
     "imageLabel": "Image",
     "audioLabel": "Audio",
-    "emptyText": "Vos œuvres apparaîtront ici une fois votre premier Totem composé."
+    "emptyText": "Vos œuvres apparaîtront ici une fois votre premier Totem composé.",
+    "resumeButton": "Reprendre mon parcours"
   },
   "consultations": {
     "eyebrow": "Votre espace",

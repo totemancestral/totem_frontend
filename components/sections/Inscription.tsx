@@ -1,10 +1,13 @@
 "use client";
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
+import { PasswordField } from "@/components/ui/PasswordField";
+import { supabase } from "@/lib/supabase/client";
+import { isStrongPassword } from "@/lib/password";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 
 // aligné sur l'ordre de dict.inscription.legalLinks (CGV, Confidentialité, Mentions)
@@ -25,7 +28,9 @@ const ivoireScope = {
 export default function Inscription({ dict, lang }: { dict: Dictionary["inscription"]; lang: Locale }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const offre = searchParams.get("offre") ?? "ancestral";
+  // null = pas d'offre choisie avant l'inscription (ex: venu de "Composer"
+  // dans la nav) : le parcours demandera le choix après les questions.
+  const offre = searchParams.get("offre");
 
   const [path, setPath] = useState<"adulte" | "junior">("adulte");
   const [gender, setGender] = useState<"homme" | "femme">("homme");
@@ -35,14 +40,41 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Quelqu'un déjà connecté qui arrive ici (ex: bouton "Composer" cliqué
+  // avec une session active) a déjà un compte : on le renvoie vers son
+  // espace plutôt que de lui montrer un nouveau formulaire d'inscription.
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!alive) return;
+      if (data.session) {
+        router.replace(`/${lang}/espace`);
+        return;
+      }
+      setCheckingAuth(false);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [lang, router]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setLoading(true);
     setError(null);
 
+    if (!isStrongPassword(password)) {
+      setError("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.");
+      return;
+    }
+
+    setLoading(true);
+
     const nextPath =
-      path === "junior" ? `/${lang}/parcours-junior` : `/${lang}/parcours?offre=${offre}`;
+      path === "junior"
+        ? `/${lang}/parcours-junior`
+        : `/${lang}/parcours${offre ? `?offre=${offre}` : ""}`;
 
     try {
       const response = await fetch("/api/auth/signup", {
@@ -82,6 +114,10 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
     } finally {
       setLoading(false);
     }
+  }
+
+  if (checkingAuth) {
+    return <div className="min-h-screen bg-nuit" />;
   }
 
   return (
@@ -234,20 +270,17 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
               />
             </label>
 
-            <label className="flex flex-col gap-2">
-              <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.passwordLabel}</span>
-              <input
-                type="password"
-                name="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-                minLength={8}
-                maxLength={128}
-                required
-                className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire"
-              />
-            </label>
+            <PasswordField
+              label={dict.passwordLabel}
+              name="password"
+              value={password}
+              onChange={setPassword}
+              autoComplete="new-password"
+              minLength={8}
+              maxLength={128}
+              required
+              showRequirements
+            />
           </div>
 
           {error && (

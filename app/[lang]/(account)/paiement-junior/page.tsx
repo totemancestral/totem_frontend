@@ -12,7 +12,7 @@ export default async function PaiementJuniorPage({
 
   return (
     <Suspense fallback={null}>
-      <Paiement dict={dict.paiement} lang={lang} variant="junior" />
+      <Paiement dict={dict.paiement} offresDict={dict.offres} lang={lang} variant="junior" />
     </Suspense>
   );
 }
