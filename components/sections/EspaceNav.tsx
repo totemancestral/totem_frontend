@@ -124,67 +124,76 @@ export default function EspaceNav({ lang, dict, children }: Props) {
       >
         Aller au contenu
       </a>
-      {/* barre du haut : fixe */}
-      <div className="flex shrink-0 items-center justify-between border-b border-ombre px-6 py-7 lg:px-12">
-        <Brand lang={lang} size={20} />
+      {/* barre du haut : fixe. Bordure pleine largeur, contenu recentré dans
+          une colonne — comme le reste du site, mais avec une marge un peu
+          plus généreuse (dashboard = besoin de plus de respiration). */}
+      <div className="shrink-0 border-b border-ombre">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-7 lg:px-20">
+          <Brand lang={lang} size={20} />
 
-        {/* liens de droite : réservés au bureau */}
-        <div className="hidden items-center gap-7 lg:flex">
-          <div className="flex items-center gap-1.5 text-xs text-grisclair">
-            <Link href="/fr" className={lang === "fr" ? "font-medium text-ivoire" : ""}>FR</Link>
-            <span>·</span>
-            <Link href="/en" className={lang === "en" ? "font-medium text-ivoire" : ""}>EN</Link>
+          {/* liens de droite : réservés au bureau */}
+          <div className="hidden items-center gap-7 lg:flex">
+            <div className="flex items-center gap-1.5 text-xs text-grisclair">
+              <Link href="/fr" className={lang === "fr" ? "font-medium text-ivoire" : ""}>FR</Link>
+              <span>·</span>
+              <Link href="/en" className={lang === "en" ? "font-medium text-ivoire" : ""}>EN</Link>
+            </div>
+            <button onClick={logout} className="text-xs uppercase tracking-[0.14em] text-grisclair">
+              {dict.logout}
+            </button>
           </div>
-          <button onClick={logout} className="text-xs uppercase tracking-[0.14em] text-grisclair">
-            {dict.logout}
+
+          {/* hamburger / croix : visible uniquement sur mobile */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="relative flex h-6 w-6 flex-col items-center justify-center lg:hidden"
+            aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          >
+            {menuOpen ? (
+              <>
+                <span className="absolute h-px w-6 rotate-45 bg-ivoire" />
+                <span className="absolute h-px w-6 -rotate-45 bg-ivoire" />
+              </>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                <span className="h-px w-6 bg-ivoire" />
+                <span className="h-px w-6 bg-ivoire" />
+                <span className="h-px w-6 bg-ivoire" />
+              </div>
+            )}
           </button>
         </div>
-
-        {/* hamburger / croix : visible uniquement sur mobile */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="relative flex h-6 w-6 flex-col items-center justify-center lg:hidden"
-          aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-        >
-          {menuOpen ? (
-            <>
-              <span className="absolute h-px w-6 rotate-45 bg-ivoire" />
-              <span className="absolute h-px w-6 -rotate-45 bg-ivoire" />
-            </>
-          ) : (
-            <div className="flex flex-col gap-1.5">
-              <span className="h-px w-6 bg-ivoire" />
-              <span className="h-px w-6 bg-ivoire" />
-              <span className="h-px w-6 bg-ivoire" />
-            </div>
-          )}
-        </button>
       </div>
 
-      {/* contenu de l'onglet actif : seule zone qui défile */}
-      <main id="main-content" className="flex-1 overflow-y-auto">
-        {children}
-      </main>
+      {/* corps : sidebar fixe (bureau) + contenu défilant, côte à côte */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* sidebar : à onglets, réservée au bureau, fixe sur toute la hauteur */}
+        <aside className="hidden w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-ombre bg-indigo lg:flex">
+          <nav className="flex flex-col gap-1 p-6">
+            {tabs.map((tab) => (
+              <Link
+                key={tab.label}
+                href={tab.href}
+                className={`flex items-center gap-3 border-l-2 py-2.5 pl-4 pr-3 text-sm font-medium ${
+                  tab.active ? "border-or text-ivoire" : "border-transparent text-grisclair"
+                }`}
+              >
+                <span className={tab.active ? "text-or" : "text-grisclair"}>{tab.icon}</span>
+                {tab.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="border-t border-ombre p-6">
+            <Button variant="outline" href={`/${lang}/offres`} className="w-full px-4! py-3! text-center text-sm">
+              {dict.composeButton}
+            </Button>
+          </div>
+        </aside>
 
-      {/* nav basse : à onglets, réservée au bureau, fixe */}
-      <div className="hidden shrink-0 border-t border-ombre bg-indigo px-12 py-4 lg:flex lg:items-center lg:justify-between">
-        <div className="flex flex-wrap items-center gap-1">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.label}
-              href={tab.href}
-              className={`flex items-center gap-2.5 border-b-2 px-3.5 py-2.5 text-sm font-medium ${
-                tab.active ? "border-or text-ivoire" : "border-transparent text-grisclair"
-              }`}
-            >
-              <span className={tab.active ? "text-or" : "text-grisclair"}>{tab.icon}</span>
-              {tab.label}
-            </Link>
-          ))}
-        </div>
-        <Button variant="outline" href={`/${lang}/offres`}>
-          {dict.composeButton}
-        </Button>
+        {/* contenu de l'onglet actif : seule zone qui défile */}
+        <main id="main-content" className="flex-1 overflow-y-auto">
+          {children}
+        </main>
       </div>
 
       {/* panneau mobile plein écran : remplace la nav basse sur petit écran */}
