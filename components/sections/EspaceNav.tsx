@@ -128,7 +128,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
           une colonne — comme le reste du site, mais avec une marge un peu
           plus généreuse (dashboard = besoin de plus de respiration). */}
       <div className="shrink-0 border-b border-ombre">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-7 lg:px-20">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-7 lg:px-24">
           <Brand lang={lang} size={20} />
 
           {/* liens de droite : réservés au bureau */}
@@ -165,35 +165,39 @@ export default function EspaceNav({ lang, dict, children }: Props) {
         </div>
       </div>
 
-      {/* corps : sidebar fixe (bureau) + contenu défilant, côte à côte */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* sidebar : à onglets, réservée au bureau, fixe sur toute la hauteur */}
-        <aside className="hidden w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-ombre bg-indigo lg:flex">
-          <nav className="flex flex-col gap-1 p-6">
-            {tabs.map((tab) => (
-              <Link
-                key={tab.label}
-                href={tab.href}
-                className={`flex items-center gap-3 border-l-2 py-2.5 pl-4 pr-3 text-sm font-medium ${
-                  tab.active ? "border-or text-ivoire" : "border-transparent text-grisclair"
-                }`}
-              >
-                <span className={tab.active ? "text-or" : "text-grisclair"}>{tab.icon}</span>
-                {tab.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="border-t border-ombre p-6">
-            <Button variant="outline" href={`/${lang}/offres`} className="w-full px-4! py-3! text-center text-sm">
-              {dict.composeButton}
-            </Button>
-          </div>
-        </aside>
+      {/* corps : même rail centré que la barre du haut (max-w-7xl), pour que
+          la sidebar s'aligne et se déplace avec la même marge que le reste
+          du site, au lieu de rester collée au bord de l'écran. */}
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <div className="mx-auto flex h-full max-w-7xl overflow-hidden px-0 lg:px-24">
+          {/* sidebar : à onglets, réservée au bureau, fixe sur toute la hauteur du rail */}
+          <aside className="hidden w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-ombre bg-indigo lg:flex">
+            <nav className="flex flex-col gap-1 p-6">
+              {tabs.map((tab) => (
+                <Link
+                  key={tab.label}
+                  href={tab.href}
+                  className={`flex items-center gap-3 border-l-2 py-2.5 pl-4 pr-3 text-sm font-medium ${
+                    tab.active ? "border-or text-ivoire" : "border-transparent text-grisclair"
+                  }`}
+                >
+                  <span className={tab.active ? "text-or" : "text-grisclair"}>{tab.icon}</span>
+                  {tab.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="border-t border-ombre p-6">
+              <Button variant="outline" href={`/${lang}/offres`} className="w-full px-4! py-3! text-center text-sm">
+                {dict.composeButton}
+              </Button>
+            </div>
+          </aside>
 
-        {/* contenu de l'onglet actif : seule zone qui défile */}
-        <main id="main-content" className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+          {/* contenu de l'onglet actif : seule zone qui défile */}
+          <main id="main-content" className="min-w-0 flex-1 overflow-y-auto">
+            {children}
+          </main>
+        </div>
       </div>
 
       {/* panneau mobile plein écran : remplace la nav basse sur petit écran */}
