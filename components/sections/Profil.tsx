@@ -119,7 +119,7 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
   const languageDisplay = profile?.langue === "en" ? "English" : "Français";
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 lg:px-16">
+    <div className="mx-auto max-w-7xl px-6 py-12 lg:pl-0 lg:pr-16">
       <div className="flex flex-col gap-2.5">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>

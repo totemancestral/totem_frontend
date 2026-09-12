@@ -14,7 +14,7 @@ export default function Espace({ dict, lang }: Props) {
   const works = (commandes ?? []).filter((c) => c.oeuvre);
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 lg:px-16">
+    <div className="mx-auto max-w-7xl px-6 py-12 lg:pl-0 lg:pr-16">
       <div className="flex flex-col gap-2.5">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>
@@ -27,22 +27,24 @@ export default function Espace({ dict, lang }: Props) {
       <div className="mt-9 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Link
           href={`/${lang}/oeuvres`}
-          className="flex flex-col gap-3 border border-ombre bg-indigo p-5 transition-colors hover:border-or"
+          className="flex items-center gap-4 border border-ombre bg-indigo p-5 transition-colors hover:border-or"
         >
-          <span className="flex h-9 w-9 items-center justify-center border border-ombre text-or">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-ombre text-or">
             <svg width="16" height="18" viewBox="0 0 200 320" fill="none" stroke="currentColor" strokeWidth="10" strokeLinejoin="round" strokeLinecap="round">
               <polygon points="100,8 145,36 162,120 152,190 130,255 100,312 70,255 48,190 38,120 55,36" />
             </svg>
           </span>
-          <span className="text-xs uppercase tracking-wide text-grisclair">{dict.worksCardLabel}</span>
-          <span className="font-display text-2xl text-ivoire">{works.length}</span>
+          <span className="flex flex-col gap-1">
+            <span className="text-xs uppercase tracking-wide text-grisclair">{dict.worksCardLabel}</span>
+            <span className="font-display text-2xl text-ivoire">{works.length}</span>
+          </span>
         </Link>
 
         <Link
           href={`/${lang}/commandes`}
-          className="flex flex-col gap-3 border border-ombre bg-indigo p-5 transition-colors hover:border-or"
+          className="flex items-center gap-4 border border-ombre bg-indigo p-5 transition-colors hover:border-or"
         >
-          <span className="flex h-9 w-9 items-center justify-center border border-ombre text-or">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-ombre text-or">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3">
               <rect x="1.5" y="4" width="13" height="10.5" />
               <path d="M1.5 4 8 0.5 14.5 4" />
@@ -50,8 +52,10 @@ export default function Espace({ dict, lang }: Props) {
               <line x1="8" y1="7.5" x2="8" y2="14.5" />
             </svg>
           </span>
-          <span className="text-xs uppercase tracking-wide text-grisclair">{dict.ordersCardLabel}</span>
-          <span className="font-display text-2xl text-ivoire">{(commandes ?? []).length}</span>
+          <span className="flex flex-col gap-1">
+            <span className="text-xs uppercase tracking-wide text-grisclair">{dict.ordersCardLabel}</span>
+            <span className="font-display text-2xl text-ivoire">{(commandes ?? []).length}</span>
+          </span>
         </Link>
 
         <Link

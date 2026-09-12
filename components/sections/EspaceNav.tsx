@@ -128,7 +128,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
           une colonne — comme le reste du site, mais avec une marge un peu
           plus généreuse (dashboard = besoin de plus de respiration). */}
       <div className="shrink-0 border-b border-ombre">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-7 lg:px-16">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-7 lg:pl-0 lg:pr-16">
           <Brand lang={lang} size={20} />
 
           {/* liens de droite : réservés au bureau */}
@@ -172,7 +172,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
 
       {/* nav basse : à onglets, réservée au bureau, fixe */}
       <div className="hidden shrink-0 border-t border-ombre bg-indigo lg:flex">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-12 py-4 lg:px-16">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-12 py-4 lg:pl-0 lg:pr-16">
           <div className="flex flex-wrap items-center gap-1">
             {tabs.map((tab) => (
               <Link
