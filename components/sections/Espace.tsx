@@ -14,7 +14,7 @@ export default function Espace({ dict, lang }: Props) {
   const works = (commandes ?? []).filter((c) => c.oeuvre);
 
   return (
-    <div className="px-6 py-12">
+    <div className="mx-auto max-w-7xl px-6 py-12 lg:px-16">
       <div className="flex flex-col gap-2.5">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>

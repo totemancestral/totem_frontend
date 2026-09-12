@@ -165,38 +165,31 @@ export default function EspaceNav({ lang, dict, children }: Props) {
         </div>
       </div>
 
-      {/* corps : même rail centré que la barre du haut (max-w-7xl), pour que
-          la sidebar s'aligne et se déplace avec la même marge que le reste
-          du site, au lieu de rester collée au bord de l'écran. */}
-      <div className="min-h-0 flex-1 overflow-hidden">
-        <div className="mx-auto flex h-full max-w-7xl overflow-hidden px-0 lg:px-16">
-          {/* sidebar : à onglets, réservée au bureau, fixe sur toute la hauteur du rail */}
-          <aside className="hidden w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-ombre bg-indigo lg:flex">
-            <nav className="flex flex-col gap-1 p-6">
-              {tabs.map((tab) => (
-                <Link
-                  key={tab.label}
-                  href={tab.href}
-                  className={`flex items-center gap-3 border-l-2 py-2.5 pl-4 pr-3 text-sm font-medium ${
-                    tab.active ? "border-or text-ivoire" : "border-transparent text-grisclair"
-                  }`}
-                >
-                  <span className={tab.active ? "text-or" : "text-grisclair"}>{tab.icon}</span>
-                  {tab.label}
-                </Link>
-              ))}
-            </nav>
-            <div className="border-t border-ombre p-6">
-              <Button variant="outline" href={`/${lang}/offres`} className="w-full px-4! py-3! text-center text-sm">
-                {dict.composeButton}
-              </Button>
-            </div>
-          </aside>
+      {/* contenu de l'onglet actif : seule zone qui défile */}
+      <main id="main-content" className="flex-1 overflow-y-auto">
+        {children}
+      </main>
 
-          {/* contenu de l'onglet actif : seule zone qui défile */}
-          <main id="main-content" className="min-w-0 flex-1 overflow-y-auto">
-            {children}
-          </main>
+      {/* nav basse : à onglets, réservée au bureau, fixe */}
+      <div className="hidden shrink-0 border-t border-ombre bg-indigo lg:flex">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-12 py-4 lg:px-16">
+          <div className="flex flex-wrap items-center gap-1">
+            {tabs.map((tab) => (
+              <Link
+                key={tab.label}
+                href={tab.href}
+                className={`flex items-center gap-2.5 border-b-2 px-3.5 py-2.5 text-sm font-medium ${
+                  tab.active ? "border-or text-ivoire" : "border-transparent text-grisclair"
+                }`}
+              >
+                <span className={tab.active ? "text-or" : "text-grisclair"}>{tab.icon}</span>
+                {tab.label}
+              </Link>
+            ))}
+          </div>
+          <Button variant="outline" href={`/${lang}/offres`}>
+            {dict.composeButton}
+          </Button>
         </div>
       </div>
 
