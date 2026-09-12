@@ -27,7 +27,20 @@ function randomFallenPose() {
   return `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
 }
 
-function CauriShell() {
+type Face = "open" | "closed";
+
+// Une fois retombé, chaque cauri se révèle ouvert (face nacrée) ou fermé
+// (dos renversé) — entièrement au hasard, indépendamment pour chacun.
+function randomFace(): Face {
+  return Math.random() < 0.5 ? "open" : "closed";
+}
+
+const FACE_IMAGE: Record<Face, string> = {
+  open: "/images/cauris_site_trimmed.png",
+  closed: "/images/cauris_renversee_trimmed.png",
+};
+
+function CauriShell({ face = "open" }: { face?: Face }) {
   return (
     <div className="relative h-[38px] w-[58px]">
       {/* pas de mix-blend-mode ici : sur un PNG transparent, le fond
@@ -37,7 +50,7 @@ function CauriShell() {
           l'or/ivoire du site) et on la pousse avec de simples filtres CSS,
           qui eux respectent la transparence. */}
       <Image
-        src="/images/cauris_site_trimmed.png"
+        src={FACE_IMAGE[face]}
         alt=""
         fill
         sizes="58px"
@@ -50,12 +63,14 @@ function CauriShell() {
 export default function ConsultationTirage({ dict, lang }: { dict: Dictionary["consultationTirage"]; lang: Locale }) {
   const [phase, setPhase] = useState<Phase>("floating");
   const [fallenPoses, setFallenPoses] = useState<string[]>(() => shells.map(randomFallenPose));
+  const [shellFaces, setShellFaces] = useState<Face[]>(() => shells.map(randomFace));
   const isFloating = phase === "floating";
   const isRevealed = phase === "revealed";
 
   function cast() {
     if (phase !== "floating") return;
     setFallenPoses(shells.map(randomFallenPose));
+    setShellFaces(shells.map(randomFace));
     setPhase("falling");
     setTimeout(() => setPhase("revealed"), 700);
   }
@@ -101,7 +116,7 @@ export default function ConsultationTirage({ dict, lang }: { dict: Dictionary["c
                 transitionDelay: shell.delay,
               }}
             >
-              <CauriShell />
+              <CauriShell face={isFloating ? "open" : shellFaces[i]} />
             </div>
           ))}
         </div>
