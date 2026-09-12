@@ -311,7 +311,7 @@
     "text": "Dernière étape avant que le griot ne commence l'écriture de votre œuvre.",
     "archetypeLabel": "Archétype attribué",
     "archetypeValue": "Le Lion Ancestral",
-    "payButton": "Payer en toute sécurité",
+    "payButton": "Procédez au paiement de",
     "secureNote": "Paiement sécurisé via Stripe · Chiffrement SSL",
     "legalLinks": ["CGV", "Confidentialité", "Mentions"],
     "adulte": {
@@ -612,7 +612,10 @@
     "readingLabel": "La lecture du jour",
     "reading": "« Six cauris tombent — quatre tournés vers le ciel, deux vers la terre. Les anciens y liraient une semaine de mouvement contenu : ce que vous avez semé commence à porter, mais la récolte demande encore de la patience. Accueillez ce qui se présente à vous en milieu de semaine — une porte que vous n'attendiez pas. »",
     "resetLink": "Tirer à nouveau",
-    "backLink": "Voir mes consultations"
+    "backLink": "Voir mes consultations",
+    "composePromptTitle": "Composez d'abord votre Totem",
+    "composePromptText": "La consultation hebdomadaire est un rituel réservé à votre Totem déjà composé. Créez le vôtre pour interroger les cauris.",
+    "composePromptCta": "Composer mon Totem"
   },
   "laMaison": {
     "eyebrow": "Qui nous sommes",

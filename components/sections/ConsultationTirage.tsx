@@ -3,7 +3,9 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Brand } from "@/components/ui/Brand";
+import { Button } from "@/components/ui/Button";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
+import { useCommandes } from "@/lib/hooks/useCommandes";
 
 type Phase = "floating" | "falling" | "revealed";
 
@@ -61,14 +63,23 @@ function CauriShell({ face = "open" }: { face?: Face }) {
 }
 
 export default function ConsultationTirage({ dict, lang }: { dict: Dictionary["consultationTirage"]; lang: Locale }) {
+  const { commandes } = useCommandes();
+  const hasWork = (commandes ?? []).some((c) => c.oeuvre);
   const [phase, setPhase] = useState<Phase>("floating");
   const [fallenPoses, setFallenPoses] = useState<string[]>(() => shells.map(randomFallenPose));
   const [shellFaces, setShellFaces] = useState<Face[]>(() => shells.map(randomFace));
+  const [showComposePrompt, setShowComposePrompt] = useState(false);
   const isFloating = phase === "floating";
   const isRevealed = phase === "revealed";
 
   function cast() {
     if (phase !== "floating") return;
+    // La consultation est un rituel sur un Totem déjà composé — on ne tire
+    // les cauris que si l'oeuvre existe déjà, sinon on incite à la composer.
+    if (!hasWork) {
+      setShowComposePrompt(true);
+      return;
+    }
     setFallenPoses(shells.map(randomFallenPose));
     setShellFaces(shells.map(randomFace));
     setPhase("falling");
@@ -147,6 +158,29 @@ export default function ConsultationTirage({ dict, lang }: { dict: Dictionary["c
                 className="border-b border-or pb-0.5 text-xs uppercase tracking-wide text-or"
               >
                 {dict.backLink}
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* invite à composer : la consultation est un rituel sur un Totem
+            déjà composé — on ne bloque pas l'accès à la page, seulement
+            le tirage lui-même, avec un appel à l'action plutôt qu'un mur. */}
+        {showComposePrompt && (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="absolute inset-0 z-30 flex cursor-default flex-col items-center justify-center gap-6 bg-nuit/95 px-6 text-center"
+          >
+            <span className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</span>
+            <h2 className="font-display max-w-sm text-2xl italic text-ivoire">{dict.composePromptTitle}</h2>
+            <p className="max-w-sm text-sm text-grisclair">{dict.composePromptText}</p>
+            <div className="mt-2 flex flex-col items-center gap-5 sm:flex-row">
+              <Button href={`/${lang}/offres`}>{dict.composePromptCta}</Button>
+              <Link
+                href={`/${lang}/consultations`}
+                className="border-b border-ombre pb-0.5 text-xs uppercase tracking-wide text-grisclair"
+              >
+                {dict.quit}
               </Link>
             </div>
           </div>

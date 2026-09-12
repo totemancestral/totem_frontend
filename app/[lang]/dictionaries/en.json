@@ -311,7 +311,7 @@
     "text": "One last step before the griot begins writing your work.",
     "archetypeLabel": "Assigned archetype",
     "archetypeValue": "The Ancestral Lion",
-    "payButton": "Pay securely",
+    "payButton": "Proceed with payment of",
     "secureNote": "Secure payment via Stripe · SSL encryption",
     "legalLinks": ["Terms", "Privacy", "Legal"],
     "adulte": {
@@ -612,7 +612,10 @@
     "readingLabel": "Today's reading",
     "reading": "\"Six cowries fall — four turned to the sky, two to the earth. The elders would read a week of contained movement: what you have sown is beginning to bear, but the harvest still calls for patience. Welcome what comes to you midweek — a door you were not expecting.\"",
     "resetLink": "Cast again",
-    "backLink": "See my consultations"
+    "backLink": "See my consultations",
+    "composePromptTitle": "Compose your Totem first",
+    "composePromptText": "The weekly consultation is a ritual reserved for your already-composed Totem. Create yours to question the cowries.",
+    "composePromptCta": "Compose my Totem"
   },
   "laMaison": {
     "eyebrow": "Who we are",

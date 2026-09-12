@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
 import type { CSSProperties } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Brand } from "@/components/ui/Brand";
+import { Logo } from "@/components/ui/Logo";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 
@@ -151,14 +151,8 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
           {/* récapitulatif de commande */}
           <div className="border border-ombre bg-indigo">
             <div className="flex gap-5 border-b border-ombre p-7">
-              <div className="relative h-[76px] w-[76px] shrink-0 overflow-hidden border border-ombre bg-nuit">
-                <Image
-                  src="/images/totem-mask-or-1024.png"
-                  alt=""
-                  fill
-                  className="object-cover grayscale contrast-[1.15] brightness-110 mix-blend-luminosity"
-                />
-                <div className="absolute inset-0 bg-or mix-blend-color" />
+              <div className="relative flex h-[76px] w-[76px] shrink-0 items-center justify-center overflow-hidden border border-ombre bg-nuit">
+                <Logo size={38} />
               </div>
               <div className="flex flex-1 flex-col gap-1">
                 <span className="font-display text-2xl text-ivoire">{summary.name}</span>
@@ -257,7 +251,7 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
               allChecked && !loading ? "cursor-pointer opacity-100" : "pointer-events-none opacity-40"
             }`}
           >
-            {loading ? "…" : `${dict.payButton} — ${summary.price}`}
+            {loading ? "…" : `${dict.payButton} ${summary.price}`}
           </button>
 
           <div className="flex items-center justify-center gap-2.5">

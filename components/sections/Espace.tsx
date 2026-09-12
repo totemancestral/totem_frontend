@@ -67,19 +67,18 @@ export default function Espace({ dict, lang }: Props) {
         </Link>
       </div>
 
-      {/* carte de statut : la consultation hebdomadaire est un rituel sur un
-          Totem déjà composé — ne pas la montrer avant qu'il en existe un. */}
-      {works.length > 0 && (
-        <div className="mt-9 flex flex-col items-start gap-6 border-[1.5px] border-or bg-indigo p-9 shadow-[0_20px_50px_rgba(201,168,76,0.1)] sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs uppercase tracking-wide text-or">{dict.statusLabel}</span>
-            <span className="font-display text-xl italic text-ivoire">{dict.statusText}</span>
-          </div>
-          <Button href={`/${lang}/consultation-question`} className="shrink-0 whitespace-nowrap">
-            {dict.discoverButton}
-          </Button>
+      {/* carte de statut : toujours visible — si le Totem n'est pas encore
+          composé, le tirage lui-même (ConsultationTirage) invite à le
+          composer plutôt que de cacher l'entrée de la consultation. */}
+      <div className="mt-9 flex flex-col items-start gap-6 border-[1.5px] border-or bg-indigo p-9 shadow-[0_20px_50px_rgba(201,168,76,0.1)] sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs uppercase tracking-wide text-or">{dict.statusLabel}</span>
+          <span className="font-display text-xl italic text-ivoire">{dict.statusText}</span>
         </div>
-      )}
+        <Button href={`/${lang}/consultation-question`} className="shrink-0 whitespace-nowrap">
+          {dict.discoverButton}
+        </Button>
+      </div>
 
       {/* grille des œuvres */}
       <div className="mt-10 flex flex-col gap-5">
