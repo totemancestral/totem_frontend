@@ -5,6 +5,19 @@
 }
 .totem-marquee { animation: totem-marquee 35s linear infinite; }
 .totem-intro:not([open]) { display: none; }
+[data-hero] {
+  --hero-extension: clamp(5rem, 10svh, 7rem);
+  min-height: calc(100svh + var(--hero-extension));
+  padding-bottom: calc(6rem + var(--hero-extension));
+}
+.hero-detail {
+  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent),
+    linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+  mask-composite: intersect;
+}
+@media (min-width: 1024px) {
+  [data-hero] { padding-bottom: calc(73px + var(--hero-extension)); }
+}
 /* Préserve le décalage interne entre texte et image ; leur bloc commun
    est ancré en bas du Hero. Cet espace se réduit sur les écrans peu hauts. */
 .hero-copy { padding-top: clamp(0rem, calc((100svh - 36rem) * 0.75), 15rem); }
@@ -12,10 +25,7 @@
   .hero-tag { display: flex; }
 }
 @media (max-height: 700px) {
-  [data-hero] { padding-top: 7.5rem; padding-bottom: 6rem; }
-}
-@media (min-width: 1024px) and (max-height: 700px) {
-  [data-hero] { padding-bottom: 73px; }
+  [data-hero] { padding-top: 7.5rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .totem-marquee { animation: none; width: 100%; }
@@ -193,6 +203,11 @@ body {
 .reveal-right {
   transform: translateX(64px);
   filter: blur(6px);
+}
+/* Sur mobile/tablette, les révélations latérales dépasseraient les marges.
+   Garder une entrée verticale évite de créer un défilement horizontal. */
+@media (max-width: 1023px) {
+  .reveal-left, .reveal-right { transform: translateY(32px); }
 }
 .reveal-scale {
   transform: scale(0.92);

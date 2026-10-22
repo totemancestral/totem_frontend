@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
@@ -16,19 +16,71 @@ export default function Nav({ lang, dict }: NavProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   // L'URL actuelle (ex: "/fr/offres"), pour savoir quel lien est "actif".
   const pathname = usePathname();
   const offresIsActive = pathname === `/${lang}/offres`;
 
   useEffect(() => {
+    let lastY = window.scrollY;
+    let movement = 0;
+    let frame = 0;
     function handleScroll() {
-      setScrolled(window.scrollY > 60);
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        const y = Math.max(0, window.scrollY);
+        const delta = y - lastY;
+        movement = Math.sign(delta) === Math.sign(movement) ? movement + delta : delta;
+        setScrolled(y > 60);
+        const keyboardFocus = navRef.current?.contains(document.activeElement)
+          && document.activeElement?.matches(":focus-visible");
+        if (y <= 80 || menuOpen || keyboardFocus) setHidden(false);
+        else if (Math.abs(movement) >= 8) setHidden(movement > 0);
+        lastY = y;
+      });
     }
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
+      window.cancelAnimationFrame(frame);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [menuOpen, pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+      if (event.key !== "Tab") return;
+      const links = [...(menuRef.current?.querySelectorAll<HTMLElement>("a[href], button") ?? [])];
+      const first = menuButtonRef.current;
+      const last = links.at(-1);
+      if (event.shiftKey && document.activeElement === first && last) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last && first) {
+        event.preventDefault(); first.focus();
+      }
+    }
+    const closeOnDesktop = () => {
+      if (window.matchMedia("(min-width: 1024px)").matches) setMenuOpen(false);
+    };
+    document.addEventListener("keydown", handleKey);
+    window.addEventListener("resize", closeOnDesktop);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKey);
+      window.removeEventListener("resize", closeOnDesktop);
+    };
+  }, [menuOpen]);
 
   // Permet au bouton "Composer" de se muer en "Mon espace" pour quelqu'un
   // déjà connecté, plutôt que de le renvoyer vers une inscription qu'il a
@@ -61,12 +113,16 @@ export default function Nav({ lang, dict }: NavProps) {
   return (
     <>
       <nav
+        ref={navRef}
         data-site-nav
-        className={`fixed top-0 left-0 z-50 flex w-full items-center justify-between px-6 py-7 transition-colors duration-300 lg:px-16 ${
+        data-nav-hidden={hidden && !menuOpen}
+        aria-label={lang === "fr" ? "Navigation principale" : "Main navigation"}
+        onFocusCapture={() => setHidden(false)}
+        className={`fixed top-0 left-0 z-50 flex h-[68px] w-full items-center justify-between px-6 transition-[transform,background-color,color] duration-300 motion-reduce:transition-none lg:h-20 lg:px-16 ${hidden && !menuOpen ? "-translate-y-full" : "translate-y-0"} ${
           isLight ? "bg-ivoire text-nuit" : "bg-transparent text-ivoire"
         }`}
       >
-        <Brand lang={lang} size={50} textClassName="" />
+        <Brand lang={lang} size={40} textClassName="text-[10px]! tracking-[0.28em]! sm:text-xs! sm:tracking-[0.50em]!" />
 
         {/* contenu complet : caché sur mobile, visible à partir de lg */}
         <div className="hidden items-center gap-9 lg:flex">
@@ -126,9 +182,13 @@ export default function Nav({ lang, dict }: NavProps) {
 
         {/* hamburger / croix : visible uniquement sur mobile */}
         <button
+          ref={menuButtonRef}
+          type="button"
           onClick={() => setMenuOpen(!menuOpen)}
-          className="relative flex h-6 w-6 flex-col items-center justify-center lg:hidden"
-          aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          className="relative flex h-11 w-11 shrink-0 flex-col items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-or lg:hidden"
+          aria-expanded={menuOpen}
+          aria-controls="site-mobile-menu"
+          aria-label={lang === "fr" ? (menuOpen ? "Fermer le menu" : "Ouvrir le menu") : (menuOpen ? "Close menu" : "Open menu")}
         >
           {menuOpen ? (
             <>
@@ -151,7 +211,7 @@ export default function Nav({ lang, dict }: NavProps) {
 
       {/* panneau mobile plein écran : couvre tout le reste de la page tant qu'il est ouvert */}
       {menuOpen && (
-        <div className="fixed inset-0 top-[76px] z-40 flex flex-col gap-6 overflow-y-auto bg-ivoire p-8 text-nuit lg:hidden">
+        <div ref={menuRef} id="site-mobile-menu" className="fixed inset-0 top-[68px] z-40 flex flex-col gap-6 overflow-y-auto bg-ivoire p-8 text-nuit lg:hidden">
           <Link
             href={`/${lang}/offres`}
             onClick={closeMenu}

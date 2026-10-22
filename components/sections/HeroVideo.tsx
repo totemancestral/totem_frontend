@@ -51,7 +51,7 @@ export default function HeroVideo({ copy }: { copy: Dictionary["media"] }) {
           onClick={togglePlay}
           aria-label={playing ? copy.pauseVideo : copy.playVideo}
           title={playing ? copy.pauseVideo : copy.playVideo}
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-or bg-nuit/90 text-ivoire focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-nuit/70 text-ivoire transition-colors hover:bg-nuit/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or"
         >
           {playing ? (
             // pause : deux barres

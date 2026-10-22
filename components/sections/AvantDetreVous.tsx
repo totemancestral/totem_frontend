@@ -16,7 +16,7 @@ const marginTops = ["", "lg:mt-16", "lg:mt-6"];
 
 export default function AvantDetreVous({ dict }: { dict: Dictionary["avantDetreVous"] }) {
   return (
-    <section className="bg-indigo px-6 py-24 lg:px-16 lg:py-32">
+    <section className="bg-indigo px-6 py-24 md:px-8 lg:px-16 lg:py-32">
       <div className="mx-auto max-w-6xl">
         {/* en-tête de section */}
         <Reveal variant="up" className="flex flex-col gap-6 text-left lg:flex-row lg:items-end lg:justify-between">
@@ -35,9 +35,9 @@ export default function AvantDetreVous({ dict }: { dict: Dictionary["avantDetreV
               key={card.title}
               variant="scale"
               delay={i * 120}
-              className={`relative mx-auto h-[400px] w-full overflow-hidden border border-ombre md:aspect-[2/3] md:h-auto md:max-w-md lg:mx-0 lg:max-w-none lg:flex-1 xl:aspect-auto xl:h-[600px] ${marginTops[i]}`}
+              className={`relative mx-auto h-[400px] w-full overflow-hidden border border-ombre md:aspect-[2/3] md:h-auto lg:mx-0 lg:flex-1 xl:aspect-auto xl:h-[600px] ${marginTops[i]}`}
             >
-              <Image src={images[i]} alt="" fill className={duotone} />
+              <Image src={images[i]} alt="" fill sizes="(min-width: 1280px) 363px, (min-width: 1024px) calc(33.333vw - 64px), (min-width: 768px) calc(100vw - 64px), calc(100vw - 48px)" className={duotone} />
               <div className="absolute inset-0 bg-or mix-blend-color" />
               <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-nuit via-nuit/70 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-6">

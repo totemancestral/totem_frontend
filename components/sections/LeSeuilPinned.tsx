@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { getSeuilImage } from "@/lib/seuil-images";
 import type { Dictionary } from "@/app/[lang]/dictionaries";
 
 type Geste = Dictionary["leSeuil"]["gestes"][number];
@@ -44,7 +45,7 @@ export function LeSeuilPinned({ gestes }: { gestes: Geste[] }) {
               style={{ opacity: i === activeIndex ? 1 : 0 }}
             >
               <Image
-                src={geste.image}
+                src={getSeuilImage(geste.image)}
                 alt=""
                 fill
                 sizes="(min-width: 1024px) 576px, 100vw"

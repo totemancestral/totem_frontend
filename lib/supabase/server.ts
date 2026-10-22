@@ -48,7 +48,7 @@ function decodeJwtAal(token: string): "aal1" | "aal2" | null {
 }
 
 // Authentifie la requête, vérifie le rôle admin (table user_roles) ET exige
-// une session 2FA (aal2) dès qu'un facteur TOTP vérifié existe sur le compte.
+// une session 2FA (aal2), même si aucun facteur n'est encore enregistré.
 // Réservé aux routes /api/admin/*.
 export async function requireAdmin(
   request: Request,
@@ -71,19 +71,9 @@ export async function requireAdmin(
     return NextResponse.json({ error: "Accès admin requis" }, { status: 403 });
   }
 
-  const { data: userData, error: userError } = await supabase.auth.admin.getUserById(auth.userId);
-  if (userError) {
-    return NextResponse.json({ error: "Vérification 2FA impossible" }, { status: 500 });
-  }
-  const hasVerifiedTotp = (userData.user?.factors ?? []).some(
-    (f) => f.factor_type === "totp" && f.status === "verified",
-  );
-
-  if (hasVerifiedTotp) {
-    const token = request.headers.get("authorization")!.slice(7);
-    if (decodeJwtAal(token) !== "aal2") {
-      return NextResponse.json({ error: "mfa_required" }, { status: 401 });
-    }
+  const token = request.headers.get("authorization")!.slice(7);
+  if (decodeJwtAal(token) !== "aal2") {
+    return NextResponse.json({ error: "mfa_required" }, { status: 401 });
   }
 
   return auth;

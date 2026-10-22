@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { Dictionary } from "@/app/[lang]/dictionaries";
-import { MusicButton } from "@/components/ui/MusicButton";
+import { MusicButton, SoundIcon } from "@/components/ui/MusicButton";
 import { AmbientMusicContext } from "@/lib/hooks/useAmbientMusic";
 
 const MUSIC_KEY = "totem_ambient_enabled";
@@ -21,33 +21,20 @@ export function MediaExperience({ children, copy, homePath }: {
   const enabledRef = useRef(false);
   const [playing, setPlaying] = useState(false);
   const [introMuted, setIntroMuted] = useState(true);
-  const [introPlaying, setIntroPlaying] = useState(false);
   const [error, setError] = useState(false);
   const [heroControls, setHeroControls] = useState<HTMLDivElement | null>(null);
-  const [heroControlsVisible, setHeroControlsVisible] = useState(true);
-  const showFloatingMusic = pathname !== homePath || (heroControls !== null && !heroControlsVisible);
+  const [heroVisible, setHeroVisible] = useState(true);
+  const showFloatingMusic = pathname !== homePath || (heroControls !== null && !heroVisible);
 
   useEffect(() => {
     if (!heroControls) return;
-    let observer: IntersectionObserver;
-    const observe = () => {
-      observer?.disconnect();
-      const navBottom = document.querySelector("[data-site-nav]")?.getBoundingClientRect().bottom ?? 0;
-      observer = new IntersectionObserver(([entry]) => {
-        setHeroControlsVisible(entry.isIntersecting && entry.intersectionRatio >= 0.99);
-      }, { threshold: [0, 0.99, 1], rootMargin: `-${Math.max(0, navBottom)}px 0px 0px 0px` });
-      observer.observe(heroControls);
-    };
-    observe();
-    window.addEventListener("resize", observe);
-    const nav = document.querySelector("[data-site-nav]");
-    const navResize = new ResizeObserver(observe);
-    if (nav) navResize.observe(nav);
-    return () => {
-      observer.disconnect();
-      navResize.disconnect();
-      window.removeEventListener("resize", observe);
-    };
+    const hero = heroControls.closest("[data-hero]");
+    if (!hero) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setHeroVisible(entry.isIntersecting);
+    }, { threshold: 0 });
+    observer.observe(hero);
+    return () => observer.disconnect();
   }, [heroControls]);
 
   const startMusic = useCallback(() => {
@@ -114,6 +101,8 @@ export function MediaExperience({ children, copy, homePath }: {
     try { seen = sessionStorage.getItem(INTRO_KEY) === "true"; } catch { /* Storage is optional. */ }
     if (seen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     dialog.showModal();
+    // Garder le focus dans l'introduction sans sélectionner un bouton à l'ouverture.
+    dialog.focus({ preventScroll: true });
     musicRef.current?.pause();
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -140,26 +129,22 @@ export function MediaExperience({ children, copy, homePath }: {
       </div>
       <dialog ref={dialogRef} aria-labelledby="totem-intro-title"
         onCancel={(event) => { event.preventDefault(); finishIntro(); }}
-        className="totem-intro m-0 h-dvh max-h-none w-screen max-w-none bg-nuit p-0 text-ivoire backdrop:bg-nuit">
+        className="totem-intro m-0 h-dvh max-h-none w-screen max-w-none bg-nuit p-0 text-ivoire outline-none backdrop:bg-nuit">
         <h2 id="totem-intro-title" className="sr-only">{copy.introTitle}</h2>
         <video ref={introRef} src="/assets/intro/totem-intro.mp4" muted={introMuted} playsInline preload="none"
-          onPlay={() => setIntroPlaying(true)} onPause={() => setIntroPlaying(false)}
           onEnded={finishIntro} onError={finishIntro} className="h-full w-full object-contain" />
-        <div className="absolute inset-x-0 bottom-0 flex flex-wrap justify-center gap-3 bg-nuit/90 p-6">
-          <button type="button" onClick={() => {
-            const video = introRef.current;
-            if (!video) return;
-            if (video.paused) void video.play().catch(() => {});
-            else video.pause();
-          }} className="border border-or px-5 py-3">{introPlaying ? copy.pauseVideo : copy.playVideo}</button>
-          <button type="button" onClick={() => {
+        <div data-intro-controls className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] flex items-center gap-3 sm:bottom-6 sm:right-6">
+          <button type="button" aria-label={introMuted ? copy.soundOn : copy.soundOff}
+            title={introMuted ? copy.soundOn : copy.soundOff} aria-pressed={!introMuted} onClick={() => {
             const video = introRef.current;
             if (!video) return;
             video.muted = !video.muted;
             setIntroMuted(video.muted);
             if (video.paused) void video.play().catch(() => {});
-          }} className="border border-or px-5 py-3">{introMuted ? copy.soundOn : copy.soundOff}</button>
-          <button type="button" onClick={finishIntro} autoFocus className="border border-or bg-or px-5 py-3 text-nuit">{copy.skipIntro}</button>
+          }} className="flex h-11 w-11 items-center justify-center border-0 bg-transparent text-ivoire transition-colors hover:text-orpale focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or">
+            <SoundIcon muted={introMuted} />
+          </button>
+          <button type="button" onClick={finishIntro} className="min-h-11 border-0 bg-transparent px-5 py-2 text-sm text-ivoire transition-colors hover:text-orpale focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or">{copy.skipIntro}</button>
         </div>
       </dialog>
     </AmbientMusicContext.Provider>

@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/.npm-cache/
+/.cache/
 /.pnp
 .pnp.*
 .yarn/*
@@ -12,6 +14,10 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.auth/
 
 # next.js
 /.next/
@@ -22,7 +28,12 @@
 
 # misc
 .DS_Store
+Thumbs.db
+Desktop.ini
 *.pem
+*.key
+*.p12
+*.pfx
 
 # debug
 npm-debug.log*
@@ -32,6 +43,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+!.env.*.example
 
 # vercel
 .vercel

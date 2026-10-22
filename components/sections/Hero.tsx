@@ -7,10 +7,8 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 
 export default function Hero({ dict, lang, mediaCopy }: { dict: Dictionary["hero"]; lang: Locale; mediaCopy: Dictionary["media"] }) {
   return (
-    // La navigation fixe est comprise dans la hauteur du premier écran.
-    // Toute la composition est ancrée au-dessus de la zone des commandes.
-    // Elle reste dans le flux pour grandir si le zoom ou la hauteur l'exige.
-    <div data-hero className="relative flex min-h-svh flex-col justify-end overflow-hidden bg-nuit px-6 pb-24 pt-36 text-center lg:px-16 lg:pb-[73px] lg:text-left xl:px-24">
+    // Une courte extension sous la composition révèle les commandes au défilement.
+    <div data-hero className="relative flex flex-col justify-end overflow-hidden bg-nuit px-6 pt-36 text-center lg:px-16 lg:text-left xl:px-24">
 
       {/* vidéo de fond, placée en premier donc visuellement derrière tout le reste */}
       <HeroVideo copy={mediaCopy} />
@@ -65,16 +63,19 @@ export default function Hero({ dict, lang, mediaCopy }: { dict: Dictionary["hero
           remontée au niveau du bloc de texte plutôt que collée en bas */}
       <Reveal
         variant="right"
-        className="relative hidden aspect-square w-full items-center justify-center overflow-hidden border-t border-l border-ombre bg-nuit lg:flex"
+        className="relative hidden aspect-square w-full items-center justify-center lg:flex"
       >
-        <div className="relative h-[105px] w-full animate-[kenburns_16s_ease-in-out_infinite_alternate] overflow-hidden">
+        <div data-hero-detail className="hero-detail relative h-[105px] w-full overflow-hidden">
+        <div className="absolute inset-0 animate-[kenburns_16s_ease-in-out_infinite_alternate] motion-reduce:animate-none">
           <Image
             src="/images/yeux_totem_original_recadres.png"
             alt=""
             fill
+            sizes="(min-width: 1024px) 21vw, 1px"
             className="object-cover grayscale contrast-[1.2] brightness-110 mix-blend-luminosity"
           />
           <div className="absolute inset-0 bg-or mix-blend-color" />
+        </div>
         </div>
       </Reveal>
       </div>
