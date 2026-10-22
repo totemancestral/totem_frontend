@@ -9,5 +9,5 @@ export default async function EspacePage({
   const { lang } = await params;
   const dict = await getDictionary(lang);
 
-  return <Espace dict={dict.espace} lang={lang} />;
+  return <Espace dict={dict.espace} caurisCopy={dict.cauris} lang={lang} />;
 }

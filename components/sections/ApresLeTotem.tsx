@@ -50,7 +50,7 @@ export default function ApresLeTotem({ dict, lang }: { dict: Dictionary["apresLe
           <Button href={`/${lang}/inscription`}>{dict.cta}</Button>
         </Reveal>
 
-        <Reveal variant="right" className="relative h-[300px] w-full flex-1 overflow-hidden border border-ombre lg:h-[560px]">
+        <Reveal variant="right" className="relative aspect-[2/3] w-full max-w-sm shrink-0 overflow-hidden border border-ombre lg:aspect-auto lg:h-[560px] lg:max-w-none lg:flex-1">
           {/* fond clair : traitement "encre sur papier" (multiply, sans surcouche dorée) */}
           <Image
             src="/images/cauris_image.png"

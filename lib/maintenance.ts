@@ -71,7 +71,7 @@ export function maintenanceHtml(locale: Locale): string {
     display: flex; align-items: center; gap: 12px;
     padding: 36px 64px;
   }
-  .brand { font-weight: 500; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ivoire); }
+  .brand { font-weight: 400; font-size: 12px; letter-spacing: 0.50em; text-transform: uppercase; color: var(--ivoire); }
   main {
     position: relative; z-index: 1;
     flex: 1;
@@ -103,19 +103,12 @@ export function maintenanceHtml(locale: Locale): string {
   <span class="watermark" aria-hidden="true">TA</span>
 
   <header>
-    <svg width="14" height="22" viewBox="0 0 200 320" fill="none" stroke="#C9A84C" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
-      <polygon points="100,8 145,36 162,120 152,190 130,255 100,312 70,255 48,190 38,120 55,36" />
-    </svg>
+    <img src="/images/logo_totem_1.svg" alt="" width="26" height="26" />
     <span class="brand">Totem Ancestral</span>
   </header>
 
   <main>
-    <svg width="34" height="55" viewBox="0 0 200 320" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
-      <polygon points="100,8 145,36 162,120 152,190 130,255 100,312 70,255 48,190 38,120 55,36" fill="#0D0D1A" fill-opacity="0.5"/>
-      <line x1="100" y1="8" x2="100" y2="312" stroke-width="1.6"/>
-      <rect x="62" y="110" width="28" height="10" stroke-width="1.6"/>
-      <rect x="110" y="110" width="28" height="10" stroke-width="1.6"/>
-    </svg>
+    <img src="/images/logo_totem_1.svg" alt="" width="72" height="72" style="margin-bottom: 4px;" />
     <p class="eyebrow">${t.eyebrow}</p>
     <h1>${t.title}</h1>
     <p class="subtitle">${t.subtitle}</p>

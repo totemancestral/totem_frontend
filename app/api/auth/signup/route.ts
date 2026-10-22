@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
-import { createPublicAuthClient } from "@/lib/supabase/server";
+import { createPublicAuthClient, createServiceClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { isStrongPassword } from "@/lib/password";
 
@@ -24,7 +24,7 @@ const signupSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const rateLimitResponse = await rateLimit(request, 5, 60_000);
+  const rateLimitResponse = await rateLimit(request, 5, 60_000, "auth.signup");
   if (rateLimitResponse) return rateLimitResponse;
 
   const parsed = signupSchema.safeParse(await request.json().catch(() => null));
@@ -47,6 +47,9 @@ export async function POST(request: Request) {
   const redirectTo = `${getRequestOrigin()}/${locale}/verification?next=${encodeURIComponent(nextPath)}`;
 
   try {
+    // Vérifier Auth, plutôt que profiles, couvre aussi les comptes qui n'ont
+    // pas encore confirmé leur adresse. Aucun email n'est envoyé dans ce cas.
+    if (await emailAlreadyRegistered(email)) return existingAccountResponse(locale);
     const supabase = createPublicAuthClient();
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -56,8 +59,14 @@ export async function POST(request: Request) {
 
     if (error) {
       console.warn("[auth/signup] rejected", { status: error.status, message: error.message });
+      if (error.code === "user_already_exists" || /already registered|already exists|user already/i.test(error.message)) {
+        return existingAccountResponse(locale);
+      }
       return NextResponse.json({ error: normalizeAuthError(error.message) }, { status: statusFromAuthError(error) });
     }
+
+    // Supabase peut masquer un doublon confirmé derrière un faux succès.
+    if (data.user?.identities?.length === 0) return existingAccountResponse(locale);
 
     // Si la confirmation email est désactivée sur le projet Supabase,
     // signUp() renvoie directement une session exploitable.
@@ -68,11 +77,34 @@ export async function POST(request: Request) {
       refreshToken: data.session?.refresh_token ?? null,
     });
   } catch (error) {
+    console.error("[auth/signup] failed", error instanceof Error ? error.message : "unknown_error");
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Inscription impossible" },
-      { status: 500 },
+      { code: "signup_unavailable", error: locale === "en" ? "Sign-up is temporarily unavailable. Please try again shortly." : "L’inscription est temporairement indisponible. Réessaie dans un instant." },
+      { status: 503 },
     );
   }
+}
+
+async function emailAlreadyRegistered(email: string): Promise<boolean> {
+  const admin = createServiceClient().auth.admin;
+  // L'API Auth ne propose pas de recherche exacte par email : parcourir les
+  // pages côté serveur, sans exposer la liste ni la clé service_role au client.
+  const perPage = 1000;
+  for (let page = 1; ; page++) {
+    const { data, error } = await admin.listUsers({ page, perPage });
+    if (error) throw error;
+    if (data.users.some((user) => user.email?.trim().toLowerCase() === email)) return true;
+    if (data.users.length < perPage) return false;
+  }
+}
+
+function existingAccountResponse(locale: "fr" | "en") {
+  return NextResponse.json({
+    code: "email_exists",
+    error: locale === "en"
+      ? "An account already exists with this email. Sign in or reset your password."
+      : "Un compte existe déjà avec cet email. Connecte-toi ou réinitialise ton mot de passe.",
+  }, { status: 409 });
 }
 
 function normalizeAuthError(message: string) {

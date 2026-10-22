@@ -7,11 +7,14 @@ import { ADULT_OFFERS, JUNIOR_AMOUNT_CENTS, JUNIOR_COMMANDE_OFFRE, toCommandeOff
 import type { Json } from "@/lib/supabase/types";
 import { adultIndicators, toAdultBackendAnswers } from "@/lib/adult-answers";
 import { internalError } from "@/lib/api-error";
+import { adultDraftSchema, hasAdultAnswersThrough, PAYMENT_AFTER_QUESTION } from "@/lib/adult-flow";
+import { readAdultDraft, readAdultPayment } from "@/lib/server/adult-parcours";
 
 const checkoutSchema = z.object({
   offre: z.enum(["origine", "ancestral", "famille", "junior"]),
   answers: z.unknown(),
   locale: z.enum(["fr", "en"]),
+  parcoursId: z.uuid().optional(),
 });
 
 const juniorAnswerSchema = z.object({ choice: z.enum(["A", "B", "C", "D"]) });
@@ -26,21 +29,14 @@ const juniorAnswersSchema = z.object({
 // Même limite que le backend (4000 caractères/réponse) : appliquée ici aussi
 // pour ne pas laisser stocker un texte libre géant dans reponses_parcours
 // avant même que la requête n'atteigne le backend.
-const adultAnswerStateSchema = z.object({
-  choice: z.enum(["A", "B", "C", "D"]).optional(),
-  field: z.string().max(4000).optional(),
-  skipped: z.boolean().optional(),
-});
-const adultAnswersSchema = z
-  .record(z.string().max(10), adultAnswerStateSchema)
-  .refine((obj) => Object.keys(obj).length <= 20, { message: "Trop de réponses" });
+const adultAnswersSchema = adultDraftSchema;
 
 export async function POST(request: Request) {
   try {
     const auth = await authenticateRequest(request);
     if (auth instanceof NextResponse) return auth;
 
-    const rateLimitResponse = await rateLimit(request, 10, 60_000);
+    const rateLimitResponse = await rateLimit(request, 10, 60_000, "checkout");
     if (rateLimitResponse) return rateLimitResponse;
 
     const parsed = checkoutSchema.safeParse(await request.json().catch(() => null));
@@ -57,12 +53,12 @@ export async function POST(request: Request) {
     }
 
     const answers = adultAnswersSchema.safeParse(parsed.data.answers);
-    if (!answers.success) {
+    if (!answers.success || !parsed.data.parcoursId || !hasAdultAnswersThrough(answers.data, PAYMENT_AFTER_QUESTION)) {
       return NextResponse.json({ error: "Réponses invalides" }, { status: 422 });
     }
     return await handleCheckout(
       request,
-      { offre: parsed.data.offre, answers: answers.data, locale: parsed.data.locale },
+      { offre: parsed.data.offre, answers: answers.data, locale: parsed.data.locale, parcoursId: parsed.data.parcoursId },
       auth,
     );
   } catch (err) {
@@ -72,13 +68,24 @@ export async function POST(request: Request) {
 
 async function handleCheckout(
   request: Request,
-  data: { offre: "origine" | "ancestral" | "famille"; answers: Record<string, unknown>; locale: "fr" | "en" },
+  data: { offre: "origine" | "ancestral" | "famille"; answers: Record<string, unknown>; locale: "fr" | "en"; parcoursId: string },
   auth: { userId: string; email: string },
 ) {
   const env = getServerEnv();
   const config = ADULT_OFFERS[data.offre];
   const origin = (env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
   const supabase = createServiceClient();
+
+  const draft = await readAdultDraft(auth.userId, data.parcoursId);
+  if (!draft || draft.termine) return NextResponse.json({ error: "parcours_not_found" }, { status: 409 });
+  if (draft.command?.stripe_session_id) {
+    const payment = await readAdultPayment(request, draft.command.stripe_session_id);
+    if (payment instanceof NextResponse) return payment;
+    if (payment.paid) return NextResponse.json({ error: "already_paid", sessionId: draft.command.stripe_session_id }, { status: 409 });
+  }
+  // Le checkout ne reçoit que les quatre premières réponses : le webhook
+  // ne peut donc pas déclencher prématurément la génération.
+  data.answers = Object.fromEntries(Object.entries(data.answers).filter(([key]) => Number(key) <= PAYMENT_AFTER_QUESTION));
 
   // Nom et prénom : l'œuvre porte un numéro de série et doit pouvoir être
   // rattachée à une personne identifiée (déclarés à l'inscription).
@@ -93,22 +100,14 @@ async function handleCheckout(
   const nomComplet = [prenom, profile?.nom ?? ""].map((part) => part.trim()).filter(Boolean).join(" ");
 
   const backendAnswers = withGender(toAdultBackendAnswers(data.answers), profile?.sexe ?? null);
-  if (backendAnswers.length < 4) {
-    return NextResponse.json({ error: "Réponses insuffisantes" }, { status: 422 });
-  }
-
   const { data: parcours, error: parcoursError } = await supabase
     .from("reponses_parcours")
-    .upsert(
-      {
-        user_id: auth.userId,
-        session_id: auth.userId,
+    .update({
         reponses: data.answers as unknown as Json,
-        termine: true,
+        termine: false,
         langue: data.locale,
-      },
-      { onConflict: "user_id, session_id" },
-    )
+      })
+    .eq("id", draft.id).eq("user_id", auth.userId).eq("termine", false)
     .select("id")
     .single();
 
@@ -141,11 +140,11 @@ async function handleCheckout(
     externalCommandId: commande.id,
     answers: backendAnswers,
     locale: data.locale,
-    questionnaireVersion: "griot-v1",
+    questionnaireVersion: "griot-v2",
     indicators: adultIndicators(data.answers),
     customerName: nomComplet || prenom || undefined,
     successUrl: `${origin}/${data.locale}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
-    cancelUrl: `${origin}/${data.locale}/paiement?offre=${data.offre}&checkout=cancelled`,
+    cancelUrl: `${origin}/${data.locale}/paiement?offre=${data.offre}&parcours=${draft.id}&checkout=cancelled`,
   }, commande.id);
 }
 
@@ -252,9 +251,8 @@ async function callBackendCheckout(
 }
 
 /**
- * Renvoie la commande en attente de paiement du visiteur, en la créant si
- * elle n'existe pas encore : une seule commande reste ouverte par visiteur,
- * reprise avec l'offre choisie en dernier (parcours repris, offre changée).
+ * Reprend une commande non payée de la même offre et du même parcours.
+ * Une autre création, ou une commande Junior, garde ses propres réponses.
  */
 async function reservePendingCommande(
   supabase: ReturnType<typeof createServiceClient>,
@@ -274,14 +272,18 @@ async function reservePendingCommande(
     langue: input.locale,
   };
 
-  const { data: existing } = await supabase
+  let pendingQuery = supabase
     .from("commandes")
     .select("id")
     .eq("user_id", input.userId)
     .eq("statut", "en_attente_paiement")
-    .order("created_at", { ascending: false })
+    .eq("offre", input.offre);
+  pendingQuery = input.reponsesId === null ? pendingQuery.is("reponses_id", null) : pendingQuery.eq("reponses_id", input.reponsesId);
+  const { data: existing, error: pendingError } = await pendingQuery.order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  if (pendingError) return { error: pendingError.message };
 
   if (existing?.id) {
     const { error } = await supabase.from("commandes").update(fields).eq("id", existing.id);

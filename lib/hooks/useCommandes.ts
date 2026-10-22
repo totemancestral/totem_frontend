@@ -17,6 +17,8 @@ export type CommandeRow = {
   devise: string;
   langue: string;
   created_at: string;
+  stripe_session_id?: string | null;
+  requiresQuestionnaire?: boolean;
   oeuvre: CommandeOeuvre | null;
 };
 

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
@@ -21,6 +22,7 @@ export default function ChoisirOffre({
   offresDict: Dictionary["offres"];
   lang: Locale;
 }) {
+  const parcours = useSearchParams().get("parcours");
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-nuit px-6 py-12 lg:px-16">
       <div className="flex items-center justify-between">
@@ -78,7 +80,7 @@ export default function ChoisirOffre({
             <Button
               variant={offre.variant as "gold" | "outline"}
               className="mt-2 w-full"
-              href={`/${lang}/paiement?offre=${OFFER_IDS[index] ?? "ancestral"}`}
+              href={`/${lang}/paiement?${new URLSearchParams({ offre: OFFER_IDS[index] ?? "ancestral", ...(parcours ? { parcours } : {}) })}`}
             >
               {offre.button}
             </Button>

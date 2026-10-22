@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getDictionary, hasLocale, locales } from "./dictionaries";
 import { getServerEnv } from "@/lib/env";
 import "../globals.css";
+import { MediaExperience } from "@/components/ui/MediaExperience";
 
 const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-cormorant-garamond",
@@ -73,13 +74,18 @@ export default async function RootLayout({
   // Si quelqu'un visite une URL avec une langue qu'on ne gère pas
   // (ex: /de), on affiche une vraie page 404 plutôt qu'une erreur.
   if (!hasLocale(lang)) notFound();
+  const dict = await getDictionary(lang);
 
   return (
     <html
       lang={lang}
       className={`${cormorantGaramond.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <MediaExperience copy={dict.media} homePath={`/${lang}`}>
+          {children}
+        </MediaExperience>
+      </body>
     </html>
   );
 }

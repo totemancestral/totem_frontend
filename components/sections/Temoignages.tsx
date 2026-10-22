@@ -85,11 +85,12 @@ export default function Temoignages({ dict }: { dict: Dictionary["temoignages"] 
         <ArrowButton direction="prev" onClick={prev} label={dict.prevLabel} className="hidden lg:flex" />
 
         <Reveal variant="scale" className="flex w-full flex-1 flex-col border border-ombre lg:min-h-[340px] lg:flex-row lg:items-stretch">
-          <div className="relative h-[220px] w-full shrink-0 bg-nuit lg:h-auto lg:w-[280px]">
+          <div className="relative mx-auto aspect-[5/6] w-full max-w-sm shrink-0 bg-nuit lg:mx-0 lg:aspect-auto lg:max-w-none lg:w-[280px]">
             <Image
               src={current.img}
               alt=""
               fill
+              sizes="(min-width: 1024px) 280px, (min-width: 432px) 384px, calc(100vw - 50px)"
               className="object-cover grayscale contrast-[1.15] brightness-110 mix-blend-luminosity"
             />
             <div className="absolute inset-0 bg-or mix-blend-color" />

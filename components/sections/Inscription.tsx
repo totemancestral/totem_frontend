@@ -40,6 +40,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [existingAccount, setExistingAccount] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   // Quelqu'un déjà connecté qui arrive ici (ex: bouton "Composer" cliqué
@@ -63,6 +64,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setExistingAccount(false);
 
     if (!isStrongPassword(password)) {
       setError("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.");
@@ -92,11 +94,14 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
       });
       const payload = (await response.json().catch(() => null)) as {
         error?: string;
+        code?: string;
         sessionReady?: boolean;
       } | null;
 
       if (!response.ok) {
-        setError(payload?.error ?? "Inscription impossible");
+        const alreadyExists = payload?.code === "email_exists";
+        setExistingAccount(alreadyExists);
+        setError(alreadyExists ? dict.emailExists : payload?.error ?? "Inscription impossible");
         return;
       }
 
@@ -287,6 +292,12 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
             <p className="text-sm" style={{ color: "#B0473E" }} role="alert">
               {error}
             </p>
+          )}
+          {existingAccount && (
+            <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm">
+              <Link href={`/${lang}/connexion`} className="text-or underline underline-offset-4">{dict.existingSignIn}</Link>
+              <Link href={`/${lang}/mot-de-passe-oublie`} className="text-or underline underline-offset-4">{dict.existingResetPassword}</Link>
+            </div>
           )}
 
           <div className="mt-2 flex flex-wrap items-center gap-6">

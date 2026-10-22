@@ -9,6 +9,7 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 import type { AdultAnswerState } from "@/lib/adult-answers";
 import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
+import { adultDraftSchema, adultResumeStep, hasAdultAnswersThrough, PAYMENT_AFTER_QUESTION, ADULT_QUESTION_COUNT } from "@/lib/adult-flow";
 
 type Props = {
   dict: Dictionary["parcours"];
@@ -16,7 +17,6 @@ type Props = {
   variant: "adulte" | "junior";
 };
 
-const DRAFT_KEY = "totem:parcours:answers";
 const JUNIOR_DRAFT_KEY = "totem:parcours:junior:answers";
 
 function pad(n: number) {
@@ -30,10 +30,10 @@ function letterFromIndex(idx: number): AdultAnswerState["choice"] {
 export default function ParcoursGriot({ dict, lang, variant }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // null = aucune offre choisie avant de commencer (ex: entré via "Composer"
-  // dans la nav) : dans ce cas on demande le choix après les questions,
-  // plutôt que de retomber silencieusement sur "ancestral".
+  // Sans offre choisie, le choix intervient après la quatrième question.
   const offre = searchParams.get("offre");
+  const requestedSession = searchParams.get("session_id");
+  const requestedParcours = searchParams.get("parcours");
   const questions = variant === "junior" ? dict.questionsJunior : dict.questionsAdulte;
 
   const [phase, setPhase] = useState<"intro" | "question">("intro");
@@ -42,6 +42,10 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bootError, setBootError] = useState(false);
+  const [parcoursId, setParcoursId] = useState<string | null>(null);
+  const [paymentSession, setPaymentSession] = useState<string | null>(null);
+  const [paid, setPaid] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioSrc, setAudioSrc] = useState("");
   const [audioPlaying, setAudioPlaying] = useState(false);
@@ -52,22 +56,44 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   // le chemin de retour.
   useEffect(() => {
     let alive = true;
-    supabase.auth.getSession().then(({ data }) => {
+    async function load() {
+      const { data } = await supabase.auth.getSession();
       if (!alive) return;
       if (!data.session) {
         const returnPath =
           variant === "junior"
             ? `/${lang}/parcours-junior`
-            : `/${lang}/parcours${offre ? `?offre=${offre}` : ""}`;
+            : `/${lang}/parcours?${new URLSearchParams({ ...(offre ? { offre } : {}), ...(requestedSession ? { session_id: requestedSession } : {}), ...(requestedParcours ? { parcours: requestedParcours } : {}) })}`;
         router.replace(`/${lang}/connexion?redirect=${encodeURIComponent(returnPath)}`);
         return;
       }
-      setCheckingAuth(false);
-    });
+      if (variant === "adulte") {
+        const query = new URLSearchParams({ ...(requestedSession ? { session_id: requestedSession } : {}), ...(requestedParcours ? { parcoursId: requestedParcours } : {}) });
+        const response = await fetch(`/api/parcours?${query}`, { headers: { Authorization: `Bearer ${data.session.access_token}` }, cache: "no-store" });
+        if (!response.ok) throw new Error("load_failed");
+        const progress = await response.json();
+        if (!alive) return;
+        if (progress.completed && progress.sessionId) {
+          router.replace(`/${lang}/confirmation?session_id=${encodeURIComponent(progress.sessionId)}`);
+          return;
+        }
+        const restored = adultDraftSchema.safeParse(progress.answers);
+        if (!restored.success) throw new Error("invalid_draft");
+        const restoredAnswers = progress.paid ? restored.data : Object.fromEntries(Object.entries(restored.data).filter(([key]) => Number(key) <= PAYMENT_AFTER_QUESTION));
+        setAnswers(restoredAnswers);
+        setParcoursId(progress.parcoursId);
+        setPaymentSession(progress.sessionId ?? null);
+        setPaid(progress.paid === true);
+        setStep(adultResumeStep(restoredAnswers, progress.paid === true));
+        if (progress.parcoursId) setPhase("question");
+      }
+      if (alive) setCheckingAuth(false);
+    }
+    void load().catch(() => { if (alive) { setBootError(true); setCheckingAuth(false); } });
     return () => {
       alive = false;
     };
-  }, [lang, offre, router, variant]);
+  }, [lang, offre, router, variant, requestedSession, requestedParcours]);
 
   const current = questions[step] as (typeof questions)[number] & {
     griot?: string;
@@ -147,30 +173,45 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   }
 
   async function goNext() {
+    if (submitting) return;
     stopAudio();
     setError(null);
-
-    if (!isLast) {
-      setStep(step + 1);
-      return;
-    }
-
-    if (Object.keys(answers).length < questions.length) {
-      setError(dict.incompleteError ?? "Réponds à toutes les questions avant de continuer.");
-      return;
-    }
-
     setSubmitting(true);
     try {
       if (variant === "junior") {
+        if (!isLast) { setStep(step + 1); return; }
+        if (Object.keys(answers).length < questions.length) { setError(dict.incompleteError); return; }
         sessionStorage.setItem(JUNIOR_DRAFT_KEY, JSON.stringify(answers));
         router.push(`/${lang}/paiement-junior`);
       } else {
-        sessionStorage.setItem(DRAFT_KEY, JSON.stringify(answers));
-        // Offre déjà choisie avant de commencer (venu de /offres) : on
-        // respecte ce choix. Sinon, on demande maintenant.
-        router.push(offre ? `/${lang}/paiement?offre=${offre}` : `/${lang}/choisir-offre`);
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) throw new Error("session_expired");
+        const headers = { "Content-Type": "application/json", Authorization: `Bearer ${data.session.access_token}` };
+        const saved = await fetch("/api/parcours", {
+          method: "POST", headers,
+          body: JSON.stringify({ parcoursId: parcoursId ?? undefined, sessionId: paymentSession ?? undefined, answers, locale: lang }),
+        });
+        if (!saved.ok) throw new Error("save_failed");
+        const progress = await saved.json();
+        setParcoursId(progress.parcoursId);
+
+        if (!paid && step + 1 >= PAYMENT_AFTER_QUESTION) {
+          if (!hasAdultAnswersThrough(answers, PAYMENT_AFTER_QUESTION)) { setError(dict.incompleteError); return; }
+          const query = new URLSearchParams({ parcours: progress.parcoursId, ...(offre ? { offre } : {}) });
+          router.push(`/${lang}/${offre ? "paiement" : "choisir-offre"}?${query}`);
+          return;
+        }
+        if (!isLast) { setStep(step + 1); return; }
+        if (!hasAdultAnswersThrough(answers, ADULT_QUESTION_COUNT)) { setError(dict.incompleteError); return; }
+        const completed = await fetch("/api/orders/complete", {
+          method: "POST", headers,
+          body: JSON.stringify({ parcoursId: progress.parcoursId, sessionId: paymentSession, answers, locale: lang }),
+        });
+        if (!completed.ok) throw new Error("completion_failed");
+        router.push(`/${lang}/confirmation?session_id=${encodeURIComponent(paymentSession!)}`);
       }
+    } catch {
+      setError(dict.saveError);
     } finally {
       setSubmitting(false);
     }
@@ -182,6 +223,12 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
 
   if (checkingAuth) {
     return <div className="min-h-screen bg-nuit" />;
+  }
+  if (bootError) {
+    return <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-nuit px-6 text-ivoire">
+      <p role="alert">{dict.loadError}</p>
+      <Button onClick={() => window.location.reload()}>{dict.retryLabel}</Button>
+    </div>;
   }
 
   return (
@@ -336,6 +383,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
                 return (
                   <button
                     key={opt}
+                    disabled={submitting}
                     onClick={() => pick(idx)}
                     aria-pressed={isSelected}
                     className={`flex items-start gap-3 border p-5.5 text-left transition-colors duration-300 lg:px-6.5 lg:py-5.5 ${
@@ -358,10 +406,11 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
                 )}
                 <textarea
                   rows={1}
+                  disabled={submitting}
                   value={currentAnswer?.field ?? ""}
                   onChange={(e) => setFreeText(e.target.value)}
                   placeholder={current.fieldPlaceholder ?? dict.wordMorePlaceholder}
-                  maxLength={4000}
+                  maxLength={3996}
                   className="w-full resize-none border border-ombre bg-indigo px-4 py-4 text-sm text-grisclair placeholder:text-grisclair"
                 />
               </div>
@@ -372,13 +421,16 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
                 {error}
               </p>
             )}
+            {variant === "adulte" && !paid && step + 1 === PAYMENT_AFTER_QUESTION && (
+              <p className="max-w-xl text-sm text-grisclair">{dict.paymentNotice}</p>
+            )}
           </div>
 
           {/* navigation basse */}
           <div className="relative z-10 flex items-center justify-between px-6 py-8 lg:px-14">
             <button
               onClick={goBack}
-              disabled={step === 0}
+              disabled={step === 0 || submitting}
               className={`flex items-center gap-2.5 text-sm uppercase tracking-wide text-grisclair ${
                 step === 0 ? "pointer-events-none opacity-30" : "opacity-100"
               }`}
@@ -390,7 +442,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
               {dict.back}
             </button>
             <Button onClick={goNext} disabled={!currentAnswer?.choice || submitting}>
-              {submitting ? "…" : isLast ? dict.revealLabel : dict.continueLabel}
+              {submitting ? "…" : variant === "adulte" && !paid && step + 1 === PAYMENT_AFTER_QUESTION ? dict.paymentContinueLabel : isLast ? dict.revealLabel : dict.continueLabel}
             </Button>
           </div>
         </>

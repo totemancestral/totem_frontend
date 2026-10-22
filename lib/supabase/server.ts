@@ -39,6 +39,7 @@ export async function authenticateRequest(
 function decodeJwtAal(token: string): "aal1" | "aal2" | null {
   try {
     const payload = token.split(".")[1];
+    if (!payload) return null;
     const json = JSON.parse(Buffer.from(payload, "base64").toString("utf8")) as { aal?: string };
     return json.aal === "aal2" ? "aal2" : json.aal === "aal1" ? "aal1" : null;
   } catch {

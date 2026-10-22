@@ -61,6 +61,7 @@ export default function Nav({ lang, dict }: NavProps) {
   return (
     <>
       <nav
+        data-site-nav
         className={`fixed top-0 left-0 z-50 flex w-full items-center justify-between px-6 py-7 transition-colors duration-300 lg:px-16 ${
           isLight ? "bg-ivoire text-nuit" : "bg-transparent text-ivoire"
         }`}

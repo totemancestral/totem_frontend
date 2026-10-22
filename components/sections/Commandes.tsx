@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { useCommandes } from "@/lib/hooks/useCommandes";
 import { formatEuro, offreLabel, type OffreType } from "@/lib/offers";
@@ -61,7 +62,9 @@ export default function Commandes({ dict, lang }: { dict: Dictionary["commandes"
                 <span className="font-display text-base italic text-orpale">{offreLabel(commande.offre as OffreType)}</span>
                 <span className="text-sm text-ivoire lg:text-right">{formatEuro(commande.montant_cents)}</span>
                 <span className="w-fit border border-ombre px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-grisclair lg:ml-auto">
-                  {dict[statusKey]}
+                  {commande.requiresQuestionnaire && commande.stripe_session_id ? (
+                    <Link href={`/${lang}/parcours?session_id=${encodeURIComponent(commande.stripe_session_id)}`}>{dict.resumeQuestionnaire}</Link>
+                  ) : dict[statusKey]}
                 </span>
               </div>
             );

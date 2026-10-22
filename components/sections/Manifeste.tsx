@@ -25,10 +25,10 @@ export default function Manifeste({ dict }: { dict: Dictionary["manifeste"] }) {
         </Reveal>
 
         {/* la grande photo : réservée au bureau, retirée sur mobile */}
-        <Reveal variant="right" className="relative hidden shrink-0 bg-nuit p-6 lg:block lg:h-[800px] lg:w-2/3">
+        <Reveal variant="right" className="relative hidden shrink-0 bg-nuit p-6 lg:block lg:aspect-[3/2] lg:w-2/3 xl:aspect-auto xl:h-[800px]">
           <div className="relative h-full w-full overflow-hidden border border-ombre">
             <Image
-              src="/images/totem-mask.jpg"
+              src="/images/manifeste.png"
               alt=""
               fill
               className="object-cover grayscale contrast-[1.15] brightness-105 mix-blend-luminosity"

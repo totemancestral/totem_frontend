@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
@@ -30,6 +30,7 @@ const ivoireScope = {
 type OrderStatus = "pending" | "processing" | "done" | "error";
 
 export default function Confirmation({ dict, offerName, lang }: Props) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
 
@@ -64,12 +65,15 @@ export default function Confirmation({ dict, offerName, lang }: Props) {
           errorMessage?: string | null;
           error?: string;
           commandeId?: string | null;
+          paid?: boolean;
+          requiresQuestionnaire?: boolean;
         } | null;
 
         if (!alive) return;
 
         if (response.status === 402) {
           setStatus("unpaid");
+          timer = setTimeout(poll, 4000);
           return;
         }
         if (!response.ok || !payload) {
@@ -78,6 +82,10 @@ export default function Confirmation({ dict, offerName, lang }: Props) {
           return;
         }
 
+        if (payload.paid && payload.requiresQuestionnaire) {
+          router.replace(`/${lang}/parcours?session_id=${encodeURIComponent(sessionId!)}`);
+          return;
+        }
         setStatus(payload.status ?? "pending");
         if (payload.commandeId) setCommandeId(payload.commandeId);
         if (payload.status === "error") setErrorMessage(payload.errorMessage ?? null);
@@ -94,17 +102,17 @@ export default function Confirmation({ dict, offerName, lang }: Props) {
       alive = false;
       clearTimeout(timer);
     };
-  }, [sessionId]);
+  }, [sessionId, lang, router]);
 
   const statusCopy = {
-    loading: { title: dict.statusTitle, text: "Vérification du paiement…" },
-    unpaid: { title: dict.statusTitle, text: "Paiement en cours de confirmation…" },
+    loading: { title: dict.statusTitle, text: dict.checkingPayment },
+    unpaid: { title: dict.statusTitle, text: dict.waitingPayment },
     pending: { title: dict.statusTitle, text: dict.statusText },
     processing: { title: dict.statusTitle, text: dict.statusText },
-    done: { title: "Ton œuvre est prête", text: "Retrouve-la dans ton espace personnel." },
+    done: { title: dict.readyTitle, text: dict.readyText },
     error: {
-      title: "Un problème est survenu",
-      text: errorMessage ?? "La génération a échoué. Contacte-nous si le problème persiste.",
+      title: dict.errorTitle,
+      text: errorMessage ?? dict.errorText,
     },
   }[status];
 

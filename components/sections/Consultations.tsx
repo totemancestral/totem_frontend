@@ -1,8 +1,34 @@
-import Image from "next/image";
+"use client";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
+import { ConsultationStatus } from "@/components/sections/ConsultationStatus";
+import { CaurisReading } from "@/components/ui/CaurisReading";
+import { CAURIS_MOODS, caurisDate, caurisRequest, type CaurisReading as Reading } from "@/lib/cauris";
 
-export default function Consultations({ dict, lang }: { dict: Dictionary["consultations"]; lang: Locale }) {
+export default function Consultations({ dict, copy, lang }: { dict: Dictionary["consultations"]; copy: Dictionary["cauris"]; lang: Locale }) {
+  const [readings, setReadings] = useState<Reading[] | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    void caurisRequest<{ readings: Reading[]; nextCursor: string | null }>("historique", undefined, controller.signal).then((data) => {
+      if (!controller.signal.aborted) { setReadings(data.readings); setCursor(data.nextCursor); setError(false); }
+    }).catch(() => { if (!controller.signal.aborted) setError(true); });
+    return () => controller.abort();
+  }, [revision]);
+
+  async function loadMore() {
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const data = await caurisRequest<{ readings: Reading[]; nextCursor: string | null }>(`historique?before=${encodeURIComponent(cursor)}`);
+      setReadings((previous) => [...(previous ?? []), ...data.readings.filter((r) => !previous?.some((p) => p.id === r.id))]);
+      setCursor(data.nextCursor); setError(false);
+    } catch { setError(true); } finally { setLoadingMore(false); }
+  }
   return (
     <div className="mx-auto max-w-7xl px-6 py-12 lg:pl-0 lg:pr-16">
       <div className="flex flex-col gap-2.5">
@@ -14,44 +40,27 @@ export default function Consultations({ dict, lang }: { dict: Dictionary["consul
       {/* carte de statut : toujours visible — si le Totem n'est pas encore
           composé, le tirage lui-même (ConsultationTirage) invite à le
           composer plutôt que de cacher l'entrée de la consultation. */}
-      <div className="mt-9 flex flex-col items-start gap-6 border-[1.5px] border-or bg-indigo p-9 shadow-[0_20px_50px_rgba(201,168,76,0.1)] sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs uppercase tracking-wide text-or">{dict.statusLabel}</span>
-          <span className="font-display text-xl italic text-ivoire">{dict.statusText}</span>
-        </div>
-        <Button href={`/${lang}/consultation-question`} className="shrink-0 whitespace-nowrap">
-          {dict.discoverButton}
-        </Button>
-      </div>
+      <ConsultationStatus copy={copy} lang={lang} />
 
       {/* historique */}
       <div className="mt-10 flex flex-col gap-5">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.historyLabel}</p>
 
+        {!readings && !error && <p role="status" className="text-grisclair">{copy.loading}</p>}
+        {error && <div className="flex items-center gap-4"><p role="alert" className="text-grisclair">{copy.loadError}</p><Button onClick={() => setRevision((r) => r + 1)}>{copy.retry}</Button></div>}
+        {readings?.length === 0 && <p className="text-sm text-grisclair">{copy.emptyHistory}</p>}
         <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
-          {dict.history.map((item) => (
-            <div key={item.week} className="flex flex-col border border-ombre bg-indigo">
-              <div className="flex h-25 items-center justify-center border-b border-ombre bg-nuit">
-                <div className="relative h-11 w-16">
-                  <Image
-                    src="/images/cauris_site_trimmed.png"
-                    alt=""
-                    fill
-                    sizes="64px"
-                    className="object-contain contrast-[1.1] brightness-105 saturate-[1.15]"
-                  />
-                </div>
+          {readings?.map((item) => (
+            <div key={item.id} className="flex flex-col gap-5 border border-ombre bg-indigo p-6">
+              <div className="flex flex-col gap-1">
+                <span className="font-display text-xl italic text-orpale">{item.mood ? copy.moods[CAURIS_MOODS.indexOf(item.mood)] : copy.readingTitle}</span>
+                <time dateTime={item.createdAt} className="text-xs text-grisclair">{caurisDate(item.createdAt, lang)}</time>
               </div>
-              <div className="flex flex-col gap-3.5 p-5.5">
-                <div className="flex flex-col gap-1">
-                  <span className="font-display text-xl italic text-ivoire">{item.title}</span>
-                  <span className="text-xs text-grisclair">{item.week}</span>
-                </div>
-                <p className="font-display text-sm italic leading-relaxed text-grisclair">{item.reading}</p>
-              </div>
+              <CaurisReading reading={item} copy={copy} lang={lang} />
             </div>
           ))}
         </div>
+        {cursor && <Button disabled={loadingMore} onClick={loadMore}>{loadingMore ? copy.loading : copy.loadMore}</Button>}
       </div>
     </div>
   );

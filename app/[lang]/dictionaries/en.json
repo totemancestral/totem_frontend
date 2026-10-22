@@ -1,7 +1,24 @@
 {
+  "media": {
+    "musicOn": "Enable music",
+    "musicOff": "Mute music",
+    "audioError": "Music is currently unavailable.",
+    "introTitle": "Welcome to Totem Ancestral",
+    "skipIntro": "Enter the site",
+    "soundOn": "Enable sound",
+    "soundOff": "Mute sound",
+    "pauseVideo": "Pause",
+    "playVideo": "Play video"
+  },
+  "proofBand": {
+    "label": "The words of Totem Ancestral",
+    "items": ["A soul", "Travels", "Sixty thousand years", "To speak to you", "Listen", "Totem Ancestral"],
+    "pause": "Pause",
+    "resume": "Resume"
+  },
   "seo": {
     "siteName": "Totem Ancestral",
-    "defaultTitle": "Totem Ancestral — The Artwork That Reveals the Ancestor in You",
+    "defaultTitle": "Totem Ancestral | The Artwork That Reveals the Ancestor in You",
     "defaultDescription": "A story, a mask, and a voice, born from your personality and African cosmogonies. A unique, numbered digital artwork — not a scientific test.",
     "ogDescription": "Who were you, before being who you are? A unique work, woven in the language of origins, nourished by African cosmogonies, that reveals the ancestor asleep within you.",
     "offres": {
@@ -102,19 +119,19 @@
       {
         "title": "Open your ears",
         "text": "The ancestor crossed sixty thousand years to speak to you — hear them.",
-        "image": "/images/totem-mask-pendant.jpg",
+        "image": "/images/seuil_1.png",
         "imageFirst": false
       },
       {
         "title": "Speak true",
         "text": "The griot does not want the right answer. He wants yours — the one that comes from further back than memory.",
-        "image": "/images/totem-mask-mouth.jpg",
+        "image": "/images/seuil_2.png",
         "imageFirst": true
       },
       {
         "title": "Keep your TOTEM",
         "text": "As one keeps a name, as one keeps a secret. It exists only through you, and will live nowhere else.",
-        "image": "/images/totem-mask.jpg",
+        "image": "/images/seuil_3.png",
         "imageFirst": false
       }
     ]
@@ -230,6 +247,9 @@
     ]
   },
   "inscription": {
+    "emailExists": "An account already exists with this email. Sign in or reset your password.",
+    "existingSignIn": "Sign in",
+    "existingResetPassword": "Forgot password",
     "eyebrow": "The threshold ( Create my account )",
     "title": "Open your passage",
     "subtitle": "Create an account",
@@ -305,6 +325,8 @@
     "legalLinks": ["Terms", "Privacy", "Legal"]
   },
   "paiement": {
+    "adultProgressError": "Answer the first four questions before paying. Resume your journey from your account.",
+    "adultPaymentText": "Your first four answers are saved. After payment, you will answer the remaining six questions before your work is created.",
     "cancel": "Cancel",
     "eyebrow": "The threshold ( Payment )",
     "title": "Your Totem is taking shape",
@@ -362,6 +384,11 @@
     "continueLabel": "Continue",
     "revealLabel": "Reveal my Totem",
     "incompleteError": "Answer every question before continuing.",
+    "paymentContinueLabel": "Continue to payment",
+    "paymentNotice": "Your first four answers will be saved. Payment unlocks the remaining six questions.",
+    "saveError": "We could not save or complete your journey. Your answers are still displayed: please try again shortly.",
+    "loadError": "We could not load your journey or verify payment. Please try again shortly.",
+    "retryLabel": "Try again",
     "questionsAdulte": [
       { "griot": "Close your eyes for a moment. Think of nature, of what draws you in ways you can't quite explain.", "q": "Which natural element calls to you most deeply?", "options": ["Fire dancing in the night — I'm drawn to its light, its unpredictable warmth, the way it transforms everything.", "Water that never stops flowing — river, ocean, rain — I always come back to it.", "The earth beneath my feet, the roots, the stones, the dense forests, what endures and holds firm.", "The wind that carries everything away, open space, the heights, the horizon you can never quite reach."], "fieldLabel": "Something else?", "fieldPlaceholder": "An element, a landscape, a feeling that isn't on the list..." },
       { "griot": "I want to know where you truly stand. Not what you do, but where you live.", "q": "In which moment do you feel most alive?", "options": ["When I'm protecting someone, fighting for what's right, right at the heart of the action.", "When I'm creating something — an idea, a work, a project — when my hands give shape to my vision.", "When I'm surrounded by those I love, in laughter, in sharing, in connection.", "When I'm alone in nature or in silence, observing, understanding, seeing far."], "fieldLabel": "+ add a nuance", "fieldPlaceholder": "Describe the moment you feel fully alive..." },
@@ -383,6 +410,12 @@
     ]
   },
   "confirmation": {
+    "checkingPayment": "Verifying payment…",
+    "waitingPayment": "Waiting for payment confirmation…",
+    "readyTitle": "Your work is ready",
+    "readyText": "Find it in your personal space.",
+    "errorTitle": "Something went wrong",
+    "errorText": "Generation failed. Please contact us if the problem persists.",
     "eyebrow": "Payment confirmed",
     "title": "The journey begins.",
     "quote": "The griot has received your offering. Your ancestor is taking shape.",
@@ -491,6 +524,7 @@
     "emptyText": "You don't have any delivered work yet."
   },
   "commandes": {
+    "resumeQuestionnaire": "Complete questionnaire",
     "eyebrow": "Your space",
     "title": "Your orders",
     "dateLabel": "Date",
@@ -566,6 +600,7 @@
     "shareCopied": "Link copied!"
   },
   "espace": {
+    "resumePaidText": "Your payment is confirmed. Complete your questionnaire to start creating your work.",
     "eyebrow": "Your space",
     "title": "Your week, at a glance",
     "intro": "Your works and your latest consultations, all in one place.",
@@ -582,6 +617,37 @@
     "emptyText": "Your works will appear here once your first Totem is composed.",
     "resumeButton": "Resume my journey"
   },
+  "cauris": {
+    "thisWeek": "This week",
+    "loading": "Loading…",
+    "loadError": "We could not load your readings. Please try again shortly.",
+    "drawError": "We could not retrieve the result. Try again: an existing reading will be preserved.",
+    "retry": "Try again",
+    "available": "Your consultation is available.",
+    "alreadyDrawn": "Your reading for this week is available.",
+    "nextAvailable": "Next draw on",
+    "parisTime": "at midnight, Paris time",
+    "seriesUnavailable": "Consultations for this Totem are not available yet.",
+    "workRequired": "Create your adult Totem before consulting the cowries.",
+    "compose": "Create my Totem",
+    "draw": "Cast the cowries",
+    "drawing": "The cowries are settling…",
+    "viewReading": "View my reading",
+    "emptyHistory": "You have not cast the cowries yet.",
+    "loadMore": "View earlier consultations",
+    "readingTitle": "Cowrie reading",
+    "forYou": "For you,",
+    "imageLabel": "Symbolic image",
+    "paroleLabel": "Words",
+    "gesteLabel": "Action for the week",
+    "readingUnavailable": "The content of this earlier reading could not be recovered.",
+    "frenchNote": "This reading is currently available in French.",
+    "moods": [
+      "At peace",
+      "In doubt",
+      "In struggle"
+    ]
+  },
   "consultations": {
     "eyebrow": "Your space",
     "title": "The thread of your weeks",
@@ -590,11 +656,7 @@
     "statusText": "Your consultation is available.",
     "discoverButton": "Discover my reading",
     "historyLabel": "Your past consultations",
-    "history": [
-      { "title": "At peace", "week": "Week of August 17, 2026", "reading": "\"The cowries fell turned inward — a week to spend closed, like the seed before the sprout. Do not yet open what you carry.\"" },
-      { "title": "In doubt", "week": "Week of August 10, 2026", "reading": "\"Three cowries, three different directions — the sign of a choice that will not be rushed. What you hesitate to decide will become clear before Friday.\"" },
-      { "title": "In struggle", "week": "Week of August 3, 2026", "reading": "\"The cowries fall open, turned to the sky — a week favorable to action. What you begin now will carry further than you imagine.\"" }
-    ]
+    "history": []
   },
   "consultationQuestion": {
     "cancel": "Cancel",
@@ -610,7 +672,7 @@
     "eyebrow": "This week's consultation",
     "instruction": "Touch the screen to question the cowries.",
     "readingLabel": "Today's reading",
-    "reading": "\"Six cowries fall — four turned to the sky, two to the earth. The elders would read a week of contained movement: what you have sown is beginning to bear, but the harvest still calls for patience. Welcome what comes to you midweek — a door you were not expecting.\"",
+    "reading": "",
     "resetLink": "Cast again",
     "backLink": "See my consultations",
     "composePromptTitle": "Compose your Totem first",
@@ -664,12 +726,12 @@
     "prevLabel": "Previous testimonial",
     "nextLabel": "Next testimonial",
     "items": [
-      { "quote": "I cried while reading the Parchment. It felt like nothing else. A raw emotion.", "name": "Aïcha", "city": "Dakar", "img": "/images/totem-mask-crown.jpg" },
-      { "quote": "The Voice gave me chills. It felt as if my ancestor truly knew me.", "name": "Kwame", "city": "Accra", "img": "/images/totem-mask-face.jpg" },
-      { "quote": "The Family box brought us around a common story, finally written.", "name": "Fatou", "city": "Bamako", "img": "/images/totem-mask-detail.jpg" },
-      { "quote": "Not a gimmick. A real, grounded, sincere experience that touched the heart.", "name": "Yannick", "city": "Paris", "img": "/images/totem-mask-mouth.jpg" },
-      { "quote": "The Face now stands in my living room. It is my Totem, my legacy.", "name": "Naomi", "city": "London", "img": "/images/totem-mask-texture.jpg" },
-      { "quote": "Fifteen minutes as promised, and an object I will keep all my life.", "name": "Idris", "city": "Lagos", "img": "/images/totem-mask-pendant.jpg" }
+      { "quote": "I cried while reading the Parchment. It felt like nothing else. A raw emotion.", "name": "Aïcha", "city": "Dakar", "img": "/images/temoignage_0.png" },
+      { "quote": "The Voice gave me chills. It felt as if my ancestor truly knew me.", "name": "Leyna", "city": "Paris", "img": "/images/temoignage_3.png" },
+      { "quote": "The Family box brought us around a common story, finally written.", "name": "Sabi", "city": "Bamako", "img": "/images/temoignage_2.png" },
+      { "quote": "Not a gimmick. A real, grounded, sincere experience that touched the heart.", "name": "Carolle", "city": "Accra", "img": "/images/temoignage_1.png" },
+      { "quote": "The Face now stands in my living room. It is my Totem, my legacy.", "name": "Eric", "city": "London", "img": "/images/temoignage_4.png" },
+      { "quote": "Fifteen minutes as promised, and an object I will keep all my life.", "name": "Naomi", "city": "Belgique", "img": "/images/temoignage_5.png" }
     ]
   },
   "faq": {

@@ -1,11 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Brand } from "@/components/ui/Brand";
 import { Button } from "@/components/ui/Button";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
-import { useCommandes } from "@/lib/hooks/useCommandes";
+import { useCaurisState } from "@/lib/hooks/useCaurisState";
+import { CAURIS_MOODS, caurisDate, caurisRequest, type CaurisReading as Reading } from "@/lib/cauris";
+import { CaurisReading } from "@/components/ui/CaurisReading";
 
 type Phase = "floating" | "falling" | "revealed";
 
@@ -20,8 +23,7 @@ const shells = [
   { floatAnim: "cauri-float-3 5.4s ease-in-out infinite", delay: "0.3s" },
 ];
 
-// Rotation quelconque (0-360°) et léger décalage vers le bas : un vrai tirage
-// aléatoire à chaque clic, pas une chute déjà écrite à l'avance.
+// Animation décorative ; la lecture provient exclusivement du serveur.
 function randomFallenPose() {
   const rotate = Math.round(Math.random() * 360 - 180);
   const x = Math.round(Math.random() * 20 - 10);
@@ -62,28 +64,44 @@ function CauriShell({ face = "open" }: { face?: Face }) {
   );
 }
 
-export default function ConsultationTirage({ dict, lang }: { dict: Dictionary["consultationTirage"]; lang: Locale }) {
-  const { commandes } = useCommandes();
-  const hasWork = (commandes ?? []).some((c) => c.oeuvre);
+export default function ConsultationTirage({ dict, copy, lang }: { dict: Dictionary["consultationTirage"]; copy: Dictionary["cauris"]; lang: Locale }) {
+  const { state, error: loadError, retry } = useCaurisState();
+  const requestedMood = useSearchParams().get("mood");
   const [phase, setPhase] = useState<Phase>("floating");
-  const [fallenPoses, setFallenPoses] = useState<string[]>(() => shells.map(randomFallenPose));
-  const [shellFaces, setShellFaces] = useState<Face[]>(() => shells.map(randomFace));
-  const [showComposePrompt, setShowComposePrompt] = useState(false);
-  const isFloating = phase === "floating";
-  const isRevealed = phase === "revealed";
+  const [fallenPoses, setFallenPoses] = useState<string[]>([]);
+  const [shellFaces, setShellFaces] = useState<Face[]>([]);
+  const [reading, setReading] = useState<Reading | null>(null);
+  const [nextAvailable, setNextAvailable] = useState<string | null>(null);
+  const [drawError, setDrawError] = useState(false);
+  const inFlight = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const displayedReading = reading ?? state?.currentReading;
+  const showComposePrompt = state?.reason === "oeuvre_required" && !displayedReading;
+  const isFloating = phase === "floating" && !displayedReading;
+  const isRevealed = Boolean(displayedReading);
+  const canCast = Boolean(state?.accessible && state.availableNow && !displayedReading && phase === "floating" && !loadError);
 
-  function cast() {
-    if (phase !== "floating") return;
-    // La consultation est un rituel sur un Totem déjà composé — on ne tire
-    // les cauris que si l'oeuvre existe déjà, sinon on incite à la composer.
-    if (!hasWork) {
-      setShowComposePrompt(true);
-      return;
-    }
+  async function cast() {
+    if (!canCast || inFlight.current) return;
+    inFlight.current = true;
+    setDrawError(false);
     setFallenPoses(shells.map(randomFallenPose));
     setShellFaces(shells.map(randomFace));
     setPhase("falling");
-    setTimeout(() => setPhase("revealed"), 700);
+    try {
+      const mood = CAURIS_MOODS.find((value) => value === requestedMood);
+      const [result] = await Promise.all([
+        caurisRequest<{ reading: Reading; nextAvailableAt: string }>("tirer", mood ? { mood } : {}),
+        new Promise((resolve) => setTimeout(resolve, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700)),
+      ]);
+      if (!mounted.current) return;
+      setReading(result.reading);
+      setNextAvailable(result.nextAvailableAt);
+      setPhase("revealed");
+    } catch {
+      if (mounted.current) { setDrawError(true); setPhase("floating"); }
+    } finally { inFlight.current = false; }
   }
 
   return (
@@ -110,13 +128,12 @@ export default function ConsultationTirage({ dict, lang }: { dict: Dictionary["c
 
       {/* plateau : centré, en colonne, s'adapte à n'importe quelle taille d'écran */}
       <div
-        onClick={cast}
-        className="relative z-10 flex flex-1 flex-col items-center justify-center gap-10 px-6 py-10 text-center cursor-pointer"
+        className="relative z-10 flex flex-1 flex-col items-center justify-center gap-10 px-6 py-10 text-center"
       >
         <span className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</span>
 
         {/* les six cauris : toujours visibles, flottent puis retombent chacun différemment */}
-        <div className="grid grid-cols-3 gap-x-8 gap-y-7 sm:gap-x-10">
+        <div className="grid grid-cols-3 gap-x-8 gap-y-7 motion-reduce:[&>div]:animate-none motion-reduce:[&>div]:transition-none sm:gap-x-10" aria-hidden="true">
           {shells.map((shell, i) => (
             <div
               key={i}
@@ -127,31 +144,24 @@ export default function ConsultationTirage({ dict, lang }: { dict: Dictionary["c
                 transitionDelay: shell.delay,
               }}
             >
-              <CauriShell face={isFloating ? "open" : shellFaces[i]} />
+              <CauriShell face={isFloating ? "open" : shellFaces[i] ?? "open"} />
             </div>
           ))}
         </div>
 
-        {isFloating && (
-          <p className="font-display max-w-sm animate-[instr-pulse_2.4s_ease-in-out_infinite] text-lg italic text-orpale">
-            {dict.instruction}
-          </p>
-        )}
+        {!state && !loadError && <p role="status" className="text-grisclair">{copy.loading}</p>}
+        {loadError && <div className="flex flex-col items-center gap-4"><p role="alert" className="text-grisclair">{copy.loadError}</p><Button onClick={retry}>{copy.retry}</Button></div>}
+        {state?.reason === "serie_indisponible" && !displayedReading && <p className="text-grisclair">{copy.seriesUnavailable}</p>}
+        {canCast && <Button onClick={cast}>{drawError ? copy.retry : copy.draw}</Button>}
+        {phase === "falling" && <p role="status" className="text-orpale">{copy.drawing}</p>}
+        {drawError && <p role="alert" className="text-grisclair">{copy.drawError}</p>}
 
-        {isRevealed && (
-          <div className="flex w-full max-w-xl flex-col items-center gap-4.5">
+        {isRevealed && displayedReading && (
+          <div className="flex w-full max-w-xl flex-col items-center gap-4.5" aria-live="polite">
             <span className="text-xs uppercase tracking-[0.18em] text-or">{dict.readingLabel}</span>
-            <p className="font-display text-lg italic leading-relaxed text-ivoire lg:text-xl">{dict.reading}</p>
+            <CaurisReading reading={displayedReading} copy={copy} lang={lang} />
+            {(nextAvailable ?? state?.nextAvailableAt) && <p className="text-sm text-grisclair">{copy.nextAvailable} {caurisDate((nextAvailable ?? state?.nextAvailableAt)!, lang)} · {copy.parisTime}</p>}
             <div className="mt-2 flex gap-5">
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPhase("floating");
-                }}
-                className="cursor-pointer border-b border-ombre pb-0.5 text-xs uppercase tracking-wide text-grisclair"
-              >
-                {dict.resetLink}
-              </span>
               <Link
                 href={`/${lang}/consultations`}
                 onClick={(e) => e.stopPropagation()}

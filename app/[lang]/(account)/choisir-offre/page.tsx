@@ -1,4 +1,5 @@
 import ChoisirOffre from "@/components/sections/ChoisirOffre";
+import { Suspense } from "react";
 import { getDictionary, type Locale } from "../../dictionaries";
 
 export default async function ChoisirOffrePage({
@@ -9,5 +10,5 @@ export default async function ChoisirOffrePage({
   const { lang } = await params;
   const dict = await getDictionary(lang);
 
-  return <ChoisirOffre dict={dict.paiement} offresDict={dict.offres} lang={lang} />;
+  return <Suspense fallback={null}><ChoisirOffre dict={dict.paiement} offresDict={dict.offres} lang={lang} /></Suspense>;
 }

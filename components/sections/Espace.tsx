@@ -3,15 +3,18 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { useCommandes } from "@/lib/hooks/useCommandes";
+import { ConsultationStatus } from "@/components/sections/ConsultationStatus";
 
 type Props = {
   dict: Dictionary["espace"];
   lang: Locale;
+  caurisCopy: Dictionary["cauris"];
 };
 
-export default function Espace({ dict, lang }: Props) {
+export default function Espace({ dict, caurisCopy, lang }: Props) {
   const { commandes, error } = useCommandes();
   const works = (commandes ?? []).filter((c) => c.oeuvre);
+  const unfinished = (commandes ?? []).find((c) => c.requiresQuestionnaire && c.stripe_session_id);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12 lg:pl-0 lg:pr-16">
@@ -70,15 +73,14 @@ export default function Espace({ dict, lang }: Props) {
       {/* carte de statut : toujours visible — si le Totem n'est pas encore
           composé, le tirage lui-même (ConsultationTirage) invite à le
           composer plutôt que de cacher l'entrée de la consultation. */}
-      <div className="mt-9 flex flex-col items-start gap-6 border-[1.5px] border-or bg-indigo p-9 shadow-[0_20px_50px_rgba(201,168,76,0.1)] sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs uppercase tracking-wide text-or">{dict.statusLabel}</span>
-          <span className="font-display text-xl italic text-ivoire">{dict.statusText}</span>
+      <ConsultationStatus copy={caurisCopy} lang={lang} />
+
+      {unfinished && (
+        <div className="mt-9 flex flex-col items-start gap-4 border border-or bg-indigo p-6">
+          <p className="text-sm text-ivoire">{dict.resumePaidText}</p>
+          <Button href={`/${lang}/parcours?session_id=${encodeURIComponent(unfinished.stripe_session_id!)}`}>{dict.resumeButton}</Button>
         </div>
-        <Button href={`/${lang}/consultation-question`} className="shrink-0 whitespace-nowrap">
-          {dict.discoverButton}
-        </Button>
-      </div>
+      )}
 
       {/* grille des œuvres */}
       <div className="mt-10 flex flex-col gap-5">

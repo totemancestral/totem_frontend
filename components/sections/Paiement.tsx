@@ -2,13 +2,13 @@
 import { useState } from "react";
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Brand } from "@/components/ui/Brand";
 import { Logo } from "@/components/ui/Logo";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
+import { adultDraftSchema, hasAdultAnswersThrough, PAYMENT_AFTER_QUESTION } from "@/lib/adult-flow";
 
-const DRAFT_KEY = "totem:parcours:answers";
 const JUNIOR_DRAFT_KEY = "totem:parcours:junior:answers";
 
 // aligné sur l'ordre de dict.offres.items (Origine, Révélation/Ancestral, Famille) —
@@ -38,8 +38,10 @@ const ivoireScope = {
 } as CSSProperties;
 
 export default function Paiement({ dict, offresDict, lang, variant }: Props) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const offre = searchParams.get("offre") ?? "ancestral";
+  const parcours = searchParams.get("parcours");
   const offer = dict[variant];
   // Le récapitulatif doit refléter l'offre réellement choisie (Origine /
   // Révélation / Famille), pas un tarif fixe — sinon l'écran de paiement
@@ -62,10 +64,10 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
     setError(null);
     try {
       const isJunior = variant === "junior";
-      const raw = sessionStorage.getItem(isJunior ? JUNIOR_DRAFT_KEY : DRAFT_KEY);
+      const raw = isJunior ? sessionStorage.getItem(JUNIOR_DRAFT_KEY) : null;
       const draft = raw ? JSON.parse(raw) : {};
       // Le backend Junior n'accepte que {choice}, pas de texte libre.
-      const answers = isJunior
+      let answers = isJunior
         ? Object.fromEntries(
             Object.entries(draft as Record<string, { choice?: string }>).map(([key, value]) => [
               key,
@@ -81,16 +83,41 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
         return;
       }
 
+      let parcoursId: string | undefined;
+      if (!isJunior) {
+        const progressResponse = await fetch(`/api/parcours?${new URLSearchParams(parcours ? { parcoursId: parcours } : {})}`, {
+          headers: { Authorization: `Bearer ${token}` }, cache: "no-store",
+        });
+        if (!progressResponse.ok) throw new Error("progress_unavailable");
+        const progress = await progressResponse.json();
+        if (progress.paid && progress.sessionId) {
+          router.replace(`/${lang}/parcours?session_id=${encodeURIComponent(progress.sessionId)}`);
+          return;
+        }
+        const validated = adultDraftSchema.safeParse(progress.answers);
+        if (!progress.parcoursId || !validated.success || !hasAdultAnswersThrough(validated.data, PAYMENT_AFTER_QUESTION)) {
+          setError(dict.adultProgressError);
+          return;
+        }
+        parcoursId = progress.parcoursId;
+        answers = validated.data;
+      }
+
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ offre: isJunior ? "junior" : offre, answers, locale: lang }),
+        body: JSON.stringify({ offre: isJunior ? "junior" : offre, answers, locale: lang, parcoursId }),
       });
       const payload = (await response.json().catch(() => null)) as {
         checkoutUrl?: string;
         error?: string;
+        sessionId?: string;
       } | null;
 
+      if (response.status === 409 && payload?.sessionId) {
+        router.replace(`/${lang}/parcours?session_id=${encodeURIComponent(payload.sessionId)}`);
+        return;
+      }
       if (!response.ok || !payload?.checkoutUrl) {
         setError(payload?.error ?? "Paiement indisponible. Réessaie dans un instant.");
         return;
@@ -145,7 +172,7 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
           <div className="flex flex-col items-center gap-4 text-center">
             <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
             <h1 className="font-display text-4xl text-ivoire lg:text-5xl">{dict.title}</h1>
-            <p className="max-w-sm text-sm text-grisclair">{dict.text}</p>
+            <p className="max-w-sm text-sm text-grisclair">{variant === "adulte" ? dict.adultPaymentText : dict.text}</p>
           </div>
 
           {/* récapitulatif de commande */}

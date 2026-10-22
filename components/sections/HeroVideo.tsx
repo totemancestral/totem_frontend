@@ -1,25 +1,28 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useAmbientMusic } from "@/lib/hooks/useAmbientMusic";
+import { MusicButton } from "@/components/ui/MusicButton";
+import type { Dictionary } from "@/app/[lang]/dictionaries";
 
-export default function HeroVideo() {
+export default function HeroVideo({ copy }: { copy: Dictionary["media"] }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(true);
-  const [playing, setPlaying] = useState(true);
-
-  function toggleMute() {
-    if (!videoRef.current) return;
-    videoRef.current.muted = !muted;
-    setMuted(!muted);
-  }
+  const { setHeroControls } = useAmbientMusic();
+  const [playing, setPlaying] = useState(false);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      void video.play().catch(() => {});
+    }
+    return () => video?.pause();
+  }, []);
 
   function togglePlay() {
     if (!videoRef.current) return;
-    if (playing) {
+    if (!videoRef.current.paused) {
       videoRef.current.pause();
     } else {
-      videoRef.current.play();
+      void videoRef.current.play().catch(() => {});
     }
-    setPlaying(!playing);
   }
 
   return (
@@ -27,45 +30,28 @@ export default function HeroVideo() {
       {/* fond vidéo : occupe tout le conteneur parent (le Hero doit être "relative") */}
       <video
         ref={videoRef}
-        autoPlay
         muted
         loop
         playsInline
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
         className="absolute inset-0 h-full w-full object-cover"
-        src="/videos/hero.mp4"
+        src="/assets/totem-intro.mp4"
       />
       {/* voile sombre pour garder le texte lisible par-dessus la vidéo */}
       <div className="absolute inset-0 bg-nuit/40" />
 
       {/* contrôles : en bas à gauche sur mobile (sous le texte, grâce au padding
           bas du Hero), repositionnés en bas à droite à partir de lg */}
-      <div className="absolute bottom-2 left-6 z-20 flex gap-3 lg:bottom-6 lg:left-auto lg:right-6">
-        <button
-          onClick={toggleMute}
-          aria-label={muted ? "Activer le son" : "Couper le son"}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-ombre bg-nuit/60 text-ivoire"
-        >
-          {muted ? (
-            // haut-parleur barré
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M3 9v6h4l5 5V4L7 9H3z" />
-              <line x1="16" y1="9" x2="22" y2="15" />
-              <line x1="22" y1="9" x2="16" y2="15" />
-            </svg>
-          ) : (
-            // haut-parleur avec ondes sonores
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M3 9v6h4l5 5V4L7 9H3z" />
-              <path d="M16 8a5 5 0 0 1 0 8" />
-              <path d="M19 5a9 9 0 0 1 0 14" />
-            </svg>
-          )}
-        </button>
+      <div ref={setHeroControls} data-hero-controls className="absolute bottom-6 left-6 z-20 flex gap-3 lg:left-auto lg:right-6">
+        <MusicButton copy={copy} />
 
         <button
+          type="button"
           onClick={togglePlay}
-          aria-label={playing ? "Mettre en pause" : "Lire"}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-ombre bg-nuit/60 text-ivoire"
+          aria-label={playing ? copy.pauseVideo : copy.playVideo}
+          title={playing ? copy.pauseVideo : copy.playVideo}
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-or bg-nuit/90 text-ivoire focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or"
         >
           {playing ? (
             // pause : deux barres

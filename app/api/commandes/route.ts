@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const { data, error } = await supabase
     .from("commandes")
     .select(
-      "id, offre, statut, montant_cents, devise, langue, created_at, oeuvres(nom_totem, image_url, numero_serie, statut)",
+      "id, offre, statut, montant_cents, devise, langue, created_at, stripe_session_id, reponses_parcours(termine), oeuvres(nom_totem, image_url, numero_serie, statut)",
     )
     .eq("user_id", auth.userId)
     .order("created_at", { ascending: false });
@@ -20,5 +20,8 @@ export async function GET(request: Request) {
     return internalError("commandes.GET", error);
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json(data.map(({ reponses_parcours, ...command }) => ({
+    ...command,
+    requiresQuestionnaire: command.offre !== "junior" && command.statut === "paye" && reponses_parcours?.termine === false,
+  })));
 }

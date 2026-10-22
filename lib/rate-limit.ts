@@ -10,13 +10,14 @@ export async function rateLimit(
   request: Request,
   maxRequests: number = 20,
   windowMs: number = 60_000,
+  scope: string = "default",
 ): Promise<NextResponse | null> {
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     request.headers.get("x-real-ip") ??
     "unknown";
 
-  return memoryLimit(ip, maxRequests, windowMs);
+  return memoryLimit(`${scope}:${ip}`, maxRequests, windowMs);
 }
 
 function memoryLimit(ip: string, maxRequests: number, windowMs: number): NextResponse | null {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Hero from "@/components/sections/Hero";
+import ProofBand from "@/components/sections/ProofBand";
 import AvantDetreVous from "@/components/sections/AvantDetreVous";
 import ApresLeTotem from "@/components/sections/ApresLeTotem";
 import Manifeste from "@/components/sections/Manifeste";
@@ -31,7 +32,8 @@ export default async function Home({
 
   return (
     <>
-      <Hero dict={dict.hero} lang={lang} />
+      <Hero dict={dict.hero} lang={lang} mediaCopy={dict.media} />
+      <ProofBand dict={dict.proofBand} />
       <AvantDetreVous dict={dict.avantDetreVous} />
       <ApresLeTotem dict={dict.apresLeTotem} lang={lang} />
       <Manifeste dict={dict.manifeste} />

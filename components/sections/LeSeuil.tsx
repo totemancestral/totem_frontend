@@ -19,12 +19,12 @@ export default function LeSeuil({ dict }: { dict: Dictionary["leSeuil"] }) {
 
         {/* les 4 gestes, empilés : réservé au mobile, la version "pinned"
             au scroll (LeSeuilPinned) prend le relais à partir de lg */}
-        <div className="mt-16 flex flex-col gap-14 lg:hidden">
+        <div className="mt-16 flex flex-col gap-14 xl:hidden">
           {dict.gestes.map((geste) => (
             <div key={geste.title} className="flex flex-col gap-8">
               <Reveal
                 variant={geste.imageFirst ? "left" : "right"}
-                className="relative h-[260px] w-full overflow-hidden border border-ombre bg-nuit"
+                className={`relative mx-auto w-full overflow-hidden border border-ombre bg-nuit ${geste.image.endsWith("seuil_0.png") ? "aspect-[2/3] max-w-md" : "aspect-[3/2] max-w-3xl"}`}
               >
                 <Image
                   src={geste.image}

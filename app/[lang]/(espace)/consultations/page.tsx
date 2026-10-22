@@ -9,5 +9,5 @@ export default async function ConsultationsPage({
   const { lang } = await params;
   const dict = await getDictionary(lang);
 
-  return <Consultations dict={dict.consultations} lang={lang} />;
+  return <Consultations dict={dict.consultations} copy={dict.cauris} lang={lang} />;
 }

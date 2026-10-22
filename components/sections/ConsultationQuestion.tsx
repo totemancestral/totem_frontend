@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
+import { CAURIS_MOODS } from "@/lib/cauris";
 
 export default function ConsultationQuestion({ dict, lang }: { dict: Dictionary["consultationQuestion"]; lang: Locale }) {
   const [selected, setSelected] = useState<number | null>(null);
@@ -62,9 +63,9 @@ export default function ConsultationQuestion({ dict, lang }: { dict: Dictionary[
       <div className="relative z-10 flex items-center justify-between px-6 py-8 lg:px-14">
         <span className="text-xs text-grisclair">{dict.privacyNote}</span>
         {hasSelection ? (
-          <Button href={`/${lang}/consultation-tirage`}>{dict.nextButton}</Button>
+          <Button href={`/${lang}/consultation-tirage?mood=${CAURIS_MOODS[selected!]}`}>{dict.nextButton}</Button>
         ) : (
-          <Button className="pointer-events-none opacity-40">{dict.nextButton}</Button>
+          <Button disabled className="opacity-40">{dict.nextButton}</Button>
         )}
       </div>
     </div>

@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+@keyframes totem-marquee {
+  to { transform: translateX(-50%); }
+}
+.totem-marquee { animation: totem-marquee 35s linear infinite; }
+.totem-intro:not([open]) { display: none; }
+/* Préserve le décalage interne entre texte et image ; leur bloc commun
+   est ancré en bas du Hero. Cet espace se réduit sur les écrans peu hauts. */
+.hero-copy { padding-top: clamp(0rem, calc((100svh - 36rem) * 0.75), 15rem); }
+@media (min-width: 1024px) and (min-height: 900px) {
+  .hero-tag { display: flex; }
+}
+@media (max-height: 700px) {
+  [data-hero] { padding-top: 7.5rem; padding-bottom: 6rem; }
+}
+@media (min-width: 1024px) and (max-height: 700px) {
+  [data-hero] { padding-bottom: 73px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .totem-marquee { animation: none; width: 100%; }
+  .totem-marquee > div { width: 100%; flex-wrap: wrap; justify-content: center; row-gap: 1rem; }
+  .totem-marquee > div + div { display: none; }
+}
+
 /* Couleurs : PAS "inline", pour que les classes (bg-nuit, text-or...)
    gardent une référence vivante à la variable, et puissent être
    redéfinies localement section par section (voir ApresLeTotem.tsx). */

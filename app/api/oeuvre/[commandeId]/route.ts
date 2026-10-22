@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ comm
 
   const { data: commande, error } = await supabase
     .from("commandes")
-    .select("id, offre, statut, oeuvres(nom_totem, recit, image_url, audio_url, pdf_url, numero_serie, statut, created_at)")
+    .select("id, offre, statut, oeuvres(nom_totem, recit, image_url, audio_url, pdf_url, certificate_url, numero_serie, statut, created_at)")
     .eq("id", commandeId)
     .eq("user_id", auth.userId)
     .maybeSingle();
