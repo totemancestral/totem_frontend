@@ -42,7 +42,7 @@ export default function Hero({ dict, lang, mediaCopy }: { dict: Dictionary["hero
         delay={150}
         className="flex flex-col items-center gap-6 lg:items-start xl:flex-row xl:items-center xl:gap-10"
       >
-        <p className="max-w-md text-sm leading-relaxed text-grisclair lg:max-w-xs">
+        <p className="max-w-md text-sm leading-relaxed text-grisclair lg:max-w-xs lg:text-justify">
           {dict.description}
         </p>
         <Button variant="outline" href={`/${lang}/inscription`}>{dict.cta}</Button>

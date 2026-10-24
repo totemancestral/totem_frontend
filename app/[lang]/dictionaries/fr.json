@@ -728,10 +728,10 @@
     "items": [
       { "quote": "J'ai pleuré en lisant le Parchemin. Ça ne ressemblait à rien d'autre. Une émotion brute.", "name": "Aïcha", "city": "Dakar", "img": "/images/temoignage_0.png" },
       { "quote": "La Voix m'a donné des frissons. On dirait que mon ancêtre me connaissait vraiment.", "name": "Leyna", "city": "Paris", "img": "/images/temoignage_3.png" },
-      { "quote": "Je m'attendais à un gadget. J'ai reçu un héritage.", "name": "Sékou", "city": "Abidjan", "img": "/images/temoignage_2.png" },
-      { "quote": "Le coffret Famille nous a réunis autour d'une histoire commune, enfin écrite.", "name": "Fatou", "city": "Bamako", "img": "/images/temoignage_2.png" },
-      { "quote": "Le Visage trône maintenant dans mon salon. C'est mon Totem, mon héritage.", "name": "Naomi", "city": "London", "img": "/images/temoignage_4.png" },
-      { "quote": "Quinze minutes comme promis, et un objet que je garderai toute ma vie.", "name": "Idris", "city": "Lagos","img": "/images/temoignage_5.png" }
+      { "quote": "Je m'attendais à un gadget. J'ai reçu un héritage.", "name": "Sabi", "city": "Bamako", "img": "/images/temoignage_2.png" },
+      { "quote": "Le coffret Famille nous a réunis autour d'une histoire commune, enfin écrite.", "name": "Carolle", "city": "Accra", "img": "/images/temoignage_1.png" },
+      { "quote": "Le Visage trône maintenant dans mon salon. C'est mon Totem, mon héritage.", "name": "Eric", "city": "London", "img": "/images/temoignage_4.png" },
+      { "quote": "Quinze minutes comme promis, et un objet que je garderai toute ma vie.", "name": "Naomi", "city": "Belgique","img": "/images/temoignage_5.png" }
     ]
   },
   "faq": {
