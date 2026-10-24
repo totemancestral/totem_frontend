@@ -1,0 +1,71 @@
+{
+  "errors": {
+    "signInFailed": "Connexion impossible. Réessayez dans un instant.",
+    "invalidCredentials": "Email ou mot de passe incorrect.",
+    "emailUnconfirmed": "Confirmez votre email avant de vous connecter.",
+    "tooManyRequests": "Trop de tentatives. Réessayez plus tard.",
+    "sendFailed": "Envoi impossible. Réessayez dans un instant.",
+    "signupFailed": "Inscription impossible. Réessayez dans un instant.",
+    "passwordRules": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.",
+    "passwordReuse": "Choisissez un mot de passe différent du précédent.",
+    "invalidRecoveryLink": "Ce lien n’est plus valide ou a déjà été utilisé. Demandez un nouveau lien.",
+    "updateFailed": "Mise à jour impossible. Réessayez dans un instant.",
+    "sessionExpired": "Session expirée. Reconnectez-vous.",
+    "invalidEmail": "Veuillez saisir une adresse email valide.",
+    "emailUnavailable": "Cette adresse email ne peut pas être utilisée. Essayez une autre adresse.",
+    "profileLoadFailed": "Impossible de charger votre profil.",
+    "paymentUnavailable": "Paiement indisponible. Réessayez dans un instant.",
+    "paymentSessionMissing": "Session de paiement introuvable.",
+    "orderUnavailable": "Impossible de charger votre commande pour le moment.",
+    "artworkMissing": "Œuvre introuvable.",
+    "artworkLoadFailed": "Impossible de charger votre œuvre pour le moment."
+  },
+  "status": {
+    "checkingSession": "Vérification de votre session…",
+    "creatingAccount": "Création du compte…",
+    "signingIn": "Connexion en cours…",
+    "sendingLink": "Envoi du lien…",
+    "sendingMessage": "Envoi du message…",
+    "savingAnswers": "Enregistrement des réponses…",
+    "loadingQuestionnaire": "Chargement de votre questionnaire…",
+    "loadingProfile": "Chargement de votre profil…",
+    "savingProfile": "Enregistrement du profil…",
+    "profileUpdated": "Profil mis à jour.",
+    "passwordUnchanged": "Laissez vide pour conserver votre mot de passe actuel.",
+    "emailResent": "Email renvoyé.",
+    "resendingEmail": "Renvoi de l’email…",
+    "updatingPassword": "Mise à jour du mot de passe…",
+    "preparingPayment": "Préparation du paiement sécurisé…",
+    "loading": "Chargement…",
+    "retry": "Réessayer"
+  },
+  "password": {
+    "show": "Afficher le mot de passe",
+    "hide": "Masquer le mot de passe",
+    "rules": ["8 caractères minimum", "une majuscule", "une minuscule", "un chiffre"],
+    "met": "Critère rempli",
+    "unmet": "Critère non rempli"
+  },
+  "artwork": {
+    "portrait": "Portrait de {name}",
+    "orderInfo": "Œuvre n° {number} · Livrée le {date}"
+  },
+  "navigation": {
+    "skip": "Aller au contenu",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "main": "Navigation principale",
+    "mobile": "Navigation mobile",
+    "personal": "Navigation de l’espace personnel"
+  },
+  "payment": { "agreements": "Accords requis avant le paiement" },
+  "offers": { "essentiel": "Origine", "signature": "Révélation", "heritage": "Famille", "origine": "Origine", "ancestral": "Révélation", "famille": "Famille", "junior": "Junior" },
+  "orders": { "number": "N° de commande", "serial": "N°", "displayedReadings": "{count} lectures affichées." },
+  "retry": {
+    "limited": "Trop de tentatives.",
+    "unavailable": "Service temporairement indisponible.",
+    "later": "Réessayez plus tard.",
+    "one": "Attendez au moins {seconds} seconde avant de réessayer.",
+    "many": "Attendez au moins {seconds} secondes avant de réessayer."
+  }
+}

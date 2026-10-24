@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Remain visible against both light and dark navigation surfaces. */
+:where([data-site-nav], #site-mobile-menu, #espace-mobile-menu) :where(a, button):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+[data-floating-music][inert] { visibility: hidden; }
+[data-admin] :where(a, button, input, select, [tabindex]):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
 @keyframes totem-marquee {
   to { transform: translateX(-50%); }
 }

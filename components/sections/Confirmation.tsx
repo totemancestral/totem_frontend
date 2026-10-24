@@ -1,10 +1,13 @@
 "use client";
+import { interfaceCopy } from "@/lib/interface-copy";
 import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
+import { retryNotice } from "@/lib/retry-after";
+import { REQUEST_TIMING, requestSignal } from "@/lib/request-timing";
 
 type Props = {
   dict: Dictionary["confirmation"];
@@ -19,26 +22,28 @@ const ivoireScope = {
   background: "#FBF6EA",
   "--color-nuit": "#0D0D1A",
   "--color-indigo": "#F3EDDD",
-  "--color-ombre": "#D8D0BC",
-  "--color-or": "#B08A3E",
-  "--color-orpale": "#8B6F2E",
+  "--color-ombre": "#857A63",
+  "--color-or": "#806020",
+  "--color-orpale": "#7B612E",
   "--color-ivoire": "#0D0D1A",
   "--color-gris": "#6B6558",
-  "--color-grisclair": "#948C78",
+  "--color-grisclair": "#706655",
 } as CSSProperties;
 
 type OrderStatus = "pending" | "processing" | "done" | "error";
 
 export default function Confirmation({ dict, offerName, lang }: Props) {
+  const ui = interfaceCopy(lang);
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
 
-  const [status, setStatus] = useState<OrderStatus | "loading" | "unpaid">(
+  const [revision, setRevision] = useState(0);
+  const [status, setStatus] = useState<OrderStatus | "loading" | "unpaid" | "delayed">(
     sessionId ? "loading" : "error",
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(
-    sessionId ? null : "Session de paiement introuvable",
+    sessionId ? null : ui.errors.paymentSessionMissing,
   );
   const [commandeId, setCommandeId] = useState<string | null>(null);
 
@@ -47,11 +52,25 @@ export default function Confirmation({ dict, offerName, lang }: Props) {
 
     let alive = true;
     let timer: ReturnType<typeof setTimeout>;
+    const controller = new AbortController();
+    let windowTimer: ReturnType<typeof setTimeout>;
+    let paidConfirmed = false;
+    function startBudget(duration: number) {
+      clearTimeout(windowTimer);
+      windowTimer = setTimeout(() => {
+      controller.abort();
+      clearTimeout(timer);
+      if (alive) setStatus("delayed");
+      }, duration);
+    }
+    startBudget(REQUEST_TIMING.paymentWindow);
 
     async function poll() {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
+      if (!alive || controller.signal.aborted) return;
       if (!token) {
+        clearTimeout(windowTimer);
         if (alive) setStatus("error");
         return;
       }
@@ -59,6 +78,7 @@ export default function Confirmation({ dict, offerName, lang }: Props) {
       try {
         const response = await fetch(`/api/orders/session/${sessionId}`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal: requestSignal(REQUEST_TIMING.read, controller.signal),
         });
         const payload = (await response.json().catch(() => null)) as {
           status?: OrderStatus;
@@ -69,42 +89,51 @@ export default function Confirmation({ dict, offerName, lang }: Props) {
           requiresQuestionnaire?: boolean;
         } | null;
 
-        if (!alive) return;
+        if (!alive || controller.signal.aborted) return;
 
         if (response.status === 402) {
           setStatus("unpaid");
-          timer = setTimeout(poll, 4000);
+          timer = setTimeout(poll, REQUEST_TIMING.paymentInterval);
           return;
         }
         if (!response.ok || !payload) {
-          setErrorMessage(payload?.error ?? "Commande introuvable");
+          setErrorMessage(retryNotice(response, lang) ?? ui.errors.orderUnavailable);
           setStatus("error");
+          clearTimeout(windowTimer);
           return;
         }
 
         if (payload.paid && payload.requiresQuestionnaire) {
+          clearTimeout(windowTimer);
           router.replace(`/${lang}/parcours?session_id=${encodeURIComponent(sessionId!)}`);
           return;
         }
+        if (payload.paid && !paidConfirmed) {
+          paidConfirmed = true;
+          startBudget(REQUEST_TIMING.artworkWindow);
+        }
         setStatus(payload.status ?? "pending");
         if (payload.commandeId) setCommandeId(payload.commandeId);
-        if (payload.status === "error") setErrorMessage(payload.errorMessage ?? null);
+        if (payload.status === "error") setErrorMessage(dict.errorText);
         if (payload.status !== "done" && payload.status !== "error") {
-          timer = setTimeout(poll, 4000);
-        }
+          timer = setTimeout(poll, REQUEST_TIMING.paymentInterval);
+        } else clearTimeout(windowTimer);
       } catch {
-        if (alive) setStatus("error");
+        if (alive && !controller.signal.aborted) { setStatus("error"); clearTimeout(windowTimer); }
       }
     }
 
     poll();
     return () => {
       alive = false;
+      controller.abort();
+      clearTimeout(windowTimer);
       clearTimeout(timer);
     };
-  }, [sessionId, lang, router]);
+  }, [sessionId, lang, router, dict.errorText, ui.errors.orderUnavailable, revision]);
 
   const statusCopy = {
+    delayed: { title: dict.statusTitle, text: lang === "fr" ? "Le traitement prend plus de temps que prévu. Vous pouvez vérifier à nouveau dans un instant." : "Processing is taking longer than expected. You can check again shortly." },
     loading: { title: dict.statusTitle, text: dict.checkingPayment },
     unpaid: { title: dict.statusTitle, text: dict.waitingPayment },
     pending: { title: dict.statusTitle, text: dict.statusText },
@@ -152,7 +181,8 @@ export default function Confirmation({ dict, offerName, lang }: Props) {
 
           <div className="flex flex-col gap-1.5">
             <p className="text-sm font-medium text-gris">{statusCopy.title}</p>
-            <p className="text-xs text-grisclair">{statusCopy.text}</p>
+            <p role={status === "error" ? "alert" : "status"} className="text-xs text-grisclair">{statusCopy.text}</p>
+            {(status === "delayed" || status === "error") && sessionId && <button type="button" className="text-sm text-or underline underline-offset-4" onClick={() => { setStatus("loading"); setErrorMessage(null); setRevision(n => n + 1); }}>{lang === "fr" ? "Vérifier à nouveau" : "Check again"}</button>}
           </div>
 
           <Link
@@ -162,7 +192,7 @@ export default function Confirmation({ dict, offerName, lang }: Props) {
             {status === "done" ? dict.buttonReady : dict.button}
           </Link>
 
-          <div className="mt-1 flex gap-6">
+          <div className="mt-1 flex flex-wrap gap-x-6 gap-y-3">
             {dict.legalLinks.map((lien, i) => (
               <Link key={lien} href={`/${lang}${legalHrefs[i]}`} className="text-sm text-grisclair">
                 {lien}

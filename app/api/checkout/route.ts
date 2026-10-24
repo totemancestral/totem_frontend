@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
 import { authenticateRequest, createServiceClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
+import { forwardRetryResponse } from "@/lib/server/response-limits";
 import { ADULT_OFFERS, JUNIOR_AMOUNT_CENTS, JUNIOR_COMMANDE_OFFRE, toCommandeOffre } from "@/lib/offers";
 import type { Json } from "@/lib/supabase/types";
 import { adultIndicators, toAdultBackendAnswers } from "@/lib/adult-answers";
@@ -216,6 +217,8 @@ async function callBackendCheckout(
       body: JSON.stringify(body),
     });
 
+    const limited = forwardRetryResponse(backendResponse);
+    if (limited) return limited;
     const backendPayload = (await backendResponse.json().catch(() => null)) as {
       id?: string;
       url?: string | null;

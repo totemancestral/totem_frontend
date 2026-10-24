@@ -1,4 +1,5 @@
 "use client";
+import { useAdminLocale } from "@/lib/hooks/useAdminLocale";
 import { useState } from "react";
 import { useAdminFetch } from "@/lib/hooks/useAdminFetch";
 import {
@@ -26,6 +27,7 @@ const ACTIVITES = [
 ];
 
 export function UtilisateursSection() {
+  const { t, lang } = useAdminLocale();
   const [search, setSearch] = useState("");
   const [langue, setLangue] = useState("");
   const [activite, setActivite] = useState("");
@@ -38,28 +40,29 @@ export function UtilisateursSection() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionTitle title="Utilisateurs" subtitle="Les comptes créés sur le site." />
+      <SectionTitle title={t("Utilisateurs")} subtitle={t("Les comptes créés sur le site.")} />
 
       <FilterBar>
-        <FilterInput label="Recherche" value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Email, prénom…" />
-        <FilterSelect label="Langue" value={langue} onChange={(v) => { setLangue(v); setPage(1); }} options={LANGUES} />
-        <FilterSelect label="Activité" value={activite} onChange={(v) => { setActivite(v); setPage(1); }} options={ACTIVITES} />
+        <FilterInput label={t("Recherche")} value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("Email, prénom…")} />
+        <FilterSelect label={t("Langue")} value={langue} onChange={(v) => { setLangue(v); setPage(1); }} options={LANGUES} />
+        <FilterSelect label={t("Activité")} value={activite} onChange={(v) => { setActivite(v); setPage(1); }} options={ACTIVITES} />
       </FilterBar>
 
       {loading && <LoadingState />}
       {error && <ErrorState text={error} />}
-      {data && data.utilisateurs.length === 0 && <EmptyState text="Aucun utilisateur ne correspond à ces filtres." />}
+      {data && data.utilisateurs.length === 0 && <EmptyState text={t("Aucun utilisateur ne correspond à ces filtres.")} />}
 
       {data && data.utilisateurs.length > 0 && (
-        <div className="overflow-x-auto border border-ombre">
+        <div role="region" aria-label={t("Tableau des utilisateurs — défilement horizontal")} tabIndex={0} className="max-w-full overflow-x-auto border border-ombre">
           <table className="w-full min-w-[640px] text-left text-sm">
+            <caption className="sr-only">{t("Utilisateurs et nombre de commandes")}</caption>
             <thead className="border-b border-ombre bg-indigo text-xs uppercase tracking-wide text-grisclair">
               <tr>
-                <th className="px-4 py-3">Nom</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Langue</th>
-                <th className="px-4 py-3">Commandes</th>
-                <th className="px-4 py-3">Inscrit le</th>
+                <th className="px-4 py-3">{t("Nom")}</th>
+                <th className="px-4 py-3">{t("Email")}</th>
+                <th className="px-4 py-3">{t("Langue")}</th>
+                <th className="px-4 py-3">{t("Commandes")}</th>
+                <th className="px-4 py-3">{t("Inscrit le")}</th>
               </tr>
             </thead>
             <tbody>
@@ -73,10 +76,10 @@ export function UtilisateursSection() {
                   <td className="px-4 py-3 text-grisclair">
                     {utilisateur.total_commandes}
                     {utilisateur.commandes_actives > 0 && (
-                      <span className="ml-1.5 text-xs text-or">({utilisateur.commandes_actives} active{utilisateur.commandes_actives > 1 ? "s" : ""})</span>
+                      <span className="ml-1.5 text-xs text-or">({lang === "fr" ? `${utilisateur.commandes_actives} active${utilisateur.commandes_actives > 1 ? "s" : ""}` : t("{count} active(s)", { count: utilisateur.commandes_actives })})</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-grisclair">{formatDateShort(utilisateur.created_at)}</td>
+                  <td className="px-4 py-3 text-grisclair">{formatDateShort(utilisateur.created_at, lang)}</td>
                 </tr>
               ))}
             </tbody>

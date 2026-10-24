@@ -1,4 +1,5 @@
 "use client";
+import { interfaceCopy, formatInterface } from "@/lib/interface-copy";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -6,6 +7,8 @@ import { Logo } from "@/components/ui/Logo";
 import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
+import { retryNotice } from "@/lib/retry-after";
+import { REQUEST_TIMING, requestSignal } from "@/lib/request-timing";
 
 type Phase = "loading" | "closed" | "open";
 
@@ -21,7 +24,7 @@ type OeuvreData = {
   created_at: string;
 };
 
-type FetchStatus = "loading" | "pending" | "ready" | "notfound" | "error";
+type FetchStatus = "loading" | "pending" | "ready" | "notfound" | "error" | "delayed";
 
 function formatDate(iso: string, lang: Locale) {
   try {
@@ -53,10 +56,13 @@ function splitRecit(recit: string): { title: string | null; text: string }[] {
 }
 
 export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lang: Locale }) {
+  const ui = interfaceCopy(lang);
   const searchParams = useSearchParams();
   const commandeId = searchParams.get("commande");
 
   const [fetchStatus, setFetchStatus] = useState<FetchStatus>(commandeId ? "loading" : "notfound");
+  const [delayNotice, setDelayNotice] = useState<string | null>(null);
+  const [revision, setRevision] = useState(0);
   const [data, setData] = useState<OeuvreData | null>(null);
   const [phase, setPhase] = useState<Phase>("loading");
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -68,52 +74,99 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
     if (!commandeId) return;
     let alive = true;
     let timer: ReturnType<typeof setTimeout>;
+    let phaseTimer: ReturnType<typeof setTimeout>;
+    let lastRefresh = 0;
+    let paused = false;
+    let inFlight = false;
+    const controller = new AbortController();
+    let windowTimer: ReturnType<typeof setTimeout>;
+    let waiting = false;
+    function startBudget() {
+      waiting = true;
+      windowTimer = setTimeout(() => {
+      paused = true;
+      controller.abort();
+      clearTimeout(timer);
+      if (alive) setFetchStatus("delayed");
+      }, REQUEST_TIMING.artworkWindow);
+    }
+    startBudget();
 
     async function poll() {
+      if (!alive || paused || inFlight) return;
+      inFlight = true;
+      try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
+      if (!alive || controller.signal.aborted) return;
       if (!token) {
+        clearTimeout(windowTimer);
+        paused = true;
         if (alive) setFetchStatus("error");
         return;
       }
 
-      try {
         const response = await fetch(`/api/oeuvre/${commandeId}`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal: requestSignal(REQUEST_TIMING.read, controller.signal),
         });
-        if (!alive) return;
+        if (!alive || controller.signal.aborted) return;
 
         if (response.status === 404) {
+          clearTimeout(windowTimer);
+          paused = true;
           setFetchStatus("notfound");
           return;
         }
         if (!response.ok) {
+          clearTimeout(windowTimer);
+          paused = true;
+          setDelayNotice(retryNotice(response, lang));
           setFetchStatus("error");
           return;
         }
 
         const payload = (await response.json()) as { oeuvre: OeuvreData | null };
         if (payload.oeuvre) {
+          if (!alive || controller.signal.aborted) return;
+          clearTimeout(windowTimer);
+          waiting = false;
+          lastRefresh = Date.now();
           setData(payload.oeuvre);
           setFetchStatus("ready");
           // Le griot "termine l'écriture" un court instant avant que le
           // parchemin ne soit disponible — mise en scène plutôt que technique.
-          setTimeout(() => setPhase((current) => (current === "loading" ? "closed" : current)), 1200);
+          clearTimeout(phaseTimer);
+          phaseTimer = setTimeout(() => setPhase((current) => (current === "loading" ? "closed" : current)), 1200);
+          // Renouveler avant l'expiration même si la page reste ouverte.
+          timer = setTimeout(poll, 45 * 60_000);
         } else {
+          if (!waiting) startBudget();
           setFetchStatus("pending");
-          timer = setTimeout(poll, 4000);
+          timer = setTimeout(poll, REQUEST_TIMING.artworkInterval);
         }
       } catch {
-        if (alive) setFetchStatus("error");
-      }
+        if (alive && !controller.signal.aborted) { paused = true; setFetchStatus("error"); clearTimeout(windowTimer); }
+      } finally { inFlight = false; }
     }
 
     poll();
+    const refreshOnReturn = () => {
+      if (!paused && document.visibilityState === "visible" && Date.now() - lastRefresh >= 30 * 60_000) {
+        clearTimeout(timer);
+        void poll();
+      }
+    };
+    document.addEventListener("visibilitychange", refreshOnReturn);
     return () => {
       alive = false;
+      controller.abort();
+      clearTimeout(windowTimer);
       clearTimeout(timer);
+      clearTimeout(phaseTimer);
+      document.removeEventListener("visibilitychange", refreshOnReturn);
     };
-  }, [commandeId]);
+  }, [commandeId, lang, revision]);
 
   function openScroll() {
     if (phase !== "closed") return;
@@ -154,6 +207,8 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
   }
 
   const isOpen = phase === "open";
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (isOpen) scrollRef.current?.focus({ preventScroll: true }); }, [isOpen]);
   let audioLabel = dict.audioListen;
   if (audioPlaying) audioLabel = dict.audioPlaying;
   else if (audioProgress > 0 && audioProgress < 100) audioLabel = dict.audioPaused;
@@ -162,16 +217,17 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
   const archetypeName = data?.nom_totem ?? "";
   const orderInfo =
     data?.numero_serie && data.created_at
-      ? `Œuvre N° ${data.numero_serie} · Livrée le ${formatDate(data.created_at, lang)}`
+      ? formatInterface(ui.artwork.orderInfo, { number: data.numero_serie, date: formatDate(data.created_at, lang) })
       : "";
 
-  if (fetchStatus === "notfound" || fetchStatus === "error") {
+  if (fetchStatus === "notfound" || fetchStatus === "error" || fetchStatus === "delayed") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-nuit px-6 text-center">
         <Logo size={40} />
-        <p className="text-lg text-ivoire">
-          {fetchStatus === "notfound" ? "Œuvre introuvable." : "Impossible de charger votre œuvre pour le moment."}
+        <p className="text-lg text-ivoire" role={fetchStatus === "delayed" ? "status" : "alert"}>
+          {fetchStatus === "delayed" ? (lang === "fr" ? "Le traitement prend plus de temps que prévu. Vous pouvez vérifier à nouveau dans un instant." : "Processing is taking longer than expected. You can check again shortly.") : delayNotice ?? (fetchStatus === "notfound" ? ui.errors.artworkMissing : ui.errors.artworkLoadFailed)}
         </p>
+        {fetchStatus !== "notfound" && <button type="button" className="text-sm text-or underline underline-offset-4" onClick={() => { setFetchStatus("loading"); setDelayNotice(null); setRevision(n => n + 1); }}>{lang === "fr" ? "Vérifier à nouveau" : "Check again"}</button>}
         <Link href={`/${lang}/espace`} className="text-sm text-or underline">
           {dict.backToSpace}
         </Link>
@@ -195,7 +251,7 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
       </svg>
 
       {/* barre du haut */}
-      <div className="relative z-10 flex items-center justify-between px-6 py-9 lg:px-16">
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 px-6 py-9 lg:px-16">
         <Brand lang={lang} />
         <Link href={`/${lang}/espace`} className="text-xs uppercase tracking-[0.14em] text-grisclair">
           {dict.backToSpace}
@@ -209,14 +265,14 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
         {data?.image_url && (
           <div className="relative my-7 h-85 w-55 overflow-hidden border border-ombre">
             {/* eslint-disable-next-line @next/next/no-img-element -- image générée dynamiquement, domaine backend non préconfiguré */}
-            <img src={data.image_url} alt="" className="h-full w-full object-cover" />
+            <img src={data.image_url} alt={formatInterface(ui.artwork.portrait, { name: archetypeName })} className="h-full w-full object-cover" />
           </div>
         )}
 
         {archetypeName && (
           <>
             <p className="font-display text-xl italic text-orpale">{dict.youAreLabel}</p>
-            <h1 className="font-display text-5xl text-ivoire lg:text-7xl">{archetypeName}</h1>
+            <h1 className="max-w-full font-display text-5xl text-ivoire [overflow-wrap:anywhere] lg:text-7xl">{archetypeName}</h1>
           </>
         )}
         {orderInfo && <p className="mt-4 text-xs text-grisclair">{orderInfo}</p>}
@@ -227,29 +283,31 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
         <div className="relative flex min-h-85 w-full max-w-xl items-center justify-center">
 
           {/* message de chargement */}
-          <div
+          {phase === "loading" && <div
             className="absolute inset-0 flex items-center justify-center px-8 text-center transition-opacity duration-500"
             style={{ opacity: phase === "loading" ? 1 : 0, pointerEvents: "none" }}
           >
-            <p className="font-display animate-[instr-pulse_2.4s_ease-in-out_infinite] text-xl italic text-orpale">
+            <p role="status" className="font-display animate-[instr-pulse_2.4s_ease-in-out_infinite] text-xl italic text-orpale">
               {fetchStatus === "pending" ? dict.loadingText : dict.loadingText}
             </p>
-          </div>
+          </div>}
 
           {/* rouleau */}
           {fetchStatus === "ready" && (
             <div
+              inert={phase === "loading"}
+              aria-hidden={phase === "loading"}
               className="flex w-full flex-col items-center transition-opacity duration-[600ms]"
               style={{ opacity: phase === "loading" ? 0 : 1 }}
             >
-              <button
-                onClick={openScroll}
-                className="flex w-full flex-col items-center"
+              <div
+                className="relative flex w-full flex-col items-center motion-reduce:animate-none!"
                 style={{
                   cursor: phase === "closed" ? "pointer" : "default",
                   animation: phase === "closed" ? "scroll-float 5s ease-in-out infinite" : "none",
                 }}
               >
+                {!isOpen && <button type="button" onClick={openScroll} aria-label={dict.openPrompt} aria-expanded={false} aria-controls="artwork-story" className="absolute inset-0 z-10 w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or" />}
                 {/* embout haut */}
                 <span className="z-[2] flex h-7 w-[84%] items-center justify-between rounded-full bg-or px-4 shadow-[0_6px_16px_rgba(0,0,0,0.4)]">
                   <span className="h-3 w-0.5 bg-nuit/35" />
@@ -259,10 +317,16 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                 {/* feuille de parchemin */}
                 <div
                   className="w-[90%] overflow-hidden bg-[#EFE4C8] shadow-[0_0_0_1px_rgba(139,111,46,0.3)] transition-[max-height] duration-[1150ms] ease-[cubic-bezier(.65,0,.35,1)]"
-                  style={{ maxHeight: isOpen ? "2200px" : "14px" }}
+                  style={{ maxHeight: isOpen ? "none" : "14px" }}
                 >
                   <div
-                    className="px-6 pb-9 pt-11 transition-opacity duration-700 lg:px-10"
+                    id="artwork-story"
+                    ref={scrollRef}
+                    role="region"
+                    aria-label={dict.parcheminTitle}
+                    tabIndex={-1}
+                    hidden={!isOpen}
+                    className="px-6 pb-9 pt-11 [overflow-wrap:anywhere] transition-opacity duration-700 focus:outline-2 focus:outline-offset-2 focus:outline-or motion-reduce:transition-none motion-reduce:delay-0! lg:px-10"
                     style={{ opacity: isOpen ? 1 : 0, transitionDelay: isOpen ? "450ms" : "0ms" }}
                   >
                     <p className="mb-6 text-center text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "#8B6F2E" }}>
@@ -295,9 +359,10 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                   <span className="h-3 w-0.5 bg-nuit/35" />
                   <span className="h-3 w-0.5 bg-nuit/35" />
                 </span>
-              </button>
+              </div>
 
               <p
+                aria-hidden={isOpen}
                 className="font-display mt-5.5 text-center text-lg italic text-grisclair transition-opacity duration-400"
                 style={{ opacity: phase === "closed" ? 1 : 0 }}
               >
@@ -310,6 +375,8 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
         {/* la voix + boutons : visibles une fois le parchemin ouvert */}
         {fetchStatus === "ready" && data && (
           <div
+            inert={!isOpen}
+            aria-hidden={!isOpen}
             className="mt-9 w-full max-w-xl transition-opacity duration-[600ms]"
             style={{ opacity: isOpen ? 1 : 0, pointerEvents: isOpen ? "auto" : "none" }}
           >
@@ -331,8 +398,8 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                     setAudioProgress(100);
                   }}
                 />
-                <div className="flex items-center gap-4">
-                  <button
+                <div className="flex flex-wrap items-center gap-4">
+                  <button type="button"
                     onClick={restartAudio}
                     aria-label={dict.audioRestart}
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-ombre"
@@ -342,7 +409,7 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                       <polygon points="16,0 16,14 8,7" fill="none" stroke="#888888" strokeWidth="1.3" strokeLinejoin="round" />
                     </svg>
                   </button>
-                  <button
+                  <button type="button"
                     onClick={toggleAudio}
                     aria-label={audioPlaying ? dict.audioPauseAction : dict.audioPlayAction}
                     aria-pressed={audioPlaying}
@@ -362,7 +429,7 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                   <div className="relative h-px flex-1 bg-ombre">
                     <div className="h-px bg-or transition-[width] duration-150 ease-linear" style={{ width: `${audioProgress}%` }} />
                   </div>
-                  <span className="whitespace-nowrap text-xs text-grisclair">{audioLabel}</span>
+                  <span className="text-xs text-grisclair">{audioLabel}</span>
                 </div>
               </div>
             )}
@@ -388,12 +455,13 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                   {dict.downloadCertButton}
                 </a>
               )}
-              <button
+              <button type="button"
                 onClick={share}
                 className="border border-ombre px-6 py-3.5 text-sm text-ivoire transition-colors duration-300 hover:border-or hover:text-or"
               >
                 {shareNotice ? dict.shareCopied : dict.shareButton}
               </button>
+              <p role="status" className="sr-only">{shareNotice ? dict.shareCopied : ""}</p>
             </div>
           </div>
         )}

@@ -2,9 +2,11 @@
 import Link from "next/link";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { useCommandes } from "@/lib/hooks/useCommandes";
+import { interfaceCopy } from "@/lib/interface-copy";
 
 export default function EspaceOeuvres({ dict, lang }: { dict: Dictionary["espaceOeuvres"]; lang: Locale }) {
-  const { commandes, error } = useCommandes();
+  const ui = interfaceCopy(lang);
+  const { commandes, error, delayNotice } = useCommandes(lang);
   const works = (commandes ?? []).filter((c) => c.oeuvre);
 
   return (
@@ -14,8 +16,9 @@ export default function EspaceOeuvres({ dict, lang }: { dict: Dictionary["espace
         <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>
       </div>
 
-      {!commandes && !error && <p className="mt-9 text-sm text-grisclair">…</p>}
-      {(error || works.length === 0) && commandes && (
+      {!commandes && !error && <p role="status" className="mt-9 text-sm text-grisclair">{ui.status.loading}</p>}
+      {delayNotice && <p role="alert" className="mt-9 text-sm text-grisclair">{delayNotice}</p>}
+      {!delayNotice && (error || works.length === 0) && commandes && (
         <p className="mt-9 text-sm text-grisclair">{dict.emptyText}</p>
       )}
 
@@ -40,7 +43,7 @@ export default function EspaceOeuvres({ dict, lang }: { dict: Dictionary["espace
               <div className="flex flex-col gap-3.5 p-5.5">
                 <div className="flex flex-col gap-1">
                   <span className="font-display text-xl italic text-ivoire">{commande.oeuvre?.nom_totem}</span>
-                  <span className="text-xs text-grisclair">N° {commande.oeuvre?.numero_serie}</span>
+                  <span className="text-xs text-grisclair">{ui.orders.serial} {commande.oeuvre?.numero_serie}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span className="border border-ombre px-4 py-2 text-xs font-medium text-ivoire">{dict.recitLabel}</span>

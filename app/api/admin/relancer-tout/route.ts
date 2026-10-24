@@ -3,76 +3,38 @@ import { requireAdmin, createServiceClient } from "@/lib/supabase/server";
 import { getServerEnv } from "@/lib/env";
 import { internalError } from "@/lib/api-error";
 import { logAdminAction } from "@/lib/admin-audit";
+import { requestAdminRetry, retryHeaders, type RetryResult } from "@/lib/server/admin-retry";
 
 export async function POST(request: Request) {
   const admin = await requireAdmin(request);
   if (admin instanceof NextResponse) return admin;
-
+  if (!getServerEnv().TOTEM_BACKEND_URL) return NextResponse.json({ ok: false, error: "backend_unavailable" }, { status: 503, headers: retryHeaders() });
   const supabase = createServiceClient();
-
-  const { data: commandes, error } = await supabase
-    .from("commandes")
-    .select("id, statut")
-    .in("statut", ["paye", "en_generation", "erreur"])
-    .order("created_at", { ascending: false });
-
+  const { data: commandes, error } = await supabase.from("commandes").select("id, statut")
+    .in("statut", ["paye", "en_generation", "erreur"]).order("created_at", { ascending: false });
   if (error) return internalError("admin.relancer-tout.POST", error);
-  if (!commandes || commandes.length === 0) {
-    return NextResponse.json({ ok: true, message: "Aucune commande à relancer", results: [] });
-  }
-
-  const env = getServerEnv();
-  const results: { commandeId: string; status: string; error?: string }[] = [];
-
-  for (const cmd of commandes) {
-    const { error: e1 } = await supabase.from("commandes").update({ statut: "en_generation" }).eq("id", cmd.id);
-    if (e1) {
-      console.error("[admin.relancer-tout] reset_commande", cmd.id, e1);
-      results.push({ commandeId: cmd.id, status: "ko", error: "Échec de réinitialisation de la commande" });
+  const results: RetryResult[] = [];
+  let stopStatus = 0;
+  let retryAfter: number | undefined;
+  const deadline = Date.now() + 25_000;
+  for (const cmd of commandes ?? []) {
+    if (stopStatus || request.signal.aborted || Date.now() >= deadline) {
+      stopStatus ||= 503;
+      results.push({ commandeId: cmd.id, status: "not_attempted", error: "retry_batch_interrupted" });
       continue;
     }
-
-    const { error: e2 } = await supabase.from("oeuvres").update({ statut: "en_generation" }).eq("commande_id", cmd.id);
-    if (e2) {
-      console.error("[admin.relancer-tout] reset_oeuvre", cmd.id, e2);
-      results.push({ commandeId: cmd.id, status: "ko", error: "Échec de réinitialisation de l'œuvre" });
-      continue;
-    }
-
-    const { error: e3 } = await supabase.from("erreurs_pipeline").delete().eq("commande_id", cmd.id);
-    if (e3) {
-      console.error("[admin.relancer-tout] efface_erreurs", cmd.id, e3);
-      results.push({ commandeId: cmd.id, status: "ko", error: "Échec de nettoyage des erreurs précédentes" });
-      continue;
-    }
-
-    results.push({ commandeId: cmd.id, status: "ok" });
+    const reply = await requestAdminRetry(request, cmd.id);
+    results.push(reply.result);
+    if ([429, 502, 503].includes(reply.status)) { stopStatus = reply.status; retryAfter = reply.retryAfter; }
   }
-
-  if (env.TOTEM_BACKEND_URL) {
-    const backendUrl = env.TOTEM_BACKEND_URL.replace(/\/$/, "");
-    for (const r of results) {
-      if (r.status !== "ok") continue;
-      try {
-        await fetch(`${backendUrl}/orders/retry`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: request.headers.get("authorization") ?? "" },
-          body: JSON.stringify({ externalCommandId: r.commandeId }),
-        });
-      } catch {
-        r.status = "ko";
-        r.error = "backend_unreachable";
-      }
-    }
-  }
-
-  const hasErrors = results.some((r) => r.status === "ko");
-
-  await logAdminAction(supabase, admin, "relancer_tout", {
-    total: commandes.length,
-    reussies: results.filter((r) => r.status === "ok").length,
-    echouees: results.filter((r) => r.status === "ko").length,
-  });
-
-  return NextResponse.json({ ok: !hasErrors, total: commandes.length, results }, { status: hasErrors ? 502 : 200 });
+  const accepted = results.filter(r => r.outcome === "accepted").length;
+  const alreadyRunning = results.filter(r => r.outcome === "already_running").length;
+  const alreadyDone = results.filter(r => r.outcome === "already_done").length;
+  const failed = results.filter(r => r.status === "ko").length;
+  const notAttempted = results.filter(r => r.status === "not_attempted").length;
+  const ok = failed === 0 && notAttempted === 0;
+  await logAdminAction(supabase, admin, "relancer_tout", { total: results.length, accepted, alreadyRunning, alreadyDone, failed, notAttempted })
+    .catch(() => console.error("[admin.relancer-tout] audit log unavailable"));
+  return NextResponse.json({ ok, total: results.length, accepted, alreadyRunning, alreadyDone, failed, notAttempted, results,
+    ...(retryAfter === undefined ? {} : { retryAfter }) }, { status: ok ? 200 : stopStatus || 502, headers: retryHeaders(retryAfter) });
 }

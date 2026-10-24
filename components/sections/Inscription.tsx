@@ -1,13 +1,17 @@
 "use client";
-import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
+import { interfaceCopy } from "@/lib/interface-copy";
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
 import { PasswordField } from "@/components/ui/PasswordField";
+import { RadioCard } from "@/components/ui/RadioCard";
 import { supabase } from "@/lib/supabase/client";
 import { isStrongPassword } from "@/lib/password";
+import { retryNotice } from "@/lib/retry-after";
+import { establishSignupSession } from "@/lib/signup-session";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 
 // aligné sur l'ordre de dict.inscription.legalLinks (CGV, Confidentialité, Mentions)
@@ -17,15 +21,16 @@ const ivoireScope = {
   background: "#FBF6EA",
   "--color-nuit": "#0D0D1A",
   "--color-indigo": "#F3EDDD",
-  "--color-ombre": "#D8D0BC",
-  "--color-or": "#B08A3E",
-  "--color-orpale": "#8B6F2E",
+  "--color-ombre": "#857A63",
+  "--color-or": "#806020",
+  "--color-orpale": "#7B612E",
   "--color-ivoire": "#0D0D1A",
   "--color-gris": "#6B6558",
-  "--color-grisclair": "#948C78",
+  "--color-grisclair": "#706655",
 } as CSSProperties;
 
 export default function Inscription({ dict, lang }: { dict: Dictionary["inscription"]; lang: Locale }) {
+  const ui = interfaceCopy(lang);
   const router = useRouter();
   const searchParams = useSearchParams();
   // null = pas d'offre choisie avant l'inscription (ex: venu de "Composer"
@@ -42,6 +47,15 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
   const [error, setError] = useState<string | null>(null);
   const [existingAccount, setExistingAccount] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [errorField, setErrorField] = useState<"email" | "password" | null>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (!error) return;
+    const field = errorField && formRef.current?.elements.namedItem(errorField);
+    if (field instanceof HTMLElement) field.focus();
+    else errorRef.current?.focus();
+  }, [error, errorField]);
 
   // Quelqu'un déjà connecté qui arrive ici (ex: bouton "Composer" cliqué
   // avec une session active) a déjà un compte : on le renvoie vers son
@@ -64,10 +78,12 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setErrorField(null);
     setExistingAccount(false);
 
     if (!isStrongPassword(password)) {
-      setError("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.");
+      setErrorField("password");
+      setError(ui.errors.passwordRules);
       return;
     }
 
@@ -96,18 +112,24 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
         error?: string;
         code?: string;
         sessionReady?: boolean;
+        accessToken?: string | null;
+        refreshToken?: string | null;
       } | null;
 
       if (!response.ok) {
         const alreadyExists = payload?.code === "email_exists";
         setExistingAccount(alreadyExists);
-        setError(alreadyExists ? dict.emailExists : payload?.error ?? "Inscription impossible");
+        setErrorField(alreadyExists ? "email" : null);
+        setError(retryNotice(response, lang) ?? (alreadyExists ? dict.emailExists : ui.errors.signupFailed));
         return;
       }
 
       if (payload?.sessionReady) {
-        // Confirmation email désactivée côté projet Supabase : la session est
-        // déjà active, on peut enchaîner directement sur le parcours.
+        // Persist the returned session before opening an authenticated route.
+        if (!await establishSignupSession(payload, supabase.auth)) {
+          setError(ui.errors.signupFailed);
+          return;
+        }
         router.push(nextPath);
       } else {
         router.push(
@@ -115,18 +137,18 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
         );
       }
     } catch {
-      setError("Inscription impossible. Réessaie dans un instant.");
+      setError(ui.errors.signupFailed);
     } finally {
       setLoading(false);
     }
   }
 
   if (checkingAuth) {
-    return <div className="min-h-screen bg-nuit" />;
+    return <div className="flex min-h-screen items-center justify-center bg-nuit px-6 text-ivoire"><p role="status">{ui.status.checkingSession}</p></div>;
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex min-h-screen">
       {/* panneau photo : réservé au bureau */}
       <div className="relative hidden h-screen w-[42%] shrink-0 overflow-hidden bg-nuit lg:block [perspective:1200px]">
       <div className="absolute inset-0 animate-totem-3d [transform-style:preserve-3d]">
@@ -146,10 +168,11 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
 
       {/* panneau formulaire : palette ivoire réchauffé */}
       <div
-        className="flex min-h-0 flex-1 overflow-y-auto px-6 py-20 lg:px-20"
+        className="flex min-w-0 flex-1 px-6 py-20 lg:px-20"
         style={ivoireScope}
       >
-        <form onSubmit={onSubmit} className="m-auto flex w-full max-w-lg flex-col gap-7">
+        <p role="status" className="sr-only">{loading ? (ui.status.creatingAccount) : ""}</p>
+        <form method="post" ref={formRef} onSubmit={onSubmit} aria-busy={loading} className="m-auto flex w-full min-w-0 max-w-lg flex-col gap-7 [overflow-wrap:anywhere]">
 
           <div className="flex flex-col gap-7">
             <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
@@ -167,46 +190,47 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
           </div>
 
           {/* parcours */}
-          <div className="flex flex-col gap-3">
-            <span className="text-xs font-medium uppercase tracking-wide text-gris">
+          <fieldset className="flex min-w-0 flex-col gap-3">
+            <legend className="mb-3 text-xs font-medium uppercase tracking-wide text-gris">
               {dict.pathLabel}
-            </span>
+            </legend>
             <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => setPath("adulte")}
-                aria-pressed={path === "adulte"}
+              <RadioCard
+                name="path" value="adulte"
+                onChange={() => setPath("adulte")}
+                checked={path === "adulte"}
                 className={`flex flex-1 flex-col gap-1.5 border p-5 text-left ${
                   path === "adulte" ? "border-[1.5px] border-or bg-indigo" : "border-ombre"
                 }`}
               >
                 <span className="font-display text-xl text-ivoire">{dict.pathAdulte}</span>
                 <span className="text-sm text-grisclair">{dict.pathAdulteDesc}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPath("junior")}
-                aria-pressed={path === "junior"}
+              </RadioCard>
+              <RadioCard
+                name="path" value="junior"
+                onChange={() => setPath("junior")}
+                checked={path === "junior"}
                 className={`flex flex-1 flex-col gap-1.5 border p-5 text-left ${
                   path === "junior" ? "border-[1.5px] border-or bg-indigo" : "border-ombre"
                 }`}
               >
                 <span className="font-display text-xl text-ivoire">{dict.pathJunior}</span>
                 <span className="text-sm text-grisclair">{dict.pathJuniorDesc}</span>
-              </button>
+              </RadioCard>
             </div>
-          </div>
+          </fieldset>
 
           {/* formulaire */}
           <div className="flex flex-col gap-5">
-            <div className="flex gap-4">
-              <label className="flex flex-1 flex-col gap-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className="flex min-w-0 flex-col gap-2">
                 <span className="text-xs font-medium uppercase tracking-wide text-gris">
                   {dict.firstNameLabel}
                 </span>
                 <input
                   type="text"
                   name="firstName"
+                  autoComplete="given-name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder={dict.firstNamePlaceholder}
@@ -215,13 +239,14 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
                   className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire placeholder:text-grisclair"
                 />
               </label>
-              <label className="flex flex-1 flex-col gap-2">
+              <label className="flex min-w-0 flex-col gap-2">
                 <span className="text-xs font-medium uppercase tracking-wide text-gris">
                   {dict.lastNameLabel}
                 </span>
                 <input
                   type="text"
                   name="lastName"
+                  autoComplete="family-name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder={dict.lastNamePlaceholder}
@@ -232,41 +257,43 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
               </label>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-medium uppercase tracking-wide text-gris">
+            <fieldset className="flex min-w-0 flex-col gap-2">
+              <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-gris">
                 {dict.genderLabel}
-              </span>
+              </legend>
               <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => setGender("homme")}
-                  aria-pressed={gender === "homme"}
+                <RadioCard
+                  name="gender" value="homme"
+                  onChange={() => setGender("homme")}
+                  checked={gender === "homme"}
                   className={`flex-1 border p-3.5 text-center text-sm ${
                     gender === "homme" ? "border-[1.5px] border-or text-ivoire" : "border-ombre text-grisclair"
                   }`}
                 >
                   {dict.genderMale}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setGender("femme")}
-                  aria-pressed={gender === "femme"}
+                </RadioCard>
+                <RadioCard
+                  name="gender" value="femme"
+                  onChange={() => setGender("femme")}
+                  checked={gender === "femme"}
                   className={`flex-1 border p-3.5 text-center text-sm ${
                     gender === "femme" ? "border-[1.5px] border-or text-ivoire" : "border-ombre text-grisclair"
                   }`}
                 >
                   {dict.genderFemale}
-                </button>
+                </RadioCard>
               </div>
-            </div>
+            </fieldset>
 
             <label className="flex flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.emailLabel}</span>
               <input
                 type="email"
                 name="email"
+                aria-invalid={errorField === "email" && !!error || undefined}
+                aria-describedby={errorField === "email" && error ? "signup-error" : undefined}
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); if (errorField === "email") { setError(null); setErrorField(null); setExistingAccount(false); } }}
                 placeholder={dict.emailPlaceholder}
                 autoComplete="email"
                 required
@@ -276,10 +303,13 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
             </label>
 
             <PasswordField
+              lang={lang}
               label={dict.passwordLabel}
               name="password"
               value={password}
-              onChange={setPassword}
+              onChange={(value) => { setPassword(value); if (errorField === "password") { setError(null); setErrorField(null); } }}
+              invalid={errorField === "password" && !!error}
+              describedBy={errorField === "password" && error ? "signup-error" : undefined}
               autoComplete="new-password"
               minLength={8}
               maxLength={128}
@@ -289,7 +319,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
           </div>
 
           {error && (
-            <p className="text-sm" style={{ color: "#B0473E" }} role="alert">
+            <p id="signup-error" ref={errorRef} tabIndex={-1} className="text-sm focus:outline-2 focus:outline-offset-4 focus:outline-or" style={{ color: "#B0473E" }} role="alert">
               {error}
             </p>
           )}
@@ -301,8 +331,8 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
           )}
 
           <div className="mt-2 flex flex-wrap items-center gap-6">
-            <Button type="submit" disabled={loading} className="disabled:cursor-wait disabled:opacity-60">
-              {loading ? "…" : dict.submit}
+            <Button type="submit" disabled={loading} className="hover:text-[#FEFCF0]! disabled:cursor-wait disabled:opacity-60">
+              {loading ? (ui.status.creatingAccount) : dict.submit}
             </Button>
           </div>
 
@@ -314,7 +344,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
           </p>
 
           <div className="mt-2 flex flex-col gap-2.5">
-            <div className="flex gap-6">
+            <div className="flex flex-wrap gap-x-6 gap-y-3">
               {dict.legalLinks.map((lien, i) => (
                 <Link key={lien} href={`/${lang}${legalHrefs[i]}`} className="text-sm text-grisclair">
                   {lien}

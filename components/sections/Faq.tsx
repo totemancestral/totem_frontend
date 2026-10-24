@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useId, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
@@ -10,6 +10,7 @@ function pad(n: number) {
 }
 
 export default function Faq({ dict, lang }: { dict: Dictionary["faq"]; lang: Locale }) {
+  const faqId = useId();
   // null = aucune question sélectionnée ("état simple"). Sur desktop, le
   // cercle affiche quand même une réponse par défaut (la première).
   const [active, setActive] = useState<number | null>(null);
@@ -38,9 +39,10 @@ export default function Faq({ dict, lang }: { dict: Dictionary["faq"]; lang: Loc
             return (
               <div key={item.question}>
                 <button
+                  type="button"
                   onClick={() => toggle(i)}
                   aria-expanded={isActive}
-                  aria-controls={`faq-answer-${i}`}
+                  aria-controls={`${faqId}-answer-${i} ${faqId}-desktop-answer`}
                   className="flex w-full items-center justify-between gap-6 py-4 text-left"
                 >
                   <span
@@ -62,10 +64,9 @@ export default function Faq({ dict, lang }: { dict: Dictionary["faq"]; lang: Loc
 
                 {/* réponse en accordéon : uniquement sur mobile, juste sous la question */}
                 <div
-                  id={`faq-answer-${i}`}
-                  className={`overflow-hidden transition-all duration-300 lg:hidden ${
-                    isActive ? "max-h-40 pb-4" : "max-h-0"
-                  }`}
+                  id={`${faqId}-answer-${i}`}
+                  hidden={!isActive}
+                  className="pb-4 lg:hidden"
                 >
                   <p className="text-sm text-grisclair">{item.answer}</p>
                 </div>
@@ -90,7 +91,7 @@ export default function Faq({ dict, lang }: { dict: Dictionary["faq"]; lang: Loc
                 background: "radial-gradient(circle, transparent 26%, var(--color-nuit) 76%)",
               }}
             />
-            <div className="absolute inset-0 flex items-center justify-center p-12 text-center">
+            <div id={`${faqId}-desktop-answer`} className="absolute inset-0 flex items-center justify-center p-12 text-center">
               <p className="font-display text-lg italic text-ivoire lg:text-xl">
                 {current.answer}
               </p>

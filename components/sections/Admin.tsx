@@ -1,5 +1,6 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useAdminLocale } from "@/lib/hooks/useAdminLocale";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { supabase } from "@/lib/supabase/client";
@@ -23,15 +24,23 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "evenements", label: "Événements" },
 ];
 
-type GuardState = "checking" | "denied" | "mfa-enroll" | "mfa-challenge" | "allowed";
+type GuardState = "checking" | "error" | "denied" | "mfa-enroll" | "mfa-challenge" | "allowed";
 
 export default function Admin({ lang }: { lang: string }) {
+  const { t } = useAdminLocale();
   const router = useRouter();
   const [guard, setGuard] = useState<GuardState>("checking");
   const [challengeFactorId, setChallengeFactorId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
+  const mainRef = useRef<HTMLElement>(null);
+  const previousTab = useRef(tab);
+  useEffect(() => {
+    if (previousTab.current !== tab) mainRef.current?.querySelector("h1")?.focus();
+    previousTab.current = tab;
+  }, [tab]);
 
   const runGuard = useCallback(async () => {
+    try {
     const { data: sessionData } = await supabase.auth.getSession();
     const userId = sessionData.session?.user.id;
     if (!userId) {
@@ -68,6 +77,7 @@ export default function Admin({ lang }: { lang: string }) {
     }
 
     setGuard("allowed");
+    } catch { setGuard("error"); }
   }, [lang, router]);
 
   useEffect(() => {
@@ -82,18 +92,24 @@ export default function Admin({ lang }: { lang: string }) {
   }
 
   if (guard === "checking") {
-    return <div className="min-h-screen bg-nuit" />;
+    return <div lang={lang} className="flex min-h-screen items-center justify-center bg-nuit text-ivoire"><p role="status">{t("Vérification de l’accès à l’administration…")}</p></div>;
   }
 
   if (guard === "denied") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-nuit px-6 text-center">
         <Logo size={40} />
-        <p className="text-lg text-ivoire">Accès réservé à l&apos;équipe.</p>
-        <p className="text-sm text-grisclair">Ce compte n&apos;a pas les droits nécessaires.</p>
+        <p className="text-lg text-ivoire">{t("Accès réservé à l'équipe.")}</p>
+        <p className="text-sm text-grisclair">{t("Ce compte n'a pas les droits nécessaires.")}</p>
       </div>
     );
   }
+
+  if (guard === "error") return <div lang={lang} className="flex min-h-screen flex-col items-center justify-center gap-5 bg-nuit px-6 text-ivoire">
+    <h1 className="font-display text-3xl">{t("Administration")}</h1>
+    <p role="alert">{t("Impossible de vérifier votre accès pour le moment.")}</p>
+    <button type="button" onClick={() => { setGuard("checking"); void runGuard(); }} className="border border-or px-6 py-3 text-or">{t("Réessayer")}</button>
+  </div>;
 
   if (guard === "mfa-enroll") {
     return <MfaEnroll onEnrolled={runGuard} />;
@@ -104,55 +120,60 @@ export default function Admin({ lang }: { lang: string }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-nuit">
+    <div lang={lang} data-admin className="flex min-h-screen bg-nuit [--color-ombre:#757585]">
+      <a href="#admin-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:bg-nuit focus:px-4 focus:py-2 focus:text-ivoire">{t("Aller au contenu")}</a>
       {/* barre latérale */}
       <aside className="hidden w-60 shrink-0 flex-col border-r border-ombre px-6 py-8 lg:flex">
         <div className="mb-10 flex items-center gap-2.5">
           <Logo size={20} />
-          <span className="text-xs tracking-[0.18em] text-ivoire uppercase">Totem — Admin</span>
+          <span className="text-xs tracking-[0.18em] text-ivoire uppercase">{t("Totem — Admin")}</span>
         </div>
-        <nav className="flex flex-col gap-1">
-          {TABS.map((t) => (
+        <nav aria-label={t("Sections de l’administration")} className="flex flex-col gap-1">
+          {TABS.map((item) => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
+              key={item.key}
+              type="button"
+              aria-current={tab === item.key ? "page" : undefined}
+              aria-controls="admin-content"
+              onClick={() => setTab(item.key)}
               className={`border-l-2 px-3.5 py-2.5 text-left text-sm font-medium transition-colors ${
-                tab === t.key ? "border-or text-ivoire" : "border-transparent text-grisclair hover:text-ivoire"
+                tab === item.key ? "border-or text-ivoire" : "border-transparent text-grisclair hover:text-ivoire"
               }`}
             >
-              {t.label}
+              {t(item.label)}
             </button>
           ))}
         </nav>
-        <button
+        <button type="button"
           onClick={logout}
           className="mt-auto pt-8 text-left text-xs uppercase tracking-wide text-grisclair hover:text-ivoire"
         >
-          Déconnexion
-        </button>
+          {t("Déconnexion")}</button>
       </aside>
 
       {/* barre mobile */}
-      <div className="fixed inset-x-0 top-0 z-20 flex items-center justify-between border-b border-ombre bg-nuit px-6 py-4 lg:hidden">
+      <div className="fixed inset-x-0 top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-ombre bg-nuit px-6 py-4 lg:hidden">
         <div className="flex items-center gap-2.5">
           <Logo size={18} />
-          <span className="text-xs tracking-[0.18em] text-ivoire uppercase">Admin</span>
+          <span className="text-xs tracking-[0.18em] text-ivoire uppercase">{t("Admin")}</span>
         </div>
         <select
+          aria-label={t("Section de l’administration")}
+          aria-controls="admin-content"
           value={tab}
           onChange={(e) => setTab(e.target.value as Tab)}
           className="border border-ombre bg-indigo px-2 py-1.5 text-xs text-ivoire"
         >
-          {TABS.map((t) => (
-            <option key={t.key} value={t.key}>
-              {t.label}
+          {TABS.map((item) => (
+            <option key={item.key} value={item.key}>
+              {t(item.label)}
             </option>
           ))}
         </select>
       </div>
 
       {/* contenu */}
-      <main className="flex-1 overflow-x-hidden px-6 py-10 pt-24 lg:px-10 lg:pt-10">
+      <main ref={mainRef} id="admin-content" tabIndex={-1} className="min-w-0 flex-1 px-6 py-10 pb-24 pt-32 scroll-mt-32 lg:px-10 lg:pt-10">
         {tab === "overview" && <OverviewSection />}
         {tab === "commandes" && <CommandesSection />}
         {tab === "oeuvres" && <OeuvresSection />}

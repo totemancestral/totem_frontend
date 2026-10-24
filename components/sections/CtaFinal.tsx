@@ -54,7 +54,7 @@ export default function CtaFinal({ dict, lang }: { dict: Dictionary["ctaFinal"];
       >
         <Image
           src="/images/logo_totem_1.svg"
-          alt="Masque totem ancestral"
+          alt=""
           fill
           sizes="(min-width: 1024px) 224px, 176px"
           className="object-contain"

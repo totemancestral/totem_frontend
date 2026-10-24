@@ -743,7 +743,12 @@
       { "question": "Is every work unique?", "answer": "Yes. Your Totem is generated from your specific answers. No two creations are identical.", "img": "/images/totem-mask-crown.jpg" },
       { "question": "Is this a DNA test?", "answer": "No. We explore spiritual and cultural memory, not biology. This is an artistic and symbolic quest.", "img": "/images/totem-mask-face.jpg" },
       { "question": "How do I receive my Totem?", "answer": "Depending on the offer, you receive digital access, a complete box and files prepared in your personal space.", "img": "/images/totem-mask-detail.jpg" },
-      { "question": "Is my data protected?", "answer": "Your answers are only used to compose and deliver the artwork. They are not sold to third parties.", "img": "/images/totem-mask-texture.jpg" }
+      { "question": "Is my data protected?", "answer": "Your answers are only used to compose and deliver the artwork. They are not sold to third parties.", "img": "/images/totem-mask-texture.jpg" },
+      {
+        "question": "Can I give a Totem as a gift without the recipient answering the questionnaire themselves?",
+        "answer": "Yes. You can answer on their behalf, or give them access so they can experience the journey themselves. The choice is yours.",
+        "img": "/images/totem-mask-pendant.jpg"
+      }
     ],
     "seeAll": "See all questions →"
   },

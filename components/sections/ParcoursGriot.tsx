@@ -1,8 +1,11 @@
 "use client";
+import { interfaceCopy } from "@/lib/interface-copy";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { RadioCard } from "@/components/ui/RadioCard";
+import { RetryAfterError, retryErrorNotice, retryNotice } from "@/lib/retry-after";
 import { Logo } from "@/components/ui/Logo";
 import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
@@ -28,6 +31,7 @@ function letterFromIndex(idx: number): AdultAnswerState["choice"] {
 }
 
 export default function ParcoursGriot({ dict, lang, variant }: Props) {
+  const ui = interfaceCopy(lang);
   const router = useRouter();
   const searchParams = useSearchParams();
   // Sans offre choisie, le choix intervient après la quatrième question.
@@ -43,13 +47,23 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bootError, setBootError] = useState(false);
+  const [bootRetryNotice, setBootRetryNotice] = useState<string | null>(null);
   const [parcoursId, setParcoursId] = useState<string | null>(null);
   const [paymentSession, setPaymentSession] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const questionTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const errorRef = useRef<HTMLParagraphElement | null>(null);
   const [audioSrc, setAudioSrc] = useState("");
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
+  useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
+
+  useEffect(() => {
+    if (!checkingAuth && !bootError && phase === "question") {
+      questionTitleRef.current?.focus();
+    }
+  }, [phase, step, checkingAuth, bootError]);
 
   // Le parcours suppose un compte déjà créé (l'inscription précède la
   // traversée) : sans session valide, retour à la connexion en conservant
@@ -70,6 +84,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
       if (variant === "adulte") {
         const query = new URLSearchParams({ ...(requestedSession ? { session_id: requestedSession } : {}), ...(requestedParcours ? { parcoursId: requestedParcours } : {}) });
         const response = await fetch(`/api/parcours?${query}`, { headers: { Authorization: `Bearer ${data.session.access_token}` }, cache: "no-store" });
+        if (retryNotice(response, lang)) throw new RetryAfterError(response);
         if (!response.ok) throw new Error("load_failed");
         const progress = await response.json();
         if (!alive) return;
@@ -89,7 +104,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
       }
       if (alive) setCheckingAuth(false);
     }
-    void load().catch(() => { if (alive) { setBootError(true); setCheckingAuth(false); } });
+    void load().catch((error) => { if (alive) { setBootRetryNotice(retryErrorNotice(error, lang)); setBootError(true); setCheckingAuth(false); } });
     return () => {
       alive = false;
     };
@@ -191,6 +206,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
           method: "POST", headers,
           body: JSON.stringify({ parcoursId: parcoursId ?? undefined, sessionId: paymentSession ?? undefined, answers, locale: lang }),
         });
+        if (retryNotice(saved, lang)) throw new RetryAfterError(saved);
         if (!saved.ok) throw new Error("save_failed");
         const progress = await saved.json();
         setParcoursId(progress.parcoursId);
@@ -207,11 +223,12 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
           method: "POST", headers,
           body: JSON.stringify({ parcoursId: progress.parcoursId, sessionId: paymentSession, answers, locale: lang }),
         });
+        if (retryNotice(completed, lang)) throw new RetryAfterError(completed);
         if (!completed.ok) throw new Error("completion_failed");
         router.push(`/${lang}/confirmation?session_id=${encodeURIComponent(paymentSession!)}`);
       }
-    } catch {
-      setError(dict.saveError);
+    } catch (error) {
+      setError(retryErrorNotice(error, lang) ?? dict.saveError);
     } finally {
       setSubmitting(false);
     }
@@ -222,11 +239,11 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   else if (audioProgress > 0 && audioProgress < 100) audioLabel = dict.audioPaused;
 
   if (checkingAuth) {
-    return <div className="min-h-screen bg-nuit" />;
+    return <div className="flex min-h-screen items-center justify-center bg-nuit px-6 text-ivoire"><p role="status">{ui.status.loadingQuestionnaire}</p></div>;
   }
   if (bootError) {
     return <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-nuit px-6 text-ivoire">
-      <p role="alert">{dict.loadError}</p>
+      <p role="alert">{bootRetryNotice ?? dict.loadError}</p>
       <Button onClick={() => window.location.reload()}>{dict.retryLabel}</Button>
     </div>;
   }
@@ -259,8 +276,8 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
       </svg>
 
       {/* barre du haut */}
-      <div className="relative z-10 flex items-center justify-between px-6 py-8 lg:px-14">
-        <div className="flex items-center gap-3">
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 px-6 py-8 lg:px-14">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           <Brand lang={lang} />
           {variant === "junior" && (
             <span className="ml-1 bg-or px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-nuit">
@@ -303,7 +320,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
         <>
           {/* contenu principal */}
           <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-9 px-6 py-8 text-center lg:px-14">
-            <span className="text-xs uppercase tracking-[0.2em] text-or">
+            <span id="question-position" className="text-xs uppercase tracking-[0.2em] text-or">
               {dict.questionLabel} {pad(step + 1)} / {pad(questions.length)}
             </span>
 
@@ -313,7 +330,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
               </p>
             )}
 
-            <h1 className="font-display max-w-3xl text-2xl leading-tight text-ivoire lg:text-5xl">
+            <h1 ref={questionTitleRef} id="question-title" tabIndex={-1} aria-describedby="question-position" className="font-display max-w-3xl text-2xl leading-tight text-ivoire focus:outline-2 focus:outline-offset-4 focus:outline-or lg:text-5xl">
               {current.q}
             </h1>
 
@@ -343,7 +360,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
               }}
             />
             <div className="-mt-3 flex w-full max-w-xs items-center gap-2.5 lg:max-w-none lg:justify-center lg:gap-4">
-              <button
+              <button type="button"
                 onClick={restartAudio}
                 aria-label={dict.audioRestart}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-ombre"
@@ -353,7 +370,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
                   <polygon points="16,0 16,14 8,7" fill="none" stroke="#888888" strokeWidth="1.3" strokeLinejoin="round" />
                 </svg>
               </button>
-              <button
+              <button type="button"
                 onClick={toggleAudio}
                 aria-label={audioPlaying ? dict.audioPauseAction : dict.audioPlayAction}
                 aria-pressed={audioPlaying}
@@ -377,15 +394,17 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
             </div>
 
             {/* options */}
-            <div className="grid w-full max-w-3xl grid-cols-1 gap-4.5 sm:grid-cols-2">
+            <fieldset aria-labelledby="question-title" className="grid w-full min-w-0 max-w-3xl grid-cols-1 gap-4.5 sm:grid-cols-2">
               {current.options.map((opt, idx) => {
                 const isSelected = currentAnswer?.choice === letterFromIndex(idx);
                 return (
-                  <button
-                    key={opt}
+                  <RadioCard
+                    key={`${questionKey}-${idx}`}
+                    name={`question-${questionKey}`}
+                    value={String.fromCharCode(65 + idx)}
                     disabled={submitting}
-                    onClick={() => pick(idx)}
-                    aria-pressed={isSelected}
+                    onChange={() => pick(idx)}
+                    checked={isSelected}
                     className={`flex items-start gap-3 border p-5.5 text-left transition-colors duration-300 lg:px-6.5 lg:py-5.5 ${
                       isSelected ? "border-or bg-indigo text-ivoire" : "border-ombre bg-transparent text-grisclair hover:border-orpale"
                     }`}
@@ -394,17 +413,16 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
                       {String.fromCharCode(65 + idx)}.
                     </span>
                     <span className="text-base lg:text-lg">{opt}</span>
-                  </button>
+                  </RadioCard>
                 );
               })}
-            </div>
+            </fieldset>
 
             {variant === "adulte" && (
               <div className="flex w-full max-w-3xl flex-col gap-2">
-                {current.fieldLabel && (
-                  <span className="text-left text-xs text-grisclair">{current.fieldLabel}</span>
-                )}
+                <label htmlFor="question-detail" className="text-left text-xs text-grisclair">{current.fieldLabel ?? dict.wordMorePlaceholder}</label>
                 <textarea
+                  id="question-detail"
                   rows={1}
                   disabled={submitting}
                   value={currentAnswer?.field ?? ""}
@@ -417,7 +435,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
             )}
 
             {error && (
-              <p className="text-sm" style={{ color: "#B0473E" }} role="alert">
+              <p ref={errorRef} tabIndex={-1} className="text-sm focus:outline-2 focus:outline-offset-4 focus:outline-or" style={{ color: "#EF9388" }} role="alert">
                 {error}
               </p>
             )}
@@ -427,8 +445,9 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
           </div>
 
           {/* navigation basse */}
-          <div className="relative z-10 flex items-center justify-between px-6 py-8 lg:px-14">
-            <button
+          <p role="status" className="sr-only">{submitting ? (ui.status.savingAnswers) : ""}</p>
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-5 px-6 py-8 lg:px-14">
+            <button type="button"
               onClick={goBack}
               disabled={step === 0 || submitting}
               className={`flex items-center gap-2.5 text-sm uppercase tracking-wide text-grisclair ${
@@ -441,8 +460,8 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
               </svg>
               {dict.back}
             </button>
-            <Button onClick={goNext} disabled={!currentAnswer?.choice || submitting}>
-              {submitting ? "…" : variant === "adulte" && !paid && step + 1 === PAYMENT_AFTER_QUESTION ? dict.paymentContinueLabel : isLast ? dict.revealLabel : dict.continueLabel}
+            <Button onClick={goNext} disabled={!currentAnswer?.choice || submitting} aria-busy={submitting}>
+              {submitting ? (ui.status.savingAnswers) : variant === "adulte" && !paid && step + 1 === PAYMENT_AFTER_QUESTION ? dict.paymentContinueLabel : isLast ? dict.revealLabel : dict.continueLabel}
             </Button>
           </div>
         </>

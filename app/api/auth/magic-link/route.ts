@@ -12,7 +12,7 @@ const magicLinkSchema = z.object({
 export async function POST(request: Request) {
   // Même limite que recover : ce point d'accès envoie un email à une adresse
   // arbitraire sans en vérifier la propriété.
-  const rateLimitResponse = await rateLimit(request, 5, 60_000);
+  const rateLimitResponse = await rateLimit(request, 5, 60_000, "auth.magic-link");
   if (rateLimitResponse) return rateLimitResponse;
 
   const parsed = magicLinkSchema.safeParse(await request.json().catch(() => null));

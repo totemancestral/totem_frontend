@@ -3,6 +3,8 @@ import { authenticateRequest } from "@/lib/supabase/server";
 import { getServerEnv } from "@/lib/env";
 import { internalError } from "@/lib/api-error";
 import { rateLimit } from "@/lib/rate-limit";
+import { forwardRetryResponse } from "@/lib/server/response-limits";
+import { REQUEST_TIMING, requestSignal } from "@/lib/request-timing";
 
 export async function relayConsultation(request: Request, path: string, body?: unknown) {
   try {
@@ -16,9 +18,13 @@ export async function relayConsultation(request: Request, path: string, body?: u
     if (!url) return NextResponse.json({ error: "consultation_unavailable" }, { status: 503 });
     const response = await fetch(`${url.replace(/\/$/, "")}/consultations/${path}`, {
       method: body === undefined ? "GET" : "POST", cache: "no-store",
-      headers: { Authorization: request.headers.get("authorization") ?? "", "Content-Type": "application/json" },
+      signal: requestSignal(body === undefined ? REQUEST_TIMING.read : REQUEST_TIMING.draw, request.signal),
+      headers: { Authorization: request.headers.get("authorization") ?? "", "Content-Type": "application/json",
+        "Accept-Language": /^en(?:[-,;]|$)/i.test(request.headers.get("accept-language")?.trim() ?? "") ? "en" : "fr" },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
+    const limited = forwardRetryResponse(response);
+    if (limited) return limited;
     const payload = await response.json().catch(() => null);
     if (!response.ok || !payload) {
       const code = typeof payload?.message === "string" ? payload.message : payload?.code;

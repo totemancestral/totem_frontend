@@ -1,10 +1,12 @@
 "use client";
+import { useAdminLocale } from "@/lib/hooks/useAdminLocale";
+import { adminStatus } from "@/lib/admin-copy";
 import type { ReactNode } from "react";
 
 export function SectionTitle({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <h2 className="font-display text-2xl text-ivoire lg:text-3xl">{title}</h2>
+      <h1 tabIndex={-1} className="font-display text-2xl text-ivoire focus:outline-2 focus:outline-offset-4 focus:outline-or lg:text-3xl">{title}</h1>
       {subtitle && <p className="text-sm text-grisclair">{subtitle}</p>}
     </div>
   );
@@ -40,7 +42,7 @@ export function FilterInput({
   placeholder?: string;
 }) {
   return (
-    <label className="flex flex-col gap-1.5">
+    <label className="flex min-w-0 max-w-full flex-col gap-1.5">
       <span className="text-xs uppercase tracking-wide text-grisclair">{label}</span>
       <input
         type="text"
@@ -64,18 +66,19 @@ export function FilterSelect({
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
 }) {
+  const { t } = useAdminLocale();
   return (
-    <label className="flex flex-col gap-1.5">
+    <label className="flex min-w-0 max-w-full flex-col gap-1.5">
       <span className="text-xs uppercase tracking-wide text-grisclair">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="border border-ombre bg-indigo px-3 py-2 text-sm text-ivoire"
       >
-        <option value="">Tous</option>
+        <option value="">{t("Tous")}</option>
         {options.map((o) => (
           <option key={o.value} value={o.value}>
-            {o.label}
+            {t(o.label)}
           </option>
         ))}
       </select>
@@ -93,10 +96,11 @@ const STATUT_STYLES: Record<string, string> = {
 };
 
 export function StatusBadge({ statut }: { statut: string }) {
+  const { lang } = useAdminLocale();
   const style = STATUT_STYLES[statut] ?? "border-ombre text-grisclair";
   return (
     <span className={`w-fit border px-2.5 py-1 text-xs font-medium uppercase tracking-wide ${style}`}>
-      {statut.replace(/_/g, " ")}
+      {adminStatus(lang, statut)}
     </span>
   );
 }
@@ -110,27 +114,26 @@ export function Pagination({
   totalPages: number;
   onChange: (page: number) => void;
 }) {
+  const { t } = useAdminLocale();
   if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-between border-t border-ombre pt-4 text-sm text-grisclair">
-      <button
+    <nav aria-label={t("Pagination")} className="flex flex-wrap items-center justify-between gap-4 border-t border-ombre pt-4 text-sm text-grisclair">
+      <button type="button"
         onClick={() => onChange(page - 1)}
         disabled={page <= 1}
         className="uppercase tracking-wide disabled:opacity-30"
       >
-        Précédent
-      </button>
-      <span>
-        Page {page} / {totalPages}
+        {t("Précédent")}</button>
+      <span role="status">
+        {t("Page")} {page} / {totalPages}
       </span>
-      <button
+      <button type="button"
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages}
         className="uppercase tracking-wide disabled:opacity-30"
       >
-        Suivant
-      </button>
-    </div>
+        {t("Suivant")}</button>
+    </nav>
   );
 }
 
@@ -139,32 +142,33 @@ export function EmptyState({ text }: { text: string }) {
 }
 
 export function LoadingState() {
-  return <p className="py-10 text-center text-sm text-grisclair">Chargement…</p>;
+  const { t } = useAdminLocale();
+  return <p role="status" className="py-10 text-center text-sm text-grisclair">{t("Chargement…")}</p>;
 }
 
 export function ErrorState({ text }: { text: string }) {
   return (
-    <p className="py-10 text-center text-sm" style={{ color: "#E0A99B" }}>
+    <p role="alert" className="py-10 text-center text-sm" style={{ color: "#E0A99B" }}>
       {text}
     </p>
   );
 }
 
-export function formatEuroCents(cents: number): string {
-  return (cents / 100).toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
+export function formatEuroCents(cents: number, lang: string = "fr"): string {
+  return (cents / 100).toLocaleString(lang === "en" ? "en-GB" : "fr-FR", { style: "currency", currency: "EUR" });
 }
 
-export function formatDateShort(iso: string): string {
+export function formatDateShort(iso: string, lang: string = "fr"): string {
   try {
-    return new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    return new Date(iso).toLocaleDateString(lang === "en" ? "en-GB" : "fr-FR", { day: "2-digit", month: "short", year: "numeric" });
   } catch {
     return iso;
   }
 }
 
-export function formatDateTime(iso: string): string {
+export function formatDateTime(iso: string, lang: string = "fr"): string {
   try {
-    return new Date(iso).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    return new Date(iso).toLocaleString(lang === "en" ? "en-GB" : "fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
   } catch {
     return iso;
   }

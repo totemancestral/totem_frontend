@@ -22,6 +22,18 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("authenticated cauris API proxy", () => {
+  it("passes the requested English locale to every backend endpoint", async () => {
+    const headers = { Authorization: "Bearer user-token", "Accept-Language": "en-GB,en;q=0.9" };
+    await state(new Request("http://localhost/api/consultations/etat", { headers }));
+    await history(new Request("http://localhost/api/consultations/historique", { headers }));
+    await draw(new Request("http://localhost/api/consultations/tirer", { headers, method: "POST", body: "{}" }));
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    for (const [, init] of fetchMock.mock.calls) expect(init.headers["Accept-Language"]).toBe("en");
+  });
+  it("uses French for an unsupported language", async () => {
+    await state(new Request("http://localhost/api/consultations/etat", { headers: { "Accept-Language": "de" } }));
+    expect(fetchMock.mock.calls[0][1].headers["Accept-Language"]).toBe("fr");
+  });
   it("rejects unauthenticated requests without contacting the backend", async () => {
     mocks.auth.mockResolvedValue(NextResponse.json({ error: "unauthenticated" }, { status: 401 }));
     expect((await state(request())).status).toBe(401); expect(fetchMock).not.toHaveBeenCalled();

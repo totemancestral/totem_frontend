@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { locales, type Locale } from "./app/[lang]/dictionaries";
 import { maintenanceHtml } from "./lib/maintenance";
+import { BYPASS_COOKIE, verifyMaintenanceToken } from "./lib/maintenance-access";
 
 const defaultLocale: Locale = "fr";
-const BYPASS_COOKIE = "totem_bypass";
 const BYPASS_ROUTE = "/api/bypass-maintenance";
 
 // Regarde l'en-tête Accept-Language envoyé par le navigateur
@@ -24,11 +24,11 @@ export function proxy(request: NextRequest) {
   // contourné par l'équipe via un cookie posé par /api/bypass-maintenance.
   if (process.env.MAINTENANCE_MODE === "true" && pathname !== BYPASS_ROUTE) {
     const secret = process.env.MAINTENANCE_BYPASS_SECRET;
-    const bypassed = Boolean(secret) && request.cookies.get(BYPASS_COOKIE)?.value === secret;
+    const bypassed = verifyMaintenanceToken(request.cookies.get(BYPASS_COOKIE)?.value, secret);
     if (!bypassed) {
-      return new NextResponse(maintenanceHtml(getPreferredLocale(request)), {
+      return new NextResponse(maintenanceHtml(getPreferredLocale(request), { endAt: process.env.MAINTENANCE_END_AT }), {
         status: 503,
-        headers: { "Content-Type": "text/html; charset=utf-8", "Retry-After": "3600" },
+        headers: { "Content-Type": "text/html; charset=utf-8", "Retry-After": "3600", "Cache-Control": "private, no-store" },
       });
     }
   }

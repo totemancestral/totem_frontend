@@ -1,6 +1,9 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { retryNotice } from "@/lib/retry-after";
+import { useAdminLocale } from "@/lib/hooks/useAdminLocale";
+import { adminLoadError } from "@/lib/admin-copy";
 
 type FetchState<T> = {
   data: T | null;
@@ -14,6 +17,7 @@ type FetchState<T> = {
  * on le sérialise donc pour ne redéclencher l'effet que si son contenu change.
  */
 export function useAdminFetch<T>(path: string, params?: Record<string, string | undefined>) {
+  const { lang } = useAdminLocale();
   const paramsKey = JSON.stringify(params ?? {});
   const [state, setState] = useState<FetchState<T>>({ data: null, loading: true, error: null });
   const [reloadToken, setReloadToken] = useState(0);
@@ -29,7 +33,7 @@ export function useAdminFetch<T>(path: string, params?: Record<string, string | 
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
       if (!token) {
-        if (alive) setState({ data: null, loading: false, error: "unauthenticated" });
+        if (alive) setState({ data: null, loading: false, error: adminLoadError(lang, 401) });
         return;
       }
 
@@ -46,25 +50,26 @@ export function useAdminFetch<T>(path: string, params?: Record<string, string | 
         const payload = await response.json().catch(() => null);
         if (!alive) return;
         if (!response.ok) {
-          setState({ data: null, loading: false, error: payload?.error ?? "Erreur de chargement" });
+          setState({ data: null, loading: false, error: retryNotice(response, lang) ?? adminLoadError(lang, response.status) });
           return;
         }
         setState({ data: payload, loading: false, error: null });
       } catch {
-        if (alive) setState({ data: null, loading: false, error: "Erreur de chargement" });
+        if (alive) setState({ data: null, loading: false, error: adminLoadError(lang, 500) });
       }
     })();
 
     return () => {
       alive = false;
     };
-  }, [path, paramsKey, reloadToken]);
+  }, [path, paramsKey, reloadToken, lang]);
 
   return { ...state, reload };
 }
 
 /** Appel POST admin ponctuel (actions : relancer, relancer-tout...). */
-export async function adminPost<T>(path: string, body?: unknown): Promise<{ ok: boolean; status: number; data: T | null }> {
+export async function adminPost<T>(path: string, body?: unknown, lang: "fr" | "en" = "fr"): Promise<{ ok: boolean; status: number; data: T | null; retryNotice?: string | null }> {
+  try {
   const { data: sessionData } = await supabase.auth.getSession();
   const token = sessionData.session?.access_token;
   if (!token) return { ok: false, status: 401, data: null };
@@ -75,5 +80,8 @@ export async function adminPost<T>(path: string, body?: unknown): Promise<{ ok: 
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await response.json().catch(() => null);
-  return { ok: response.ok, status: response.status, data };
+  return { ok: response.ok, status: response.status, data, retryNotice: retryNotice(response, lang) };
+  } catch {
+    return { ok: false, status: 503, data: null };
+  }
 }

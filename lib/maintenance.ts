@@ -20,8 +20,28 @@ const content: Record<Locale, { eyebrow: string; title: string; subtitle: string
  * Reprend le même langage visuel que le reste du site (voir Erreur404) :
  * fond nuit, sunburst tournant, filigrane géant, Cormorant Garamond + Inter.
  */
-export function maintenanceHtml(locale: Locale): string {
+export function maintenanceHtml(locale: Locale, options: { endAt?: string; now?: number } = {}): string {
   const t = content[locale];
+  const value = options.endAt?.trim();
+  // Require an explicit time zone; never insert the raw configuration in HTML.
+  const end = value && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+    ? Date.parse(value) : NaN;
+  let estimate = "";
+  if (Number.isFinite(end)) {
+    if (end <= (options.now ?? Date.now())) {
+      estimate = locale === "fr"
+        ? "La maintenance se prolonge. Merci de votre patience."
+        : "Maintenance is taking longer than expected. Thank you for your patience.";
+    } else {
+      const date = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-GB", {
+        timeZone: "Africa/Lagos", year: "numeric", month: "long", day: "numeric",
+        hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+      }).format(end);
+      estimate = locale === "fr"
+        ? `Retour estimé le ${date} — heure de Lagos.`
+        : `Expected back on ${date} — Lagos time.`;
+    }
+  }
   return `<!doctype html>
 <html lang="${locale}">
 <head>
@@ -112,7 +132,7 @@ export function maintenanceHtml(locale: Locale): string {
     <p class="eyebrow">${t.eyebrow}</p>
     <h1>${t.title}</h1>
     <p class="subtitle">${t.subtitle}</p>
-    <p class="text">${t.text}</p>
+    <p class="text">${estimate || t.text}</p>
   </main>
 </body>
 </html>`;

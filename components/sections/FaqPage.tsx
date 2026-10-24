@@ -1,19 +1,19 @@
 "use client";
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { Dictionary } from "@/app/[lang]/dictionaries";
 
 type Props = {
   dict: Dictionary["faqPage"];
 };
 
-let accordionIdCounter = 0;
 
 function AccordionItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
-  const [panelId] = useState(() => `faq-page-answer-${accordionIdCounter++}`);
+  const panelId = useId();
   return (
     <div className="border-b border-ombre py-5">
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={panelId}

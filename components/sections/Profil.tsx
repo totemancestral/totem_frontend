@@ -1,9 +1,13 @@
 "use client";
-import { useEffect, useState, type FormEvent } from "react";
+import { interfaceCopy, authErrorMessage, InterfaceError } from "@/lib/interface-copy";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
+import { PasswordField } from "@/components/ui/PasswordField";
+import { isStrongPassword } from "@/lib/password";
+import { RetryAfterError, retryErrorNotice, retryNotice } from "@/lib/retry-after";
 
 type ProfileData = {
   prenom: string | null;
@@ -14,6 +18,7 @@ type ProfileData = {
 };
 
 export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lang: Locale }) {
+  const ui = interfaceCopy(lang);
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -24,6 +29,24 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const [passwordInvalid, setPasswordInvalid] = useState(false);
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const editButtonContainerRef = useRef<HTMLDivElement>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  const wasEditing = useRef(false);
+  useEffect(() => {
+    if (isEditing) firstNameRef.current?.focus();
+    else if (wasEditing.current) editButtonContainerRef.current?.querySelector("button")?.focus();
+    wasEditing.current = isEditing;
+  }, [isEditing]);
+  useEffect(() => {
+    if (!error) return;
+    if (passwordInvalid) document.getElementById("profile-password")?.focus();
+    else errorRef.current?.focus();
+  }, [error, passwordInvalid]);
 
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
@@ -31,21 +54,32 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
-    (async () => {
+    let alive = true;
+    const controller = new AbortController();
+    void (async () => {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
-      if (!token) return;
-      const response = await fetch("/api/profil", { headers: { Authorization: `Bearer ${token}` } });
-      if (!response.ok) return;
+      if (!token) throw new Error("session_expired");
+      const response = await fetch("/api/profil", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store", signal: controller.signal });
+      if (!response.ok) throw new Error("profile_unavailable");
       const data = (await response.json()) as ProfileData;
+      if (!alive) return;
       setProfile(data);
       setFirstName(data.prenom ?? "");
       setLastName(data.nom ?? "");
-    })();
-  }, []);
+    })().catch(() => { if (alive) setLoadError(true); }).finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; controller.abort(); };
+  }, [retry]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
+    setPasswordInvalid(false);
+    if (newPassword && !isStrongPassword(newPassword)) {
+      setPasswordInvalid(true);
+      setError(ui.errors.passwordRules);
+      return;
+    }
     setSaving(true);
     setError(null);
     setNotice(null);
@@ -53,7 +87,7 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
-      if (!token) throw new Error("Session expirée");
+      if (!token) throw new InterfaceError("sessionExpired");
 
       const response = await fetch("/api/profil", {
         method: "PATCH",
@@ -61,11 +95,11 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
         body: JSON.stringify({ prenom: firstName, nom: lastName }),
       });
       const payload = (await response.json().catch(() => null)) as ProfileData & { error?: string };
-      if (!response.ok) throw new Error(payload?.error ?? "Mise à jour impossible");
+      if (retryNotice(response, lang)) throw new RetryAfterError(response);
+      if (!response.ok) throw new InterfaceError("updateFailed");
       setProfile(payload);
 
       if (newPassword) {
-        if (newPassword.length < 8) throw new Error("Le nouveau mot de passe doit faire au moins 8 caractères.");
         const { error: pwError } = await supabase.auth.updateUser({ password: newPassword });
         if (pwError) throw pwError;
         setNewPassword("");
@@ -83,10 +117,10 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
         setNewEmail("");
       }
 
-      setNotice(emailChangeRequested ? dict.emailChangeNotice : "Profil mis à jour.");
+      setNotice(emailChangeRequested ? dict.emailChangeNotice : (ui.status.profileUpdated));
       setIsEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Mise à jour impossible");
+      setError(retryErrorNotice(err, lang) ?? authErrorMessage(err, lang, "updateFailed"));
     } finally {
       setSaving(false);
     }
@@ -118,8 +152,16 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
     profile?.sexe === "homme" ? dict.genderMale : profile?.sexe === "femme" ? dict.genderFemale : "—";
   const languageDisplay = profile?.langue === "en" ? "English" : "Français";
 
+  if (loading || loadError) return <div className="mx-auto max-w-7xl px-6 py-12 text-ivoire">
+    <h1 className="font-display text-3xl">{dict.title}</h1>
+    {loading ? <p className="mt-5" role="status">{ui.status.loadingProfile}</p> : <>
+      <p className="mt-5" role="alert">{ui.errors.profileLoadFailed}</p>
+      <Button className="mt-5" onClick={() => { setLoading(true); setLoadError(false); setRetry(value => value + 1); }}>{ui.status.retry}</Button>
+    </>}
+  </div>;
+
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 lg:pl-0 lg:pr-16">
+    <div className="mx-auto min-w-0 max-w-7xl px-6 py-12 [--color-gris:#A8A8A8] [--color-ombre:#757585] [overflow-wrap:anywhere] lg:pl-0 lg:pr-16">
       <div className="flex flex-col gap-2.5">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>
@@ -143,17 +185,22 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
         </p>
       )}
       {error && (
-        <p className="mt-4 text-sm" style={{ color: "#B0473E" }} role="alert">
+        <p id="profile-error" ref={errorRef} tabIndex={-1} className="mt-4 text-sm focus:outline-2 focus:outline-offset-4 focus:outline-or" style={{ color: "#EF9388" }} role="alert">
           {error}
         </p>
       )}
+      <p role="status" className="sr-only">{saving ? (ui.status.savingProfile) : ""}</p>
 
       {isEditing ? (
-        <form onSubmit={onSubmit} className="mt-5 flex max-w-lg flex-col gap-5">
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <label className="flex flex-1 flex-col gap-2">
+        <form onSubmit={onSubmit} aria-busy={saving} className="mt-5 flex min-w-0 max-w-lg flex-col gap-5">
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+            <label className="flex min-w-0 flex-1 flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.firstNameLabel}</span>
               <input
+                ref={firstNameRef}
+                name="firstName"
+                autoComplete="given-name"
+                required
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
@@ -161,9 +208,11 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
                 className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire"
               />
             </label>
-            <label className="flex flex-1 flex-col gap-2">
+            <label className="flex min-w-0 flex-1 flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.lastNameLabel}</span>
               <input
+                name="lastName"
+                autoComplete="family-name"
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
@@ -173,14 +222,16 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
             </label>
           </div>
 
-          <label className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.emailLabel}</span>
             <p className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-grisclair">{profile?.email}</p>
-          </label>
+          </div>
 
           <label className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.newEmailLabel}</span>
             <input
+              name="newEmail"
+              autoComplete="email"
               type="email"
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
@@ -190,26 +241,22 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
             />
           </label>
 
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.newPasswordLabel}</span>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Laisser vide pour ne pas changer"
-              minLength={8}
-              maxLength={128}
-              className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire"
-            />
-          </label>
+          <div className="flex flex-col gap-2">
+            <PasswordField id="profile-password" name="newPassword" lang={lang} label={dict.newPasswordLabel}
+              value={newPassword} onChange={value => { setNewPassword(value); if (passwordInvalid) { setPasswordInvalid(false); setError(null); } }}
+              autoComplete="new-password" minLength={8} maxLength={128} showRequirements
+              invalid={passwordInvalid} describedBy={passwordInvalid ? "profile-error profile-password-hint" : "profile-password-hint"} />
+            <p id="profile-password-hint" className="text-sm text-grisclair">{ui.status.passwordUnchanged}</p>
+          </div>
 
           <div className="mt-2 flex flex-wrap items-center gap-6">
             <Button type="submit" disabled={saving}>
-              {saving ? "…" : dict.saveButton}
+              {saving ? (ui.status.savingProfile) : dict.saveButton}
             </Button>
             <button
               type="button"
-              onClick={() => setIsEditing(false)}
+              disabled={saving}
+              onClick={() => { setIsEditing(false); setError(null); setPasswordInvalid(false); }}
               className="text-sm font-medium text-grisclair"
             >
               {dict.cancelButton}
@@ -217,7 +264,7 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
           </div>
         </form>
       ) : (
-        <div className="mt-5 flex max-w-lg flex-col gap-5">
+        <div ref={editButtonContainerRef} className="mt-5 flex max-w-lg flex-col gap-5">
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex flex-1 flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.firstNameLabel}</span>

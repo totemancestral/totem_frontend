@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const rateLimitResponse = await rateLimit(request, 20, 60_000);
+  const rateLimitResponse = await rateLimit(request, 20, 60_000, "profil.update");
   if (rateLimitResponse) return rateLimitResponse;
 
   const auth = await authenticateRequest(request);
@@ -72,7 +72,7 @@ export async function PATCH(request: Request) {
  */
 export async function DELETE(request: Request) {
   // Action destructrice et irréversible : limite volontairement basse.
-  const rateLimitResponse = await rateLimit(request, 3, 60_000);
+  const rateLimitResponse = await rateLimit(request, 3, 60_000, "profil.delete");
   if (rateLimitResponse) return rateLimitResponse;
 
   const auth = await authenticateRequest(request);

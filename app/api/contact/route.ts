@@ -12,7 +12,7 @@ const contactSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const rateLimitResponse = await rateLimit(request, 5, 60_000);
+  const rateLimitResponse = await rateLimit(request, 5, 60_000, "contact");
   if (rateLimitResponse) return rateLimitResponse;
 
   const parsed = contactSchema.safeParse(await request.json().catch(() => null));

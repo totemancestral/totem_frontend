@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { passwordRequirements } from "@/lib/password";
+import { interfaceCopy } from "@/lib/interface-copy";
 
 function EyeIcon({ open }: { open: boolean }) {
   return open ? (
@@ -18,6 +19,8 @@ function EyeIcon({ open }: { open: boolean }) {
 }
 
 type PasswordFieldProps = {
+  id?: string;
+  lang?: "fr" | "en";
   label?: string;
   name?: string;
   value: string;
@@ -28,6 +31,8 @@ type PasswordFieldProps = {
   required?: boolean;
   showRequirements?: boolean;
   className?: string;
+  invalid?: boolean;
+  describedBy?: string;
 };
 
 // Champ mot de passe partagé (inscription, connexion, réinitialisation) :
@@ -35,6 +40,8 @@ type PasswordFieldProps = {
 // quand showRequirements est activé (création/changement de mot de passe —
 // pas utile pour une simple connexion).
 export function PasswordField({
+  id,
+  lang = "fr",
   label,
   name,
   value,
@@ -45,15 +52,24 @@ export function PasswordField({
   required,
   showRequirements = false,
   className = "",
+  invalid,
+  describedBy,
 }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+  const requirementsId = `${inputId}-requirements`;
+  const copy = interfaceCopy(lang).password;
   const req = passwordRequirements(value);
 
   return (
-    <label className="flex flex-col gap-2">
-      {label && <span className="text-xs font-medium uppercase tracking-wide text-gris">{label}</span>}
+    <div className="flex flex-col gap-2">
+      {label && <label htmlFor={inputId} className="text-xs font-medium uppercase tracking-wide text-gris">{label}</label>}
       <div className="relative">
         <input
+          id={inputId}
+          aria-invalid={invalid || undefined}
+          aria-describedby={[showRequirements ? requirementsId : "", describedBy].filter(Boolean).join(" ") || undefined}
           type={visible ? "text" : "password"}
           name={name}
           value={value}
@@ -67,7 +83,8 @@ export function PasswordField({
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          aria-label={visible ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+          aria-label={visible ? copy.hide : copy.show}
+          aria-controls={inputId}
           className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-grisclair hover:text-ivoire"
         >
           <EyeIcon open={visible} />
@@ -75,19 +92,20 @@ export function PasswordField({
       </div>
 
       {showRequirements && (
-        <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+        <ul id={requirementsId} className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
           {[
-            { ok: req.length, label: "8 caractères min." },
-            { ok: req.uppercase, label: "une majuscule" },
-            { ok: req.lowercase, label: "une minuscule" },
-            { ok: req.digit, label: "un chiffre" },
+            { ok: req.length, label: copy.rules[0] },
+            { ok: req.uppercase, label: copy.rules[1] },
+            { ok: req.lowercase, label: copy.rules[2] },
+            { ok: req.digit, label: copy.rules[3] },
           ].map((item) => (
             <li key={item.label} className={`text-xs ${item.ok ? "text-or" : "text-grisclair"}`}>
-              {item.ok ? "✓" : "·"} {item.label}
+              <span aria-hidden="true">{item.ok ? "✓" : "·"}</span>
+              <span className="sr-only">{item.ok ? copy.met : copy.unmet} : </span>{item.label}
             </li>
           ))}
         </ul>
       )}
-    </label>
+    </div>
   );
 }

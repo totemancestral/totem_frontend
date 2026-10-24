@@ -22,6 +22,15 @@ beforeEach(() => {
 });
 
 describe("existing account at signup", () => {
+  it("does not expose an unknown Auth provider error", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    mocks.signUp.mockResolvedValueOnce({ data: {}, error: { status: 400, message: "private database schema diagnostic" } });
+    const response = await POST(request("en"));
+    const body = await response.json();
+    expect(body.code).toBe("signup_rejected");
+    expect(JSON.stringify(body)).not.toContain("private");
+    vi.restoreAllMocks();
+  });
   it.each([true, false])("rejects an existing account (confirmed=%s) before sending any signup email", async (confirmed) => {
     mocks.listUsers.mockResolvedValue({ data: { users: [{ email: "test@example.com", email_confirmed_at: confirmed ? "2026-01-01" : null }] }, error: null });
     const response = await POST(request());

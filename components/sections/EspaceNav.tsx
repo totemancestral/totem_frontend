@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
+import { useNavigationOverlay } from "@/lib/hooks/useNavigationOverlay";
+import { interfaceCopy } from "@/lib/interface-copy";
 
 type Props = {
   lang: Locale;
@@ -16,10 +18,15 @@ type Props = {
 };
 
 export default function EspaceNav({ lang, dict, children }: Props) {
+  const ui = interfaceCopy(lang);
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  useNavigationOverlay(menuOpen, headerRef, menuRef, menuButtonRef, setMenuOpen);
 
   // Tout l'espace personnel exige une session valide.
   useEffect(() => {
@@ -47,7 +54,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
   }
 
   if (checkingAuth) {
-    return <div className="min-h-screen bg-nuit" />;
+    return <div className="flex min-h-screen items-center justify-center bg-nuit px-6 text-ivoire"><p role="status">{ui.status.checkingSession}</p></div>;
   }
 
   const tabs = [
@@ -120,14 +127,14 @@ export default function EspaceNav({ lang, dict, children }: Props) {
     <div className="flex h-screen flex-col overflow-hidden bg-nuit">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:border focus:border-or focus:bg-nuit focus:px-4 focus:py-2 focus:text-ivoire"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:border focus:border-or focus:bg-nuit focus:px-4 focus:py-2 focus:text-ivoire"
       >
-        Aller au contenu
+        {ui.navigation.skip}
       </a>
       {/* barre du haut : fixe. Bordure pleine largeur, contenu recentré dans
           une colonne — comme le reste du site, mais avec une marge un peu
           plus généreuse (dashboard = besoin de plus de respiration). */}
-      <div className="shrink-0 border-b border-ombre">
+      <div ref={headerRef} className="relative z-50 shrink-0 border-b border-ombre bg-nuit">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-7 lg:pl-0 lg:pr-16">
           <Brand lang={lang} size={20} />
 
@@ -138,16 +145,20 @@ export default function EspaceNav({ lang, dict, children }: Props) {
               <span>·</span>
               <Link href="/en" className={lang === "en" ? "font-medium text-ivoire" : ""}>EN</Link>
             </div>
-            <button onClick={logout} className="text-xs uppercase tracking-[0.14em] text-grisclair">
+            <button type="button" onClick={logout} className="text-xs uppercase tracking-[0.14em] text-grisclair">
               {dict.logout}
             </button>
           </div>
 
           {/* hamburger / croix : visible uniquement sur mobile */}
           <button
+            ref={menuButtonRef}
+            type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="relative flex h-6 w-6 flex-col items-center justify-center lg:hidden"
-            aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            className="relative flex h-11 w-11 shrink-0 flex-col items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-or lg:hidden"
+            aria-expanded={menuOpen}
+            aria-controls="espace-mobile-menu"
+            aria-label={menuOpen ? ui.navigation.closeMenu : ui.navigation.openMenu}
           >
             {menuOpen ? (
               <>
@@ -166,7 +177,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
       </div>
 
       {/* contenu de l'onglet actif : seule zone qui défile */}
-      <main id="main-content" className="flex-1 overflow-y-auto">
+      <main id="main-content" tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto pb-20 focus-visible:outline-2 focus-visible:outline-or">
         {children}
       </main>
 
@@ -195,7 +206,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
 
       {/* panneau mobile plein écran : remplace la nav basse sur petit écran */}
       {menuOpen && (
-        <div className="fixed inset-0 top-[76px] z-40 flex flex-col justify-between overflow-y-auto bg-nuit p-8 lg:hidden">
+        <div ref={menuRef} id="espace-mobile-menu" role="navigation" aria-label={ui.navigation.personal} className="fixed inset-0 top-[100px] z-40 flex flex-col justify-between gap-6 overflow-y-auto bg-nuit p-8 lg:hidden">
           <div className="flex flex-col gap-1">
             {tabs.map((tab) => (
               <Link
@@ -222,7 +233,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
                 <span>·</span>
                 <Link href="/en" onClick={closeMenu} className={lang === "en" ? "font-medium text-ivoire" : ""}>EN</Link>
               </div>
-              <button
+              <button type="button"
                 onClick={() => {
                   closeMenu();
                   logout();

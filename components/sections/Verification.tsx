@@ -1,4 +1,5 @@
 "use client";
+import { interfaceCopy, authErrorMessage } from "@/lib/interface-copy";
 import { useEffect, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 // aligné sur l'ordre de dict.verification.legalLinks (CGV, Confidentialité, Mentions)
 const legalHrefs = ["/cgv", "/confidentialite", "/mentions"];
@@ -31,9 +33,10 @@ function readVerifiableType(value: string | null): VerifiableType {
 }
 
 export default function Verification({ dict, lang }: { dict: Dictionary["verification"]; lang: Locale }) {
+  const ui = interfaceCopy(lang);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") || `/${lang}/parcours`;
+  const nextPath = safeRedirectPath(searchParams.get("next"), lang);
   const email = searchParams.get("email") ?? "";
   const tokenHash = searchParams.get("token_hash");
   const otpType = readVerifiableType(searchParams.get("type"));
@@ -82,7 +85,7 @@ export default function Verification({ dict, lang }: { dict: Dictionary["verific
     setResending(true);
     setNotice(null);
     const { error } = await supabase.auth.resend({ type: "signup", email });
-    setNotice(error ? "Envoi impossible. Réessaie dans un instant." : "Email renvoyé.");
+    setNotice(error ? authErrorMessage(error, lang, "sendFailed") : ui.status.emailResent);
     setResending(false);
   }
 
@@ -153,7 +156,7 @@ export default function Verification({ dict, lang }: { dict: Dictionary["verific
 
           <div className="mt-2 flex flex-wrap items-center gap-6">
             <Button variant="outline" onClick={resend} disabled={resending || !email}>
-              {resending ? "…" : dict.resendButton}
+              {resending ? ui.status.resendingEmail : dict.resendButton}
             </Button>
             <Link href={`/${lang}/inscription`} className="border-b border-or text-sm font-medium text-or pb-0.5">
               {dict.changeEmailLink}

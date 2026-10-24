@@ -1,3 +1,5 @@
+import { interfaceCopy } from "@/lib/interface-copy";
+
 /**
  * Source de vérité unique du catalogue (prix + mapping ENUM) côté frontend.
  *
@@ -54,8 +56,9 @@ export const JUNIOR_AMOUNT_CENTS = 999;
 /** Prix barré Famille (3 × Révélation), en centimes — ancrage marketing. */
 export const FAMILLE_COMPARE_AT_CENTS = 29700;
 
-export function formatEuro(amountCents: number): string {
+export function formatEuro(amountCents: number, lang: "fr" | "en" = "fr"): string {
   const euros = amountCents / 100;
+  if (lang === "en") return new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", minimumFractionDigits: Number.isInteger(euros) ? 0 : 2 }).format(euros);
   if (Number.isInteger(euros)) return `${euros}€`;
   return `${euros.toFixed(2).replace(".", ",")} €`;
 }
@@ -73,17 +76,7 @@ export function isAdultOffer(offer: Offer): offer is AdultOffer {
   return offer === "origine" || offer === "ancestral" || offer === "famille";
 }
 
-const OFFRE_LABELS: Record<OffreType, string> = {
-  essentiel: "Origine",
-  signature: "Révélation",
-  heritage: "Famille",
-  origine: "Origine",
-  ancestral: "Révélation",
-  famille: "Famille",
-  junior: "Junior",
-};
-
 /** Libellé lisible d'une valeur ENUM `commandes.offre`. */
-export function offreLabel(offre: OffreType): string {
-  return OFFRE_LABELS[offre] ?? offre;
+export function offreLabel(offre: OffreType, lang: "fr" | "en" = "fr"): string {
+  return interfaceCopy(lang).offers[offre] ?? offre;
 }

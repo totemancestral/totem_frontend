@@ -9,6 +9,7 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { useCaurisState } from "@/lib/hooks/useCaurisState";
 import { CAURIS_MOODS, caurisDate, caurisRequest, type CaurisReading as Reading } from "@/lib/cauris";
 import { CaurisReading } from "@/components/ui/CaurisReading";
+import { retryErrorNotice } from "@/lib/retry-after";
 
 type Phase = "floating" | "falling" | "revealed";
 
@@ -65,7 +66,7 @@ function CauriShell({ face = "open" }: { face?: Face }) {
 }
 
 export default function ConsultationTirage({ dict, copy, lang }: { dict: Dictionary["consultationTirage"]; copy: Dictionary["cauris"]; lang: Locale }) {
-  const { state, error: loadError, retry } = useCaurisState();
+  const { state, error: loadError, retry, delayNotice } = useCaurisState();
   const requestedMood = useSearchParams().get("mood");
   const [phase, setPhase] = useState<Phase>("floating");
   const [fallenPoses, setFallenPoses] = useState<string[]>([]);
@@ -73,8 +74,13 @@ export default function ConsultationTirage({ dict, copy, lang }: { dict: Diction
   const [reading, setReading] = useState<Reading | null>(null);
   const [nextAvailable, setNextAvailable] = useState<string | null>(null);
   const [drawError, setDrawError] = useState(false);
+  const [drawDelayNotice, setDrawDelayNotice] = useState<string | null>(null);
   const inFlight = useRef(false);
   const mounted = useRef(true);
+  const resultRef = useRef<HTMLHeadingElement>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => { if (phase === "revealed") resultRef.current?.focus(); }, [phase]);
+  useEffect(() => { if (drawError) errorRef.current?.focus(); }, [drawError]);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const displayedReading = reading ?? state?.currentReading;
   const showComposePrompt = state?.reason === "oeuvre_required" && !displayedReading;
@@ -86,21 +92,22 @@ export default function ConsultationTirage({ dict, copy, lang }: { dict: Diction
     if (!canCast || inFlight.current) return;
     inFlight.current = true;
     setDrawError(false);
+    setDrawDelayNotice(null);
     setFallenPoses(shells.map(randomFallenPose));
     setShellFaces(shells.map(randomFace));
     setPhase("falling");
     try {
       const mood = CAURIS_MOODS.find((value) => value === requestedMood);
       const [result] = await Promise.all([
-        caurisRequest<{ reading: Reading; nextAvailableAt: string }>("tirer", mood ? { mood } : {}),
+        caurisRequest<{ reading: Reading; nextAvailableAt: string }>("tirer", mood ? { mood } : {}, undefined, lang),
         new Promise((resolve) => setTimeout(resolve, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700)),
       ]);
       if (!mounted.current) return;
       setReading(result.reading);
       setNextAvailable(result.nextAvailableAt);
       setPhase("revealed");
-    } catch {
-      if (mounted.current) { setDrawError(true); setPhase("floating"); }
+    } catch (error) {
+      if (mounted.current) { setDrawDelayNotice(retryErrorNotice(error, lang)); setDrawError(true); setPhase("floating"); }
     } finally { inFlight.current = false; }
   }
 
@@ -119,7 +126,7 @@ export default function ConsultationTirage({ dict, copy, lang }: { dict: Diction
       </svg>
 
       {/* barre du haut */}
-      <div className="relative z-20 flex items-center justify-between px-6 py-8 lg:px-14">
+      <div className="relative z-20 flex flex-wrap items-center justify-between gap-4 px-6 py-8 lg:px-14">
         <Brand lang={lang} />
         <Link href={`/${lang}/consultations`} className="text-xs uppercase tracking-[0.14em] text-grisclair">
           {dict.quit}
@@ -130,10 +137,10 @@ export default function ConsultationTirage({ dict, copy, lang }: { dict: Diction
       <div
         className="relative z-10 flex flex-1 flex-col items-center justify-center gap-10 px-6 py-10 text-center"
       >
-        <span className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</span>
+        <h1 className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</h1>
 
         {/* les six cauris : toujours visibles, flottent puis retombent chacun différemment */}
-        <div className="grid grid-cols-3 gap-x-8 gap-y-7 motion-reduce:[&>div]:animate-none motion-reduce:[&>div]:transition-none sm:gap-x-10" aria-hidden="true">
+        <div className="grid grid-cols-3 gap-x-8 gap-y-7 motion-reduce:[&>div]:animate-none! motion-reduce:[&>div]:transition-none! sm:gap-x-10" aria-hidden="true">
           {shells.map((shell, i) => (
             <div
               key={i}
@@ -150,15 +157,17 @@ export default function ConsultationTirage({ dict, copy, lang }: { dict: Diction
         </div>
 
         {!state && !loadError && <p role="status" className="text-grisclair">{copy.loading}</p>}
-        {loadError && <div className="flex flex-col items-center gap-4"><p role="alert" className="text-grisclair">{copy.loadError}</p><Button onClick={retry}>{copy.retry}</Button></div>}
+        {loadError && <div className="flex flex-col items-center gap-4"><p role="alert" className="text-grisclair">{delayNotice ?? copy.loadError}</p><Button onClick={retry}>{copy.retry}</Button></div>}
         {state?.reason === "serie_indisponible" && !displayedReading && <p className="text-grisclair">{copy.seriesUnavailable}</p>}
         {canCast && <Button onClick={cast}>{drawError ? copy.retry : copy.draw}</Button>}
-        {phase === "falling" && <p role="status" className="text-orpale">{copy.drawing}</p>}
-        {drawError && <p role="alert" className="text-grisclair">{copy.drawError}</p>}
+        <p role="status" className="sr-only">{phase === "falling" ? copy.drawing : ""}</p>
+        {phase === "falling" && <p aria-hidden="true" className="text-orpale">{copy.drawing}</p>}
+        {drawError && <p ref={errorRef} tabIndex={-1} role="alert" className="text-grisclair focus:outline-2 focus:outline-offset-4 focus:outline-or">{drawDelayNotice ?? copy.drawError}</p>}
+        {state?.accessible && !state.availableNow && !displayedReading && <p role="status" className="text-sm text-grisclair">{state.nextAvailableAt ? `${copy.nextAvailable} ${caurisDate(state.nextAvailableAt, lang)} · ${copy.parisTime}` : copy.alreadyDrawn}</p>}
 
         {isRevealed && displayedReading && (
-          <div className="flex w-full max-w-xl flex-col items-center gap-4.5" aria-live="polite">
-            <span className="text-xs uppercase tracking-[0.18em] text-or">{dict.readingLabel}</span>
+          <div className="flex w-full min-w-0 max-w-xl flex-col items-center gap-4.5 [overflow-wrap:anywhere]">
+            <h2 ref={resultRef} tabIndex={-1} className="text-xs uppercase tracking-[0.18em] text-or focus:outline-2 focus:outline-offset-4 focus:outline-or">{dict.readingLabel}</h2>
             <CaurisReading reading={displayedReading} copy={copy} lang={lang} />
             {(nextAvailable ?? state?.nextAvailableAt) && <p className="text-sm text-grisclair">{copy.nextAvailable} {caurisDate((nextAvailable ?? state?.nextAvailableAt)!, lang)} · {copy.parisTime}</p>}
             <div className="mt-2 flex gap-5">
@@ -179,7 +188,7 @@ export default function ConsultationTirage({ dict, copy, lang }: { dict: Diction
         {showComposePrompt && (
           <div
             onClick={(e) => e.stopPropagation()}
-            className="absolute inset-0 z-30 flex cursor-default flex-col items-center justify-center gap-6 bg-nuit/95 px-6 text-center"
+            className="relative z-30 flex w-full cursor-default flex-col items-center justify-center gap-6 bg-nuit/95 px-6 text-center"
           >
             <span className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</span>
             <h2 className="font-display max-w-sm text-2xl italic text-ivoire">{dict.composePromptTitle}</h2>

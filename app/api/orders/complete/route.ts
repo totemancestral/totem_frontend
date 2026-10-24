@@ -7,6 +7,7 @@ import { adultIndicators, toAdultBackendAnswers } from "@/lib/adult-answers";
 import { readAdultDraft, readAdultPayment } from "@/lib/server/adult-parcours";
 import { getServerEnv } from "@/lib/env";
 import { rateLimit } from "@/lib/rate-limit";
+import { forwardRetryResponse } from "@/lib/server/response-limits";
 import type { Json } from "@/lib/supabase/types";
 
 const schema = z.object({ parcoursId: z.uuid(), sessionId: z.string().min(1).max(255), answers: adultDraftSchema, locale: z.enum(["fr", "en"]) });
@@ -43,6 +44,8 @@ export async function POST(request: Request) {
       method: "POST", headers: { "Content-Type": "application/json", Authorization: request.headers.get("authorization") ?? "" },
       body: JSON.stringify({ externalCommandId: draft.command.id, answers: backendAnswers, locale, questionnaireVersion: "griot-v2", indicators: adultIndicators(answers) }),
     });
+    const backendLimit = forwardRetryResponse(response);
+    if (backendLimit) return backendLimit;
     if (!response.ok) return NextResponse.json({ error: "completion_failed" }, { status: response.status });
     const { error } = await db.from("reponses_parcours").update({ termine: true })
       .eq("id", parcoursId).eq("user_id", auth.userId);

@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
+import { contentSecurityPolicy } from "./lib/content-security-policy";
 
 const securityHeaders = [
+  {
+    key: "Content-Security-Policy-Report-Only",
+    value: contentSecurityPolicy({
+      development: process.env.NODE_ENV === "development",
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      backendUrl: process.env.TOTEM_BACKEND_URL,
+    }),
+  },
   // Interdit l'affichage du site dans une <iframe> tierce (protection clickjacking).
   { key: "X-Frame-Options", value: "DENY" },
   // Empêche le navigateur de deviner un type MIME différent de celui déclaré.

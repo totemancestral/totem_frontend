@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   // Limite basse : ce point d'accès envoie un email à une adresse arbitraire,
   // sans en vérifier la propriété — sans limite, il permettrait de harceler
   // n'importe quelle boîte mail de demandes de réinitialisation.
-  const rateLimitResponse = await rateLimit(request, 5, 60_000);
+  const rateLimitResponse = await rateLimit(request, 5, 60_000, "auth.recover");
   if (rateLimitResponse) return rateLimitResponse;
 
   const parsed = recoverSchema.safeParse(await request.json().catch(() => null));

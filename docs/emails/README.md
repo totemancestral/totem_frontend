@@ -5,7 +5,7 @@ Deux familles d'emails :
 | Type | Envoyé par | Où le configurer |
 |------|-----------|------------------|
 | **Confirmation de compte, réinitialisation, lien magique, changement d'email** | Supabase Auth | Dashboard Supabase (templates ci-dessous) |
-| **Confirmation de commande, livraison, alerte erreur** | `totem_backend` (Resend, `resend-mailer.service.ts`) | Déjà stylé dans le code — rien à faire |
+| **Livraison adulte/Junior, alerte erreur** | `totem_backend` (Resend, `resend-mailer.service.ts`) | Modèles de livraison par langue dans `email_templates`, ou modèles intégrés au code |
 
 ---
 
@@ -21,12 +21,24 @@ contenu du fichier correspondant dans **Message body (HTML)** :
 | Magic Link | `magic-link.html` |
 | Change Email Address | `change-email.html` |
 
-Sujets recommandés :
+Pour **Subject**, copier le fichier `.subject.txt` du même nom. Il contient
+également les deux langues. Les quatre corps HTML et sujets utilisent
+`{{ if eq .Data.langue "en" }}` : anglais lorsque la métadonnée `langue` du
+compte vaut `en`, français sinon. L'inscription enregistre déjà cette métadonnée.
+Les blocs HTML déclarent leur langue avec `lang="fr"` ou `lang="en"`.
 
-- Confirm signup — `Confirme ton compte Totem Ancestral`
-- Reset password — `Réinitialise ton mot de passe`
-- Magic Link — `Ton lien de connexion Totem Ancestral`
-- Change Email — `Confirme ta nouvelle adresse email`
+La condition repose sur les métadonnées du compte, et non sur la langue de la
+page au moment de demander un lien. Un ancien compte sans `langue` recevra le
+français. Les URL de retour restent celles transmises par le site ; la langue
+du lien et celle du corps peuvent donc différer si la personne change de langue
+après son inscription. Une sélection de langue par demande nécessiterait un
+flux d'envoi personnalisé ; il n'est pas ajouté ici.
+
+La prise en charge de `.Data` et des conditions Go est documentée par
+[Supabase](https://supabase.com/docs/guides/auth/auth-email-templates).
+Les fichiers locaux ne sont pas automatiquement synchronisés avec le Dashboard.
+Après installation, utiliser l'aperçu Supabase pour vérifier les deux branches,
+puis un compte de test de chaque langue pour contrôler l'envoi effectif.
 
 Les variables `{{ .RedirectTo }}`, `{{ .TokenHash }}`, `{{ .Email }}` sont
 remplacées automatiquement par Supabase.
@@ -57,10 +69,9 @@ la page appelle ensuite `PATCH /api/profil` pour resynchroniser
 fait automatiquement. `/mot-de-passe-oublie` gère `type=recovery` séparément
 de la même façon.
 
-Testé de bout en bout contre le vrai projet Supabase (génération de lien +
-`verifyOtp()`) pour signup et recovery. Magic link et change email suivent
-exactement le même mécanisme, avec un `redirectTo` désormais garanti par
-leurs points d'entrée respectifs.
+Les tests locaux vérifient les deux branches HTML, les sujets et la conservation
+des paramètres de vérification pour les quatre flux. Ils n'envoient aucun email
+et ne valident pas la configuration actuellement installée dans Supabase.
 
 Pas de logo en image dans ces templates : le domaine du site n'est pas encore
 en ligne, donc aucune URL publique stable n'existe pour l'asset, et les

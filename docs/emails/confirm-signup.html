@@ -1,4 +1,35 @@
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0b12;padding:56px 16px;font-family:Arial,Helvetica,sans-serif">
+{{ if eq .Data.langue "en" }}
+<table lang="en" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0b12;padding:56px 16px;font-family:Arial,Helvetica,sans-serif">
+  <tr><td align="center">
+    <table role="presentation" width="440" cellpadding="0" cellspacing="0" style="max-width:440px;width:100%">
+      <tr><td align="center" style="padding-bottom:40px">
+        <span style="letter-spacing:.32em;text-transform:uppercase;color:#d8ad4d;font-size:11px">Totem Ancestral</span>
+      </td></tr>
+      <tr><td align="center" style="padding:0 12px 30px">
+        <p style="margin:0;color:#f5f3ee;font-size:23px;line-height:1.45;font-family:Georgia,'Times New Roman',serif">Confirm your account to begin your journey.</p>
+      </td></tr>
+      <tr><td align="center" style="padding:0 20px 30px;color:#a9a496;font-size:14px;line-height:1.6">
+        Your journey is about to begin. Confirm your email address to activate your personal space and start creating your totem.
+      </td></tr>
+      <tr><td align="center" style="padding-bottom:28px">
+        <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=signup" style="display:inline-block;background:#d8ad4d;color:#0c0e16;text-decoration:none;font-weight:700;padding:14px 34px;letter-spacing:.12em;text-transform:uppercase;font-size:12px">Confirm my account</a>
+      </td></tr>
+      <tr><td align="center">
+        <p style="margin:0;color:#6b675e;font-size:12px;line-height:1.7">
+          Button not working? Copy this link into your browser:<br>
+          <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=signup" style="color:#9a9284;word-break:break-all">{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=signup</a><br><br>
+          Did not request this? Simply ignore this email.
+        </p>
+      </td></tr>
+      <tr><td style="padding:44px 0 18px"><div style="height:1px;background:#1c1c24"></div></td></tr>
+      <tr><td align="center">
+        <p style="margin:0;color:#57544c;font-size:11px">TOTEM ANCESTRAL &middot; <a href="mailto:contact@totemancestral.com" style="color:#57544c">contact@totemancestral.com</a></p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+{{ else }}
+<table lang="fr" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0b12;padding:56px 16px;font-family:Arial,Helvetica,sans-serif">
   <tr><td align="center">
     <table role="presentation" width="440" cellpadding="0" cellspacing="0" style="max-width:440px;width:100%">
       <tr><td align="center" style="padding-bottom:40px">
@@ -27,3 +58,4 @@
     </table>
   </td></tr>
 </table>
+{{ end }}

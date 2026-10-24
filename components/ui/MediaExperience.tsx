@@ -15,6 +15,7 @@ export function MediaExperience({ children, copy, homePath }: {
   homePath: string;
 }) {
   const pathname = usePathname();
+  const introSource = homePath === "/en" ? "/assets/intro/totem-intro-en.mp4" : "/assets/intro/totem-intro.mp4";
   const musicRef = useRef<HTMLAudioElement>(null);
   const introRef = useRef<HTMLVideoElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -59,6 +60,7 @@ export function MediaExperience({ children, copy, homePath }: {
     introRef.current?.pause();
     try { sessionStorage.setItem(INTRO_KEY, "true"); } catch { /* Storage is optional. */ }
     dialogRef.current?.close();
+    document.getElementById("main-content")?.focus({ preventScroll: true });
     // Called from a user gesture when skipping; browsers may still require the music button after autoplay.
     if (enabledRef.current) startMusic();
   }
@@ -131,7 +133,7 @@ export function MediaExperience({ children, copy, homePath }: {
         onCancel={(event) => { event.preventDefault(); finishIntro(); }}
         className="totem-intro m-0 h-dvh max-h-none w-screen max-w-none bg-nuit p-0 text-ivoire outline-none backdrop:bg-nuit">
         <h2 id="totem-intro-title" className="sr-only">{copy.introTitle}</h2>
-        <video ref={introRef} src="/assets/intro/totem-intro.mp4" muted={introMuted} playsInline preload="none"
+        <video ref={introRef} src={introSource} muted={introMuted} playsInline preload="none"
           onEnded={finishIntro} onError={finishIntro} className="h-full w-full object-contain" />
         <div data-intro-controls className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] flex items-center gap-3 sm:bottom-6 sm:right-6">
           <button type="button" aria-label={introMuted ? copy.soundOn : copy.soundOff}

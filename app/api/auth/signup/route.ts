@@ -4,6 +4,7 @@ import { getServerEnv } from "@/lib/env";
 import { createPublicAuthClient, createServiceClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { isStrongPassword } from "@/lib/password";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 const signupSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(255),
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
       if (error.code === "user_already_exists" || /already registered|already exists|user already/i.test(error.message)) {
         return existingAccountResponse(locale);
       }
-      return NextResponse.json({ error: normalizeAuthError(error.message) }, { status: statusFromAuthError(error) });
+      return NextResponse.json({ code: "signup_rejected", error: normalizeAuthError(error.message) }, { status: statusFromAuthError(error) });
     }
 
     // Supabase peut masquer un doublon confirmé derrière un faux succès.
@@ -113,7 +114,7 @@ function normalizeAuthError(message: string) {
   }
   if (/rate limit/i.test(message)) return "Trop de tentatives. Réessaie dans quelques minutes.";
   if (/password/i.test(message)) return "Mot de passe trop court, minimum 8 caractères.";
-  return message || "Inscription impossible";
+  return "Inscription impossible";
 }
 
 function statusFromAuthError(error: { status?: number; message?: string }) {
@@ -127,10 +128,4 @@ function getRequestOrigin() {
   // par le client et une mauvaise configuration de proxy pourrait le laisser
   // le falsifier, empoisonnant le lien de confirmation envoyé par email.
   return (getServerEnv().NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
-}
-
-function safeRedirectPath(path: string | undefined, locale: "fr" | "en") {
-  const fallback = `/${locale}/parcours`;
-  if (!path || !path.startsWith(`/${locale}/`)) return fallback;
-  return path;
 }

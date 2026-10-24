@@ -2,6 +2,7 @@
 import Link from "next/link";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { useCommandes } from "@/lib/hooks/useCommandes";
+import { interfaceCopy } from "@/lib/interface-copy";
 import { formatEuro, offreLabel, type OffreType } from "@/lib/offers";
 
 const STATUS_KEY = {
@@ -26,7 +27,8 @@ function formatDate(iso: string, lang: Locale) {
 }
 
 export default function Commandes({ dict, lang }: { dict: Dictionary["commandes"]; lang: Locale }) {
-  const { commandes, error } = useCommandes();
+  const ui = interfaceCopy(lang);
+  const { commandes, error, delayNotice } = useCommandes(lang);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12 lg:pl-0 lg:pr-16">
@@ -35,15 +37,15 @@ export default function Commandes({ dict, lang }: { dict: Dictionary["commandes"
         <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>
       </div>
 
-      {!commandes && !error && <p className="mt-9 text-sm text-grisclair">…</p>}
-      {error && <p className="mt-9 text-sm text-grisclair">{dict.emptyText}</p>}
+      {!commandes && !error && <p role="status" className="mt-9 text-sm text-grisclair">{ui.status.loading}</p>}
+      {error && <p role="alert" className="mt-9 text-sm text-grisclair">{delayNotice ?? dict.emptyText}</p>}
       {commandes && commandes.length === 0 && <p className="mt-9 text-sm text-grisclair">{dict.emptyText}</p>}
 
       {commandes && commandes.length > 0 && (
         <div className="mt-9 flex flex-col border border-ombre">
           {/* en-tête, réservé au bureau */}
           <div className="hidden border-b border-ombre bg-indigo px-6 py-4 text-xs uppercase tracking-wide text-grisclair lg:grid lg:grid-cols-[1fr_1fr_1fr_auto_auto]">
-            <span>N° de commande</span>
+            <span>{ui.orders.number}</span>
             <span>{dict.dateLabel}</span>
             <span>{dict.offerLabel}</span>
             <span className="text-right">{dict.priceLabel}</span>
@@ -59,8 +61,8 @@ export default function Commandes({ dict, lang }: { dict: Dictionary["commandes"
               >
                 <span className="text-sm text-ivoire">{commande.id.slice(0, 8).toUpperCase()}</span>
                 <span className="text-sm text-grisclair">{formatDate(commande.created_at, lang)}</span>
-                <span className="font-display text-base italic text-orpale">{offreLabel(commande.offre as OffreType)}</span>
-                <span className="text-sm text-ivoire lg:text-right">{formatEuro(commande.montant_cents)}</span>
+                <span className="font-display text-base italic text-orpale">{offreLabel(commande.offre as OffreType, lang)}</span>
+                <span className="text-sm text-ivoire lg:text-right">{formatEuro(commande.montant_cents, lang)}</span>
                 <span className="w-fit border border-ombre px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-grisclair lg:ml-auto">
                   {commande.requiresQuestionnaire && commande.stripe_session_id ? (
                     <Link href={`/${lang}/parcours?session_id=${encodeURIComponent(commande.stripe_session_id)}`}>{dict.resumeQuestionnaire}</Link>

@@ -22,7 +22,7 @@ function ArrowButton({
   className?: string;
 }) {
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       aria-label={label}
       className={`

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { forwardRetryResponse } from "@/lib/server/response-limits";
 import { getServerEnv } from "@/lib/env";
 import { createServiceClient } from "@/lib/supabase/server";
+import { REQUEST_TIMING, requestSignal } from "@/lib/request-timing";
 
 export type AdultOrderState = {
   paid: boolean;
@@ -16,8 +18,11 @@ export async function readAdultPayment(request: Request, sessionId: string): Pro
   const response = await fetch(`${TOTEM_BACKEND_URL.replace(/\/$/, "")}/orders/session/${encodeURIComponent(sessionId)}`, {
     headers: { Authorization: request.headers.get("authorization") ?? "" },
     cache: "no-store",
+    signal: requestSignal(REQUEST_TIMING.read, request.signal),
   });
   if (response.status === 402) return { paid: false, offer: "", status: "pending" };
+  const limited = forwardRetryResponse(response);
+  if (limited) return limited;
   const payload = await response.json().catch(() => null);
   if (!response.ok || !payload) {
     return NextResponse.json({ error: "payment_verification_failed" }, { status: response.ok ? 502 : response.status });

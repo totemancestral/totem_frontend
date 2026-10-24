@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { interfaceCopy } from "@/lib/interface-copy";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,6 +9,7 @@ import { Logo } from "@/components/ui/Logo";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 import { adultDraftSchema, hasAdultAnswersThrough, PAYMENT_AFTER_QUESTION } from "@/lib/adult-flow";
+import { RetryAfterError, retryErrorNotice, retryNotice } from "@/lib/retry-after";
 
 const JUNIOR_DRAFT_KEY = "totem:parcours:junior:answers";
 
@@ -29,15 +31,16 @@ const ivoireScope = {
   background: "#FBF6EA",
   "--color-nuit": "#0D0D1A",
   "--color-indigo": "#F3EDDD",
-  "--color-ombre": "#D8D0BC",
-  "--color-or": "#B08A3E",
-  "--color-orpale": "#8B6F2E",
+  "--color-ombre": "#857A63",
+  "--color-or": "#806020",
+  "--color-orpale": "#7B612E",
   "--color-ivoire": "#0D0D1A",
   "--color-gris": "#6B6558",
-  "--color-grisclair": "#948C78",
+  "--color-grisclair": "#706655",
 } as CSSProperties;
 
 export default function Paiement({ dict, offresDict, lang, variant }: Props) {
+  const ui = interfaceCopy(lang);
   const router = useRouter();
   const searchParams = useSearchParams();
   const offre = searchParams.get("offre") ?? "ancestral";
@@ -57,9 +60,12 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
   const [c3, setC3] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
   const allChecked = c1 && c2 && c3;
 
   async function pay() {
+    if (loading || !allChecked) return;
     setLoading(true);
     setError(null);
     try {
@@ -79,7 +85,7 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
       if (!token) {
-        setError("Session expirée. Reconnecte-toi.");
+        setError(ui.errors.sessionExpired);
         return;
       }
 
@@ -88,6 +94,7 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
         const progressResponse = await fetch(`/api/parcours?${new URLSearchParams(parcours ? { parcoursId: parcours } : {})}`, {
           headers: { Authorization: `Bearer ${token}` }, cache: "no-store",
         });
+        if (retryNotice(progressResponse, lang)) throw new RetryAfterError(progressResponse);
         if (!progressResponse.ok) throw new Error("progress_unavailable");
         const progress = await progressResponse.json();
         if (progress.paid && progress.sessionId) {
@@ -119,13 +126,13 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
         return;
       }
       if (!response.ok || !payload?.checkoutUrl) {
-        setError(payload?.error ?? "Paiement indisponible. Réessaie dans un instant.");
+        setError(retryNotice(response, lang) ?? ui.errors.paymentUnavailable);
         return;
       }
 
       window.location.href = payload.checkoutUrl;
-    } catch {
-      setError("Paiement indisponible. Réessaie dans un instant.");
+    } catch (error) {
+      setError(retryErrorNotice(error, lang) ?? ui.errors.paymentUnavailable);
     } finally {
       setLoading(false);
     }
@@ -151,8 +158,8 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
       </svg>
 
       {/* barre du haut */}
-      <div className="relative z-10 flex items-center justify-between px-6 py-9 lg:px-16">
-        <div className="flex items-center gap-3">
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 px-6 py-9 lg:px-16">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           <Brand lang={lang} />
           {variant === "junior" && (
             <span className="ml-1 bg-or px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#FBF6EA]">
@@ -167,7 +174,7 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
 
       {/* contenu */}
       <div className="relative z-10 flex flex-1 flex-col items-center px-6 pb-24 lg:px-16">
-        <div className="flex w-full max-w-xl flex-col gap-8">
+        <div className="flex w-full min-w-0 max-w-xl flex-col gap-8 [overflow-wrap:anywhere]">
 
           <div className="flex flex-col items-center gap-4 text-center">
             <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
@@ -177,11 +184,11 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
 
           {/* récapitulatif de commande */}
           <div className="border border-ombre bg-indigo">
-            <div className="flex gap-5 border-b border-ombre p-7">
+            <div className="flex flex-wrap gap-5 border-b border-ombre p-7">
               <div className="relative flex h-[76px] w-[76px] shrink-0 items-center justify-center overflow-hidden border border-ombre bg-nuit">
                 <Logo size={38} />
               </div>
-              <div className="flex flex-1 flex-col gap-1">
+              <div className="flex min-w-0 flex-1 basis-32 flex-col gap-1">
                 <span className="font-display text-2xl text-ivoire">{summary.name}</span>
                 <span className="text-sm text-grisclair">{summary.desc}</span>
               </div>
@@ -190,14 +197,15 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
                 <p className="mt-0.5 text-xs text-grisclair">{summary.priceCaption}</p>
               </div>
             </div>
-            <div className="flex items-center justify-between px-7 py-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-7 py-5">
               <span className="text-xs uppercase tracking-wide text-grisclair">{dict.archetypeLabel}</span>
               <span className="font-display text-lg italic text-orpale">{dict.archetypeValue}</span>
             </div>
           </div>
 
           {/* consentements */}
-          <div className="flex flex-col gap-4">
+          <fieldset className="flex min-w-0 flex-col gap-4">
+            <legend className="mb-4 text-sm text-gris">{ui.payment.agreements}</legend>
             <label className="flex cursor-pointer items-start gap-3.5">
               <input
                 type="checkbox"
@@ -263,23 +271,26 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
               </span>
               <span className="text-sm text-grisclair">{offer.consent3}</span>
             </label>
-          </div>
+          </fieldset>
 
           {error && (
-            <p className="text-center text-sm" style={{ color: "#B0473E" }} role="alert">
+            <p ref={errorRef} tabIndex={-1} className="text-center text-sm focus:outline-2 focus:outline-offset-4 focus:outline-or" style={{ color: "#B0473E" }} role="alert">
               {error}
             </p>
           )}
 
           <button
+            type="button"
+            aria-busy={loading}
             disabled={!allChecked || loading}
             onClick={pay}
             className={`relative w-full overflow-hidden border-[1.5px] border-nuit px-10 py-4 font-body text-base text-nuit transition-opacity duration-300 ${
               allChecked && !loading ? "cursor-pointer opacity-100" : "pointer-events-none opacity-40"
             }`}
           >
-            {loading ? "…" : `${dict.payButton} ${summary.price}`}
+            {loading ? (ui.status.preparingPayment) : `${dict.payButton} ${summary.price}`}
           </button>
+          <p role="status" className="sr-only">{loading ? (ui.status.preparingPayment) : ""}</p>
 
           <div className="flex items-center justify-center gap-2.5">
             <svg width="13" height="15" viewBox="0 0 13 15" fill="none" stroke="#6B6558" strokeWidth="1.2">
@@ -290,7 +301,7 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
           </div>
 
           <div className="flex flex-col items-center gap-2.5">
-            <div className="flex gap-6">
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-3">
               {dict.legalLinks.map((lien, i) => (
                 <Link key={lien} href={`/${lang}${legalHrefs[i]}`} className="text-sm text-grisclair">
                   {lien}

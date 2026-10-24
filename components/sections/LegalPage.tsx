@@ -22,7 +22,7 @@ function renderBody(body: LegalContent["articles"][number]["body"], lang: Locale
       <a
         key={i}
         href={part.href.startsWith("mailto:") ? part.href : `/${lang}${part.href}`}
-        className="text-or"
+        className="text-or underline underline-offset-4"
       >
         {part.text}
       </a>

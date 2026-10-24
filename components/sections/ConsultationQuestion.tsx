@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { RadioCard } from "@/components/ui/RadioCard";
 import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { CAURIS_MOODS } from "@/lib/cauris";
@@ -25,7 +26,7 @@ export default function ConsultationQuestion({ dict, lang }: { dict: Dictionary[
       </svg>
 
       {/* barre du haut */}
-      <div className="relative z-10 flex items-center justify-between px-6 py-8 lg:px-14">
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 px-6 py-8 lg:px-14">
         <Brand lang={lang} />
         <Link href={`/${lang}/consultations`} className="text-xs uppercase tracking-[0.14em] text-grisclair">
           {dict.cancel}
@@ -36,31 +37,32 @@ export default function ConsultationQuestion({ dict, lang }: { dict: Dictionary[
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-10 px-6 py-8 text-center lg:px-14">
         <div className="flex flex-col items-center gap-4">
           <span className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</span>
-          <h1 className="font-display max-w-2xl text-2xl leading-tight text-ivoire lg:text-4xl">{dict.title}</h1>
+          <h1 id="cauris-mood-title" className="font-display max-w-2xl text-2xl leading-tight text-ivoire lg:text-4xl">{dict.title}</h1>
           <p className="font-display max-w-md text-lg italic text-grisclair">{dict.subtitle}</p>
         </div>
 
-        <div className="grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
+        <fieldset aria-labelledby="cauris-mood-title" className="grid w-full min-w-0 max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
           {dict.options.map((opt, idx) => {
             const isSelected = idx === selected;
             return (
-              <button
+              <RadioCard
                 key={opt}
-                onClick={() => setSelected(idx)}
-                aria-pressed={isSelected}
+                name="cauris-mood" value={CAURIS_MOODS[idx] ?? String(idx)}
+                onChange={() => setSelected(idx)}
+                checked={isSelected}
                 className={`flex min-h-24 items-center justify-center border p-7 text-center transition-colors duration-300 ${
                   isSelected ? "border-or bg-indigo text-ivoire" : "border-ombre bg-transparent text-grisclair hover:border-orpale"
                 }`}
               >
                 <span className="text-lg">{opt}</span>
-              </button>
+              </RadioCard>
             );
           })}
-        </div>
+        </fieldset>
       </div>
 
       {/* navigation basse */}
-      <div className="relative z-10 flex items-center justify-between px-6 py-8 lg:px-14">
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-5 px-6 py-8 lg:px-14">
         <span className="text-xs text-grisclair">{dict.privacyNote}</span>
         {hasSelection ? (
           <Button href={`/${lang}/consultation-tirage?mood=${CAURIS_MOODS[selected!]}`}>{dict.nextButton}</Button>

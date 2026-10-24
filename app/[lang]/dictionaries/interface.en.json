@@ -1,0 +1,71 @@
+{
+  "errors": {
+    "signInFailed": "Unable to sign in. Please try again shortly.",
+    "invalidCredentials": "Incorrect email or password.",
+    "emailUnconfirmed": "Confirm your email before signing in.",
+    "tooManyRequests": "Too many requests. Please try again later.",
+    "sendFailed": "Unable to send the email. Please try again shortly.",
+    "signupFailed": "Unable to create your account. Please try again shortly.",
+    "passwordRules": "Your password must contain at least 8 characters, one uppercase letter, one lowercase letter and one digit.",
+    "passwordReuse": "Choose a password different from your previous one.",
+    "invalidRecoveryLink": "This link has expired or has already been used. Request a new link.",
+    "updateFailed": "Unable to save your changes. Please try again shortly.",
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "invalidEmail": "Please enter a valid email address.",
+    "emailUnavailable": "This email address cannot be used. Please try another address.",
+    "profileLoadFailed": "Your profile could not be loaded.",
+    "paymentUnavailable": "Payment is unavailable. Please try again shortly.",
+    "paymentSessionMissing": "Payment session not found.",
+    "orderUnavailable": "Your order could not be loaded right now.",
+    "artworkMissing": "Artwork not found.",
+    "artworkLoadFailed": "Your artwork could not be loaded right now."
+  },
+  "status": {
+    "checkingSession": "Checking your session…",
+    "creatingAccount": "Creating your account…",
+    "signingIn": "Signing in…",
+    "sendingLink": "Sending the link…",
+    "sendingMessage": "Sending your message…",
+    "savingAnswers": "Saving your answers…",
+    "loadingQuestionnaire": "Loading your questionnaire…",
+    "loadingProfile": "Loading your profile…",
+    "savingProfile": "Saving your profile…",
+    "profileUpdated": "Profile updated.",
+    "passwordUnchanged": "Leave blank to keep your current password.",
+    "emailResent": "Email resent.",
+    "resendingEmail": "Resending the email…",
+    "updatingPassword": "Updating your password…",
+    "preparingPayment": "Preparing secure payment…",
+    "loading": "Loading…",
+    "retry": "Try again"
+  },
+  "password": {
+    "show": "Show password",
+    "hide": "Hide password",
+    "rules": ["8 characters minimum", "one uppercase letter", "one lowercase letter", "one digit"],
+    "met": "Requirement met",
+    "unmet": "Requirement not met"
+  },
+  "artwork": {
+    "portrait": "Portrait of {name}",
+    "orderInfo": "Artwork no. {number} · Delivered on {date}"
+  },
+  "navigation": {
+    "skip": "Skip to content",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "main": "Main navigation",
+    "mobile": "Mobile navigation",
+    "personal": "Personal space navigation"
+  },
+  "payment": { "agreements": "Required agreements before payment" },
+  "offers": { "essentiel": "Origin", "signature": "Revelation", "heritage": "Family", "origine": "Origin", "ancestral": "Revelation", "famille": "Family", "junior": "Junior" },
+  "orders": { "number": "Order number", "serial": "No.", "displayedReadings": "{count} readings displayed." },
+  "retry": {
+    "limited": "Too many requests.",
+    "unavailable": "Service temporarily unavailable.",
+    "later": "Please try again later.",
+    "one": "Wait at least {seconds} second before trying again.",
+    "many": "Wait at least {seconds} seconds before trying again."
+  }
+}

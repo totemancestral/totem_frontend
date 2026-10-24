@@ -1,4 +1,5 @@
 "use client";
+import { interfaceCopy, authErrorMessage } from "@/lib/interface-copy";
 import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,6 +10,7 @@ import { PasswordField } from "@/components/ui/PasswordField";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 import { isStrongPassword } from "@/lib/password";
+import { RetryAfterError, retryErrorNotice, retryNotice } from "@/lib/retry-after";
 
 // aligné sur l'ordre de dict.motDePasseOublie.legalLinks (CGV, Confidentialité, Mentions)
 const legalHrefs = ["/cgv", "/confidentialite", "/mentions"];
@@ -17,12 +19,12 @@ const ivoireScope = {
   background: "#FBF6EA",
   "--color-nuit": "#0D0D1A",
   "--color-indigo": "#F3EDDD",
-  "--color-ombre": "#D8D0BC",
-  "--color-or": "#B08A3E",
-  "--color-orpale": "#8B6F2E",
+  "--color-ombre": "#857A63",
+  "--color-or": "#806020",
+  "--color-orpale": "#7B612E",
   "--color-ivoire": "#0D0D1A",
   "--color-gris": "#6B6558",
-  "--color-grisclair": "#948C78",
+  "--color-grisclair": "#706655",
 } as CSSProperties;
 
 type Phase = "request" | "update";
@@ -34,6 +36,7 @@ export default function MotDePasseOublie({
   dict: Dictionary["motDePasseOublie"];
   lang: Locale;
 }) {
+  const ui = interfaceCopy(lang);
   const router = useRouter();
   const searchParams = useSearchParams();
   const tokenHash = searchParams.get("token_hash");
@@ -52,7 +55,7 @@ export default function MotDePasseOublie({
     if (tokenHash) {
       supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" }).then(({ error: verifyError }) => {
         if (verifyError) {
-          setError("Ce lien n'est plus valide ou a déjà été utilisé. Refais une demande.");
+          setError(ui.errors.invalidRecoveryLink);
           return;
         }
         setPhase("update");
@@ -65,7 +68,7 @@ export default function MotDePasseOublie({
       // eslint-disable-next-line react-hooks/set-state-in-effect -- valeur lue depuis window.location, inconnue au rendu serveur/statique
       setPhase("update");
     }
-  }, [tokenHash]);
+  }, [tokenHash, ui.errors.invalidRecoveryLink]);
 
   async function requestReset(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,11 +81,11 @@ export default function MotDePasseOublie({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, locale: lang }),
       });
-      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      if (!response.ok) throw new Error(payload?.error ?? "Envoi impossible");
+      if (retryNotice(response, lang)) throw new RetryAfterError(response);
+      if (!response.ok) throw new Error("send_failed");
       setNotice(dict.sentNotice);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Envoi impossible");
+      setError(retryErrorNotice(err, lang) ?? authErrorMessage(err, lang, "sendFailed"));
     } finally {
       setLoading(false);
     }
@@ -94,7 +97,7 @@ export default function MotDePasseOublie({
     setNotice(null);
 
     if (!isStrongPassword(password)) {
-      setError("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.");
+      setError(ui.errors.passwordRules);
       return;
     }
 
@@ -105,7 +108,7 @@ export default function MotDePasseOublie({
       setNotice(dict.updatedNotice);
       setTimeout(() => router.replace(`/${lang}/connexion`), 1200);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Mise à jour impossible");
+      setError(authErrorMessage(err, lang, "updateFailed"));
     } finally {
       setLoading(false);
     }
@@ -168,6 +171,7 @@ export default function MotDePasseOublie({
               </label>
             ) : (
               <PasswordField
+                lang={lang}
                 label={dict.passwordLabel}
                 name="password"
                 value={password}
@@ -193,8 +197,8 @@ export default function MotDePasseOublie({
           )}
 
           <div className="mt-2 flex flex-wrap items-center gap-6">
-            <Button type="submit" disabled={loading} className="disabled:cursor-wait disabled:opacity-60">
-              {loading ? "…" : phase === "request" ? dict.sendButton : dict.updateButton}
+            <Button type="submit" disabled={loading} className="hover:text-[#FEFCF0]! disabled:cursor-wait disabled:opacity-60">
+              {loading ? (phase === "request" ? ui.status.sendingLink : ui.status.updatingPassword) : phase === "request" ? dict.sendButton : dict.updateButton}
             </Button>
           </div>
 
@@ -203,7 +207,7 @@ export default function MotDePasseOublie({
           </Link>
 
           <div className="mt-2 flex flex-col gap-2.5">
-            <div className="flex gap-6">
+            <div className="flex flex-wrap gap-x-6 gap-y-3">
               {dict.legalLinks.map((lien, i) => (
                 <Link key={lien} href={`/${lang}${legalHrefs[i]}`} className="text-sm text-grisclair">
                   {lien}

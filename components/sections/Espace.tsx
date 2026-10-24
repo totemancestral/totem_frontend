@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { useCommandes } from "@/lib/hooks/useCommandes";
+import { interfaceCopy } from "@/lib/interface-copy";
 import { ConsultationStatus } from "@/components/sections/ConsultationStatus";
 
 type Props = {
@@ -12,7 +13,8 @@ type Props = {
 };
 
 export default function Espace({ dict, caurisCopy, lang }: Props) {
-  const { commandes, error } = useCommandes();
+  const ui = interfaceCopy(lang);
+  const { commandes, error, delayNotice } = useCommandes(lang);
   const works = (commandes ?? []).filter((c) => c.oeuvre);
   const unfinished = (commandes ?? []).find((c) => c.requiresQuestionnaire && c.stripe_session_id);
 
@@ -88,8 +90,9 @@ export default function Espace({ dict, caurisCopy, lang }: Props) {
           <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.gridLabel}</p>
         </div>
 
-        {commandes === null && !error && <p className="text-sm text-grisclair">…</p>}
-        {(commandes !== null || error) && works.length === 0 && (
+        {commandes === null && !error && <p role="status" className="text-sm text-grisclair">{ui.status.loading}</p>}
+        {delayNotice && <p role="alert" className="text-sm text-grisclair">{delayNotice}</p>}
+        {!delayNotice && (commandes !== null || error) && works.length === 0 && (
           <div className="flex flex-col items-start gap-4">
             <p className="text-sm text-grisclair">{dict.emptyText}</p>
             <Button href={`/${lang}/parcours`}>{dict.resumeButton}</Button>
@@ -117,7 +120,7 @@ export default function Espace({ dict, caurisCopy, lang }: Props) {
                 <div className="flex flex-col gap-3.5 p-5.5">
                   <div className="flex flex-col gap-1">
                     <span className="font-display text-xl italic text-ivoire">{commande.oeuvre?.nom_totem}</span>
-                    <span className="text-xs text-grisclair">N° {commande.oeuvre?.numero_serie}</span>
+                    <span className="text-xs text-grisclair">{ui.orders.serial} {commande.oeuvre?.numero_serie}</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <span className="border border-ombre px-4 py-2 text-xs font-medium text-ivoire">{dict.recitLabel}</span>

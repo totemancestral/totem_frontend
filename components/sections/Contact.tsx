@@ -4,30 +4,35 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
+import { retryNotice } from "@/lib/retry-after";
+import { interfaceCopy } from "@/lib/interface-copy";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 
 // aligné sur l'ordre de dict.contact.legalLinks (CGV, Confidentialité, Mentions)
 const legalHrefs = ["/cgv", "/confidentialite", "/mentions"];
 
 export default function Contact({ dict, lang }: { dict: Dictionary["contact"]; lang: Locale }) {
+  const ui = interfaceCopy(lang);
   const [prenom, setPrenom] = useState("");
   const [email, setEmail] = useState("");
   const [sujet, setSujet] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
+  const [delayNotice, setDelayNotice] = useState<string | null>(null);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setStatus("idle");
+    setDelayNotice(null);
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prenom, email, sujet, message }),
       });
-      if (!response.ok) throw new Error();
+      if (!response.ok) { setDelayNotice(retryNotice(response, lang)); throw new Error(); }
       setStatus("sent");
       setPrenom("");
       setEmail("");
@@ -135,13 +140,13 @@ export default function Contact({ dict, lang }: { dict: Dictionary["contact"]; l
           )}
           {status === "error" && (
             <p className="text-sm" style={{ color: "#E07A6B" }} role="alert">
-              {dict.errorNotice}
+              {delayNotice ?? dict.errorNotice}
             </p>
           )}
 
           <div className="mt-2 flex flex-wrap items-center gap-6">
             <Button type="submit" disabled={loading} className="disabled:cursor-wait disabled:opacity-60">
-              {loading ? "…" : dict.submit}
+              {loading ? ui.status.sendingMessage : dict.submit}
             </Button>
             <a href={`mailto:${dict.directEmail}`} className="border-b border-or text-sm font-medium text-or pb-0.5">
               {dict.directEmailPrefix}{dict.directEmail}
