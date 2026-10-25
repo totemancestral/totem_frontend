@@ -13,13 +13,13 @@ function Cell({ value }: { value: boolean | string }) {
 
 export default function OffresComparatif({ dict }: { dict: Dictionary["offresComparatif"] }) {
   return (
-    <section className="hidden bg-nuit px-6 py-24 lg:block lg:px-16 lg:py-32">
+    <section className="site-section hidden bg-nuit lg:block">
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h2 className="font-display mt-4 text-3xl text-ivoire lg:text-4xl">{dict.title}</h2>
       </div>
 
-      <div className="mx-auto mt-14 max-w-5xl overflow-x-auto">
+      <div className="site-container site-stack overflow-x-auto">
         <table className="w-full min-w-[640px] border-collapse text-sm">
           <thead>
             <tr>

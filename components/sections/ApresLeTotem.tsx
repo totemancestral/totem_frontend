@@ -24,8 +24,8 @@ const ivoireScope = {
 
 export default function ApresLeTotem({ dict, lang }: { dict: Dictionary["apresLeTotem"]; lang: Locale }) {
   return (
-    <section className="px-6 py-24 lg:px-16 lg:py-32" style={ivoireScope}>
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-16 text-center lg:flex-row lg:text-left">
+    <section className="site-section" style={ivoireScope}>
+      <div className="site-container site-gap flex flex-col items-center text-center lg:flex-row lg:text-left">
 
         <Reveal variant="left" className="flex flex-1 flex-col items-center gap-6 lg:items-start">
           <div className="flex items-center gap-3">

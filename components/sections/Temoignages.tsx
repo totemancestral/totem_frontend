@@ -72,7 +72,7 @@ export default function Temoignages({ dict }: { dict: Dictionary["temoignages"] 
   }
 
   return (
-    <section className="bg-indigo px-6 py-24 lg:px-16 lg:py-32">
+    <section className="site-section bg-indigo">
       <Reveal variant="up" className="mx-auto max-w-2xl text-center">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h2 className="font-display mt-4 text-4xl text-ivoire lg:text-5xl">{dict.title}</h2>
@@ -80,7 +80,7 @@ export default function Temoignages({ dict }: { dict: Dictionary["temoignages"] 
         <p className="mx-auto mt-4 max-w-md text-sm text-grisclair">{dict.intro}</p>
       </Reveal>
 
-      <div className="mx-auto mt-16 flex max-w-5xl flex-col items-center gap-6 lg:mt-20 lg:flex-row lg:gap-7">
+      <div className="site-container site-stack site-gap flex flex-col items-center lg:flex-row">
         {/* flèche précédente : visible uniquement à partir de lg, à gauche de la carte */}
         <ArrowButton direction="prev" onClick={prev} label={dict.prevLabel} className="hidden lg:flex" />
 

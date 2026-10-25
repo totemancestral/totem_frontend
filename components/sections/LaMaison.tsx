@@ -5,8 +5,8 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 
 export default function LaMaison({ dict, lang }: { dict: Dictionary["laMaison"]; lang: Locale }) {
   return (
-    <section className="bg-ivoire px-6 py-24 lg:px-16 lg:py-32">
-      <div className="mx-auto flex max-w-5xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-16">
+    <section className="site-section bg-ivoire">
+      <div className="site-container site-gap flex flex-col items-center lg:flex-row">
 
         <Reveal variant="left" className="relative h-[320px] w-full max-w-[320px] shrink-0 overflow-hidden border border-nuit/10">
           <Image

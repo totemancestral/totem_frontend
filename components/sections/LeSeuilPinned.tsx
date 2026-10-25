@@ -34,7 +34,7 @@ export function LeSeuilPinned({ gestes }: { gestes: Geste[] }) {
   }, [gestes]);
 
   return (
-    <div className="mx-auto mt-16 hidden max-w-6xl gap-16 px-16 xl:mt-24 xl:flex">
+    <div className="site-container site-stack site-gap hidden xl:flex">
       {/* photo : reste fixée à l'écran, centrée verticalement comme le texte à côté */}
       <div className="sticky top-0 flex h-screen shrink-0 items-center lg:flex-[1.7]">
         <div className="relative h-[560px] w-full max-w-xl overflow-hidden border border-ombre bg-nuit">

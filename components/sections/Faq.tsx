@@ -23,7 +23,7 @@ export default function Faq({ dict, lang }: { dict: Dictionary["faq"]; lang: Loc
   }
 
   return (
-    <section id="faq" className="scroll-mt-24 px-6 py-24 lg:px-16 lg:py-32">
+    <section id="faq" className="site-section scroll-mt-24">
       <Reveal variant="up" className="mx-auto max-w-2xl text-center">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h2 className="font-display mt-4 text-4xl text-ivoire lg:text-5xl">{dict.title}</h2>
@@ -31,7 +31,7 @@ export default function Faq({ dict, lang }: { dict: Dictionary["faq"]; lang: Loc
         <p className="mx-auto mt-4 max-w-md text-sm text-grisclair">{dict.intro}</p>
       </Reveal>
 
-      <div className="mx-auto mt-16 flex max-w-6xl flex-col items-center gap-16 lg:mt-20 lg:flex-row lg:items-start lg:gap-20">
+      <div className="site-container site-stack site-gap flex flex-col items-center lg:flex-row lg:items-start">
         {/* la liste des questions */}
         <Reveal variant="left" className="flex w-full flex-[1.15] flex-col gap-2">
           {dict.items.map((item, i) => {

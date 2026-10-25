@@ -199,7 +199,7 @@
       { "name": "Famille", "price": "219 €", "featured": false }
     ],
     "rows": [
-      { "label": "Parchemin narratif", "values": [true, true, true] },
+      { "label": "Parchemin ancestral", "values": [true, true, true] },
       { "label": "Œuvre visuelle", "values": [true, true, true] },
       { "label": "Voix de l'ancêtre", "values": [false, true, true] },
       { "label": "Certificat d'authenticité numéroté", "values": [true, true, true] },
@@ -237,12 +237,11 @@
   "ceQueVousRecevez": {
     "eyebrow": "L'œuvre",
     "title": "Ce que vous recevez",
-    "intro": "Cinq pièces, livrées ensemble, composant l'intégralité de votre Totem Ancestral.",
+    "intro": "Selon l'offre choisie, jusqu'à quatre pièces composent votre Totem Ancestral.",
     "items": [
-      { "label": "Le Parchemin" },
+      { "label": "Le Parchemin ancestral" },
       { "label": "La Voix" },
       { "label": "Le Visage" },
-      { "label": "La Carte ancestrale" },
       { "label": "Le Certificat" }
     ]
   },
@@ -257,7 +256,7 @@
     "quoteLine2": "Pour que l'ancêtre se lève à votre image.",
     "pathLabel": "Votre parcours",
     "pathAdulte": "Adulte",
-    "pathAdulteDesc": "Parcours complet · parchemin, audio & image",
+    "pathAdulteDesc": "Parcours complet · Parchemin ancestral, audio & image",
     "pathJunior": "Junior",
     "pathJuniorDesc": "Totem express · cinq questions, défie tes amis",
     "firstNameLabel": "Prénom",
@@ -442,7 +441,7 @@
     "articles": [
       { "title": "Article 1 — Objet et champ d'application", "body": ["Les présentes conditions générales de vente (CGV) encadrent toute commande d'œuvres numériques personnalisées Totem Ancestral, éditées par SENYCE PARTNERS (SARL), passée sur le site totem-ancestral.com. Toute commande implique l'acceptation pleine et entière des présentes CGV, opposables au client dans leur version en vigueur au jour de la commande."] },
       { "title": "Article 2 — Identité du vendeur", "body": ["Le site est édité par SENYCE PARTNERS, SARL au capital de 19 000 €, dont le siège social est situé au 4 avenue Laurent Cely, 92600 Asnières-sur-Seine. Contact : ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
-      { "title": "Article 3 — Produits et nature artistique", "body": ["Selon l'offre choisie, vous recevez un parchemin PDF, une œuvre visuelle PNG haute résolution, et, pour Ancestral et Famille, un fichier audio MP3 de 90 secondes de la voix de l'ancêtre imaginaire, ainsi qu'un certificat d'authenticité numéroté. Ces créations ne constituent ni un test ADN, ni une recherche généalogique, ni une prestation divinatoire, médicale ou juridique."] },
+      { "title": "Article 3 — Produits et nature artistique", "body": ["Selon l'offre choisie, vous recevez un parchemin ancestral PDF, une œuvre visuelle PNG haute résolution, et, pour Ancestral et Famille, un fichier audio MP3 de 90 secondes de la voix de l'ancêtre imaginaire, ainsi qu'un certificat d'authenticité numéroté. Ces créations ne constituent ni un test ADN, ni une recherche généalogique, ni une prestation divinatoire, médicale ou juridique."] },
       { "title": "Article 4 — Prix et paiement", "body": ["Les prix sont indiqués en euros toutes taxes comprises et affichés avant validation de la commande. L'offre Junior est proposée à 9,99 €. Le paiement s'effectue de manière sécurisée via Stripe. SENYCE PARTNERS ne conserve aucune donnée bancaire complète. La commande est ferme après encaissement complet et confirmation des informations nécessaires à la composition."] },
       { "title": "Article 5 — Commande et composition", "body": ["La commande s'accompagne d'un questionnaire créatif permettant la personnalisation de l'œuvre. Elle est validée après réception du paiement intégral ; un email de confirmation est envoyé immédiatement. La maison se réserve le droit de refuser une commande en cas de fraude suspectée, de contenu manifestement illicite, ou d'impossibilité technique."] },
       { "title": "Article 6 — Livraison", "body": ["L'œuvre est livrée par email sous quinze minutes (trente minutes pour l'offre Famille) après validation du questionnaire. Si une difficulté technique empêche la livraison, l'œuvre est recomposée ou remboursée intégralement."] },
@@ -570,9 +569,9 @@
     "youAreLabel": "Vous êtes",
     "archetypeName": "Le Lion Ancestral",
     "orderInfo": "Œuvre N° TTM-2026-B7241C9 · Livrée le 28 août 2026",
-    "loadingText": "Le griot achève l'écriture de votre parchemin…",
-    "openPrompt": "Touchez le parchemin pour le déplier.",
-    "parcheminTitle": "Le Parchemin",
+    "loadingText": "Le griot achève l'écriture de votre parchemin ancestral…",
+    "openPrompt": "Touchez le Parchemin ancestral pour le déplier.",
+    "parcheminTitle": "Le Parchemin ancestral",
     "sections": [
       {
         "title": "L'Éveil",
@@ -594,7 +593,7 @@
     "audioRestart": "Réécouter depuis le début",
     "audioPlayAction": "Lire l'audio",
     "audioPauseAction": "Mettre l'audio en pause",
-    "downloadMapButton": "Télécharger la Carte ancestrale",
+    "downloadMapButton": "Télécharger le Parchemin ancestral",
     "downloadCertButton": "Télécharger le Certificat",
     "shareButton": "Partager mon Totem",
     "shareCopied": "Lien copié !"
@@ -765,7 +764,7 @@
         "title": "L'expérience pratique",
         "items": [
           { "question": "Combien de temps prend la composition ?", "answer": "Le questionnaire dure environ quinze minutes. L'œuvre est livrée par email sous quinze minutes après validation (trente minutes pour le Totem Famille)." },
-          { "question": "Sous quel format reçoit-on l'œuvre ?", "answer": "Vous recevez un parchemin PDF, une œuvre visuelle PNG haute résolution, et, pour Ancestral et Famille, un fichier audio MP3 de 90 secondes." },
+          { "question": "Sous quel format reçoit-on l'œuvre ?", "answer": "Vous recevez un parchemin ancestral PDF, une œuvre visuelle PNG haute résolution, et, pour Ancestral et Famille, un fichier audio MP3 de 90 secondes." },
           { "question": "Puis-je offrir une œuvre ?", "answer": "Absolument. Chaque commande inclut une carte cadeau gratuite, et vous pouvez désigner un destinataire au moment du paiement." }
         ]
       },

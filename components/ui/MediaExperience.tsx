@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { Dictionary } from "@/app/[lang]/dictionaries";
 import { MusicButton, SoundIcon } from "@/components/ui/MusicButton";
 import { AmbientMusicContext } from "@/lib/hooks/useAmbientMusic";
+import { AmbientLoop } from "@/lib/ambient-loop";
 
 const MUSIC_KEY = "totem_ambient_enabled";
 const INTRO_KEY = "totem_intro_seen";
@@ -16,7 +17,7 @@ export function MediaExperience({ children, copy, homePath }: {
 }) {
   const pathname = usePathname();
   const introSource = homePath === "/en" ? "/assets/intro/totem-intro-en.mp4" : "/assets/intro/totem-intro.mp4";
-  const musicRef = useRef<HTMLAudioElement>(null);
+  const musicRef = useRef<AmbientLoop | null>(null);
   const introRef = useRef<HTMLVideoElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const enabledRef = useRef(false);
@@ -42,8 +43,8 @@ export function MediaExperience({ children, copy, homePath }: {
     const music = musicRef.current;
     if (!music || dialogRef.current?.open) return;
     const voicePlaying = Array.from(document.querySelectorAll<HTMLMediaElement>("audio, video"))
-      .some((media) => media !== music && !media.paused && !media.ended && !media.muted);
-    music.volume = voicePlaying ? 0.1 : 0.5;
+      .some((media) => !music.owns(media) && !media.paused && !media.ended && !media.muted);
+    music.setVolume(voicePlaying ? 0.1 : 0.5);
     void music.play().then(() => setError(false)).catch(() => setPlaying(false));
   }, []);
 
@@ -66,19 +67,26 @@ export function MediaExperience({ children, copy, homePath }: {
   }
 
   useEffect(() => {
-    const music = musicRef.current;
-    if (!music) return;
+    const tracks: [HTMLAudioElement, HTMLAudioElement] = [
+      new Audio("/assets/totem-music.mp3?v=20261025-continu1"),
+      new Audio("/assets/totem-music.mp3?v=20261025-continu1"),
+    ];
+    tracks.forEach(track => { track.preload = "none"; });
+    const music = new AmbientLoop(tracks, setPlaying);
+    musicRef.current = music;
+    const onError = () => { music.pause(); setError(true); };
+    tracks.forEach(track => track.addEventListener("error", onError));
     try { enabledRef.current = localStorage.getItem(MUSIC_KEY) !== "false"; } catch { enabledRef.current = true; }
     const otherAudio = new Set<HTMLMediaElement>();
     const updateVolume = (event: Event) => {
       const media = event.target;
-      if (!(media instanceof HTMLMediaElement) || media === music) return;
+      if (!(media instanceof HTMLMediaElement) || music.owns(media)) return;
       if (media.paused || media.ended || media.muted) otherAudio.delete(media);
       else otherAudio.add(media);
       for (const active of otherAudio) {
         if (!active.isConnected || active.paused || active.ended || active.muted) otherAudio.delete(active);
       }
-      music.volume = otherAudio.size ? 0.1 : 0.5;
+      music.setVolume(otherAudio.size ? 0.1 : 0.5);
     };
     const resume = (event: Event) => {
       if (event.target instanceof Element && event.target.closest("button, a, input, select, textarea")) return;
@@ -91,7 +99,9 @@ export function MediaExperience({ children, copy, homePath }: {
       for (const type of ["play", "pause", "ended", "volumechange"]) document.removeEventListener(type, updateVolume, true);
       document.removeEventListener("pointerdown", resume);
       document.removeEventListener("keydown", resume);
-      music.pause();
+      tracks.forEach(track => track.removeEventListener("error", onError));
+      music.dispose();
+      musicRef.current = null;
     };
   }, [startMusic]);
 
@@ -122,9 +132,6 @@ export function MediaExperience({ children, copy, homePath }: {
   return (
     <AmbientMusicContext.Provider value={{ playing, toggle, setHeroControls }}>
       {children}
-      <audio ref={musicRef} src="/assets/totem-music.mp3" loop preload="none"
-        onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}
-        onError={() => { setPlaying(false); setError(true); }} />
       <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-[60] flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2" data-floating-music>
         {error && <p role="status" className="bg-nuit px-3 py-2 text-sm text-ivoire">{copy.audioError}</p>}
         {showFloatingMusic && <MusicButton copy={copy} className="shadow-lg" />}

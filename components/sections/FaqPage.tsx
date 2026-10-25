@@ -41,14 +41,14 @@ export default function FaqPage({ dict }: Props) {
   return (
     <div className="min-h-screen bg-nuit pt-32 lg:pt-40">
       {/* en-tête */}
-      <div className="mx-auto flex max-w-2xl flex-col gap-4 px-6 pb-14 text-center lg:px-16">
+      <div className="mx-auto flex max-w-2xl flex-col gap-4 site-reading pb-14 text-center">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h1 className="font-display text-4xl text-ivoire lg:text-5xl">{dict.title}</h1>
         <p className="font-display text-xl italic text-orpale">{dict.subtitle}</p>
       </div>
 
       {/* catégories */}
-      <div className="mx-auto flex max-w-2xl flex-col gap-14 px-6 pb-24 lg:px-16">
+      <div className="mx-auto flex max-w-2xl flex-col gap-14 site-reading site-section-end">
         {dict.categories.map((cat) => (
           <div key={cat.title}>
             <h2 className="font-display mb-2 border-b border-ombre pb-4 text-2xl text-orpale">

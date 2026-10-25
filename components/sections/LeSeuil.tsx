@@ -13,8 +13,8 @@ const imagePositions: Record<string, string> = {
 
 export default function LeSeuil({ dict }: { dict: Dictionary["leSeuil"] }) {
   return (
-    <section id="experience" className="scroll-mt-24 bg-indigo px-6 pb-4 pt-24 lg:px-16 lg:pb-6 lg:pt-32">
-      <div className="mx-auto max-w-6xl">
+    <section id="experience" className="site-gutters site-section-start scroll-mt-24 bg-indigo pb-4 lg:pb-6">
+      <div className="site-container">
         {/* en-tête */}
         <Reveal variant="up" className="flex flex-col gap-6 text-left lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -26,7 +26,7 @@ export default function LeSeuil({ dict }: { dict: Dictionary["leSeuil"] }) {
         </Reveal>
 
         {/* Format commun sur mobile/tablette ; la version fixe prend le relais à xl. */}
-        <div className="mt-16 flex flex-col gap-14 xl:hidden">
+        <div className="site-stack site-gap flex flex-col xl:hidden">
           {dict.gestes.map((geste) => (
             <div key={geste.title} className="flex flex-col gap-8">
               <Reveal

@@ -12,12 +12,15 @@
  */
 export type AudioTrack = "adulte" | "junior";
 
+// Change the corresponding version when replacing recordings to refresh browser caches.
+const FRENCH_AUDIO_VERSION = "20261025-fr1";
+const ENGLISH_AUDIO_VERSION = "20261025-en1";
+
 export function questionAudioSrc(track: AudioTrack, n: number, locale: string): string {
-  const base = `/assets/${track}/q${n}.mp3`;
-  return locale === "en" ? `/assets/${track}/en/q${n}.mp3` : base;
+  return locale === "en" ? `/assets/${track}/en/q${n}.mp3?v=${ENGLISH_AUDIO_VERSION}` : questionAudioFallbackSrc(track, n);
 }
 
 /** Voix de repli (toujours le français) quand la piste demandée manque. */
 export function questionAudioFallbackSrc(track: AudioTrack, n: number): string {
-  return `/assets/${track}/q${n}.mp3`;
+  return `/assets/${track}/q${n}.mp3?v=${FRENCH_AUDIO_VERSION}`;
 }

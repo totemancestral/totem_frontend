@@ -91,7 +91,7 @@ export default function Nav({ lang, dict }: NavProps) {
         data-nav-hidden={hidden && !menuOpen}
         aria-label={ui.navigation.main}
         onFocusCapture={() => setHidden(false)}
-        className={`fixed top-0 left-0 z-50 flex h-[68px] w-full items-center justify-between px-6 transition-[transform,background-color,color] duration-300 motion-reduce:transition-none lg:h-20 lg:px-16 ${hidden && !menuOpen ? "-translate-y-full" : "translate-y-0"} ${
+        className={`fixed top-0 left-0 z-50 flex h-[68px] w-full items-center justify-between site-gutters transition-[transform,background-color,color] duration-300 motion-reduce:transition-none lg:h-20 ${hidden && !menuOpen ? "-translate-y-full" : "translate-y-0"} ${
           isLight ? "bg-ivoire text-nuit" : "bg-transparent text-ivoire"
         }`}
       >

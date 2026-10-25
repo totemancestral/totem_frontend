@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { Brand } from "@/components/ui/Brand";
+import { AudioSeekBar } from "@/components/ui/AudioSeekBar";
+import { parchmentParagraphs } from "@/lib/parchment-text";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 import { retryNotice } from "@/lib/retry-after";
@@ -38,21 +40,9 @@ function formatDate(iso: string, lang: Locale) {
   }
 }
 
-/** Découpe le récit (parchemin + pages du récit, concaténés côté backend)
- *  en paragraphes affichables ; une première ligne courte est traitée comme
- *  un titre de mouvement. */
+/** Affiche une seule version du récit, y compris pour les anciens miroirs. */
 function splitRecit(recit: string): { title: string | null; text: string }[] {
-  return recit
-    .split(/\n{2,}/)
-    .map((chunk) => chunk.trim())
-    .filter(Boolean)
-    .map((chunk) => {
-      const lines = chunk.split("\n");
-      if (lines.length > 1 && lines[0].length <= 60) {
-        return { title: lines[0], text: lines.slice(1).join(" ").trim() };
-      }
-      return { title: null, text: chunk };
-    });
+  return parchmentParagraphs(recit).map(text => ({ title: null, text }));
 }
 
 export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lang: Locale }) {
@@ -426,10 +416,8 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                       </svg>
                     )}
                   </button>
-                  <div className="relative h-px flex-1 bg-ombre">
-                    <div className="h-px bg-or transition-[width] duration-150 ease-linear" style={{ width: `${audioProgress}%` }} />
-                  </div>
                   <span className="text-xs text-grisclair">{audioLabel}</span>
+                  <AudioSeekBar audioRef={audioRef} lang={lang} />
                 </div>
               </div>
             )}

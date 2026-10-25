@@ -1,5 +1,6 @@
 "use client";
 import { interfaceCopy } from "@/lib/interface-copy";
+import { totemConflictMessage } from "@/lib/totem-eligibility";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import Link from "next/link";
@@ -60,6 +61,7 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
   const [c3, setC3] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [totemConflict, setTotemConflict] = useState(false);
   const errorRef = useRef<HTMLParagraphElement>(null);
   useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
   const allChecked = c1 && c2 && c3;
@@ -68,6 +70,7 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
     if (loading || !allChecked) return;
     setLoading(true);
     setError(null);
+    setTotemConflict(false);
     try {
       const isJunior = variant === "junior";
       const raw = isJunior ? sessionStorage.getItem(JUNIOR_DRAFT_KEY) : null;
@@ -119,6 +122,7 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
         checkoutUrl?: string;
         error?: string;
         sessionId?: string;
+        code?: string;
       } | null;
 
       if (response.status === 409 && payload?.sessionId) {
@@ -126,7 +130,8 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
         return;
       }
       if (!response.ok || !payload?.checkoutUrl) {
-        setError(retryNotice(response, lang) ?? ui.errors.paymentUnavailable);
+        setTotemConflict(Boolean(totemConflictMessage(payload?.code, lang)) && payload?.code !== "totem_checkout_in_progress");
+        setError(totemConflictMessage(payload?.code, lang) ?? retryNotice(response, lang) ?? ui.errors.paymentUnavailable);
         return;
       }
 
@@ -184,7 +189,7 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
 
           {/* récapitulatif de commande */}
           <div className="border border-ombre bg-indigo">
-            <div className="flex flex-wrap gap-5 border-b border-ombre p-7">
+            <div className="flex flex-wrap gap-5 p-7">
               <div className="relative flex h-[76px] w-[76px] shrink-0 items-center justify-center overflow-hidden border border-ombre bg-nuit">
                 <Logo size={38} />
               </div>
@@ -196,10 +201,6 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
                 <span className="font-display text-[28px] text-ivoire">{summary.price}</span>
                 <p className="mt-0.5 text-xs text-grisclair">{summary.priceCaption}</p>
               </div>
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-3 px-7 py-5">
-              <span className="text-xs uppercase tracking-wide text-grisclair">{dict.archetypeLabel}</span>
-              <span className="font-display text-lg italic text-orpale">{dict.archetypeValue}</span>
             </div>
           </div>
 
@@ -278,6 +279,9 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
               {error}
             </p>
           )}
+          {totemConflict && <Link href={`/${lang}/espace`} className="text-center text-sm text-or underline underline-offset-4">
+            {lang === "en" ? "Go to my space" : "Accéder à mon espace"}
+          </Link>}
 
           <button
             type="button"

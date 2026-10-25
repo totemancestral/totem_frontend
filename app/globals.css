@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+/* Shared public-page rhythm: fluid gutters and spacing, bounded reading widths. */
+:root {
+  --site-width: 90rem;
+  --site-gutter: clamp(1.25rem, 4vw, 4rem);
+  --site-space: clamp(3rem, 6vw, 6rem);
+  --site-stack: clamp(2rem, 4vw, 4rem);
+  --site-gap: clamp(1.5rem, 3vw, 3rem);
+  --site-nav-height: 4.25rem;
+}
+.site-section, .site-gutters {
+  padding-inline: max(var(--site-gutter), calc((100% - var(--site-width)) / 2));
+}
+.site-section { padding-block: var(--site-space); }
+.site-container { width: 100%; max-width: var(--site-width); min-width: 0; margin-inline: auto; }
+.site-stack { margin-top: var(--site-stack); }
+.site-gap { gap: var(--site-gap); }
+.site-card { padding: clamp(1.25rem, 2.5vw, 2.25rem); }
+.site-section-start { padding-top: var(--site-space); }
+.site-section-end { padding-bottom: var(--site-space); }
+.site-reading { padding-inline: var(--site-gutter); }
+#main-content > .site-section:first-child {
+  padding-top: calc(var(--site-nav-height) + var(--site-space));
+}
+@media (min-width: 1024px) {
+  :root { --site-nav-height: 5rem; }
+}
+
 /* Remain visible against both light and dark navigation surfaces. */
 :where([data-site-nav], #site-mobile-menu, #espace-mobile-menu) :where(a, button):focus-visible {
   outline: 2px solid currentColor;

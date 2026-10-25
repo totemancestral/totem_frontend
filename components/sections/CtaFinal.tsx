@@ -5,7 +5,7 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 
 export default function CtaFinal({ dict, lang }: { dict: Dictionary["ctaFinal"]; lang: Locale }) {
   return (
-    <div className="relative flex flex-col items-center gap-6 overflow-hidden bg-nuit px-6 py-24 text-center lg:py-32">
+    <div className="relative flex flex-col items-center gap-6 overflow-hidden site-section bg-nuit text-center">
       {/* lueur douce derrière l'icône */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/2 h-[480px] w-[480px] -translate-x-1/2 -translate-y-1/2"

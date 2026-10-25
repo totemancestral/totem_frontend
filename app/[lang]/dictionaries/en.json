@@ -199,7 +199,7 @@
       { "name": "Family", "price": "€219", "featured": false }
     ],
     "rows": [
-      { "label": "Narrative parchment", "values": [true, true, true] },
+      { "label": "Ancestral Parchment", "values": [true, true, true] },
       { "label": "Visual artwork", "values": [true, true, true] },
       { "label": "Voice of the ancestor", "values": [false, true, true] },
       { "label": "Numbered certificate of authenticity", "values": [true, true, true] },
@@ -237,12 +237,11 @@
   "ceQueVousRecevez": {
     "eyebrow": "The work",
     "title": "What you receive",
-    "intro": "Five pieces, delivered together, forming the whole of your Totem Ancestral.",
+    "intro": "Depending on your offer, up to four pieces make up your Totem Ancestral.",
     "items": [
-      { "label": "The Parchment" },
+      { "label": "The Ancestral Parchment" },
       { "label": "The Voice" },
       { "label": "The Face" },
-      { "label": "The Ancestral Map" },
       { "label": "The Certificate" }
     ]
   },
@@ -257,7 +256,7 @@
     "quoteLine2": "So the ancestor may rise in your image.",
     "pathLabel": "Your path",
     "pathAdulte": "Adult",
-    "pathAdulteDesc": "Full journey · parchment, audio & image",
+    "pathAdulteDesc": "Full journey · Ancestral Parchment, audio & image",
     "pathJunior": "Junior",
     "pathJuniorDesc": "Express Totem · five questions, challenge your friends",
     "firstNameLabel": "First name",
@@ -442,7 +441,7 @@
     "articles": [
       { "title": "Article 1 — Purpose and scope", "body": ["These general terms and conditions of sale (T&Cs) govern any order of personalized Totem Ancestral digital works, published by SENYCE PARTNERS (SARL), placed on the site totem-ancestral.com. Any order implies full and complete acceptance of these T&Cs, binding on the client in the version in force on the day of the order."] },
       { "title": "Article 2 — Identity of the seller", "body": ["This site is published by SENYCE PARTNERS, a French SARL with capital of €19,000, whose registered office is located at 4 avenue Laurent Cely, 92600 Asnières-sur-Seine, France. Contact: ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
-      { "title": "Article 3 — Products and artistic nature", "body": ["Depending on the offer chosen, you receive a PDF parchment, a high-resolution PNG visual artwork, and, for Ancestral and Family, a 90-second MP3 audio file of the imaginary ancestor's voice, along with a numbered certificate of authenticity. These creations constitute neither a DNA test, nor genealogical research, nor a divinatory, medical, or legal service."] },
+      { "title": "Article 3 — Products and artistic nature", "body": ["Depending on the offer chosen, you receive an Ancestral Parchment PDF, a high-resolution PNG visual artwork, and, for Ancestral and Family, a 90-second MP3 audio file of the imaginary ancestor's voice, along with a numbered certificate of authenticity. These creations constitute neither a DNA test, nor genealogical research, nor a divinatory, medical, or legal service."] },
       { "title": "Article 4 — Price and payment", "body": ["Prices are shown in euros, all taxes included, and displayed before the order is confirmed. The Junior offer is priced at €9.99. Payment is processed securely via Stripe. SENYCE PARTNERS retains no complete banking data. The order is final once payment is fully collected and the information needed for composition is confirmed."] },
       { "title": "Article 5 — Order and composition", "body": ["Each order includes a creative questionnaire enabling personalization of the work. It is confirmed upon receipt of full payment; a confirmation email is sent immediately. The house reserves the right to refuse an order in case of suspected fraud, manifestly unlawful content, or technical impossibility."] },
       { "title": "Article 6 — Delivery", "body": ["The artwork is delivered by email within fifteen minutes (thirty minutes for the Family offer) after the questionnaire is validated. If a technical issue prevents delivery, the artwork is recomposed or fully refunded."] },
@@ -570,9 +569,9 @@
     "youAreLabel": "You are",
     "archetypeName": "The Ancestral Lion",
     "orderInfo": "Work No. TTM-2026-B7241C9 · Delivered on August 28, 2026",
-    "loadingText": "The griot is finishing the writing of your parchment…",
-    "openPrompt": "Touch the parchment to unroll it.",
-    "parcheminTitle": "The Parchment",
+    "loadingText": "The griot is finishing the writing of your Ancestral Parchment…",
+    "openPrompt": "Touch the Ancestral Parchment to unroll it.",
+    "parcheminTitle": "The Ancestral Parchment",
     "sections": [
       {
         "title": "The Awakening",
@@ -594,7 +593,7 @@
     "audioRestart": "Restart from the beginning",
     "audioPlayAction": "Play audio",
     "audioPauseAction": "Pause audio",
-    "downloadMapButton": "Download the Ancestral Map",
+    "downloadMapButton": "Download the Ancestral Parchment",
     "downloadCertButton": "Download the Certificate",
     "shareButton": "Share my Totem",
     "shareCopied": "Link copied!"

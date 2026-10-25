@@ -7,20 +7,20 @@ const OFFER_IDS = ["origine", "ancestral", "famille"] as const;
 
 export default function Offres({ dict, lang }: { dict: Dictionary["offres"]; lang: Locale }) {
   return (
-    <section className="px-6 py-24 lg:px-16 lg:py-32">
+    <section className="site-section">
       <Reveal variant="up" className="mx-auto max-w-3xl text-center">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h2 className="font-display mt-4 text-4xl text-ivoire lg:text-5xl">{dict.title}</h2>
         <p className="mx-auto mt-5 max-w-md text-sm text-grisclair">{dict.intro}</p>
       </Reveal>
 
-      <div className="mx-auto mt-16 flex max-w-6xl flex-col gap-8 lg:mt-20 lg:flex-row lg:items-start">
+      <div className="site-container site-stack site-gap flex flex-col lg:flex-row lg:items-start">
         {dict.items.map((offre, index) => (
           <Reveal
             key={offre.title}
             variant="scale"
             delay={index * 120}
-            className={`flex flex-1 flex-col gap-5 border bg-indigo p-9 ${
+            className={`flex flex-1 flex-col gap-5 border bg-indigo site-card ${
               offre.featured
                 ? "border-[1.5px] border-or shadow-[0_24px_60px_rgba(201,168,76,0.12)] lg:-mt-5"
                 : "border-ombre"

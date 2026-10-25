@@ -3,7 +3,6 @@ import Offres from "@/components/sections/Offres";
 import OffreJunior from "@/components/sections/OffreJunior";
 import CeQueVousRecevez from "@/components/sections/CeQueVousRecevez";
 import OffresComparatif from "@/components/sections/OffresComparatif";
-import TotemVivant from "@/components/sections/TotemVivant";
 import { getDictionary, type Locale } from "../../dictionaries";
 import { baseOpenGraph, pageAlternates } from "@/lib/seo";
 
@@ -37,7 +36,6 @@ export default async function OffresPage({
     <>
       <Offres dict={dict.offres} lang={lang} />
       <OffresComparatif dict={dict.offresComparatif} />
-      <TotemVivant dict={dict.totemVivant} />
       <OffreJunior dict={dict.offreJunior} lang={lang} />
       <CeQueVousRecevez dict={dict.ceQueVousRecevez} />
     </>

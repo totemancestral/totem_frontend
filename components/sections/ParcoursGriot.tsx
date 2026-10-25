@@ -1,10 +1,12 @@
 "use client";
 import { interfaceCopy } from "@/lib/interface-copy";
+import { totemConflictMessage } from "@/lib/totem-eligibility";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { RadioCard } from "@/components/ui/RadioCard";
+import { AudioSeekBar } from "@/components/ui/AudioSeekBar";
 import { RetryAfterError, retryErrorNotice, retryNotice } from "@/lib/retry-after";
 import { Logo } from "@/components/ui/Logo";
 import { Brand } from "@/components/ui/Brand";
@@ -44,6 +46,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, AdultAnswerState>>({});
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [existingTotem, setExistingTotem] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bootError, setBootError] = useState(false);
@@ -81,6 +84,13 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
         router.replace(`/${lang}/connexion?redirect=${encodeURIComponent(returnPath)}`);
         return;
       }
+      const eligibility = await fetch("/api/totem/eligibility", {
+        headers: { Authorization: `Bearer ${data.session.access_token}` }, cache: "no-store",
+      });
+      const permission = await eligibility.json();
+      if (!alive) return;
+      if (!eligibility.ok || typeof permission.allowed !== "boolean") throw new Error("eligibility_unavailable");
+      if (!permission.allowed) { setExistingTotem(true); setCheckingAuth(false); return; }
       if (variant === "adulte") {
         const query = new URLSearchParams({ ...(requestedSession ? { session_id: requestedSession } : {}), ...(requestedParcours ? { parcoursId: requestedParcours } : {}) });
         const response = await fetch(`/api/parcours?${query}`, { headers: { Authorization: `Bearer ${data.session.access_token}` }, cache: "no-store" });
@@ -123,7 +133,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   // un premier geste utilisateur (déjà obtenu via "Je commence mon voyage"),
   // sinon le bouton play sert de secours.
   useEffect(() => {
-    if (phase !== "question") return;
+    if (phase !== "question" || checkingAuth || bootError || existingTotem) return;
     const el = audioRef.current;
     if (!el) return;
     const src = questionAudioSrc(variant, step + 1, lang);
@@ -131,11 +141,10 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
     setAudioProgress(0);
     el.src = src;
     el.load();
-    const promise = el.play();
-    if (promise && typeof promise.then === "function") {
-      promise.then(() => setAudioPlaying(true)).catch(() => setAudioPlaying(false));
-    }
-  }, [phase, step, variant, lang]);
+    let alive = true;
+    void el.play().catch(() => { if (alive) setAudioPlaying(false); });
+    return () => { alive = false; el.pause(); };
+  }, [phase, step, variant, lang, checkingAuth, bootError, existingTotem]);
 
   function toggleAudio() {
     const el = audioRef.current;
@@ -241,6 +250,12 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   if (checkingAuth) {
     return <div className="flex min-h-screen items-center justify-center bg-nuit px-6 text-ivoire"><p role="status">{ui.status.loadingQuestionnaire}</p></div>;
   }
+  if (existingTotem) {
+    return <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-nuit px-6 text-center text-ivoire">
+      <p role="status">{totemConflictMessage("totem_already_exists", lang)}</p>
+      <Button href={`/${lang}/espace`}>{lang === "en" ? "Go to my space" : "Accéder à mon espace"}</Button>
+    </div>;
+  }
   if (bootError) {
     return <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-nuit px-6 text-ivoire">
       <p role="alert">{bootRetryNotice ?? dict.loadError}</p>
@@ -338,6 +353,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
             <audio
               ref={audioRef}
               src={audioSrc || undefined}
+              autoPlay
               preload="auto"
               onTimeUpdate={(e) => {
                 const el = e.currentTarget;
@@ -359,7 +375,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
                 el.play().catch(() => undefined);
               }}
             />
-            <div className="-mt-3 flex w-full max-w-xs items-center gap-2.5 lg:max-w-none lg:justify-center lg:gap-4">
+            <div className="-mt-3 flex w-full max-w-xl flex-wrap items-center justify-center gap-3">
               <button type="button"
                 onClick={restartAudio}
                 aria-label={dict.audioRestart}
@@ -387,10 +403,8 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
                   </svg>
                 )}
               </button>
-              <div className="relative h-px min-w-10 flex-1 bg-ombre lg:w-45 lg:flex-none">
-                <div className="h-px bg-or transition-[width] duration-150 ease-linear" style={{ width: `${audioProgress}%` }} />
-              </div>
               <span className="shrink-0 truncate text-xs text-grisclair">{audioLabel}</span>
+              <AudioSeekBar audioRef={audioRef} lang={lang} />
             </div>
 
             {/* options */}

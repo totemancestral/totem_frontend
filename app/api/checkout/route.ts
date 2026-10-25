@@ -223,6 +223,7 @@ async function callBackendCheckout(
       id?: string;
       url?: string | null;
       message?: string | string[];
+      code?: string;
     } | null;
 
     if (backendResponse.ok && backendPayload?.url) {
@@ -233,6 +234,10 @@ async function callBackendCheckout(
       });
     }
 
+    const conflict = backendPayload?.code;
+    if (backendResponse.status === 409 && ["totem_already_exists", "totem_order_in_progress", "totem_checkout_in_progress"].includes(conflict ?? "")) {
+      return NextResponse.json({ code: conflict, error: conflict }, { status: 409 });
+    }
     console.error(`[checkout] Backend checkout failed (${backendResponse.status})`, backendPayload);
     return NextResponse.json(
       {

@@ -8,7 +8,7 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 export default function Hero({ dict, lang, mediaCopy }: { dict: Dictionary["hero"]; lang: Locale; mediaCopy: Dictionary["media"] }) {
   return (
     // Une courte extension sous la composition révèle les commandes au défilement.
-    <div data-hero className="relative flex flex-col justify-end overflow-hidden bg-nuit px-6 pt-36 text-center lg:px-16 lg:text-left xl:px-24">
+    <div data-hero className="relative flex flex-col justify-end overflow-hidden site-gutters bg-nuit pt-36 text-center lg:text-left">
 
       {/* vidéo de fond, placée en premier donc visuellement derrière tout le reste */}
       <HeroVideo copy={mediaCopy} />
@@ -24,7 +24,7 @@ export default function Hero({ dict, lang, mediaCopy }: { dict: Dictionary["hero
         <span className="text-[9.5px] tracking-wide text-gris uppercase">{dict.tagCaption}</span>
       </Reveal>
 
-      <div data-hero-composition className="relative z-10 mx-auto grid w-full max-w-[1600px] items-center gap-12 lg:items-end lg:grid-cols-[minmax(0,1fr)_clamp(12rem,21vw,20rem)]">
+      <div data-hero-composition className="relative z-10 site-container grid items-center gap-12 lg:items-end lg:grid-cols-[minmax(0,1fr)_clamp(12rem,21vw,20rem)]">
       <div className="hero-copy flex min-w-0 flex-col gap-7 lg:translate-y-[60px]">
       {/* titre */}
       <Reveal variant="up">
