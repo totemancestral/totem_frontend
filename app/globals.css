@@ -265,3 +265,16 @@ body {
     opacity: 1;
   }
 }
+
+/* Shared with the PDF artwork: keep the ornamental rollers at their native ratio. */
+@font-face {
+  font-family: "Totem Manuscript";
+  src: url("/assets/parchment/DancingScript-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+.royal-scroll-cap { width: 100%; aspect-ratio: 1024 / 180; background-size: 100% 100%; position: relative; z-index: 2; }
+.royal-scroll-top { background-image: url("/assets/parchment/top.webp"); }
+.royal-scroll-bottom { background-image: url("/assets/parchment/bottom.webp"); }
+.royal-scroll-paper { background-image: url("/assets/parchment/paper.webp"); background-size: 100% 100%; }
+.royal-scroll-content { padding: 1rem 17% 2rem; color: #291506; }
+.royal-scroll-text { font-family: "Totem Manuscript", Georgia, serif; font-size: clamp(1.5rem, 2.8vw, 1.875rem); line-height: 1.65; text-align: left; }

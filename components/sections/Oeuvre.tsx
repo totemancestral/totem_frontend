@@ -252,25 +252,12 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
       <div className="relative z-10 flex flex-col items-center px-6 pb-14 pt-4 text-center">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
 
-        {data?.image_url && (
-          <div className="relative my-7 h-85 w-55 overflow-hidden border border-ombre">
-            {/* eslint-disable-next-line @next/next/no-img-element -- image générée dynamiquement, domaine backend non préconfiguré */}
-            <img src={data.image_url} alt={formatInterface(ui.artwork.portrait, { name: archetypeName })} className="h-full w-full object-cover" />
-          </div>
-        )}
-
-        {archetypeName && (
-          <>
-            <p className="font-display text-xl italic text-orpale">{dict.youAreLabel}</p>
-            <h1 className="max-w-full font-display text-5xl text-ivoire [overflow-wrap:anywhere] lg:text-7xl">{archetypeName}</h1>
-          </>
-        )}
         {orderInfo && <p className="mt-4 text-xs text-grisclair">{orderInfo}</p>}
       </div>
 
       {/* le parchemin */}
-      <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center px-6 pb-24">
-        <div className="relative flex min-h-85 w-full max-w-xl items-center justify-center">
+      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-2 pb-24 sm:px-6">
+        <div className="relative flex min-h-85 w-full max-w-3xl items-center justify-center">
 
           {/* message de chargement */}
           {phase === "loading" && <div
@@ -298,27 +285,34 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                 }}
               >
                 {!isOpen && <button type="button" onClick={openScroll} aria-label={dict.openPrompt} aria-expanded={false} aria-controls="artwork-story" className="absolute inset-0 z-10 w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or" />}
-                {/* embout haut */}
-                <span className="z-[2] flex h-7 w-[84%] items-center justify-between rounded-full bg-or px-4 shadow-[0_6px_16px_rgba(0,0,0,0.4)]">
-                  <span className="h-3 w-0.5 bg-nuit/35" />
-                  <span className="h-3 w-0.5 bg-nuit/35" />
-                </span>
+                <div aria-hidden="true" className="royal-scroll-cap royal-scroll-top" />
 
                 {/* feuille de parchemin */}
                 <div
-                  className="w-[90%] overflow-hidden bg-[#EFE4C8] shadow-[0_0_0_1px_rgba(139,111,46,0.3)] transition-[max-height] duration-[1150ms] ease-[cubic-bezier(.65,0,.35,1)]"
-                  style={{ maxHeight: isOpen ? "none" : "14px" }}
+                  className="royal-scroll-paper grid w-full transition-[grid-template-rows] duration-[1150ms] motion-reduce:transition-none"
+                  style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
                 >
+                  <div className="min-h-0 overflow-hidden">
                   <div
                     id="artwork-story"
                     ref={scrollRef}
                     role="region"
                     aria-label={dict.parcheminTitle}
                     tabIndex={-1}
-                    hidden={!isOpen}
-                    className="px-6 pb-9 pt-11 [overflow-wrap:anywhere] transition-opacity duration-700 focus:outline-2 focus:outline-offset-2 focus:outline-or motion-reduce:transition-none motion-reduce:delay-0! lg:px-10"
+                    inert={!isOpen}
+                    aria-hidden={!isOpen}
+                    className="royal-scroll-content [overflow-wrap:anywhere] transition-opacity duration-700 focus-visible:outline-2 focus-visible:outline-or motion-reduce:transition-none motion-reduce:delay-0!"
                     style={{ opacity: isOpen ? 1 : 0, transitionDelay: isOpen ? "450ms" : "0ms" }}
                   >
+                    <header className="mb-10 text-center">
+                      <p className="font-display text-3xl font-bold sm:text-5xl">TOTEM ANCESTRAL</p>
+                      <p className="mt-2 font-display text-lg italic">{lang === "fr" ? "Décret royal de révélation symbolique" : "Royal decree of symbolic revelation"}</p>
+                      {data?.image_url && <div className="mx-auto my-6 w-3/4 max-w-sm border-4 border-[#b18a2d] p-1">
+                        {/* eslint-disable-next-line @next/next/no-img-element -- portrait personnel généré */}
+                        <img src={data.image_url} alt={formatInterface(ui.artwork.portrait, { name: archetypeName })} className="h-auto w-full" />
+                      </div>}
+                      {archetypeName && <h1 className="font-display text-2xl font-bold uppercase sm:text-4xl">{archetypeName}</h1>}
+                    </header>
                     <p className="mb-6 text-center text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "#8B6F2E" }}>
                       {dict.parcheminTitle}
                     </p>
@@ -330,25 +324,23 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                             {section.title}
                           </p>
                         )}
-                        <p className="font-display text-lg italic leading-relaxed" style={{ color: "#3A2E17" }}>
+                        <p className="royal-scroll-text">
                           {section.text}
                         </p>
                       </div>
                     ))}
 
                     <div className="mt-8 flex justify-center">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-[1.5px] bg-nuit" style={{ borderColor: "#8B6F2E" }}>
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-[3px] border-[#c29236] bg-[#ad140d] shadow-[2px_3px_0_#790e09]" style={{ borderColor: "#8B6F2E" }}>
                         <span className="font-display text-lg tracking-wide" style={{ color: "#EDD99A" }}>TA</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
+                  </div>
                 {/* embout bas */}
-                <span className="z-[2] flex h-7 w-[84%] items-center justify-between rounded-full bg-or px-4 shadow-[0_-6px_16px_rgba(0,0,0,0.4)]">
-                  <span className="h-3 w-0.5 bg-nuit/35" />
-                  <span className="h-3 w-0.5 bg-nuit/35" />
-                </span>
+                <div aria-hidden="true" className="royal-scroll-cap royal-scroll-bottom" />
               </div>
 
               <p
