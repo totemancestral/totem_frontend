@@ -34,10 +34,10 @@ export function LeSeuilPinned({ gestes }: { gestes: Geste[] }) {
   }, [gestes]);
 
   return (
-    <div className="site-container site-stack site-gap hidden xl:flex">
+    <div className="seuil-pinned site-container site-stack hidden xl:grid">
       {/* photo : reste fixée à l'écran, centrée verticalement comme le texte à côté */}
-      <div className="sticky top-0 flex h-screen shrink-0 items-center lg:flex-[1.7]">
-        <div className="relative h-[560px] w-full max-w-xl overflow-hidden border border-ombre bg-nuit">
+      <div className="sticky top-0 flex h-screen min-w-0 items-center self-start">
+        <div className="seuil-pinned-image relative overflow-hidden border border-ombre bg-nuit">
           {gestes.map((geste, i) => (
             <div
               key={geste.title}
@@ -48,7 +48,7 @@ export function LeSeuilPinned({ gestes }: { gestes: Geste[] }) {
                 src={getSeuilImage(geste.image)}
                 alt=""
                 fill
-                sizes="(min-width: 1024px) 576px, 100vw"
+                sizes="(min-width: 2200px) 1012px, (min-width: 1280px) 49vw, 100vw"
                 className="object-cover grayscale contrast-[1.1] brightness-105"
               />
               <div className="absolute inset-0 bg-or opacity-45 mix-blend-color" />
@@ -58,7 +58,7 @@ export function LeSeuilPinned({ gestes }: { gestes: Geste[] }) {
       </div>
 
       {/* texte : défile normalement, s'estompe quand il n'est plus au centre */}
-      <div className="flex-1 py-24">
+      <div className="seuil-pinned-copy">
         {gestes.map((geste, i) => (
           <div
             key={geste.title}

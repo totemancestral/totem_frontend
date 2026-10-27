@@ -2,8 +2,8 @@
 
 /* Shared public-page rhythm: fluid gutters and spacing, bounded reading widths. */
 :root {
-  --site-width: 90rem;
-  --site-gutter: clamp(1.25rem, 4vw, 4rem);
+  --site-width: 120rem;
+  --site-gutter: clamp(1.25rem, 4vw, 6rem);
   --site-space: clamp(3rem, 6vw, 6rem);
   --site-stack: clamp(2rem, 4vw, 4rem);
   --site-gap: clamp(1.5rem, 3vw, 3rem);
@@ -20,6 +20,16 @@
 .site-section-start { padding-top: var(--site-space); }
 .site-section-end { padding-bottom: var(--site-space); }
 .site-reading { padding-inline: var(--site-gutter); }
+/* Let the composition grow, while keeping prose at a readable line length. */
+@media (min-width: 1536px) {
+  :where(.site-section, .site-gutters) h2 {
+    font-size: clamp(3rem, 2.8vw, 4.5rem);
+  }
+}
+.seuil-pinned { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(2rem, 4vw, 5rem); }
+.seuil-pinned-image { width: 100%; height: min(76svh, 48rem); }
+.seuil-pinned-copy { padding-block: 17.5vh; min-width: 0; }
+.seuil-pinned-copy p { max-width: 60ch; }
 #main-content > .site-section:first-child {
   padding-top: calc(var(--site-nav-height) + var(--site-space));
 }

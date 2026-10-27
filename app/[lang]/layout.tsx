@@ -34,7 +34,7 @@ export async function generateMetadata({
     metadataBase: new URL(siteUrl),
     title: {
       default: dict.seo.defaultTitle,
-      template: `%s — ${dict.seo.siteName}`,
+      template: `%s | ${dict.seo.siteName}`,
     },
     description: dict.seo.defaultDescription,
     openGraph: {
