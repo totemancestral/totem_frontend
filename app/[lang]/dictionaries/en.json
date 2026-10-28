@@ -83,7 +83,7 @@
     "title": "Your ancestor has a word for you this week",
     "lead": "The questionnaire revealed your clan. The Consultation lets it speak to you again — same voice, same world, the same archetype.",
     "text": "Not a new test, not a feed to scroll through: a brief, unhurried gesture, once a week. The cowries fall, and the ancestor answers. A ritual, not a notification.",
-    "cta": "Compose my Totem"
+    "cta": "Consult the cowries"
   },
   "manifeste": {
     "eyebrow": "Our approach",
@@ -631,7 +631,7 @@
     "compose": "Create my Totem",
     "draw": "Cast the cowries",
     "drawing": "The cowries are settling…",
-    "viewReading": "View my reading",
+    "viewReading": "Read my consultation again",
     "emptyHistory": "You have not cast the cowries yet.",
     "loadMore": "View earlier consultations",
     "readingTitle": "Cowrie reading",

@@ -3,74 +3,72 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { getSeuilImage } from "@/lib/seuil-images";
 import type { Dictionary } from "@/app/[lang]/dictionaries";
+import styles from "./SeuilImmersif.module.css";
 
 type Geste = Dictionary["leSeuil"]["gestes"][number];
+const positions: Record<string, string> = {
+  "/images/seuil_0.png": "45% 50%",
+  "/images/seuil_1.png": "45% 50%",
+  "/images/seuil_2.png": "50% 50%",
+  "/images/seuil_3.png": "55% 50%",
+};
 
-// Séquence "image fixe, texte qui défile" (façon deriv.com) : la photo reste
-// collée à l'écran (position: sticky) pendant que les 4 textes défilent
-// normalement à côté, au rythme naturel du scroll — aucun calcul de scroll
-// en JS, aucun blocage. On observe juste quel texte est le plus proche du
-// centre de l'écran pour savoir quelle photo doit être affichée, et on la
-// fait fondre (transition CSS classique) vers la suivante.
 export function LeSeuilPinned({ gestes }: { gestes: Geste[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const index = Number((entry.target as HTMLElement).dataset.index);
-          setActiveIndex(index);
-        });
-      },
-      // bande étroite au centre de l'écran : le texte qui la traverse
-      // devient "actif" (et sa photo s'affiche).
-      { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
-    );
-    itemRefs.current.forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
+    let frame = 0;
+    // Read once per animation frame; native scrolling remains unrestricted.
+    function update() {
+      frame = 0;
+      const center = window.innerHeight / 2;
+      let nearest = 0;
+      let distance = Infinity;
+      itemRefs.current.forEach((item, index) => {
+        if (!item) return;
+        const bounds = item.getBoundingClientRect();
+        const nextDistance = Math.abs(bounds.top + bounds.height / 2 - center);
+        if (nextDistance < distance) { distance = nextDistance; nearest = index; }
+      });
+      setActiveIndex(current => current === nearest ? current : nearest);
+    }
+    function schedule() { if (!frame) frame = requestAnimationFrame(update); }
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
   }, [gestes]);
 
-  return (
-    <div className="seuil-pinned site-container site-stack hidden xl:grid">
-      {/* photo : reste fixée à l'écran, centrée verticalement comme le texte à côté */}
-      <div className="sticky top-0 flex h-screen min-w-0 items-center self-start">
-        <div className="seuil-pinned-image relative overflow-hidden border border-ombre bg-nuit">
-          {gestes.map((geste, i) => (
-            <div
-              key={geste.title}
-              className="absolute inset-0 transition-opacity duration-700 ease-out"
-              style={{ opacity: i === activeIndex ? 1 : 0 }}
-            >
-              <Image
-                src={getSeuilImage(geste.image)}
-                alt=""
-                fill
-                sizes="(min-width: 2200px) 1012px, (min-width: 1280px) 49vw, 100vw"
-                className="object-cover grayscale contrast-[1.1] brightness-105"
-              />
-              <div className="absolute inset-0 bg-or opacity-45 mix-blend-color" />
-            </div>
-          ))}
-        </div>
-      </div>
+  if (!gestes.length) return null;
 
-      {/* texte : défile normalement, s'estompe quand il n'est plus au centre */}
-      <div className="seuil-pinned-copy">
-        {gestes.map((geste, i) => (
-          <div
-            key={geste.title}
-            ref={(el) => {
-              itemRefs.current[i] = el;
-            }}
-            data-index={i}
-            className="flex min-h-[65vh] flex-col justify-center gap-3 transition-opacity duration-700 ease-out"
-            style={{ opacity: i === activeIndex ? 1 : 0.15 }}
-          >
-            <h3 className="text-xl font-medium text-ivoire lg:text-2xl">{geste.title}</h3>
-            <p className="text-sm leading-relaxed text-grisclair lg:text-base">{geste.text}</p>
+  return (
+    <div className={styles.sequence} data-seuil-immersif data-active-step={activeIndex}>
+      <div className={styles.backdrop} aria-hidden="true">
+        {gestes.map((geste, index) => (
+          <div key={geste.title} className={styles.scene} style={{ opacity: index === activeIndex ? 1 : 0 }}>
+            <Image
+              src={getSeuilImage(geste.image)} alt="" fill sizes="100vw"
+              className={styles.image}
+              style={{ objectPosition: positions[geste.image] ?? "center" }}
+            />
+          </div>
+        ))}
+        <div className={styles.shade} />
+      </div>
+      <div className={styles.steps}>
+        {gestes.map((geste, index) => (
+          <div key={geste.title} ref={el => { itemRefs.current[index] = el; }} className={styles.step} data-seuil-step={index}>
+            <div className="site-container">
+              <div className={styles.copy}>
+                <h3>{geste.title}</h3>
+                <p>{geste.text}</p>
+              </div>
+            </div>
           </div>
         ))}
       </div>

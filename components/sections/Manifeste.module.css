@@ -1,0 +1,48 @@
+.section {
+  background: var(--color-nuit);
+  overflow: clip;
+}
+
+.composition { position: relative; isolation: isolate; }
+.content { position: relative; z-index: 1; min-width: 0; }
+.content p { max-width: 58ch; }
+
+.artwork {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  margin-top: 2rem;
+  pointer-events: none;
+  mask-image: linear-gradient(to right, transparent, #000 10%, #000 88%, transparent),
+    linear-gradient(to bottom, transparent, #000 14%, #000 76%, transparent);
+  mask-composite: intersect;
+}
+
+.image {
+  object-fit: cover;
+  object-position: left center;
+  filter: contrast(1.06) saturate(.85);
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .artwork { aspect-ratio: 3 / 2; }
+}
+
+@media (min-width: 1024px) {
+  .composition { min-height: 48rem; display: flex; align-items: center; }
+  .content { width: 47%; padding-block: 3rem; }
+  .artwork {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 68%;
+    aspect-ratio: auto;
+    margin-top: 0;
+    z-index: -1;
+    mask-image: linear-gradient(to right, transparent, #000 25%, #000 88%, transparent),
+      linear-gradient(to bottom, transparent, #000 12%, #000 82%, transparent);
+  }
+  .image { object-position: 23% center; }
+  .content { background: linear-gradient(to right, var(--color-nuit) 65%, transparent); }
+}

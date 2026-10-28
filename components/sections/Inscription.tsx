@@ -168,9 +168,10 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
 
       {/* panneau formulaire : palette ivoire réchauffé */}
       <div
-        className="flex min-w-0 flex-1 px-6 py-20 lg:px-20"
+        className="relative flex min-w-0 flex-1 px-6 pb-20 pt-28 lg:px-20 lg:pt-20"
         style={ivoireScope}
       >
+        <Brand lang={lang} className="absolute left-6 top-7 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or lg:hidden" />
         <p role="status" className="sr-only">{loading ? (ui.status.creatingAccount) : ""}</p>
         <form method="post" ref={formRef} onSubmit={onSubmit} aria-busy={loading} className="m-auto flex w-full min-w-0 max-w-lg flex-col gap-7 [overflow-wrap:anywhere]">
 

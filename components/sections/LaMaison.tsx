@@ -10,7 +10,7 @@ export default function LaMaison({ dict, lang }: { dict: Dictionary["laMaison"];
 
         <Reveal variant="left" className="relative aspect-square w-full max-w-[320px] shrink-0 overflow-hidden border border-nuit/10 lg:w-[40%] lg:max-w-xl">
           <Image
-            src="/images/totem-mask-face.jpg"
+            src="/images/totem-mask-or-1024.png"
             alt=""
             fill
             sizes="(min-width: 1536px) 576px, (min-width: 1024px) 37vw, 320px"

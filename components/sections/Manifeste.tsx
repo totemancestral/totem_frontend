@@ -1,19 +1,20 @@
 import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
 import type { Dictionary } from "@/app/[lang]/dictionaries";
+import styles from "./Manifeste.module.css";
 
 export default function Manifeste({ dict }: { dict: Dictionary["manifeste"] }) {
   return (
-    <section className="site-section">
-      <Reveal variant="up" className="text-center">
+    <section className={`site-section ${styles.section}`}>
+      <div className={`site-container ${styles.composition}`}>
+      <div className={styles.content}>
+      <Reveal variant="up">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h2 className="font-display mt-4 text-4xl text-ivoire lg:text-5xl">{dict.title}</h2>
-        <p className="mx-auto mt-5 max-w-md text-sm text-grisclair">{dict.intro}</p>
+        <p className="mt-5 max-w-md text-sm leading-relaxed text-grisclair">{dict.intro}</p>
       </Reveal>
 
-      <div className="site-container site-stack site-gap flex flex-col items-start lg:flex-row">
-        {/* les 3 affirmations : commencent à la même hauteur que la photo, sans lignes de séparation */}
-        <Reveal variant="left" className="flex min-w-0 flex-1 flex-col gap-10">
+        <Reveal variant="left" className="site-stack flex min-w-0 flex-col gap-8 lg:gap-10">
           {dict.points.map((point, i) => (
             <Reveal key={point.title} variant="up" delay={i * 100} className="flex flex-col gap-3">
               <h3 className="text-xl font-medium text-ivoire">{point.title}</h3>
@@ -23,19 +24,18 @@ export default function Manifeste({ dict }: { dict: Dictionary["manifeste"] }) {
             </Reveal>
           ))}
         </Reveal>
+      </div>
 
-        {/* la grande photo : réservée au bureau, retirée sur mobile */}
-        <Reveal variant="right" className="relative hidden shrink-0 bg-nuit lg:block lg:aspect-[3/2] lg:w-2/3 xl:aspect-auto xl:h-[clamp(30rem,45vw,44rem)]">
-          <div className="relative h-full w-full overflow-hidden border border-ombre">
+        {/* Photo originale, fondue dans la section sans cadre ni nouvel asset. */}
+        <div className={styles.artwork} aria-hidden="true">
             <Image
               src="/images/manifeste.png"
               alt=""
               fill
-              className="object-cover grayscale contrast-[1.15] brightness-105 mix-blend-luminosity"
+              sizes="(min-width: 2200px) 1306px, (min-width: 1024px) 63vw, 92vw"
+              className={styles.image}
             />
-            <div className="absolute inset-0 bg-or mix-blend-color" />
-          </div>
-        </Reveal>
+        </div>
       </div>
     </section>
   );

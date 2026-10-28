@@ -47,7 +47,7 @@ export default function ApresLeTotem({ dict, lang }: { dict: Dictionary["apresLe
 
           <p className="max-w-md text-sm text-grisclair">{dict.text}</p>
 
-          <Button href={`/${lang}/inscription`}>{dict.cta}</Button>
+          <Button href={`/${lang}/consultations`}>{dict.cta}</Button>
         </Reveal>
 
         <Reveal variant="right" className="relative aspect-[2/3] w-full max-w-sm shrink-0 overflow-hidden border border-ombre lg:aspect-[6/5] lg:max-w-none lg:flex-1">

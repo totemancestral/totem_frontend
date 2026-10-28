@@ -1,0 +1,8 @@
+.artwork {
+  position: absolute;
+  inset: 0;
+  /* Only soften the scene's perimeter: keep faces, hands and shells sharp. */
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 90%, transparent),
+    linear-gradient(to bottom, transparent, #000 9%, #000 86%, transparent);
+  mask-composite: intersect;
+}

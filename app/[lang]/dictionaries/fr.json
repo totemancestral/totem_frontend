@@ -83,7 +83,7 @@
     "title": "Ton ancêtre a un mot pour toi cette semaine",
     "lead": "Le questionnaire vous a révélé votre clan. La Consultation le laisse vous parler encore — même voix, même univers, le même archétype.",
     "text": "Pas un nouveau test, pas un fil d'actualité à faire défiler : un geste bref et espacé, une fois par semaine. Les cauris tombent, et l'ancêtre répond. Un rituel, pas une notification.",
-    "cta": "Composer mon Totem"
+    "cta": "Consulter les cauris"
   },
   "manifeste": {
     "eyebrow": "Notre démarche",
@@ -631,7 +631,7 @@
     "compose": "Composer mon Totem",
     "draw": "Tirer les cauris",
     "drawing": "Les cauris se posent…",
-    "viewReading": "Voir ma lecture",
+    "viewReading": "Relire ma consultation",
     "emptyHistory": "Tu n’as pas encore effectué de tirage.",
     "loadMore": "Voir les consultations précédentes",
     "readingTitle": "Lecture des cauris",

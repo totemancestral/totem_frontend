@@ -1,0 +1,6 @@
+.artwork {
+  position: absolute;
+  inset: 0;
+  /* Preserve the carved face, then dissolve its studio backdrop into ivory. */
+  mask-image: radial-gradient(ellipse 39% 49% at 50% 47%, #000 53%, rgba(0, 0, 0, .85) 65%, transparent 100%);
+}

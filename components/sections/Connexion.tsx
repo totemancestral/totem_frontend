@@ -113,9 +113,10 @@ export default function Connexion({ dict, lang }: { dict: Dictionary["connexion"
 
       {/* panneau formulaire : palette ivoire réchauffé */}
       <div
-        className="flex min-w-0 flex-1 items-center justify-center px-6 py-20 lg:px-20"
+        className="relative flex min-w-0 flex-1 items-center justify-center px-6 pb-20 pt-28 lg:px-20 lg:pt-20"
         style={ivoireScope}
       >
+        <Brand lang={lang} className="absolute left-6 top-7 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or lg:hidden" />
         <p role="status" className="sr-only">{loading ? (ui.status.signingIn) : sendingMagicLink ? (ui.status.sendingLink) : ""}</p>
         <form onSubmit={onSubmit} aria-busy={loading || sendingMagicLink} className="flex w-full min-w-0 max-w-lg flex-col gap-7 [overflow-wrap:anywhere]">
 
