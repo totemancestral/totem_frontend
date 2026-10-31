@@ -20,9 +20,9 @@ export function Button({ children, variant = "gold", className, ...rest }: Butto
   // qu'on renvoie telles quelles sur le vrai <button> via {...rest}
 
   const classes = `
-    relative overflow-hidden
+    relative overflow-hidden rounded-tl-[12px] rounded-br-[12px]
     border
-    font-body px-10 py-4
+    font-body font-medium px-10 py-4
     transition-colors duration-300
 
     before:content-[''] before:absolute before:inset-y-0 before:left-0

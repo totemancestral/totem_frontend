@@ -8,7 +8,7 @@ const hrefs = ["/inscription", "/offres", "/la-maison", "/faq", "/contact", "/cg
 
 export default function Footer({ dict, lang }: { dict: Dictionary["footer"]; lang: Locale }) {
   return (
-    <footer className="site-gutters bg-ivoire pb-10 pt-[var(--site-space)]">
+    <footer className="site-pattern-ivory site-gutters bg-ivoire pb-10 pt-[var(--site-space)]">
       <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-between">
         <Brand lang={lang} size={50} textClassName="text-nuit" />
 

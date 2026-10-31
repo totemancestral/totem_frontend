@@ -5,7 +5,7 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 
 export default function LaMaison({ dict, lang }: { dict: Dictionary["laMaison"]; lang: Locale }) {
   return (
-    <section className="site-section bg-ivoire">
+    <section className="site-section site-pattern-ivory bg-ivoire">
       <div className="site-container site-gap flex flex-col items-center lg:flex-row">
 
         <Reveal variant="left" className="relative aspect-square w-full max-w-[320px] shrink-0 overflow-hidden border border-nuit/10 lg:w-[40%] lg:max-w-xl">

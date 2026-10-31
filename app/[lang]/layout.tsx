@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { getDictionary, hasLocale, locales } from "./dictionaries";
 import { getServerEnv } from "@/lib/env";
 import "../globals.css";
+import "../patterns.css";
+import "../typography.css";
 import { MediaExperience } from "@/components/ui/MediaExperience";
 
 const cormorantGaramond = Cormorant_Garamond({

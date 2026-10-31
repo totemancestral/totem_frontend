@@ -1,0 +1,18 @@
+/* Approved public-page typography; small captions and forms keep their sizes. */
+[data-site-presentation] {
+  font-weight: 500;
+  --color-grisclair: #C6C2B8;
+}
+[data-site-presentation] :where(h1, h2, h3) { font-weight: 600; }
+[data-site-presentation] p.text-sm:not(.uppercase) {
+  font-size: 1rem;
+  line-height: 1.65;
+}
+[data-site-presentation] p.font-display.italic {
+  font-weight: 600;
+}
+[data-site-presentation] p.font-display.italic.text-lg { font-size: 1.25rem; }
+[data-site-presentation] .site-pattern-ivory {
+  --color-gris: #6B6558;
+  --color-grisclair: #6B6558;
+}

@@ -23,7 +23,7 @@ export default async function MarketingLayout({
         {interfaceCopy(locale).navigation.skip}
       </a>
       <Nav lang={locale} dict={dict} />
-      <main id="main-content" tabIndex={-1} className="scroll-mt-24 focus-visible:outline-2 focus-visible:outline-or">{children}</main>
+      <main id="main-content" data-site-presentation tabIndex={-1} className="scroll-mt-24 focus-visible:outline-2 focus-visible:outline-or">{children}</main>
       <Footer dict={dict.footer} lang={locale} />
     </>
   );

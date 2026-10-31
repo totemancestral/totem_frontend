@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
   // serveur de dev (/_next/*) : sans ça, ouvrir le site via l'IP réseau
   // (ex: depuis un téléphone sur le même Wi-Fi) charge la page mais casse
   // tout le CSS/JS, qui sont refusés comme venant d'une origine étrangère.
-  allowedDevOrigins: ["192.168.1.66", "192.168.1.70", "192.168.1.67", "172.24.0.1",],
+  allowedDevOrigins: ["10.180.219.1", "192.168.1.70", "192.168.1.67", "172.24.0.1",],
   async headers() {
     return [
       {

@@ -1,5 +1,5 @@
 .section {
-  background: var(--color-nuit);
+  background-color: var(--color-nuit);
   overflow: clip;
 }
 

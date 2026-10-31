@@ -11,7 +11,7 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 // Le "as CSSProperties" est nécessaire car TypeScript ne connaît pas par
 // défaut les propriétés CSS personnalisées (--xxx) sur un style React.
 const ivoireScope = {
-  background: "#FBF6EA",
+  backgroundColor: "#FBF6EA",
   "--color-nuit": "#0D0D1A",
   "--color-indigo": "#F3EDDD",
   "--color-ombre": "#D8D0BC",
@@ -19,12 +19,12 @@ const ivoireScope = {
   "--color-orpale": "#8B6F2E",
   "--color-ivoire": "#0D0D1A",
   "--color-gris": "#6B6558",
-  "--color-grisclair": "#948C78",
+  "--color-grisclair": "#6B6558",
 } as CSSProperties;
 
 export default function ApresLeTotem({ dict, lang }: { dict: Dictionary["apresLeTotem"]; lang: Locale }) {
   return (
-    <section className="site-section" style={ivoireScope}>
+    <section className="site-section site-pattern-ivory" style={ivoireScope}>
       <div className="site-container site-gap flex flex-col items-center text-center lg:flex-row lg:text-left">
 
         <Reveal variant="left" className="flex flex-1 flex-col items-center gap-6 lg:items-start">

@@ -1,0 +1,11 @@
+/* Static vector texture: no animation, overlay, or interaction changes. */
+.site-pattern-night {
+  background-image: url("/assets/patterns/totem-curves-nuit.svg");
+  background-size: 320px 320px;
+  background-repeat: repeat;
+}
+.site-pattern-ivory {
+  background-image: url("/assets/patterns/totem-curves-ivoire.svg");
+  background-size: 320px 320px;
+  background-repeat: repeat;
+}
