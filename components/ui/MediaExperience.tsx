@@ -9,6 +9,8 @@ import { AmbientLoop } from "@/lib/ambient-loop";
 
 const MUSIC_KEY = "totem_ambient_enabled";
 const INTRO_KEY = "totem_intro_seen";
+const MUSIC_VOLUME = 0.5;
+const MEDIA_EVENTS = ["play", "pause", "ended", "volumechange", "error", "emptied", "abort"];
 
 export function MediaExperience({ children, copy, homePath }: {
   children: ReactNode;
@@ -39,14 +41,20 @@ export function MediaExperience({ children, copy, homePath }: {
     return () => observer.disconnect();
   }, [heroControls]);
 
+  const syncMusicVolume = useCallback(() => {
+    const music = musicRef.current;
+    if (!music) return;
+    const voicePlaying = Array.from(document.querySelectorAll<HTMLMediaElement>("audio, video"))
+      .some((media) => !music.owns(media) && !media.paused && !media.ended && !media.muted && media.volume > 0 && !media.error);
+    music.setVolume(voicePlaying ? MUSIC_VOLUME * 0.5 : MUSIC_VOLUME, voicePlaying ? 150 : 800);
+  }, []);
+
   const startMusic = useCallback(() => {
     const music = musicRef.current;
     if (!music || dialogRef.current?.open) return;
-    const voicePlaying = Array.from(document.querySelectorAll<HTMLMediaElement>("audio, video"))
-      .some((media) => !music.owns(media) && !media.paused && !media.ended && !media.muted);
-    music.setVolume(voicePlaying ? 0.1 : 0.5);
+    syncMusicVolume();
     void music.play().then(() => setError(false)).catch(() => setPlaying(false));
-  }, []);
+  }, [syncMusicVolume]);
 
   function toggle() {
     const music = musicRef.current;
@@ -77,33 +85,31 @@ export function MediaExperience({ children, copy, homePath }: {
     const onError = () => { music.pause(); setError(true); };
     tracks.forEach(track => track.addEventListener("error", onError));
     try { enabledRef.current = localStorage.getItem(MUSIC_KEY) !== "false"; } catch { enabledRef.current = true; }
-    const otherAudio = new Set<HTMLMediaElement>();
     const updateVolume = (event: Event) => {
       const media = event.target;
       if (!(media instanceof HTMLMediaElement) || music.owns(media)) return;
-      if (media.paused || media.ended || media.muted) otherAudio.delete(media);
-      else otherAudio.add(media);
-      for (const active of otherAudio) {
-        if (!active.isConnected || active.paused || active.ended || active.muted) otherAudio.delete(active);
-      }
-      music.setVolume(otherAudio.size ? 0.1 : 0.5);
+      syncMusicVolume();
     };
     const resume = (event: Event) => {
       if (event.target instanceof Element && event.target.closest("button, a, input, select, textarea")) return;
       if (enabledRef.current && music.paused) startMusic();
     };
-    for (const type of ["play", "pause", "ended", "volumechange"]) document.addEventListener(type, updateVolume, true);
+    for (const type of MEDIA_EVENTS) document.addEventListener(type, updateVolume, true);
     document.addEventListener("pointerdown", resume);
     document.addEventListener("keydown", resume);
     return () => {
-      for (const type of ["play", "pause", "ended", "volumechange"]) document.removeEventListener(type, updateVolume, true);
+      for (const type of MEDIA_EVENTS) document.removeEventListener(type, updateVolume, true);
       document.removeEventListener("pointerdown", resume);
       document.removeEventListener("keydown", resume);
       tracks.forEach(track => track.removeEventListener("error", onError));
       music.dispose();
       musicRef.current = null;
     };
-  }, [startMusic]);
+  }, [startMusic, syncMusicVolume]);
+
+  useEffect(() => {
+    syncMusicVolume();
+  }, [pathname, syncMusicVolume]);
 
   useEffect(() => {
     const dialog = dialogRef.current;

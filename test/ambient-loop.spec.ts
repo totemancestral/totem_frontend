@@ -62,9 +62,37 @@ describe("ambient music overlap", () => {
     vi.useFakeTimers();
     const { loop, params } = fixture();
     await loop.play();
-    loop.setVolume(0.1);
-    expect(params[0].setTargetAtTime).toHaveBeenCalledWith(0.1, 100, 0.08);
+    loop.setVolume(0.25, 150);
+    expect(params[0].setValueAtTime).toHaveBeenCalledWith(0.5, 100);
+    expect(params[0].linearRampToValueAtTime).toHaveBeenCalledWith(0.25, 100.15);
     expect(params[1].cancelScheduledValues).not.toHaveBeenCalled();
+    loop.dispose();
+  });
+
+  it("restores normal volume in 800ms and reverses an unfinished fade smoothly", async () => {
+    vi.useFakeTimers();
+    const { loop, params, context } = fixture();
+    await loop.play();
+    loop.setVolume(0.25, 150);
+    context.currentTime = 100.075;
+    loop.setVolume(0.5, 800);
+    expect(params[0].setValueAtTime.mock.calls.at(-1)?.[0]).toBeCloseTo(0.375);
+    expect(params[0].linearRampToValueAtTime).toHaveBeenLastCalledWith(0.5, 100.875);
+    loop.setVolume(0.5, 800);
+    expect(params[0].linearRampToValueAtTime).toHaveBeenCalledTimes(2);
+    loop.dispose();
+  });
+
+  it("volume changes never restart music that the user paused", async () => {
+    vi.useFakeTimers();
+    const { loop, tracks } = fixture();
+    await loop.play();
+    loop.pause();
+    loop.setVolume(0.25, 150);
+    loop.setVolume(0.5, 800);
+    expect(loop.paused).toBe(true);
+    expect(tracks[0].play).toHaveBeenCalledOnce();
+    expect(tracks[1].play).not.toHaveBeenCalled();
     loop.dispose();
   });
 

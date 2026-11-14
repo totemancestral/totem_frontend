@@ -11,6 +11,7 @@ export class AmbientLoop {
   private generation = 0;
   private enabled = false;
   private volume = 0.5;
+  private volumeRamp?: { from: number; start: number; duration: number };
   private onTime = () => { void this.tick(); };
 
   constructor(private tracks: [HTMLAudioElement, HTMLAudioElement], private onPlaying: (playing: boolean) => void) {
@@ -23,11 +24,21 @@ export class AmbientLoop {
   owns(media: HTMLMediaElement) { return this.tracks.includes(media as HTMLAudioElement); }
   get paused() { return !this.enabled; }
 
-  setVolume(volume: number) {
-    this.volume = volume;
+  setVolume(volume: number, durationMs = 150) {
+    if (volume === this.volume) return;
     if (this.master && this.context) {
-      this.master.gain.setTargetAtTime(volume, this.context.currentTime, 0.08);
+      const now = this.context.currentTime;
+      const ramp = this.volumeRamp;
+      const current = ramp
+        ? ramp.from + (this.volume - ramp.from) * Math.min((now - ramp.start) / ramp.duration, 1)
+        : this.volume;
+      const duration = durationMs / 1000;
+      this.master.gain.cancelScheduledValues(now);
+      this.master.gain.setValueAtTime(current, now);
+      this.master.gain.linearRampToValueAtTime(volume, now + duration);
+      this.volumeRamp = { from: current, start: now, duration };
     }
+    this.volume = volume;
   }
 
   async play() {
