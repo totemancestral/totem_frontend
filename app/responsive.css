@@ -1,0 +1,54 @@
+/* Shared Tailwind thresholds and fluid type scale, starting from the mobile layout. */
+@theme static {
+  --breakpoint-sm: 36rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 62rem;
+  --breakpoint-xl: 75rem;
+  --breakpoint-2xl: 87.5rem;
+
+  --text-2xl: clamp(1.375rem, 1.25rem + 0.5vw, 1.5rem);
+  --text-3xl: clamp(1.625rem, 1.375rem + 1vw, 1.875rem);
+  --text-4xl: clamp(1.875rem, 1.5rem + 1.5vw, 2.25rem);
+  --text-5xl: clamp(2.125rem, 1.5rem + 2.5vw, 3rem);
+  --text-6xl: clamp(2.5rem, 1.75rem + 3vw, 3.75rem);
+  --text-7xl: clamp(3rem, 2rem + 4vw, 4.5rem);
+  --text-8xl: clamp(3.5rem, 2rem + 5vw, 6rem);
+  --text-9xl: clamp(4rem, 2.5rem + 6vw, 8rem);
+}
+
+:root {
+  --site-width: 90rem;
+  --site-gutter: clamp(1.25rem, 4vw, 6rem);
+  --site-space: clamp(3rem, 6vw, 6rem);
+  --site-stack: clamp(2rem, 4vw, 4rem);
+  --site-gap: clamp(1.5rem, 3vw, 3rem);
+  --site-card-padding: clamp(1.25rem, 2.5vw, 2.25rem);
+  --site-nav-height: 4.25rem;
+  --account-width: 80rem;
+  --account-gutter: clamp(1.25rem, 4vw, 3rem);
+  --account-space: clamp(2rem, 4vw, 3.5rem);
+}
+
+.account-container {
+  width: 100%;
+  max-width: var(--account-width);
+  min-width: 0;
+  margin-inline: auto;
+  padding-inline: var(--account-gutter);
+  overflow-wrap: anywhere;
+}
+.account-section { padding-block: var(--account-space); }
+
+@layer base {
+  html { font-size: 100%; }
+  :where(h1, h2, h3, p, a, button) { overflow-wrap: break-word; }
+  :where(form, fieldset) { min-width: 0; }
+  :where(input, select, textarea) { min-width: 0; max-width: 100%; }
+}
+
+/* Keep form text legible and avoid automatic field zoom on mobile Safari. */
+@media (width < theme(--breakpoint-lg)) {
+  :where(input:is([type="text"], [type="email"], [type="password"], [type="date"], [type="tel"], [type="number"], [type="search"], [type="url"]), select, textarea) {
+    font-size: 1rem;
+  }
+}

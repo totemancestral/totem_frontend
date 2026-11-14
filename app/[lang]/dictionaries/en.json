@@ -19,7 +19,7 @@
   "seo": {
     "siteName": "Totem Ancestral",
     "defaultTitle": "Totem Ancestral | The Artwork That Reveals the Ancestor in You",
-    "defaultDescription": "A story, a mask, and a voice, born from your personality and African cosmogonies. A unique, numbered digital artwork — not a scientific test.",
+    "defaultDescription": "An Ancestral Story, a Totem and the Ancestor’s Voice, inspired by your personality and African cosmogonies. A unique, numbered digital artwork — not a scientific test.",
     "ogDescription": "Who were you, before being who you are? A unique work, woven in the language of origins, nourished by African cosmogonies, that reveals the ancestor asleep within you.",
     "offres": {
       "title": "Our Offerings",
@@ -100,7 +100,7 @@
       },
       {
         "title": "Transmit",
-        "text": "Your Totem takes shape as text, voice and image, ready to be kept and shared."
+        "text": "Your creation takes shape as an Ancestral Story, a Totem and the Ancestor’s Voice, ready to be kept and shared."
       }
     ]
   },
@@ -159,12 +159,12 @@
       {
         "tag": "Most chosen",
         "title": "Revelation",
-        "lead": "The creation in full: the story, the face, the voice.",
+        "lead": "The complete creation: the Ancestral Story, the Totem and the Ancestor’s Voice.",
         "price": "€99",
         "priceCaption": "Indicative price",
         "features": [
           "Complete creation",
-          "Ritual voice",
+          "The Ancestor’s Voice",
           "Fine Art print as an option"
         ],
         "button": "Reveal my Totem",
@@ -178,7 +178,7 @@
         "price": "€219",
         "priceCaption": "Indicative price",
         "features": [
-          "Three boxes, one single origin story",
+          "Three boxes, one shared Ancestral Story",
           "Three souls, one same origin",
           "Delivered together, carried for life"
         ],
@@ -199,9 +199,9 @@
       { "name": "Family", "price": "€219", "featured": false }
     ],
     "rows": [
-      { "label": "Ancestral Parchment", "values": [true, true, true] },
-      { "label": "Visual artwork", "values": [true, true, true] },
-      { "label": "Voice of the ancestor", "values": [false, true, true] },
+      { "label": "Ancestral Card", "values": [true, true, true] },
+      { "label": "Totem", "values": [true, true, true] },
+      { "label": "The Ancestor’s Voice", "values": [false, true, true] },
       { "label": "Numbered certificate of authenticity", "values": [true, true, true] },
       { "label": "Number of boxes", "values": ["1", "1", "3"] },
       { "label": "Free gift card", "values": [true, true, true] },
@@ -239,9 +239,9 @@
     "title": "What you receive",
     "intro": "Depending on your offer, up to four pieces make up your Totem Ancestral.",
     "items": [
-      { "label": "The Ancestral Parchment" },
-      { "label": "The Voice" },
-      { "label": "The Face" },
+      { "label": "The Ancestral Card" },
+      { "label": "The Ancestor’s Voice" },
+      { "label": "The Totem" },
       { "label": "The Certificate" }
     ]
   },
@@ -256,9 +256,12 @@
     "quoteLine2": "So the ancestor may rise in your image.",
     "pathLabel": "Your path",
     "pathAdulte": "Adult",
-    "pathAdulteDesc": "Full journey · Ancestral Parchment, audio & image",
+    "pathAdulteDesc": "Full journey · Ancestral Card, Totem and Ancestor’s Voice",
     "pathJunior": "Junior",
     "pathJuniorDesc": "Express Totem · five questions, challenge your friends",
+    "birthDateLabel": "Date of birth",
+    "childBirthDateLabel": "Child's date of birth",
+    "birthDateError": "Enter a valid date of birth that is not in the future.",
     "firstNameLabel": "First name",
     "firstNamePlaceholder": "Your first name",
     "lastNameLabel": "Last name",
@@ -337,7 +340,7 @@
     "legalLinks": ["Terms", "Privacy", "Legal"],
     "adulte": {
       "offerName": "Revelation Offer",
-      "offerDesc": "The creation in its fullness: the story, the face, the voice.",
+      "offerDesc": "The Ancestral Story, the Totem and the Ancestor’s Voice, brought together in your creation.",
       "price": "€89",
       "priceCaption": "indicative",
       "consent1Before": "I have read and accept the ",
@@ -370,9 +373,9 @@
     "audioListen": "Listen to the question",
     "audioPlaying": "Playing",
     "audioPaused": "Paused",
-    "audioRestart": "Restart from the beginning",
-    "audioPlayAction": "Play audio",
-    "audioPauseAction": "Pause audio",
+    "audioRestart": "Listen to the Ancestor’s Voice from the beginning",
+    "audioPlayAction": "Play the Ancestor’s Voice",
+    "audioPauseAction": "Pause the Ancestor’s Voice",
     "wordMorePlaceholder": "One more word? (optional)",
     "introTitle": "The griot speaks.",
     "introParagraph1": "There are no right or wrong answers here. There is your truth, and the truth you allow yourself to see.",
@@ -441,7 +444,7 @@
     "articles": [
       { "title": "Article 1 — Purpose and scope", "body": ["These general terms and conditions of sale (T&Cs) govern any order of personalized Totem Ancestral digital works, published by SENYCE PARTNERS (SARL), placed on the site totem-ancestral.com. Any order implies full and complete acceptance of these T&Cs, binding on the client in the version in force on the day of the order."] },
       { "title": "Article 2 — Identity of the seller", "body": ["This site is published by SENYCE PARTNERS, a French SARL with capital of €19,000, whose registered office is located at 4 avenue Laurent Cely, 92600 Asnières-sur-Seine, France. Contact: ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
-      { "title": "Article 3 — Products and artistic nature", "body": ["Depending on the offer chosen, you receive an Ancestral Parchment PDF, a high-resolution PNG visual artwork, and, for Ancestral and Family, a 90-second MP3 audio file of the imaginary ancestor's voice, along with a numbered certificate of authenticity. These creations constitute neither a DNA test, nor genealogical research, nor a divinatory, medical, or legal service."] },
+      { "title": "Article 3 — Products and artistic nature", "body": ["Depending on the offer chosen, you receive an Ancestral Card PDF containing your Totem and your Ancestral Story, your Totem as a high-resolution PNG and, for Ancestral and Family, the imaginary Ancestor’s Voice as a 90-second MP3, along with a numbered certificate of authenticity. These creations constitute neither a DNA test, nor genealogical research, nor a divinatory, medical, or legal service."] },
       { "title": "Article 4 — Price and payment", "body": ["Prices are shown in euros, all taxes included, and displayed before the order is confirmed. The Junior offer is priced at €9.99. Payment is processed securely via Stripe. SENYCE PARTNERS retains no complete banking data. The order is final once payment is fully collected and the information needed for composition is confirmed."] },
       { "title": "Article 5 — Order and composition", "body": ["Each order includes a creative questionnaire enabling personalization of the work. It is confirmed upon receipt of full payment; a confirmation email is sent immediately. The house reserves the right to refuse an order in case of suspected fraud, manifestly unlawful content, or technical impossibility."] },
       { "title": "Article 6 — Delivery", "body": ["The artwork is delivered by email within fifteen minutes (thirty minutes for the Family offer) after the questionnaire is validated. If a technical issue prevents delivery, the artwork is recomposed or fully refunded."] },
@@ -512,14 +515,15 @@
     "navOeuvres": "Works",
     "navConsultations": "Consultations",
     "navProfil": "Profile",
+    "viewTotemButton": "View my Totem",
     "composeButton": "+ Compose a work"
   },
   "espaceOeuvres": {
     "eyebrow": "Your space",
     "title": "Your works",
-    "recitLabel": "Story",
-    "imageLabel": "Image",
-    "audioLabel": "Audio",
+    "recitLabel": "Ancestral Story",
+    "imageLabel": "Totem",
+    "audioLabel": "The Ancestor’s Voice",
     "emptyText": "You don't have any delivered work yet."
   },
   "commandes": {
@@ -569,9 +573,10 @@
     "youAreLabel": "You are",
     "archetypeName": "The Ancestral Lion",
     "orderInfo": "Work No. TTM-2026-B7241C9 · Delivered on August 28, 2026",
-    "loadingText": "The griot is finishing the writing of your Ancestral Parchment…",
-    "openPrompt": "Touch the Ancestral Parchment to unroll it.",
-    "parcheminTitle": "The Ancestral Parchment",
+    "loadingText": "The griot is finishing your Ancestral Card…",
+    "openPrompt": "Touch the Ancestral Card to unfold it.",
+    "parcheminTitle": "The Ancestral Card",
+    "historyTitle": "Ancestral Story",
     "sections": [
       {
         "title": "The Awakening",
@@ -586,33 +591,41 @@
         "text": "You carry that same fire. The Ancestral Lion does not conquer through speed, but through the quiet certainty of his place in the world. Where others search, you already know."
       }
     ],
-    "voiceLabel": "The Voice",
-    "audioListen": "Listen to the voice",
+    "voiceLabel": "The Ancestor’s Voice",
+    "audioListen": "Listen to the Ancestor’s Voice",
     "audioPlaying": "Playing",
     "audioPaused": "Paused",
-    "audioRestart": "Restart from the beginning",
-    "audioPlayAction": "Play audio",
-    "audioPauseAction": "Pause audio",
-    "downloadMapButton": "Download the Ancestral Parchment",
+    "audioRestart": "Listen to the Ancestor’s Voice from the beginning",
+    "audioPlayAction": "Play the Ancestor’s Voice",
+    "audioPauseAction": "Pause the Ancestor’s Voice",
+    "downloadMapButton": "Download my Ancestral Card",
     "downloadCertButton": "Download the Certificate",
     "shareButton": "Share my Totem",
     "shareCopied": "Link copied!"
   },
   "espace": {
+    "composeTitle": "Your story starts here",
+    "composeText": "Discover the Totem that reflects who you are.",
+    "composeButton": "Compose my Totem",
+    "resumeTitle": "Your story awaits",
+    "resumeText": "Continue your journey where you left off.",
+    "journeyLoadError": "We could not retrieve your journey. Please try again shortly.",
+    "totemTitle": "Your Totem",
     "resumePaidText": "Your payment is confirmed. Complete your questionnaire to start creating your work.",
     "eyebrow": "Your space",
     "title": "Your week, at a glance",
     "intro": "Your works and your latest consultations, all in one place.",
     "worksCardLabel": "Works composed",
     "ordersCardLabel": "Orders",
+    "viewTotemCardLabel": "View my Totem",
     "composeCardLabel": "Compose a Totem",
     "statusLabel": "This week",
     "statusText": "Your consultation is available.",
     "discoverButton": "Discover my reading",
     "gridLabel": "Your works and readings",
-    "recitLabel": "Story",
-    "imageLabel": "Image",
-    "audioLabel": "Audio",
+    "recitLabel": "Ancestral Story",
+    "imageLabel": "Totem",
+    "audioLabel": "The Ancestor’s Voice",
     "emptyText": "Your works will appear here once your first Totem is composed.",
     "resumeButton": "Resume my journey"
   },
@@ -624,8 +637,7 @@
     "retry": "Try again",
     "available": "Your consultation is available.",
     "alreadyDrawn": "Your reading for this week is available.",
-    "nextAvailable": "Next draw on",
-    "parisTime": "at midnight, Paris time",
+    "seeYouNextWeek": "See you next week for another reading.",
     "seriesUnavailable": "Consultations for this Totem are not available yet.",
     "workRequired": "Create your adult Totem before consulting the cowries.",
     "compose": "Create my Totem",
@@ -725,8 +737,8 @@
     "prevLabel": "Previous testimonial",
     "nextLabel": "Next testimonial",
     "items": [
-      { "quote": "I cried while reading the Parchment. It felt like nothing else. A raw emotion.", "name": "Aïcha", "city": "Dakar", "img": "/images/temoignage_0.png" },
-      { "quote": "The Voice gave me chills. It felt as if my ancestor truly knew me.", "name": "Leyna", "city": "Paris", "img": "/images/temoignage_3.png" },
+      { "quote": "I cried while reading the Ancestral Card. It felt like nothing else. A raw emotion.", "name": "Aïcha", "city": "Dakar", "img": "/images/temoignage_0.png" },
+      { "quote": "The Ancestor’s Voice gave me chills. It felt as if my ancestor truly knew me.", "name": "Leyna", "city": "Paris", "img": "/images/temoignage_3.png" },
       { "quote": "The Family box brought us around a common story, finally written.", "name": "Sabi", "city": "Bamako", "img": "/images/temoignage_2.png" },
       { "quote": "Not a gimmick. A real, grounded, sincere experience that touched the heart.", "name": "Carolle", "city": "Accra", "img": "/images/temoignage_1.png" },
       { "quote": "The Face now stands in my living room. It is my Totem, my legacy.", "name": "Eric", "city": "London", "img": "/images/temoignage_4.png" },
@@ -768,7 +780,7 @@
         "title": "Practical experience",
         "items": [
           { "question": "How long does it take to compose?", "answer": "The questionnaire takes about fifteen minutes to complete. The results are delivered by email within fifteen minutes of submission (thirty minutes for the Family Totem)." },
-          { "question": "In what format will we receive the work?", "answer": "You will receive a PDF scroll, a high-resolution PNG image, and, for Ancestral and Family, a 90-second MP3 audio file." },
+          { "question": "In what format will we receive the work?", "answer": "You receive an Ancestral Card PDF containing your Totem and your Ancestral Story, your Totem as a high-resolution PNG and, for Ancestral and Family, the Ancestor’s Voice as a 90-second MP3." },
           { "question": "Can I gift a piece of art?", "answer": "Absolutely. Every order includes a free gift card, and you can specify a recipient at checkout." }
         ]
       },

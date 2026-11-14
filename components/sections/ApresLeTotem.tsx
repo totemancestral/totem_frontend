@@ -56,7 +56,7 @@ export default function ApresLeTotem({ dict, lang }: { dict: Dictionary["apresLe
             src="/images/cauris_image.png"
             alt=""
             fill
-            sizes="(min-width: 2200px) 936px, (min-width: 1024px) 44vw, 384px"
+            sizes="(min-width: 992px) min(44vw, 45rem), min(24rem, 92vw)"
             className="object-cover grayscale contrast-[1.15] mix-blend-multiply"
           />
         </Reveal>

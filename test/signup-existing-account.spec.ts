@@ -11,7 +11,7 @@ vi.mock("../lib/env", () => ({ getServerEnv: () => ({ NEXT_PUBLIC_SITE_URL: "htt
 
 const request = (locale = "fr") => new Request("http://localhost/api/auth/signup", {
   method: "POST", headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email: "  Test@Example.com  ", password: "StrongPassword1", locale }),
+  body: JSON.stringify({ email: "  Test@Example.com  ", password: "StrongPassword1", date_naissance: "2000-05-21", naissance_concerne: "titulaire", locale }),
 });
 
 beforeEach(() => {
@@ -71,5 +71,33 @@ describe("existing account at signup", () => {
     const response = await POST(request());
     expect(response.status).toBe(503);
     expect(mocks.signUp).not.toHaveBeenCalled();
+  });
+});
+
+
+describe("birth date at signup", () => {
+  it.each([undefined, "", "2025-02-29", "2020-02-30", "2999-01-01", "21/05/2000"])("rejects invalid or missing date %s", async (date) => {
+    const body = await request().json();
+    const response = await POST(new Request("http://localhost/api/auth/signup", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, date_naissance: date }),
+    }));
+    expect(response.status).toBe(422);
+    expect((await response.json()).code).toBe("invalid_birth_date");
+    expect(mocks.signUp).not.toHaveBeenCalled();
+  });
+
+  it("persists the child's date and its subject in Auth metadata", async () => {
+    const body = await request().json();
+    const response = await POST(new Request("http://localhost/api/auth/signup", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, date_naissance: "2020-02-29", naissance_concerne: "enfant" }),
+    }));
+    expect(response.status).toBe(200);
+    expect(mocks.signUp).toHaveBeenCalledWith(expect.objectContaining({
+      options: expect.objectContaining({ data: expect.objectContaining({
+        date_naissance: "2020-02-29", naissance_concerne: "enfant",
+      }) }),
+    }));
   });
 });

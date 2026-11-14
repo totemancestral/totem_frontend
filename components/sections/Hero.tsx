@@ -71,7 +71,7 @@ export default function Hero({ dict, lang, mediaCopy }: { dict: Dictionary["hero
             src="/images/yeux_totem_original_recadres.png"
             alt=""
             fill
-            sizes="(min-width: 1024px) 21vw, 1px"
+            sizes="(min-width: 992px) 21vw, 1px"
             className="object-cover grayscale contrast-[1.2] brightness-110 mix-blend-luminosity"
           />
           <div className="absolute inset-0 bg-or mix-blend-color" />

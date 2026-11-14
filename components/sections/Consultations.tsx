@@ -43,7 +43,7 @@ export default function Consultations({ dict, copy, lang }: { dict: Dictionary["
     } catch (error) { setDelayNotice(retryErrorNotice(error, lang)); setError(true); } finally { setLoadingMore(false); }
   }
   return (
-    <div className="mx-auto min-w-0 max-w-7xl px-6 py-12 [overflow-wrap:anywhere] lg:pl-0 lg:pr-16">
+    <div className="account-container account-section [overflow-wrap:anywhere]">
       <div className="flex flex-col gap-2.5">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>

@@ -47,7 +47,7 @@
     "unmet": "Requirement not met"
   },
   "artwork": {
-    "portrait": "Portrait of {name}",
+    "portrait": "Totem of {name}",
     "orderInfo": "Artwork no. {number} · Delivered on {date}"
   },
   "navigation": {

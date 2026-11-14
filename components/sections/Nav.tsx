@@ -91,14 +91,14 @@ export default function Nav({ lang, dict }: NavProps) {
         data-nav-hidden={hidden && !menuOpen}
         aria-label={ui.navigation.main}
         onFocusCapture={() => setHidden(false)}
-        className={`fixed top-0 left-0 z-50 flex h-[68px] w-full items-center justify-between site-gutters transition-[transform,background-color,color] duration-300 motion-reduce:transition-none lg:h-20 ${hidden && !menuOpen ? "-translate-y-full" : "translate-y-0"} ${
+        className={`fixed top-0 left-0 z-50 flex h-[var(--site-nav-height)] w-full items-center justify-between site-gutters transition-[transform,background-color,color] duration-300 motion-reduce:transition-none ${hidden && !menuOpen ? "-translate-y-full" : "translate-y-0"} ${
           isLight ? "site-pattern-ivory bg-ivoire text-nuit" : "bg-transparent text-ivoire"
         }`}
       >
         <Brand lang={lang} size={40} textClassName="text-[10px]! tracking-[0.28em]! sm:text-xs! sm:tracking-[0.50em]!" />
 
         {/* contenu complet : caché sur mobile, visible à partir de lg */}
-        <div className="hidden items-center gap-9 lg:flex">
+        <div className="hidden items-center gap-9 xl:flex">
           <Link
             href={`/${lang}/offres`}
             className={`text-xs uppercase tracking-wide ${
@@ -158,7 +158,7 @@ export default function Nav({ lang, dict }: NavProps) {
           ref={menuButtonRef}
           type="button"
           onClick={() => setMenuOpen(!menuOpen)}
-          className="relative flex h-11 w-11 shrink-0 flex-col items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-or lg:hidden"
+          className="relative flex h-11 w-11 shrink-0 flex-col items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-or xl:hidden"
           aria-expanded={menuOpen}
           aria-controls="site-mobile-menu"
           aria-label={menuOpen ? ui.navigation.closeMenu : ui.navigation.openMenu}
@@ -184,7 +184,7 @@ export default function Nav({ lang, dict }: NavProps) {
 
       {/* panneau mobile plein écran : couvre tout le reste de la page tant qu'il est ouvert */}
       {menuOpen && (
-        <div ref={menuRef} id="site-mobile-menu" role="navigation" aria-label={ui.navigation.mobile} className="site-pattern-ivory fixed inset-0 top-[68px] z-40 flex flex-col gap-6 overflow-y-auto bg-ivoire p-8 text-nuit lg:hidden">
+        <div ref={menuRef} id="site-mobile-menu" role="navigation" aria-label={ui.navigation.mobile} className="site-pattern-ivory fixed inset-0 top-[var(--site-nav-height)] z-40 flex flex-col gap-6 overflow-y-auto bg-ivoire p-8 text-nuit xl:hidden">
           <Link
             href={`/${lang}/offres`}
             onClick={closeMenu}

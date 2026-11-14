@@ -152,7 +152,7 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
     profile?.sexe === "homme" ? dict.genderMale : profile?.sexe === "femme" ? dict.genderFemale : "—";
   const languageDisplay = profile?.langue === "en" ? "English" : "Français";
 
-  if (loading || loadError) return <div className="mx-auto max-w-7xl px-6 py-12 text-ivoire">
+  if (loading || loadError) return <div className="account-container account-section text-ivoire">
     <h1 className="font-display text-3xl">{dict.title}</h1>
     {loading ? <p className="mt-5" role="status">{ui.status.loadingProfile}</p> : <>
       <p className="mt-5" role="alert">{ui.errors.profileLoadFailed}</p>
@@ -161,7 +161,7 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
   </div>;
 
   return (
-    <div className="mx-auto min-w-0 max-w-7xl px-6 py-12 [--color-gris:#A8A8A8] [--color-ombre:#757585] [overflow-wrap:anywhere] lg:pl-0 lg:pr-16">
+    <div className="account-container account-section [--color-gris:#A8A8A8] [--color-ombre:#757585] [overflow-wrap:anywhere]">
       <div className="flex flex-col gap-2.5">
         <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
         <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>

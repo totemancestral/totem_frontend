@@ -9,6 +9,7 @@ import { Brand } from "@/components/ui/Brand";
 import { PasswordField } from "@/components/ui/PasswordField";
 import { RadioCard } from "@/components/ui/RadioCard";
 import { supabase } from "@/lib/supabase/client";
+import { isValidBirthDate } from "@/lib/birth-date";
 import { isStrongPassword } from "@/lib/password";
 import { retryNotice } from "@/lib/retry-after";
 import { establishSignupSession } from "@/lib/signup-session";
@@ -41,13 +42,14 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
   const [gender, setGender] = useState<"homme" | "femme">("homme");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [existingAccount, setExistingAccount] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [errorField, setErrorField] = useState<"email" | "password" | null>(null);
+  const [errorField, setErrorField] = useState<"email" | "password" | "birthDate" | null>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   useEffect(() => {
@@ -81,6 +83,12 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
     setErrorField(null);
     setExistingAccount(false);
 
+    if (!isValidBirthDate(birthDate)) {
+      setErrorField("birthDate");
+      setError(dict.birthDateError);
+      return;
+    }
+
     if (!isStrongPassword(password)) {
       setErrorField("password");
       setError(ui.errors.passwordRules);
@@ -104,6 +112,8 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
           prenom: firstName,
           nom: lastName,
           sexe: gender,
+          date_naissance: birthDate,
+          naissance_concerne: path === "junior" ? "enfant" : "titulaire",
           locale: lang,
           redirectPath: nextPath,
         }),
@@ -119,8 +129,8 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
       if (!response.ok) {
         const alreadyExists = payload?.code === "email_exists";
         setExistingAccount(alreadyExists);
-        setErrorField(alreadyExists ? "email" : null);
-        setError(retryNotice(response, lang) ?? (alreadyExists ? dict.emailExists : ui.errors.signupFailed));
+        setErrorField(alreadyExists ? "email" : payload?.code === "invalid_birth_date" ? "birthDate" : null);
+        setError(retryNotice(response, lang) ?? (alreadyExists ? dict.emailExists : payload?.code === "invalid_birth_date" ? dict.birthDateError : ui.errors.signupFailed));
         return;
       }
 
@@ -156,6 +166,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
           src="/images/logo_totem_1.svg"
           alt=""
           fill
+          sizes="(min-width: 992px) 42vw, 1px"
           priority
           className="object-cover object-[50%_25%]"
         />
@@ -198,7 +209,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
             <div className="flex gap-4">
               <RadioCard
                 name="path" value="adulte"
-                onChange={() => setPath("adulte")}
+                onChange={() => { setPath("adulte"); setBirthDate(""); }}
                 checked={path === "adulte"}
                 className={`flex flex-1 flex-col gap-1.5 border p-5 text-left ${
                   path === "adulte" ? "border-[1.5px] border-or bg-indigo" : "border-ombre"
@@ -209,7 +220,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
               </RadioCard>
               <RadioCard
                 name="path" value="junior"
-                onChange={() => setPath("junior")}
+                onChange={() => { setPath("junior"); setBirthDate(""); }}
                 checked={path === "junior"}
                 className={`flex flex-1 flex-col gap-1.5 border p-5 text-left ${
                   path === "junior" ? "border-[1.5px] border-or bg-indigo" : "border-ombre"
@@ -257,6 +268,28 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
                 />
               </label>
             </div>
+
+            <label className="flex min-w-0 flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-gris">
+                {path === "junior" ? dict.childBirthDateLabel : dict.birthDateLabel}
+              </span>
+              <input
+                type="date"
+                name="birthDate"
+                autoComplete={path === "junior" ? "off" : "bday"}
+                value={birthDate}
+                onChange={(event) => {
+                  setBirthDate(event.target.value);
+                  if (errorField === "birthDate") { setError(null); setErrorField(null); }
+                }}
+                min="0001-01-01"
+                max={new Date().toISOString().slice(0, 10)}
+                required
+                aria-invalid={errorField === "birthDate" && !!error || undefined}
+                aria-describedby={errorField === "birthDate" && error ? "signup-error" : undefined}
+                className="w-full min-w-0 border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire"
+              />
+            </label>
 
             <fieldset className="flex min-w-0 flex-col gap-2">
               <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-gris">

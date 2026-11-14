@@ -82,6 +82,7 @@ export default function Faq({ dict, lang }: { dict: Dictionary["faq"]; lang: Loc
               src={current.img}
               alt=""
               fill
+              sizes="340px"
               className="object-cover grayscale contrast-[1.15] brightness-110 mix-blend-luminosity"
             />
             <div className="absolute inset-0 bg-or mix-blend-color" />

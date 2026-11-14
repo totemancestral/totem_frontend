@@ -1,3 +1,5 @@
+@reference "../../app/responsive.css";
+
 .section {
   background-color: var(--color-nuit);
   overflow: clip;
@@ -24,11 +26,11 @@
   filter: contrast(1.06) saturate(.85);
 }
 
-@media (min-width: 640px) and (max-width: 1023px) {
+@media (theme(--breakpoint-sm) <= width < theme(--breakpoint-lg)) {
   .artwork { aspect-ratio: 3 / 2; }
 }
 
-@media (min-width: 1024px) {
+@media (width >= theme(--breakpoint-lg)) {
   .composition { min-height: 48rem; display: flex; align-items: center; }
   .content { width: 47%; padding-block: 3rem; }
   .artwork {

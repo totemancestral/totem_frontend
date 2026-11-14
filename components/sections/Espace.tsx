@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
+import { useCanComposeTotem } from "@/lib/hooks/useCanComposeTotem";
+import { useTotemJourney } from "@/lib/hooks/useTotemJourney";
+import styles from "./Espace.module.css";
 import { useCommandes } from "@/lib/hooks/useCommandes";
 import { interfaceCopy } from "@/lib/interface-copy";
 import { ConsultationStatus } from "@/components/sections/ConsultationStatus";
@@ -14,90 +16,77 @@ type Props = {
 
 export default function Espace({ dict, caurisCopy, lang }: Props) {
   const ui = interfaceCopy(lang);
+  const canCompose = useCanComposeTotem();
   const { commandes, error, delayNotice } = useCommandes(lang);
   const works = (commandes ?? []).filter((c) => c.oeuvre);
   const unfinished = (commandes ?? []).find((c) => c.requiresQuestionnaire && c.stripe_session_id);
 
+  const waitingForWork = (commandes ?? []).some((commande) =>
+    ["paye", "en_generation", "livree", "erreur"].includes(commande.statut) && !commande.requiresQuestionnaire,
+  );
+  const canContinue = canCompose === true && commandes !== null && !error && works.length === 0 && !waitingForWork;
+  const { journey, error: journeyError, retry } = useTotemJourney(lang, canContinue && !unfinished);
+  const action = canContinue ? unfinished
+    ? { href: `/${lang}/parcours?session_id=${encodeURIComponent(unfinished.stripe_session_id!)}`, resuming: true }
+    : journey : null;
+
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 lg:pl-0 lg:pr-16">
-      <div className="flex flex-col gap-2.5">
-        <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
-        <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>
-        <p className="mt-1 max-w-lg text-sm text-grisclair">{dict.intro}</p>
-      </div>
+    <div className={styles.dashboard}>
+      <header>
+        <h1 className={styles.heading}>{dict.eyebrow}</h1>
+        <p className={styles.subtitle}>{dict.title}</p>
+        <p className={styles.intro}>{dict.intro}</p>
+      </header>
 
-      {/* aperçu rapide : mêmes chiffres que les pages Œuvres/Commandes,
-          présentés en cartes pour donner un point d'entrée direct depuis
-          l'accueil. */}
-      <div className="mt-9 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Link
-          href={`/${lang}/oeuvres`}
-          className="flex items-center gap-4 border border-ombre bg-indigo p-5 transition-colors hover:border-or"
-        >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-ombre text-or">
-            <svg width="16" height="18" viewBox="0 0 200 320" fill="none" stroke="currentColor" strokeWidth="10" strokeLinejoin="round" strokeLinecap="round">
-              <polygon points="100,8 145,36 162,120 152,190 130,255 100,312 70,255 48,190 38,120 55,36" />
-            </svg>
-          </span>
-          <span className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-wide text-grisclair">{dict.worksCardLabel}</span>
-            <span className="font-display text-2xl text-ivoire">{works.length}</span>
-          </span>
+      <div className={styles.stats}>
+        <Link href={`/${lang}/oeuvres`} className={styles.stat}>
+          <span className={styles.statLabel}>{dict.worksCardLabel}</span>
+          <span className={styles.statValue}>{commandes === null ? "\u2014" : works.length}</span>
         </Link>
-
-        <Link
-          href={`/${lang}/commandes`}
-          className="flex items-center gap-4 border border-ombre bg-indigo p-5 transition-colors hover:border-or"
-        >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-ombre text-or">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3">
-              <rect x="1.5" y="4" width="13" height="10.5" />
-              <path d="M1.5 4 8 0.5 14.5 4" />
-              <path d="M1.5 4 8 7.5 14.5 4" />
-              <line x1="8" y1="7.5" x2="8" y2="14.5" />
-            </svg>
-          </span>
-          <span className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-wide text-grisclair">{dict.ordersCardLabel}</span>
-            <span className="font-display text-2xl text-ivoire">{(commandes ?? []).length}</span>
-          </span>
-        </Link>
-
-        <Link
-          href={`/${lang}/offres`}
-          className="flex flex-col items-center justify-center gap-2 border border-dashed border-ombre p-5 text-grisclair transition-colors hover:border-or hover:text-or"
-        >
-          <span className="flex h-9 w-9 items-center justify-center border border-ombre text-xl leading-none">+</span>
-          <span className="text-center text-xs uppercase tracking-wide">{dict.composeCardLabel}</span>
+        <Link href={`/${lang}/commandes`} className={styles.stat}>
+          <span className={styles.statLabel}>{dict.ordersCardLabel}</span>
+          <span className={styles.statValue}>{commandes === null ? "\u2014" : commandes.length}</span>
         </Link>
       </div>
 
-      {/* carte de statut : toujours visible — si le Totem n'est pas encore
-          composé, le tirage lui-même (ConsultationTirage) invite à le
-          composer plutôt que de cacher l'entrée de la consultation. */}
-      <ConsultationStatus copy={caurisCopy} lang={lang} />
-
-      {unfinished && (
-        <div className="mt-9 flex flex-col items-start gap-4 border border-or bg-indigo p-6">
-          <p className="text-sm text-ivoire">{dict.resumePaidText}</p>
-          <Button href={`/${lang}/parcours?session_id=${encodeURIComponent(unfinished.stripe_session_id!)}`}>{dict.resumeButton}</Button>
+      {action && (
+        <section className={styles.journey} aria-labelledby="journey-title">
+          <div aria-hidden="true" className={styles.ornament}>
+            <span className="block h-8 rounded-b-full border-2 border-current" />
+            <span className="mx-auto -mt-8 block h-6 w-6 rounded-b-full border-2 border-current" />
+            <span className="mx-auto -mt-6 block h-4 w-3 rounded-b-full border-2 border-current" />
+            <span className="mx-auto mt-8 block h-3 w-3 rotate-45 border-2 border-current" />
+            <span className="mx-auto mt-4 block h-3 w-3 rotate-45 border-l-2 border-t-2 border-current" />
+            <span className="mx-auto block h-3 w-3 rotate-45 border-l-2 border-t-2 border-current" />
+          </div>
+          <h2 id="journey-title" className={styles.journeyTitle}>
+            {action.resuming ? dict.resumeTitle : dict.composeTitle}
+          </h2>
+          <p className={styles.journeyCopy}>
+            {unfinished ? dict.resumePaidText : action.resuming ? dict.resumeText : dict.composeText}
+          </p>
+          <Link className={styles.journeyButton} href={action.href}>
+            <span>{action.resuming ? dict.resumeButton : dict.composeButton}</span>
+            <span aria-hidden="true">&rarr;</span>
+          </Link>
+        </section>
+      )}
+      {journeyError && (
+        <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-grisclair">
+          <p role="alert">{dict.journeyLoadError}</p>
+          <button type="button" onClick={retry} className="text-or underline underline-offset-4">{caurisCopy.retry}</button>
         </div>
       )}
 
+      <ConsultationStatus copy={caurisCopy} lang={lang} className={styles.consultation} showComposeAction={false} />
+
       {/* grille des œuvres */}
-      <div className="mt-10 flex flex-col gap-5">
-        <div className="flex items-baseline justify-between">
-          <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.gridLabel}</p>
-        </div>
+      <div className={`${styles.works} flex flex-col gap-5`}>
+        {works.length > 0 && <h2 className={styles.worksTitle}>{dict.totemTitle}</h2>}
 
         {commandes === null && !error && <p role="status" className="text-sm text-grisclair">{ui.status.loading}</p>}
         {delayNotice && <p role="alert" className="text-sm text-grisclair">{delayNotice}</p>}
-        {!delayNotice && (commandes !== null || error) && works.length === 0 && (
-          <div className="flex flex-col items-start gap-4">
-            <p className="text-sm text-grisclair">{dict.emptyText}</p>
-            <Button href={`/${lang}/parcours`}>{dict.resumeButton}</Button>
-          </div>
-        )}
+        {error && !delayNotice && <p role="alert" className="text-sm text-grisclair">{ui.errors.orderUnavailable}</p>}
 
         {works.length > 0 && (
           <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
@@ -105,15 +94,14 @@ export default function Espace({ dict, caurisCopy, lang }: Props) {
               <Link
                 key={commande.id}
                 href={`/${lang}/oeuvre?commande=${commande.id}`}
-                className="flex flex-col border border-ombre bg-indigo transition-colors hover:border-or"
+                className={styles.work}
               >
-                <div className="relative h-55 overflow-hidden border-b border-ombre bg-nuit">
+                <div className={styles.workImage}>
                   {commande.oeuvre?.image_url && (
                     // eslint-disable-next-line @next/next/no-img-element -- image générée dynamiquement, domaine backend non préconfiguré
                     <img
                       src={commande.oeuvre.image_url}
                       alt=""
-                      className="h-full w-full object-cover grayscale contrast-[1.15] brightness-110"
                     />
                   )}
                 </div>

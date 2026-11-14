@@ -90,7 +90,7 @@ export default function Temoignages({ dict }: { dict: Dictionary["temoignages"] 
               src={current.img}
               alt=""
               fill
-              sizes="(min-width: 1024px) 280px, (min-width: 432px) 384px, calc(100vw - 50px)"
+              sizes="(min-width: 992px) 280px, (min-width: 432px) 384px, calc(100vw - 50px)"
               className="object-cover grayscale contrast-[1.15] brightness-110 mix-blend-luminosity"
             />
             <div className="absolute inset-0 bg-or mix-blend-color" />

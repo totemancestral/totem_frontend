@@ -101,6 +101,7 @@ export default function Connexion({ dict, lang }: { dict: Dictionary["connexion"
             src="/images/logo_totem_1.svg"
             alt=""
             fill
+            sizes="(min-width: 992px) 42vw, 1px"
             priority
             className="object-cover object-[50%_25%]"
           />

@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { getImageProps } from "next/image";
 import { getSeuilImage } from "@/lib/seuil-images";
 import type { Dictionary } from "@/app/[lang]/dictionaries";
 import styles from "./SeuilImmersif.module.css";
@@ -49,15 +49,24 @@ export function LeSeuilPinned({ gestes }: { gestes: Geste[] }) {
   return (
     <div className={styles.sequence} data-seuil-immersif data-active-step={activeIndex}>
       <div className={styles.backdrop} aria-hidden="true">
-        {gestes.map((geste, index) => (
-          <div key={geste.title} className={styles.scene} style={{ opacity: index === activeIndex ? 1 : 0 }}>
-            <Image
-              src={getSeuilImage(geste.image)} alt="" fill sizes="100vw"
-              className={styles.image}
-              style={{ objectPosition: positions[geste.image] ?? "center" }}
-            />
-          </div>
-        ))}
+        {gestes.map((geste, index) => {
+          const { props: landscape } = getImageProps({
+            src: getSeuilImage(geste.image), alt: "", fill: true, sizes: "100vw",
+            className: styles.image,
+            style: { "--seuil-image-position": positions[geste.image] ?? "center" } as CSSProperties,
+          });
+          const { props: portrait } = getImageProps({
+            src: getSeuilImage(geste.image, "portrait"), alt: "", fill: true, sizes: "100vw",
+          });
+          return (
+            <div key={geste.title} className={styles.scene} style={{ opacity: index === activeIndex ? 1 : 0 }}>
+              <picture>
+                <source media="(orientation: portrait)" srcSet={portrait.srcSet} sizes={portrait.sizes} />
+                <img {...landscape} alt="" />
+              </picture>
+            </div>
+          );
+        })}
         <div className={styles.shade} />
       </div>
       <div className={styles.steps}>

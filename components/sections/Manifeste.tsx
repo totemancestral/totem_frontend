@@ -32,7 +32,7 @@ export default function Manifeste({ dict }: { dict: Dictionary["manifeste"] }) {
               src="/images/manifeste.png"
               alt=""
               fill
-              sizes="(min-width: 2200px) 1306px, (min-width: 1024px) 63vw, 92vw"
+              sizes="(min-width: 992px) min(63vw, 61.2rem), 92vw"
               className={styles.image}
             />
         </div>

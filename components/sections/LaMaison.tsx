@@ -13,7 +13,7 @@ export default function LaMaison({ dict, lang }: { dict: Dictionary["laMaison"];
             src="/images/totem-mask-or-1024.png"
             alt=""
             fill
-            sizes="(min-width: 1536px) 576px, (min-width: 1024px) 37vw, 320px"
+            sizes="(min-width: 992px) min(37vw, 36rem), min(20rem, 92vw)"
             className="object-cover grayscale contrast-[1.2] brightness-125 mix-blend-multiply"
           />
         </Reveal>

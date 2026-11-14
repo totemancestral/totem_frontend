@@ -41,7 +41,8 @@ export function useNavigationOverlay(open: boolean, header: RefObject<HTMLElemen
     function focusin(event: FocusEvent) {
       if (event.target instanceof Node && !roots.some(root => root.contains(event.target as Node))) initial?.focus();
     }
-    const desktop = window.matchMedia("(min-width: 1024px)");
+    const desktopBreakpoint = getComputedStyle(document.documentElement).getPropertyValue("--breakpoint-xl").trim();
+    const desktop = window.matchMedia(`(min-width: ${desktopBreakpoint || "75rem"})`);
     const resize = () => { if (desktop.matches) setOpen(false); };
     desktop.addEventListener("change", resize);
     document.addEventListener("keydown", keydown);

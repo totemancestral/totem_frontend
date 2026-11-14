@@ -24,9 +24,15 @@ export async function GET(request: Request) {
     return internalError("profil.GET", error);
   }
 
-  return NextResponse.json(
-    data ?? { prenom: null, nom: null, sexe: null, langue: "fr", email: auth.email },
-  );
+  const { data: authData, error: authError } = await supabase.auth.admin.getUserById(auth.userId);
+  if (authError) return internalError("profil.GET.auth", authError);
+  const metadata = authData.user?.user_metadata;
+
+  return NextResponse.json({
+    ...(data ?? { prenom: null, nom: null, sexe: null, langue: "fr", email: auth.email }),
+    date_naissance: metadata?.date_naissance ?? null,
+    naissance_concerne: metadata?.naissance_concerne ?? null,
+  });
 }
 
 export async function PATCH(request: Request) {

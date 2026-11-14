@@ -1,7 +1,9 @@
+@reference "../../app/responsive.css";
+
 .sequence { position: relative; isolation: isolate; background: #0d0d1a; }
 .backdrop { position: sticky; top: 0; height: 100svh; overflow: hidden; pointer-events: none; }
 .scene { position: absolute; inset: 0; transition: opacity 700ms ease; }
-.image { object-fit: cover; filter: saturate(.65) contrast(1.05); }
+.image { object-fit: cover; object-position: var(--seuil-image-position, center); filter: saturate(.65) contrast(1.05); }
 .shade {
   position: absolute;
   inset: 0;
@@ -18,8 +20,16 @@
 .copy { max-width: 36rem; color: #fffdf3; text-shadow: 0 2px 12px rgba(0,0,0,.55); }
 .copy h3 { font-family: var(--font-cormorant-garamond), Georgia, serif; font-size: clamp(2.25rem, 4vw, 4.5rem); line-height: 1.12; }
 .copy p { max-width: 48ch; margin-top: 1.5rem; font-size: clamp(1.125rem, 1.35vw, 1.5rem); line-height: 1.65; }
-@media (max-width: 767px) {
+@media (width < theme(--breakpoint-md)) {
   .step { align-items: flex-end; padding-bottom: max(5rem, env(safe-area-inset-bottom)); }
   .shade { background: linear-gradient(0deg, rgba(9,9,19,.94), rgba(9,9,19,.78) 35%, rgba(9,9,19,.22) 75%); }
+}
+/* Match the portrait source selected by <picture>, including after rotation. */
+@media (orientation: portrait) {
+  .image { object-position: center; }
+  .step { align-items: flex-end; padding-bottom: max(3rem, 8svh, env(safe-area-inset-bottom)); }
+  .shade {
+    background: linear-gradient(to bottom, rgba(9,9,19,.08) 0%, rgba(9,9,19,.08) 35%, rgba(9,9,19,.9) 65%, #0d0d1a 80%);
+  }
 }
 @media (prefers-reduced-motion: reduce) { .scene { transition: none; } }

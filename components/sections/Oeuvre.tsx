@@ -314,7 +314,7 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                       {archetypeName && <h1 className="font-display text-2xl font-bold uppercase sm:text-4xl">{archetypeName}</h1>}
                     </header>
                     <p className="mb-6 text-center text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "#8B6F2E" }}>
-                      {dict.parcheminTitle}
+                      {dict.historyTitle}
                     </p>
 
                     {sections.map((section, i) => (

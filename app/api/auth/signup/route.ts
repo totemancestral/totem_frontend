@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { isValidBirthDate } from "@/lib/birth-date";
 import { getServerEnv } from "@/lib/env";
 import { createPublicAuthClient, createServiceClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
@@ -20,6 +21,8 @@ const signupSchema = z.object({
   prenom: z.string().trim().max(80).optional(),
   nom: z.string().trim().max(80).optional(),
   sexe: z.enum(["homme", "femme"]).optional(),
+  date_naissance: z.string().refine(isValidBirthDate),
+  naissance_concerne: z.enum(["titulaire", "enfant"]),
   locale: z.enum(["fr", "en"]).optional(),
   redirectPath: z.string().max(300).optional(),
 });
@@ -30,7 +33,8 @@ export async function POST(request: Request) {
 
   const parsed = signupSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
-    return NextResponse.json({ error: "Formulaire invalide" }, { status: 422 });
+    const invalidBirthDate = parsed.error.issues.some((issue) => issue.path[0] === "date_naissance");
+    return NextResponse.json({ code: invalidBirthDate ? "invalid_birth_date" : "invalid_form", error: "Formulaire invalide" }, { status: 422 });
   }
   const payload = parsed.data;
   const email = payload.email;
@@ -42,6 +46,8 @@ export async function POST(request: Request) {
     nom: payload.nom ?? "",
     sexe: payload.sexe ?? "",
     langue: locale,
+    date_naissance: payload.date_naissance,
+    naissance_concerne: payload.naissance_concerne,
   };
 
   const nextPath = safeRedirectPath(payload.redirectPath, locale);

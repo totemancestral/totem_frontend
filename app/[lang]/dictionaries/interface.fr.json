@@ -47,7 +47,7 @@
     "unmet": "Critère non rempli"
   },
   "artwork": {
-    "portrait": "Portrait de {name}",
+    "portrait": "Totem de {name}",
     "orderInfo": "Œuvre n° {number} · Livrée le {date}"
   },
   "navigation": {

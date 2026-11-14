@@ -9,6 +9,7 @@ import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 import { useNavigationOverlay } from "@/lib/hooks/useNavigationOverlay";
+import { CanComposeTotemContext } from "@/lib/hooks/useCanComposeTotem";
 import { interfaceCopy } from "@/lib/interface-copy";
 
 type Props = {
@@ -23,6 +24,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [canCompose, setCanCompose] = useState<boolean | null>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -31,13 +33,24 @@ export default function EspaceNav({ lang, dict, children }: Props) {
   // Tout l'espace personnel exige une session valide.
   useEffect(() => {
     let alive = true;
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (!alive) return;
       if (!data.session) {
         router.replace(`/${lang}/connexion?redirect=${encodeURIComponent(pathname)}`);
         return;
       }
       setCheckingAuth(false);
+      try {
+        const response = await fetch("/api/totem/eligibility", {
+          headers: { Authorization: `Bearer ${data.session.access_token}` },
+          cache: "no-store",
+          signal: AbortSignal.timeout(10000),
+        });
+        const result = await response.json();
+        if (alive) setCanCompose(response.ok && typeof result?.allowed === "boolean" ? result.allowed : null);
+      } catch {
+        if (alive) setCanCompose(null);
+      }
     });
     return () => {
       alive = false;
@@ -124,128 +137,134 @@ export default function EspaceNav({ lang, dict, children }: Props) {
   ];
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-nuit">
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:border focus:border-or focus:bg-nuit focus:px-4 focus:py-2 focus:text-ivoire"
-      >
-        {ui.navigation.skip}
-      </a>
-      {/* barre du haut : fixe. Bordure pleine largeur, contenu recentré dans
-          une colonne — comme le reste du site, mais avec une marge un peu
-          plus généreuse (dashboard = besoin de plus de respiration). */}
-      <div ref={headerRef} className="relative z-50 shrink-0 border-b border-ombre bg-nuit">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-7 lg:pl-0 lg:pr-16">
-          <Brand lang={lang} size={20} />
+    <CanComposeTotemContext.Provider value={canCompose}>
+      <div className="flex h-dvh min-w-0 flex-col overflow-hidden bg-nuit">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:border focus:border-or focus:bg-nuit focus:px-4 focus:py-2 focus:text-ivoire"
+        >
+          {ui.navigation.skip}
+        </a>
+        {/* barre du haut : fixe. Bordure pleine largeur, contenu recentré dans
+            une colonne — comme le reste du site, mais avec une marge un peu
+            plus généreuse (dashboard = besoin de plus de respiration). */}
+        <div ref={headerRef} className="relative z-50 shrink-0 border-b border-ombre bg-nuit">
+          <div className="account-container flex items-center justify-between py-7">
+            <Brand lang={lang} size={20} />
 
-          {/* liens de droite : réservés au bureau */}
-          <div className="hidden items-center gap-7 lg:flex">
-            <div className="flex items-center gap-1.5 text-xs text-grisclair">
-              <Link href="/fr" className={lang === "fr" ? "font-medium text-ivoire" : ""}>FR</Link>
-              <span>·</span>
-              <Link href="/en" className={lang === "en" ? "font-medium text-ivoire" : ""}>EN</Link>
-            </div>
-            <button type="button" onClick={logout} className="text-xs uppercase tracking-[0.14em] text-grisclair">
-              {dict.logout}
-            </button>
-          </div>
-
-          {/* hamburger / croix : visible uniquement sur mobile */}
-          <button
-            ref={menuButtonRef}
-            type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="relative flex h-11 w-11 shrink-0 flex-col items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-or lg:hidden"
-            aria-expanded={menuOpen}
-            aria-controls="espace-mobile-menu"
-            aria-label={menuOpen ? ui.navigation.closeMenu : ui.navigation.openMenu}
-          >
-            {menuOpen ? (
-              <>
-                <span className="absolute h-px w-6 rotate-45 bg-ivoire" />
-                <span className="absolute h-px w-6 -rotate-45 bg-ivoire" />
-              </>
-            ) : (
-              <div className="flex flex-col gap-1.5">
-                <span className="h-px w-6 bg-ivoire" />
-                <span className="h-px w-6 bg-ivoire" />
-                <span className="h-px w-6 bg-ivoire" />
-              </div>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* contenu de l'onglet actif : seule zone qui défile */}
-      <main id="main-content" tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto pb-20 focus-visible:outline-2 focus-visible:outline-or">
-        {children}
-      </main>
-
-      {/* nav basse : à onglets, réservée au bureau, fixe */}
-      <div className="hidden shrink-0 border-t border-ombre bg-indigo lg:flex">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-12 py-4 lg:pl-0 lg:pr-16">
-          <div className="flex flex-wrap items-center gap-1">
-            {tabs.map((tab) => (
-              <Link
-                key={tab.label}
-                href={tab.href}
-                className={`flex items-center gap-2.5 border-b-2 px-3.5 py-2.5 text-sm font-medium ${
-                  tab.active ? "border-or text-ivoire" : "border-transparent text-grisclair"
-                }`}
-              >
-                <span className={tab.active ? "text-or" : "text-grisclair"}>{tab.icon}</span>
-                {tab.label}
-              </Link>
-            ))}
-          </div>
-          <Button variant="outline" href={`/${lang}/offres`}>
-            {dict.composeButton}
-          </Button>
-        </div>
-      </div>
-
-      {/* panneau mobile plein écran : remplace la nav basse sur petit écran */}
-      {menuOpen && (
-        <div ref={menuRef} id="espace-mobile-menu" role="navigation" aria-label={ui.navigation.personal} className="fixed inset-0 top-[100px] z-40 flex flex-col justify-between gap-6 overflow-y-auto bg-nuit p-8 lg:hidden">
-          <div className="flex flex-col gap-1">
-            {tabs.map((tab) => (
-              <Link
-                key={tab.label}
-                href={tab.href}
-                onClick={closeMenu}
-                className={`flex items-center gap-4 border-b border-ombre py-4 text-base font-medium ${
-                  tab.active ? "text-or" : "text-ivoire"
-                }`}
-              >
-                <span className={tab.active ? "text-or" : "text-grisclair"}>{tab.icon}</span>
-                {tab.label}
-              </Link>
-            ))}
-          </div>
-
-          <div className="flex flex-col gap-6">
-            <Button variant="outline" href={`/${lang}/offres`} onClick={closeMenu} className="w-full">
-              {dict.composeButton}
-            </Button>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-sm text-grisclair">
-                <Link href="/fr" onClick={closeMenu} className={lang === "fr" ? "font-medium text-ivoire" : ""}>FR</Link>
+            {/* liens de droite : réservés au bureau */}
+            <div className="hidden items-center gap-7 xl:flex">
+              <div className="flex items-center gap-1.5 text-xs text-grisclair">
+                <Link href="/fr" className={lang === "fr" ? "font-medium text-ivoire" : ""}>FR</Link>
                 <span>·</span>
-                <Link href="/en" onClick={closeMenu} className={lang === "en" ? "font-medium text-ivoire" : ""}>EN</Link>
+                <Link href="/en" className={lang === "en" ? "font-medium text-ivoire" : ""}>EN</Link>
               </div>
-              <button type="button"
-                onClick={() => {
-                  closeMenu();
-                  logout();
-                }}
-                className="text-xs uppercase tracking-[0.14em] text-grisclair"
-              >
+              <button type="button" onClick={logout} className="text-xs uppercase tracking-[0.14em] text-grisclair">
                 {dict.logout}
               </button>
             </div>
+
+            {/* hamburger / croix : visible uniquement sur mobile */}
+            <button
+              ref={menuButtonRef}
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="relative flex h-11 w-11 shrink-0 flex-col items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-or xl:hidden"
+              aria-expanded={menuOpen}
+              aria-controls="espace-mobile-menu"
+              aria-label={menuOpen ? ui.navigation.closeMenu : ui.navigation.openMenu}
+            >
+              {menuOpen ? (
+                <>
+                  <span className="absolute h-px w-6 rotate-45 bg-ivoire" />
+                  <span className="absolute h-px w-6 -rotate-45 bg-ivoire" />
+                </>
+              ) : (
+                <div className="flex flex-col gap-1.5">
+                  <span className="h-px w-6 bg-ivoire" />
+                  <span className="h-px w-6 bg-ivoire" />
+                  <span className="h-px w-6 bg-ivoire" />
+                </div>
+              )}
+            </button>
           </div>
         </div>
-      )}
-    </div>
+
+        {/* contenu de l'onglet actif : seule zone qui défile */}
+        <main id="main-content" tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto pb-20 focus-visible:outline-2 focus-visible:outline-or">
+          {children}
+        </main>
+
+        {/* nav basse : à onglets, réservée au bureau, fixe */}
+        <div className="hidden shrink-0 border-t border-ombre bg-indigo xl:flex">
+          <div className="account-container flex items-center justify-between gap-4 py-4">
+            <div className="flex flex-wrap items-center gap-1">
+              {tabs.map((tab) => (
+                <Link
+                  key={tab.label}
+                  href={tab.href}
+                  className={`flex items-center gap-2.5 border-b-2 px-3.5 py-2.5 text-sm font-medium ${
+                    tab.active ? "border-or text-ivoire" : "border-transparent text-grisclair"
+                  }`}
+                >
+                  <span className={tab.active ? "text-or" : "text-grisclair"}>{tab.icon}</span>
+                  {tab.label}
+                </Link>
+              ))}
+            </div>
+            {canCompose !== null && (
+              <Button variant="outline" href={`/${lang}/${canCompose ? "offres" : "espace"}`}>
+                {canCompose ? dict.composeButton : dict.viewTotemButton}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* panneau mobile plein écran : remplace la nav basse sur petit écran */}
+        {menuOpen && (
+          <div ref={menuRef} id="espace-mobile-menu" role="navigation" aria-label={ui.navigation.personal} className="fixed inset-0 top-[100px] z-40 flex flex-col justify-between gap-6 overflow-y-auto bg-nuit p-8 xl:hidden">
+            <div className="flex flex-col gap-1">
+              {tabs.map((tab) => (
+                <Link
+                  key={tab.label}
+                  href={tab.href}
+                  onClick={closeMenu}
+                  className={`flex items-center gap-4 border-b border-ombre py-4 text-base font-medium ${
+                    tab.active ? "text-or" : "text-ivoire"
+                  }`}
+                >
+                  <span className={tab.active ? "text-or" : "text-grisclair"}>{tab.icon}</span>
+                  {tab.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-6">
+              {canCompose !== null && (
+                <Button variant="outline" href={`/${lang}/${canCompose ? "offres" : "espace"}`} onClick={closeMenu} className="w-full">
+                  {canCompose ? dict.composeButton : dict.viewTotemButton}
+                </Button>
+              )}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-sm text-grisclair">
+                  <Link href="/fr" onClick={closeMenu} className={lang === "fr" ? "font-medium text-ivoire" : ""}>FR</Link>
+                  <span>·</span>
+                  <Link href="/en" onClick={closeMenu} className={lang === "en" ? "font-medium text-ivoire" : ""}>EN</Link>
+                </div>
+                <button type="button"
+                  onClick={() => {
+                    closeMenu();
+                    logout();
+                  }}
+                  className="text-xs uppercase tracking-[0.14em] text-grisclair"
+                >
+                  {dict.logout}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </CanComposeTotemContext.Provider>
   );
 }

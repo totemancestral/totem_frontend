@@ -1,0 +1,176 @@
+@reference "../../app/responsive.css";
+
+.dashboard {
+  width: 100%;
+  max-width: var(--account-width);
+  min-width: 0;
+  margin-inline: auto;
+  padding: var(--account-space) var(--account-gutter);
+  color: var(--color-ivoire);
+  overflow-wrap: anywhere;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.subtitle {
+  margin-top: 1rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.5vw, 2.15rem);
+  font-style: italic;
+  line-height: 1.15;
+}
+
+.intro {
+  max-width: 42rem;
+  margin-top: 0.75rem;
+  color: var(--color-grisclair);
+  font-size: clamp(0.875rem, 1.2vw, 1rem);
+  line-height: 1.65;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+  margin-top: clamp(1.5rem, 3vw, 2rem);
+}
+
+.stat {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  background: linear-gradient(135deg, #222237, var(--color-indigo));
+  transition: border-color 180ms ease;
+}
+
+.stat:hover { border-color: var(--color-or); }
+.statLabel {
+  max-width: 20ch;
+  font-size: clamp(0.75rem, 1.1vw, 0.875rem);
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 5vw, 4rem);
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1;
+}
+
+.journey {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  margin-top: 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  overflow: hidden;
+  border: 1.5px solid var(--color-or);
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #202034, #161626);
+}
+
+.journeyTitle {
+  max-width: 25ch;
+  padding-right: 2.25rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3vw, 2.65rem);
+  font-weight: 400;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.journeyCopy {
+  max-width: 55ch;
+  margin-top: 0.875rem;
+  font-size: clamp(0.875rem, 1.2vw, 1rem);
+  line-height: 1.6;
+}
+
+.ornament {
+  position: absolute;
+  z-index: -1;
+  top: 0.875rem;
+  right: 1.125rem;
+  width: 2.25rem;
+  height: 7.5rem;
+  color: var(--color-or);
+  opacity: 0.5;
+}
+
+.journeyButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3.5rem;
+  margin-top: 1.5rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--color-or);
+  border-radius: 0.5rem;
+  background: linear-gradient(115deg, #d0a24c, #e4bc66 60%, #c99b40);
+  color: #0d0d1a;
+  font-size: clamp(0.875rem, 1.2vw, 1.05rem);
+  font-weight: 600;
+  line-height: 1.5;
+  transition: filter 180ms ease;
+}
+
+.journeyButton:hover { filter: brightness(1.1); }
+.journeyButton span:last-child { flex-shrink: 0; font-size: 1.75rem; line-height: 1; }
+.dashboard a:focus-visible, .dashboard button:focus-visible {
+  outline: 2px solid var(--color-orpale);
+  outline-offset: 4px;
+}
+
+.consultation {
+  margin-top: 1.5rem;
+  gap: 1.25rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border-radius: 0.75rem;
+}
+.consultation > a, .consultation > button {
+  max-width: 100%;
+  padding: 0.7rem 1.5rem;
+  border-radius: 0.5rem;
+  color: var(--color-or);
+  text-align: center;
+}
+
+.works { margin-top: 2rem; }
+.worksTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3vw, 2.5rem);
+  font-weight: 400;
+  line-height: 1.15;
+}
+.work {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-or);
+  border-radius: 0.75rem;
+  background: var(--color-indigo);
+}
+.workImage { aspect-ratio: 4 / 3; overflow: hidden; background: var(--color-nuit); }
+.workImage img { width: 100%; height: 100%; object-fit: cover; }
+
+@media (width >= theme(--breakpoint-md)) {
+  .journeyButton { max-width: 28rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stat, .journeyButton { transition: none; }
+}

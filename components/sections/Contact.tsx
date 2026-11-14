@@ -46,7 +46,7 @@ export default function Contact({ dict, lang }: { dict: Dictionary["contact"]; l
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-nuit">
+    <div className="flex h-dvh min-w-0 overflow-hidden bg-nuit">
       {/* panneau photo : réservé au bureau */}
       <div className="relative hidden h-screen w-[42%] shrink-0 overflow-hidden bg-nuit lg:block [perspective:1200px]">
         <div className="absolute inset-0 animate-totem-3d [transform-style:preserve-3d]">
@@ -54,6 +54,7 @@ export default function Contact({ dict, lang }: { dict: Dictionary["contact"]; l
             src="/images/logo_totem_1.svg"
             alt=""
             fill
+            sizes="(min-width: 992px) 42vw, 1px"
             priority
             className="object-cover object-[50%_25%]"
           />
@@ -65,7 +66,7 @@ export default function Contact({ dict, lang }: { dict: Dictionary["contact"]; l
       </div>
 
       {/* panneau formulaire : thème sombre, pas de teinte ivoire */}
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-20 lg:px-20">
+      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto px-6 py-20 lg:px-20">
         <form onSubmit={onSubmit} className="mx-auto flex w-full max-w-lg flex-col gap-6.5">
 
           <div className="flex flex-col gap-3">
@@ -78,7 +79,7 @@ export default function Contact({ dict, lang }: { dict: Dictionary["contact"]; l
 
           {/* formulaire */}
           <div className="flex flex-col gap-5">
-            <div className="flex gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="flex flex-1 flex-col gap-2">
                 <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.firstNameLabel}</span>
                 <input

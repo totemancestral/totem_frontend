@@ -37,7 +37,7 @@ export default function AvantDetreVous({ dict }: { dict: Dictionary["avantDetreV
               delay={i * 120}
               className={`relative mx-auto h-[400px] w-full overflow-hidden border border-ombre md:aspect-[2/3] md:h-auto lg:mx-0 lg:flex-1 xl:aspect-auto xl:h-[600px] ${marginTops[i]}`}
             >
-              <Image src={images[i]} alt="" fill sizes="(min-width: 1568px) 448px, (min-width: 1024px) 30vw, 92vw" className={duotone} />
+              <Image src={images[i]} alt="" fill sizes="(min-width: 992px) min(30vw, 30rem), 92vw" className={duotone} />
               <div className="absolute inset-0 bg-or mix-blend-color" />
               <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-nuit via-nuit/70 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-6">
