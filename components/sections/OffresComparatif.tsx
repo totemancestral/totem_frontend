@@ -23,7 +23,7 @@ export default function OffresComparatif({ dict }: { dict: Dictionary["offresCom
         <table className="w-full min-w-[640px] border-collapse text-sm">
           <thead>
             <tr>
-              <th className="w-1/4" />
+              <th className="w-1/3" />
               {dict.columns.map((col) => (
                 <th
                   key={col.name}

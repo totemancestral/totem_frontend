@@ -23,7 +23,7 @@
     "ogDescription": "Qui étiez-vous, avant d'être qui vous êtes ? Une œuvre unique, tissée dans la langue des origines, nourrie des cosmogonies africaines, qui révèle l'ancêtre qui sommeille en vous.",
     "offres": {
       "title": "Nos offres",
-      "description": "Origine, Ancestral ou Famille : découvrez les trois formats de l'œuvre Totem Ancestral et choisissez celui qui correspond à votre quête."
+      "description": "Origine à 29 € ou Révélation à 49 € avec la voix de l’ancêtre : découvrez les deux manières de concevoir votre œuvre Totem Ancestral."
     },
     "laMaison": {
       "title": "La Maison",
@@ -138,75 +138,124 @@
   },
   "offres": {
     "eyebrow": "Offrandes",
-    "title": "Trois manières de recevoir l'œuvre",
+    "title": "Deux manières de concevoir votre œuvre",
     "intro": "Choisissez le format qui convient le mieux à votre quête et à votre héritage.",
     "items": [
       {
         "tag": "Porte d'entrée",
         "title": "Origine",
-        "lead": "Le premier pas vers votre source.",
-        "price": "49 €",
-        "priceCaption": "Prix indicatif",
+        "lead": "La création dans sa plénitude : l’histoire ancestrale et le totem.",
+        "price": "29 €",
+        "priceCaption": "",
         "features": [
-          "Création personnalisée",
-          "Un coffret que vous seul pouvez ouvrir",
-          "Un lieu à vous, où votre œuvre demeure"
+          {
+            "title": "Carte ancestrale",
+            "description": "Le document qui réunit votre histoire ancestrale et votre totem."
+          },
+          {
+            "title": "Histoire ancestrale",
+            "description": "Votre récit personnalisé, créé à partir de vos réponses."
+          },
+          {
+            "title": "Totem",
+            "description": "Votre image symbolique personnelle."
+          },
+          {
+            "title": "Certificat d’authenticité numéroté",
+            "description": "Le certificat qui accompagne votre œuvre."
+          }
         ],
-        "button": "Commencer le voyage",
-        "variant": "outline",
+        "button": "Révéler mon totem",
+        "variant": "gold",
         "featured": false
       },
       {
         "tag": "Le plus choisi",
         "title": "Révélation",
         "lead": "La création dans sa plénitude : l’histoire ancestrale, le totem et la voix de l’ancêtre.",
-        "price": "99 €",
-        "priceCaption": "Prix indicatif",
+        "price": "49 €",
+        "priceCaption": "",
         "features": [
-          "Création complète",
-          "La voix de l’ancêtre",
-          "Tirage Fine Art en option"
+          {
+            "title": "Carte ancestrale",
+            "description": "Le document qui réunit votre histoire ancestrale et votre totem."
+          },
+          {
+            "title": "Histoire ancestrale",
+            "description": "Votre récit personnalisé, créé à partir de vos réponses."
+          },
+          {
+            "title": "Totem",
+            "description": "Votre image symbolique personnelle."
+          },
+          {
+            "title": "Certificat d’authenticité numéroté",
+            "description": "Le certificat qui accompagne votre œuvre."
+          },
+          {
+            "title": "La voix de l’ancêtre",
+            "description": "La narration audio de votre histoire ancestrale."
+          }
         ],
-        "button": "Révéler mon Totem",
+        "button": "Révéler mon totem",
         "variant": "gold",
         "featured": true
-      },
-      {
-        "tag": "Offre cadeau",
-        "title": "Famille",
-        "lead": "Pour des racines qui se partagent.",
-        "price": "219 €",
-        "priceCaption": "Prix indicatif",
-        "features": [
-          "Trois coffrets, une histoire ancestrale commune",
-          "Trois âmes, une même origine",
-          "Livrés ensemble, portés à vie"
-        ],
-        "button": "Réunir ma famille",
-        "variant": "outline",
-        "featured": false
       }
     ],
     "footerText": "Chaque Totem Ancestral est une création unique, façonnée spécialement pour vous à partir de votre récit.",
-    "giftLine": "✦ CARTE CADEAU GRATUITE À CHAQUE COMMANDE · PAIEMENTS INTERNATIONAUX · RGPD ✦"
+    "giftLine": ""
   },
   "offresComparatif": {
     "eyebrow": "Comparatif",
     "title": "Les coffrets côte à côte",
     "columns": [
-      { "name": "Origine", "price": "49 €", "featured": false },
-      { "name": "Révélation", "price": "99 €", "featured": true },
-      { "name": "Famille", "price": "219 €", "featured": false }
+      {
+        "name": "Origine",
+        "price": "29 €",
+        "featured": false
+      },
+      {
+        "name": "Révélation",
+        "price": "49 €",
+        "featured": true
+      }
     ],
     "rows": [
-      { "label": "Carte ancestrale", "values": [true, true, true] },
-      { "label": "Totem", "values": [true, true, true] },
-      { "label": "La voix de l’ancêtre", "values": [false, true, true] },
-      { "label": "Certificat d'authenticité numéroté", "values": [true, true, true] },
-      { "label": "Nombre de coffrets", "values": ["1", "1", "3"] },
-      { "label": "Carte cadeau gratuite", "values": [true, true, true] },
-      { "label": "Délai de livraison", "values": ["15 min", "15 min", "30 min"] },
-      { "label": "Support prioritaire", "values": [false, false, true] }
+      {
+        "label": "Carte ancestrale",
+        "values": [
+          true,
+          true
+        ]
+      },
+      {
+        "label": "Histoire ancestrale",
+        "values": [
+          true,
+          true
+        ]
+      },
+      {
+        "label": "Totem",
+        "values": [
+          true,
+          true
+        ]
+      },
+      {
+        "label": "La voix de l’ancêtre",
+        "values": [
+          false,
+          true
+        ]
+      },
+      {
+        "label": "Certificat d’authenticité numéroté",
+        "values": [
+          true,
+          true
+        ]
+      }
     ]
   },
   "totemVivant": {
@@ -216,7 +265,7 @@
     "text": "Un message audio inédit de votre ancêtre, livré chaque saison. Quatre fois par an, votre œuvre s'enrichit d'une nouvelle parole.",
     "price": "+9 €",
     "priceUnit": "/ an",
-    "caption": "À ajouter à toute commande Ancestral ou Famille."
+    "caption": "À ajouter à toute commande Révélation."
   },
   "offreJunior": {
     "eyebrow": "Le parcours Junior",
@@ -259,9 +308,11 @@
     "pathAdulteDesc": "Parcours complet · Carte ancestrale, totem et voix de l’ancêtre",
     "pathJunior": "Junior",
     "pathJuniorDesc": "Totem express · cinq questions, défie tes amis",
-    "birthDateLabel": "Date de naissance",
-    "childBirthDateLabel": "Date de naissance de l'enfant",
-    "birthDateError": "Saisis une date de naissance valide, qui ne soit pas dans le futur.",
+    "birthDateLabel": "Jour et mois de naissance",
+    "childBirthDateLabel": "Jour et mois de naissance de l’enfant",
+    "birthDayLabel": "Jour",
+    "birthMonthLabel": "Mois",
+    "birthDateError": "Sélectionne un jour et un mois de naissance valides.",
     "firstNameLabel": "Prénom",
     "firstNamePlaceholder": "Votre prénom",
     "lastNameLabel": "Nom",
@@ -341,8 +392,8 @@
     "adulte": {
       "offerName": "Offre Révélation",
       "offerDesc": "La création dans sa plénitude : l’histoire ancestrale, le totem et la voix de l’ancêtre.",
-      "price": "89 €",
-      "priceCaption": "indicatif",
+      "price": "49 €",
+      "priceCaption": "",
       "consent1Before": "J'ai lu et j'accepte les ",
       "consent1Middle": " et la ",
       "consent1After": ".",
@@ -444,10 +495,10 @@
     "articles": [
       { "title": "Article 1 — Objet et champ d'application", "body": ["Les présentes conditions générales de vente (CGV) encadrent toute commande d'œuvres numériques personnalisées Totem Ancestral, éditées par SENYCE PARTNERS (SARL), passée sur le site totem-ancestral.com. Toute commande implique l'acceptation pleine et entière des présentes CGV, opposables au client dans leur version en vigueur au jour de la commande."] },
       { "title": "Article 2 — Identité du vendeur", "body": ["Le site est édité par SENYCE PARTNERS, SARL au capital de 19 000 €, dont le siège social est situé au 4 avenue Laurent Cely, 92600 Asnières-sur-Seine. Contact : ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
-      { "title": "Article 3 — Produits et nature artistique", "body": ["Selon l’offre choisie, vous recevez une carte ancestrale PDF réunissant votre totem et votre histoire ancestrale, votre totem en PNG haute résolution et, pour Ancestral et Famille, la voix de l’ancêtre imaginaire au format MP3 de 90 secondes, ainsi qu’un certificat d’authenticité numéroté. Ces créations ne constituent ni un test ADN, ni une recherche généalogique, ni une prestation divinatoire, médicale ou juridique."] },
+      { "title": "Article 3 — Produits et nature artistique", "body": ["Selon l’offre choisie, vous recevez une carte ancestrale PDF réunissant votre totem et votre histoire ancestrale, votre totem en PNG haute résolution et, pour Révélation, la voix de l’ancêtre imaginaire au format MP3 de 90 secondes, ainsi qu’un certificat d’authenticité numéroté. Ces créations ne constituent ni un test ADN, ni une recherche généalogique, ni une prestation divinatoire, médicale ou juridique."] },
       { "title": "Article 4 — Prix et paiement", "body": ["Les prix sont indiqués en euros toutes taxes comprises et affichés avant validation de la commande. L'offre Junior est proposée à 9,99 €. Le paiement s'effectue de manière sécurisée via Stripe. SENYCE PARTNERS ne conserve aucune donnée bancaire complète. La commande est ferme après encaissement complet et confirmation des informations nécessaires à la composition."] },
       { "title": "Article 5 — Commande et composition", "body": ["La commande s'accompagne d'un questionnaire créatif permettant la personnalisation de l'œuvre. Elle est validée après réception du paiement intégral ; un email de confirmation est envoyé immédiatement. La maison se réserve le droit de refuser une commande en cas de fraude suspectée, de contenu manifestement illicite, ou d'impossibilité technique."] },
-      { "title": "Article 6 — Livraison", "body": ["L'œuvre est livrée par email sous quinze minutes (trente minutes pour l'offre Famille) après validation du questionnaire. Si une difficulté technique empêche la livraison, l'œuvre est recomposée ou remboursée intégralement."] },
+      { "title": "Article 6 — Livraison", "body": ["L'œuvre est livrée par email sous quinze minutes après validation du questionnaire. Si une difficulté technique empêche la livraison, l'œuvre est recomposée ou remboursée intégralement."] },
       { "title": "Article 7 — Droit de rétractation", "body": ["Les œuvres étant confectionnées selon les indications du client et nettement personnalisées, et s'agissant de contenus numériques fournis immédiatement, le client renonce expressément à son droit de rétractation dès le lancement de la composition, conformément à l'article L.221-28 du Code de la consommation. Avant ce lancement, le client dispose du délai légal de quatorze jours."] },
       { "title": "Article 8 — Garanties légales", "body": ["Le consommateur bénéficie de la garantie légale de conformité (articles L.217-3 et suivants du Code de la consommation) et de la garantie contre les vices cachés (articles 1641 et suivants du Code civil). En cas de fichier manquant, illisible ou de défaut de livraison imputable au service, SENYCE PARTNERS procède à une nouvelle mise à disposition ou à un remboursement. Les appréciations subjectives liées au style, au ton ou à l'interprétation artistique ne constituent pas, à elles seules, un défaut de conformité."] },
       { "title": "Article 9 — Propriété intellectuelle", "body": ["L'ensemble des contenus du site demeure la propriété de SENYCE PARTNERS. Un droit d'usage personnel est octroyé au client pour l'œuvre qui lui est livrée."] },
@@ -740,7 +791,6 @@
       { "quote": "J’ai pleuré en lisant la carte ancestrale. Ça ne ressemblait à rien d’autre. Une émotion brute.", "name": "Aïcha", "city": "Dakar", "img": "/images/temoignage_0.png" },
       { "quote": "La Voix m'a donné des frissons. On dirait que mon ancêtre me connaissait vraiment.", "name": "Leyna", "city": "Paris", "img": "/images/temoignage_3.png" },
       { "quote": "Je m'attendais à un gadget. J'ai reçu un héritage.", "name": "Sabi", "city": "Bamako", "img": "/images/temoignage_2.png" },
-      { "quote": "Le coffret Famille nous a réunis autour d'une histoire commune, enfin écrite.", "name": "Carolle", "city": "Accra", "img": "/images/temoignage_1.png" },
       { "quote": "Le Visage trône maintenant dans mon salon. C'est mon Totem, mon héritage.", "name": "Eric", "city": "London", "img": "/images/temoignage_4.png" },
       { "quote": "Quinze minutes comme promis, et un objet que je garderai toute ma vie.", "name": "Naomi", "city": "Belgique","img": "/images/temoignage_5.png" }
     ]
@@ -775,9 +825,8 @@
       {
         "title": "L'expérience pratique",
         "items": [
-          { "question": "Combien de temps prend la composition ?", "answer": "Le questionnaire dure environ quinze minutes. L'œuvre est livrée par email sous quinze minutes après validation (trente minutes pour le Totem Famille)." },
-          { "question": "Sous quel format reçoit-on l'œuvre ?", "answer": "Vous recevez une carte ancestrale PDF réunissant votre totem et votre histoire ancestrale, votre totem en PNG haute résolution et, pour Ancestral et Famille, la voix de l’ancêtre au format MP3 de 90 secondes." },
-          { "question": "Puis-je offrir une œuvre ?", "answer": "Absolument. Chaque commande inclut une carte cadeau gratuite, et vous pouvez désigner un destinataire au moment du paiement." }
+          { "question": "Combien de temps prend la composition ?", "answer": "Le questionnaire dure environ quinze minutes. L'œuvre est livrée par email sous quinze minutes après validation." },
+          { "question": "Sous quel format reçoit-on l'œuvre ?", "answer": "Vous recevez une carte ancestrale PDF réunissant votre totem et votre histoire ancestrale, votre totem en PNG haute résolution et, pour Révélation, la voix de l’ancêtre au format MP3 de 90 secondes." }
         ]
       },
       {

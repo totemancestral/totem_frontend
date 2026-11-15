@@ -14,6 +14,7 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 import type { AdultAnswerState } from "@/lib/adult-answers";
 import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
+import { isAdultOffer } from "@/lib/offers";
 import { adultDraftSchema, adultResumeStep, hasAdultAnswersThrough, PAYMENT_AFTER_QUESTION, ADULT_QUESTION_COUNT } from "@/lib/adult-flow";
 
 type Props = {
@@ -37,7 +38,8 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   // Sans offre choisie, le choix intervient après la quatrième question.
-  const offre = searchParams.get("offre");
+  const requestedOffer = searchParams.get("offre");
+  const offre = isAdultOffer(requestedOffer) ? requestedOffer : null;
   const requestedSession = searchParams.get("session_id");
   const requestedParcours = searchParams.get("parcours");
   const questions = variant === "junior" ? dict.questionsJunior : dict.questionsAdulte;

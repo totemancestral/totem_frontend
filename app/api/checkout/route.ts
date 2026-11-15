@@ -12,7 +12,7 @@ import { adultDraftSchema, hasAdultAnswersThrough, PAYMENT_AFTER_QUESTION } from
 import { readAdultDraft, readAdultPayment } from "@/lib/server/adult-parcours";
 
 const checkoutSchema = z.object({
-  offre: z.enum(["origine", "ancestral", "famille", "junior"]),
+  offre: z.enum(["origine", "ancestral", "junior"]),
   answers: z.unknown(),
   locale: z.enum(["fr", "en"]),
   parcoursId: z.uuid().optional(),
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
 async function handleCheckout(
   request: Request,
-  data: { offre: "origine" | "ancestral" | "famille"; answers: Record<string, unknown>; locale: "fr" | "en"; parcoursId: string },
+  data: { offre: "origine" | "ancestral"; answers: Record<string, unknown>; locale: "fr" | "en"; parcoursId: string },
   auth: { userId: string; email: string },
 ) {
   const env = getServerEnv();

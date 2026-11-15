@@ -8,6 +8,35 @@ export type Database = {
   };
   public: {
     Tables: {
+      // Local migration, to regenerate with the Supabase CLI alongside the other additions.
+      totem_shares: {
+        Row: {
+          token: string;
+          commande_id: string;
+          user_id: string;
+          display_name: string;
+          slug: string;
+          totem_name: string;
+          excerpt: string;
+          preview_jpeg: string;
+          social_jpeg: string;
+          created_at: string;
+        };
+        Insert: {
+          token?: string;
+          commande_id: string;
+          user_id: string;
+          display_name: string;
+          slug: string;
+          totem_name: string;
+          excerpt: string;
+          preview_jpeg: string;
+          social_jpeg: string;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
       // Ajoutée à la main (CLI Supabase non disponible dans cet environnement) :
       // à faire disparaître au prochain vrai `supabase gen types typescript`.
       admin_audit_log: {

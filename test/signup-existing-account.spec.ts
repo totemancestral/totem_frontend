@@ -11,7 +11,7 @@ vi.mock("../lib/env", () => ({ getServerEnv: () => ({ NEXT_PUBLIC_SITE_URL: "htt
 
 const request = (locale = "fr") => new Request("http://localhost/api/auth/signup", {
   method: "POST", headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email: "  Test@Example.com  ", password: "StrongPassword1", date_naissance: "2000-05-21", naissance_concerne: "titulaire", locale }),
+  body: JSON.stringify({ email: "  Test@Example.com  ", password: "StrongPassword1", date_naissance: "05-21", naissance_concerne: "titulaire", locale }),
 });
 
 beforeEach(() => {
@@ -76,7 +76,7 @@ describe("existing account at signup", () => {
 
 
 describe("birth date at signup", () => {
-  it.each([undefined, "", "2025-02-29", "2020-02-30", "2999-01-01", "21/05/2000"])("rejects invalid or missing date %s", async (date) => {
+  it.each([undefined, "", "02-30", "04-31", "13-01", "00-12", "12-00", "2-3", "2025-02-29", "2999-01-01", "21/05/2000"])("rejects invalid or missing date %s", async (date) => {
     const body = await request().json();
     const response = await POST(new Request("http://localhost/api/auth/signup", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -87,17 +87,26 @@ describe("birth date at signup", () => {
     expect(mocks.signUp).not.toHaveBeenCalled();
   });
 
-  it("persists the child's date and its subject in Auth metadata", async () => {
+  it("persists only the child's day and month, including February 29", async () => {
     const body = await request().json();
     const response = await POST(new Request("http://localhost/api/auth/signup", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, date_naissance: "2020-02-29", naissance_concerne: "enfant" }),
+      body: JSON.stringify({ ...body, date_naissance: "02-29", naissance_concerne: "enfant" }),
     }));
     expect(response.status).toBe(200);
     expect(mocks.signUp).toHaveBeenCalledWith(expect.objectContaining({
       options: expect.objectContaining({ data: expect.objectContaining({
-        date_naissance: "2020-02-29", naissance_concerne: "enfant",
+        date_naissance: "02-29", naissance_concerne: "enfant",
       }) }),
     }));
+  });
+  it("discards the year from an already-open legacy signup form", async () => {
+    const body = await request().json();
+    const response = await POST(new Request("http://localhost/api/auth/signup", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, date_naissance: "2000-05-21" }),
+    }));
+    expect(response.status).toBe(200);
+    expect(mocks.signUp.mock.calls[0]?.[0].options.data.date_naissance).toBe("05-21");
   });
 });

@@ -10,7 +10,7 @@ import { AmbientLoop } from "@/lib/ambient-loop";
 const MUSIC_KEY = "totem_ambient_enabled";
 const INTRO_KEY = "totem_intro_seen";
 const MUSIC_VOLUME = 0.5;
-const MEDIA_EVENTS = ["play", "pause", "ended", "volumechange", "error", "emptied", "abort"];
+const MEDIA_EVENTS = ["play", "playing", "pause", "ended", "volumechange", "error", "emptied", "abort"];
 
 export function MediaExperience({ children, copy, homePath }: {
   children: ReactNode;
@@ -23,6 +23,7 @@ export function MediaExperience({ children, copy, homePath }: {
   const introRef = useRef<HTMLVideoElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const enabledRef = useRef(false);
+  const backgroundPausedRef = useRef(false);
   const [playing, setPlaying] = useState(false);
   const [introMuted, setIntroMuted] = useState(true);
   const [error, setError] = useState(false);
@@ -51,7 +52,7 @@ export function MediaExperience({ children, copy, homePath }: {
 
   const startMusic = useCallback(() => {
     const music = musicRef.current;
-    if (!music || dialogRef.current?.open) return;
+    if (!music || document.hidden || dialogRef.current?.open || backgroundPausedRef.current) return;
     syncMusicVolume();
     void music.play().then(() => setError(false)).catch(() => setPlaying(false));
   }, [syncMusicVolume]);
@@ -59,6 +60,7 @@ export function MediaExperience({ children, copy, homePath }: {
   function toggle() {
     const music = musicRef.current;
     if (!music) return;
+    backgroundPausedRef.current = false;
     enabledRef.current = music.paused;
     try { localStorage.setItem(MUSIC_KEY, String(enabledRef.current)); } catch { /* Storage is optional. */ }
     if (enabledRef.current) startMusic();
@@ -85,9 +87,25 @@ export function MediaExperience({ children, copy, homePath }: {
     const onError = () => { music.pause(); setError(true); };
     tracks.forEach(track => track.addEventListener("error", onError));
     try { enabledRef.current = localStorage.getItem(MUSIC_KEY) !== "false"; } catch { enabledRef.current = true; }
+    const pauseForBackground = () => {
+      backgroundPausedRef.current = true;
+      music.pause();
+      document.querySelectorAll<HTMLMediaElement>("audio, video").forEach(media => media.pause());
+    };
+    const onVisibilityChange = () => {
+      if (document.hidden) pauseForBackground();
+    };
+    const guardBackgroundPlayback = () => {
+      if (document.hidden) pauseForBackground();
+    };
     const updateVolume = (event: Event) => {
       const media = event.target;
-      if (!(media instanceof HTMLMediaElement) || music.owns(media)) return;
+      if (!(media instanceof HTMLMediaElement)) return;
+      if (document.hidden && (event.type === "play" || event.type === "playing")) {
+        pauseForBackground();
+        return;
+      }
+      if (music.owns(media)) return;
       syncMusicVolume();
     };
     const resume = (event: Event) => {
@@ -95,10 +113,23 @@ export function MediaExperience({ children, copy, homePath }: {
       if (enabledRef.current && music.paused) startMusic();
     };
     for (const type of MEDIA_EVENTS) document.addEventListener(type, updateVolume, true);
+    tracks.forEach(track => {
+      track.addEventListener("play", guardBackgroundPlayback);
+      track.addEventListener("playing", guardBackgroundPlayback);
+    });
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", pauseForBackground);
     document.addEventListener("pointerdown", resume);
     document.addEventListener("keydown", resume);
+    onVisibilityChange();
     return () => {
       for (const type of MEDIA_EVENTS) document.removeEventListener(type, updateVolume, true);
+      tracks.forEach(track => {
+        track.removeEventListener("play", guardBackgroundPlayback);
+        track.removeEventListener("playing", guardBackgroundPlayback);
+      });
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pagehide", pauseForBackground);
       document.removeEventListener("pointerdown", resume);
       document.removeEventListener("keydown", resume);
       tracks.forEach(track => track.removeEventListener("error", onError));

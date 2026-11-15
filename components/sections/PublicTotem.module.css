@@ -1,0 +1,42 @@
+.page {
+  min-height: 100svh;
+  padding: clamp(1.5rem, 5vw, 4rem) max(1.25rem, env(safe-area-inset-left));
+  background: #0d0c18;
+  color: #f0e9dc;
+  text-align: center;
+}
+.brand { color: #c6a354; font-size: .75rem; letter-spacing: .3em; }
+.artwork {
+  max-width: 52rem;
+  margin: 2.5rem auto;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.artwork h1 {
+  font-family: var(--font-cormorant-garamond), serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.15;
+  margin-bottom: 2rem;
+}
+.artwork img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 70svh;
+  margin: 0 auto;
+  object-fit: contain;
+  border: 1px solid #c6a35455;
+  pointer-events: none;
+}
+.excerpt {
+  max-width: 38rem;
+  margin: 1.75rem auto 0;
+  font-family: var(--font-cormorant-garamond), serif;
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
+  line-height: 1.6;
+}
+.cta { display: inline-block; padding: .9rem 1.5rem; border: 1px solid #c6a354; color: #c6a354; }
+@media print {
+  .page { display: none !important; }
+}

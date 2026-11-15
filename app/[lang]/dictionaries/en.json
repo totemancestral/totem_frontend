@@ -23,7 +23,7 @@
     "ogDescription": "Who were you, before being who you are? A unique work, woven in the language of origins, nourished by African cosmogonies, that reveals the ancestor asleep within you.",
     "offres": {
       "title": "Our Offerings",
-      "description": "Origin, Ancestral, or Family: discover the three formats of the Totem Ancestral artwork and choose the one that matches your quest."
+      "description": "Origin at €29 or Revelation at €49 with the Ancestor’s Voice: discover two ways to create your Totem Ancestral artwork."
     },
     "laMaison": {
       "title": "The House",
@@ -138,75 +138,124 @@
   },
   "offres": {
     "eyebrow": "Offerings",
-    "title": "Three ways to receive the work",
+    "title": "Two ways to create your artwork",
     "intro": "Choose the format that best suits your quest and your legacy.",
     "items": [
       {
         "tag": "Entry point",
         "title": "Origin",
-        "lead": "The first step towards your source.",
-        "price": "€49",
-        "priceCaption": "Indicative price",
+        "lead": "The complete creation: the Ancestral Story and the Totem.",
+        "price": "€29",
+        "priceCaption": "",
         "features": [
-          "Personalized creation",
-          "A box only you can open",
-          "A place of your own, where your work remains"
+          {
+            "title": "Ancestral Card",
+            "description": "The document bringing together your Ancestral Story and your Totem."
+          },
+          {
+            "title": "Ancestral Story",
+            "description": "Your personalized story, created from your answers."
+          },
+          {
+            "title": "Totem",
+            "description": "Your personal symbolic image."
+          },
+          {
+            "title": "Numbered certificate of authenticity",
+            "description": "The certificate accompanying your artwork."
+          }
         ],
-        "button": "Begin the journey",
-        "variant": "outline",
+        "button": "Reveal my totem",
+        "variant": "gold",
         "featured": false
       },
       {
         "tag": "Most chosen",
         "title": "Revelation",
         "lead": "The complete creation: the Ancestral Story, the Totem and the Ancestor’s Voice.",
-        "price": "€99",
-        "priceCaption": "Indicative price",
+        "price": "€49",
+        "priceCaption": "",
         "features": [
-          "Complete creation",
-          "The Ancestor’s Voice",
-          "Fine Art print as an option"
+          {
+            "title": "Ancestral Card",
+            "description": "The document bringing together your Ancestral Story and your Totem."
+          },
+          {
+            "title": "Ancestral Story",
+            "description": "Your personalized story, created from your answers."
+          },
+          {
+            "title": "Totem",
+            "description": "Your personal symbolic image."
+          },
+          {
+            "title": "Numbered certificate of authenticity",
+            "description": "The certificate accompanying your artwork."
+          },
+          {
+            "title": "The Ancestor’s Voice",
+            "description": "The audio narration of your Ancestral Story."
+          }
         ],
-        "button": "Reveal my Totem",
+        "button": "Reveal my totem",
         "variant": "gold",
         "featured": true
-      },
-      {
-        "tag": "Gift offering",
-        "title": "Family",
-        "lead": "For roots that are shared.",
-        "price": "€219",
-        "priceCaption": "Indicative price",
-        "features": [
-          "Three boxes, one shared Ancestral Story",
-          "Three souls, one same origin",
-          "Delivered together, carried for life"
-        ],
-        "button": "Gather my family",
-        "variant": "outline",
-        "featured": false
       }
     ],
     "footerText": "Every Totem Ancestral is a unique creation, shaped especially for you from your own story.",
-    "giftLine": "✦ FREE GIFT CARD WITH EVERY ORDER · INTERNATIONAL PAYMENTS · GDPR ✦"
+    "giftLine": ""
   },
   "offresComparatif": {
     "eyebrow": "Comparison",
     "title": "The boxes side by side",
     "columns": [
-      { "name": "Origin", "price": "€49", "featured": false },
-      { "name": "Revelation", "price": "€99", "featured": true },
-      { "name": "Family", "price": "€219", "featured": false }
+      {
+        "name": "Origin",
+        "price": "€29",
+        "featured": false
+      },
+      {
+        "name": "Revelation",
+        "price": "€49",
+        "featured": true
+      }
     ],
     "rows": [
-      { "label": "Ancestral Card", "values": [true, true, true] },
-      { "label": "Totem", "values": [true, true, true] },
-      { "label": "The Ancestor’s Voice", "values": [false, true, true] },
-      { "label": "Numbered certificate of authenticity", "values": [true, true, true] },
-      { "label": "Number of boxes", "values": ["1", "1", "3"] },
-      { "label": "Free gift card", "values": [true, true, true] },
-      { "label": "Delivery time", "values": ["15 min", "15 min", "30 min"] },
-      { "label": "Priority support", "values": [false, false, true] }
+      {
+        "label": "Ancestral Card",
+        "values": [
+          true,
+          true
+        ]
+      },
+      {
+        "label": "Ancestral Story",
+        "values": [
+          true,
+          true
+        ]
+      },
+      {
+        "label": "Totem",
+        "values": [
+          true,
+          true
+        ]
+      },
+      {
+        "label": "The Ancestor’s Voice",
+        "values": [
+          false,
+          true
+        ]
+      },
+      {
+        "label": "Numbered certificate of authenticity",
+        "values": [
+          true,
+          true
+        ]
+      }
     ]
   },
   "totemVivant": {
@@ -216,7 +265,7 @@
     "text": "A new audio message from your ancestor, delivered every season. Four times a year, your artwork is enriched with a new word.",
     "price": "+€9",
     "priceUnit": "/ year",
-    "caption": "Can be added to any Ancestral or Family order."
+    "caption": "Can be added to any Revelation order."
   },
   "offreJunior": {
     "eyebrow": "The Junior path",
@@ -259,9 +308,11 @@
     "pathAdulteDesc": "Full journey · Ancestral Card, Totem and Ancestor’s Voice",
     "pathJunior": "Junior",
     "pathJuniorDesc": "Express Totem · five questions, challenge your friends",
-    "birthDateLabel": "Date of birth",
-    "childBirthDateLabel": "Child's date of birth",
-    "birthDateError": "Enter a valid date of birth that is not in the future.",
+    "birthDateLabel": "Birth day and month",
+    "childBirthDateLabel": "Child’s birth day and month",
+    "birthDayLabel": "Day",
+    "birthMonthLabel": "Month",
+    "birthDateError": "Select a valid birth day and month.",
     "firstNameLabel": "First name",
     "firstNamePlaceholder": "Your first name",
     "lastNameLabel": "Last name",
@@ -341,8 +392,8 @@
     "adulte": {
       "offerName": "Revelation Offer",
       "offerDesc": "The Ancestral Story, the Totem and the Ancestor’s Voice, brought together in your creation.",
-      "price": "€89",
-      "priceCaption": "indicative",
+      "price": "€49",
+      "priceCaption": "",
       "consent1Before": "I have read and accept the ",
       "consent1Middle": " and the ",
       "consent1After": ".",
@@ -444,10 +495,10 @@
     "articles": [
       { "title": "Article 1 — Purpose and scope", "body": ["These general terms and conditions of sale (T&Cs) govern any order of personalized Totem Ancestral digital works, published by SENYCE PARTNERS (SARL), placed on the site totem-ancestral.com. Any order implies full and complete acceptance of these T&Cs, binding on the client in the version in force on the day of the order."] },
       { "title": "Article 2 — Identity of the seller", "body": ["This site is published by SENYCE PARTNERS, a French SARL with capital of €19,000, whose registered office is located at 4 avenue Laurent Cely, 92600 Asnières-sur-Seine, France. Contact: ", { "text": "contact@totemancestral.com", "href": "mailto:contact@totemancestral.com" }, "."] },
-      { "title": "Article 3 — Products and artistic nature", "body": ["Depending on the offer chosen, you receive an Ancestral Card PDF containing your Totem and your Ancestral Story, your Totem as a high-resolution PNG and, for Ancestral and Family, the imaginary Ancestor’s Voice as a 90-second MP3, along with a numbered certificate of authenticity. These creations constitute neither a DNA test, nor genealogical research, nor a divinatory, medical, or legal service."] },
+      { "title": "Article 3 — Products and artistic nature", "body": ["Depending on the offer chosen, you receive an Ancestral Card PDF containing your Totem and your Ancestral Story, your Totem as a high-resolution PNG and, for Revelation, the imaginary Ancestor’s Voice as a 90-second MP3, along with a numbered certificate of authenticity. These creations constitute neither a DNA test, nor genealogical research, nor a divinatory, medical, or legal service."] },
       { "title": "Article 4 — Price and payment", "body": ["Prices are shown in euros, all taxes included, and displayed before the order is confirmed. The Junior offer is priced at €9.99. Payment is processed securely via Stripe. SENYCE PARTNERS retains no complete banking data. The order is final once payment is fully collected and the information needed for composition is confirmed."] },
       { "title": "Article 5 — Order and composition", "body": ["Each order includes a creative questionnaire enabling personalization of the work. It is confirmed upon receipt of full payment; a confirmation email is sent immediately. The house reserves the right to refuse an order in case of suspected fraud, manifestly unlawful content, or technical impossibility."] },
-      { "title": "Article 6 — Delivery", "body": ["The artwork is delivered by email within fifteen minutes (thirty minutes for the Family offer) after the questionnaire is validated. If a technical issue prevents delivery, the artwork is recomposed or fully refunded."] },
+      { "title": "Article 6 — Delivery", "body": ["The artwork is delivered by email within fifteen minutes after the questionnaire is validated. If a technical issue prevents delivery, the artwork is recomposed or fully refunded."] },
       { "title": "Article 7 — Right of withdrawal", "body": ["As the works are made to the client's specifications and are clearly personalized, and given that they are digital content supplied immediately, the client expressly waives their right of withdrawal once composition has begun, in accordance with Article L.221-28 of the French Consumer Code. Before that point, the client has the statutory fourteen-day period."] },
       { "title": "Article 8 — Legal warranties", "body": ["The consumer benefits from the statutory warranty of conformity (Articles L.217-3 et seq. of the French Consumer Code) and the warranty against hidden defects (Articles 1641 et seq. of the French Civil Code). In the event of a missing or unreadable file, or a delivery failure attributable to the service, SENYCE PARTNERS will provide a new delivery or a refund. Subjective assessments of style, tone or artistic interpretation do not, on their own, constitute a lack of conformity."] },
       { "title": "Article 9 — Intellectual property", "body": ["All content on this site remains the exclusive property of SENYCE PARTNERS. A personal right of use is granted to the customer for the work delivered to them."] },
@@ -739,7 +790,6 @@
     "items": [
       { "quote": "I cried while reading the Ancestral Card. It felt like nothing else. A raw emotion.", "name": "Aïcha", "city": "Dakar", "img": "/images/temoignage_0.png" },
       { "quote": "The Ancestor’s Voice gave me chills. It felt as if my ancestor truly knew me.", "name": "Leyna", "city": "Paris", "img": "/images/temoignage_3.png" },
-      { "quote": "The Family box brought us around a common story, finally written.", "name": "Sabi", "city": "Bamako", "img": "/images/temoignage_2.png" },
       { "quote": "Not a gimmick. A real, grounded, sincere experience that touched the heart.", "name": "Carolle", "city": "Accra", "img": "/images/temoignage_1.png" },
       { "quote": "The Face now stands in my living room. It is my Totem, my legacy.", "name": "Eric", "city": "London", "img": "/images/temoignage_4.png" },
       { "quote": "Fifteen minutes as promised, and an object I will keep all my life.", "name": "Naomi", "city": "Belgique", "img": "/images/temoignage_5.png" }
@@ -779,9 +829,8 @@
       {
         "title": "Practical experience",
         "items": [
-          { "question": "How long does it take to compose?", "answer": "The questionnaire takes about fifteen minutes to complete. The results are delivered by email within fifteen minutes of submission (thirty minutes for the Family Totem)." },
-          { "question": "In what format will we receive the work?", "answer": "You receive an Ancestral Card PDF containing your Totem and your Ancestral Story, your Totem as a high-resolution PNG and, for Ancestral and Family, the Ancestor’s Voice as a 90-second MP3." },
-          { "question": "Can I gift a piece of art?", "answer": "Absolutely. Every order includes a free gift card, and you can specify a recipient at checkout." }
+          { "question": "How long does it take to compose?", "answer": "The questionnaire takes about fifteen minutes to complete. The results are delivered by email within fifteen minutes of submission." },
+          { "question": "In what format will we receive the work?", "answer": "You receive an Ancestral Card PDF containing your Totem and your Ancestral Story, your Totem as a high-resolution PNG and, for Revelation, the Ancestor’s Voice as a 90-second MP3." }
         ]
       },
       {

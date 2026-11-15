@@ -4,14 +4,15 @@ import { interfaceCopy } from "@/lib/interface-copy";
  * Source de vérité unique du catalogue (prix + mapping ENUM) côté frontend.
  *
  * Deux vocabulaires coexistent :
- *  - UI / backend NestJS : origine | ancestral | famille | junior
+ *  - Catalogue actif : origine | ancestral | junior
  *  - Colonne `commandes.offre` (ENUM `offre_type`) : essentiel | signature | heritage
  *
- * Grille : Origine 49 €, Révélation/Ancestral 99 €, Famille 219 € (barre
- * 297 €), Junior 9,99 €. Doit rester identique à `totem_backend/src/totem/prices.ts`.
+ * Grille : Origine 29 €, Révélation/Ancestral 49 €, Junior 9,99 €.
+ * Doit rester identique à `totem_backend/src/totem/prices.ts`.
  */
 
-export type AdultOffer = "origine" | "ancestral" | "famille";
+export const ADULT_OFFER_IDS = ["origine", "ancestral"] as const;
+export type AdultOffer = typeof ADULT_OFFER_IDS[number];
 export type Offer = AdultOffer | "junior";
 export type OffreType =
   | "essentiel"
@@ -31,19 +32,14 @@ type AdultOfferConfig = {
 
 export const ADULT_OFFERS: Record<AdultOffer, AdultOfferConfig> = {
   origine: {
-    amountCents: 4900,
+    amountCents: 2900,
     commandeOffre: "essentiel",
     label: "TOTEM ANCESTRAL - Origine",
   },
   ancestral: {
-    amountCents: 9900,
+    amountCents: 4900,
     commandeOffre: "signature",
     label: "TOTEM ANCESTRAL - Revelation",
-  },
-  famille: {
-    amountCents: 21900,
-    commandeOffre: "heritage",
-    label: "TOTEM ANCESTRAL - Famille",
   },
 };
 
@@ -52,9 +48,6 @@ export const JUNIOR_LABEL = "TOTEM JUNIOR";
 
 /** Prix Junior, en centimes. */
 export const JUNIOR_AMOUNT_CENTS = 999;
-
-/** Prix barré Famille (3 × Révélation), en centimes — ancrage marketing. */
-export const FAMILLE_COMPARE_AT_CENTS = 29700;
 
 export function formatEuro(amountCents: number, lang: "fr" | "en" = "fr"): string {
   const euros = amountCents / 100;
@@ -72,8 +65,8 @@ export function toCommandeOffre(offer: AdultOffer): OffreType {
 }
 
 /** Garde de type : vrai pour les offres adultes (présentes dans l'ENUM). */
-export function isAdultOffer(offer: Offer): offer is AdultOffer {
-  return offer === "origine" || offer === "ancestral" || offer === "famille";
+export function isAdultOffer(offer: string | null): offer is AdultOffer {
+  return offer === "origine" || offer === "ancestral";
 }
 
 /** Libellé lisible d'une valeur ENUM `commandes.offre`. */

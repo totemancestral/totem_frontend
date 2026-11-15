@@ -11,12 +11,9 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 import { adultDraftSchema, hasAdultAnswersThrough, PAYMENT_AFTER_QUESTION } from "@/lib/adult-flow";
 import { RetryAfterError, retryErrorNotice, retryNotice } from "@/lib/retry-after";
+import { ADULT_OFFER_IDS, isAdultOffer } from "@/lib/offers";
 
 const JUNIOR_DRAFT_KEY = "totem:parcours:junior:answers";
-
-// aligné sur l'ordre de dict.offres.items (Origine, Révélation/Ancestral, Famille) —
-// même liste que Offres.tsx, pour retrouver le bon tarif à afficher ici.
-const OFFER_IDS = ["origine", "ancestral", "famille"] as const;
 
 type Props = {
   dict: Dictionary["paiement"];
@@ -44,13 +41,11 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
   const ui = interfaceCopy(lang);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const offre = searchParams.get("offre") ?? "ancestral";
+  const requestedOffer = searchParams.get("offre");
+  const offre = isAdultOffer(requestedOffer) ? requestedOffer : "ancestral";
   const parcours = searchParams.get("parcours");
   const offer = dict[variant];
-  // Le récapitulatif doit refléter l'offre réellement choisie (Origine /
-  // Révélation / Famille), pas un tarif fixe — sinon l'écran de paiement
-  // affiche un prix différent de celui qui sera effectivement débité.
-  const offerIndex = OFFER_IDS.indexOf(offre as (typeof OFFER_IDS)[number]);
+  const offerIndex = ADULT_OFFER_IDS.indexOf(offre);
   const adultOffre = offresDict.items[offerIndex >= 0 ? offerIndex : 1];
   const summary =
     variant === "junior"
@@ -65,9 +60,14 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
   const errorRef = useRef<HTMLParagraphElement>(null);
   useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
   const allChecked = c1 && c2 && c3;
+  useEffect(() => {
+    if (variant === "adulte" && requestedOffer !== null && !isAdultOffer(requestedOffer)) {
+      router.replace(`/${lang}/choisir-offre${parcours ? `?parcours=${encodeURIComponent(parcours)}` : ""}`);
+    }
+  }, [variant, requestedOffer, lang, parcours, router]);
 
   async function pay() {
-    if (loading || !allChecked) return;
+    if (loading || !allChecked || (variant === "adulte" && requestedOffer !== null && !isAdultOffer(requestedOffer))) return;
     setLoading(true);
     setError(null);
     setTotemConflict(false);
@@ -199,7 +199,7 @@ export default function Paiement({ dict, offresDict, lang, variant }: Props) {
               </div>
               <div className="shrink-0 text-right">
                 <span className="font-display text-[28px] text-ivoire">{summary.price}</span>
-                <p className="mt-0.5 text-xs text-grisclair">{summary.priceCaption}</p>
+                {summary.priceCaption && <p className="mt-0.5 text-xs text-grisclair">{summary.priceCaption}</p>}
               </div>
             </div>
           </div>

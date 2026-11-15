@@ -3,6 +3,7 @@ import { z } from "zod";
 import { authenticateRequest, createServiceClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { internalError } from "@/lib/api-error";
+import { normalizeBirthDate } from "@/lib/birth-date";
 
 const patchSchema = z.object({
   prenom: z.string().trim().min(1).max(80).optional(),
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ...(data ?? { prenom: null, nom: null, sexe: null, langue: "fr", email: auth.email }),
-    date_naissance: metadata?.date_naissance ?? null,
+    date_naissance: normalizeBirthDate(metadata?.date_naissance),
     naissance_concerne: metadata?.naissance_concerne ?? null,
   });
 }

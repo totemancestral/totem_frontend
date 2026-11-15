@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
+import { OfferFeatures } from "@/components/ui/OfferFeatures";
+import { ADULT_OFFER_IDS } from "@/lib/offers";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
-
-// Ordre du catalogue dans le dictionnaire : Origine, Révélation (Ancestral), Famille.
-const OFFER_IDS = ["origine", "ancestral", "famille"] as const;
 
 export default function Offres({ dict, lang }: { dict: Dictionary["offres"]; lang: Locale }) {
   return (
@@ -14,15 +13,15 @@ export default function Offres({ dict, lang }: { dict: Dictionary["offres"]; lan
         <p className="mx-auto mt-5 max-w-md text-sm text-grisclair">{dict.intro}</p>
       </Reveal>
 
-      <div className="site-container site-stack site-gap flex flex-col lg:flex-row lg:items-start">
+      <div className="site-container mt-8 grid gap-6 lg:grid-cols-2" style={{ maxWidth: "68rem" }}>
         {dict.items.map((offre, index) => (
           <Reveal
             key={offre.title}
             variant="scale"
             delay={index * 120}
-            className={`flex flex-1 flex-col gap-5 border bg-indigo site-card ${
+            className={`flex min-w-0 flex-col gap-3 border bg-indigo p-5 sm:p-6 ${
               offre.featured
-                ? "border-[1.5px] border-or shadow-[0_24px_60px_rgba(201,168,76,0.12)] lg:-mt-5"
+                ? "border-[1.5px] border-or shadow-[0_24px_60px_rgba(201,168,76,0.12)]"
                 : "border-ombre"
             }`}
           >
@@ -31,38 +30,27 @@ export default function Offres({ dict, lang }: { dict: Dictionary["offres"]; lan
                 {offre.tag}
               </span>
             ) : (
-              <span className="text-xs uppercase tracking-[0.14em] text-or">
+              <span className="flex min-h-7 items-center text-xs uppercase tracking-[0.14em] text-or">
                 {offre.tag}
               </span>
             )}
 
-            <h3 className="font-display text-2xl text-ivoire">{offre.title}</h3>
-            <p className="font-display text-xl italic text-orpale">{offre.lead}</p>
+            <h3 className="font-display text-2xl text-ivoire sm:text-3xl">{offre.title}</h3>
+            <p className="font-display text-lg leading-snug italic text-orpale lg:min-h-[2.75em]">{offre.lead}</p>
 
             <div className="flex flex-col gap-1">
-              <span className="font-display text-4xl text-ivoire">{offre.price}</span>
-              <span className="text-sm text-grisclair">{offre.priceCaption}</span>
+              <span className="font-display text-4xl text-ivoire sm:text-5xl">{offre.price}</span>
+              {offre.priceCaption && <span className="text-sm text-grisclair">{offre.priceCaption}</span>}
             </div>
 
-            <div className="flex flex-col gap-3.5">
-              {offre.features.map((feature) => (
-                <div key={feature} className="flex items-start gap-3">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-or" />
-                  <span
-                    className={`text-sm ${offre.featured ? "text-ivoire" : "text-grisclair"}`}
-                  >
-                    {feature}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <OfferFeatures features={offre.features} />
 
             {/* le JSON donne "variant" comme un simple string ; on précise
                 à Button qu'il n'y a en réalité que ces deux valeurs possibles */}
             <Button
               variant={offre.variant as "gold" | "outline"}
-              className="mt-2 w-full"
-              href={`/${lang}/inscription?offre=${OFFER_IDS[index] ?? "ancestral"}`}
+              className="mt-auto w-full"
+              href={`/${lang}/inscription?offre=${ADULT_OFFER_IDS[index] ?? "ancestral"}`}
             >
               {offre.button}
             </Button>
@@ -72,7 +60,7 @@ export default function Offres({ dict, lang }: { dict: Dictionary["offres"]; lan
 
       <div className="mx-auto mt-14 flex max-w-md flex-col items-center gap-2.5 text-center">
         <p className="text-sm text-grisclair">{dict.footerText}</p>
-        <p className="text-xs tracking-wide text-or">{dict.giftLine}</p>
+        {dict.giftLine && <p className="text-xs tracking-wide text-or">{dict.giftLine}</p>}
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { isValidBirthDate } from "@/lib/birth-date";
+import { normalizeBirthDate } from "@/lib/birth-date";
 import { getServerEnv } from "@/lib/env";
 import { createPublicAuthClient, createServiceClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
@@ -21,7 +21,7 @@ const signupSchema = z.object({
   prenom: z.string().trim().max(80).optional(),
   nom: z.string().trim().max(80).optional(),
   sexe: z.enum(["homme", "femme"]).optional(),
-  date_naissance: z.string().refine(isValidBirthDate),
+  date_naissance: z.string().transform(normalizeBirthDate).pipe(z.string()),
   naissance_concerne: z.enum(["titulaire", "enfant"]),
   locale: z.enum(["fr", "en"]).optional(),
   redirectPath: z.string().max(300).optional(),

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { Brand } from "@/components/ui/Brand";
 import { AudioSeekBar } from "@/components/ui/AudioSeekBar";
+import { ShareTotem } from "@/components/ui/ShareTotem";
 import { parchmentParagraphs } from "@/lib/parchment-text";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
@@ -58,7 +59,6 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
-  const [shareNotice, setShareNotice] = useState(false);
 
   useEffect(() => {
     if (!commandeId) return;
@@ -184,16 +184,6 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
     el.play()
       .then(() => setAudioPlaying(true))
       .catch(() => setAudioPlaying(false));
-  }
-
-  async function share() {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setShareNotice(true);
-      setTimeout(() => setShareNotice(false), 2500);
-    } catch {
-      /* noop */
-    }
   }
 
   const isOpen = phase === "open";
@@ -435,13 +425,7 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                   {dict.downloadCertButton}
                 </a>
               )}
-              <button type="button"
-                onClick={share}
-                className="border border-ombre px-6 py-3.5 text-sm text-ivoire transition-colors duration-300 hover:border-or hover:text-or"
-              >
-                {shareNotice ? dict.shareCopied : dict.shareButton}
-              </button>
-              <p role="status" className="sr-only">{shareNotice ? dict.shareCopied : ""}</p>
+              {commandeId && <ShareTotem commandeId={commandeId} lang={lang} label={dict.shareButton} />}
             </div>
           </div>
         )}

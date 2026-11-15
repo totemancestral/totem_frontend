@@ -9,10 +9,11 @@ import { Brand } from "@/components/ui/Brand";
 import { PasswordField } from "@/components/ui/PasswordField";
 import { RadioCard } from "@/components/ui/RadioCard";
 import { supabase } from "@/lib/supabase/client";
-import { isValidBirthDate } from "@/lib/birth-date";
+import { BIRTH_MONTH_DAYS, isValidBirthDate } from "@/lib/birth-date";
 import { isStrongPassword } from "@/lib/password";
 import { retryNotice } from "@/lib/retry-after";
 import { establishSignupSession } from "@/lib/signup-session";
+import { isAdultOffer } from "@/lib/offers";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 
 // aligné sur l'ordre de dict.inscription.legalLinks (CGV, Confidentialité, Mentions)
@@ -36,13 +37,18 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
   const searchParams = useSearchParams();
   // null = pas d'offre choisie avant l'inscription (ex: venu de "Composer"
   // dans la nav) : le parcours demandera le choix après les questions.
-  const offre = searchParams.get("offre");
+  const requestedOffer = searchParams.get("offre");
+  const offre = isAdultOffer(requestedOffer) ? requestedOffer : null;
 
   const [path, setPath] = useState<"adulte" | "junior">("adulte");
   const [gender, setGender] = useState<"homme" | "femme">("homme");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
+  const [birthDay, setBirthDay] = useState("");
+  const [birthMonth, setBirthMonth] = useState("");
+  const birthDate = birthMonth && birthDay ? `${birthMonth}-${birthDay}` : "";
+  const birthDays = BIRTH_MONTH_DAYS[Number(birthMonth) - 1] ?? 31;
+  const monthFormatter = new Intl.DateTimeFormat(lang, { month: "long", timeZone: "UTC" });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -209,7 +215,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
             <div className="flex gap-4">
               <RadioCard
                 name="path" value="adulte"
-                onChange={() => { setPath("adulte"); setBirthDate(""); }}
+                onChange={() => { setPath("adulte"); setBirthDay(""); setBirthMonth(""); }}
                 checked={path === "adulte"}
                 className={`flex flex-1 flex-col gap-1.5 border p-5 text-left ${
                   path === "adulte" ? "border-[1.5px] border-or bg-indigo" : "border-ombre"
@@ -220,7 +226,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
               </RadioCard>
               <RadioCard
                 name="path" value="junior"
-                onChange={() => { setPath("junior"); setBirthDate(""); }}
+                onChange={() => { setPath("junior"); setBirthDay(""); setBirthMonth(""); }}
                 checked={path === "junior"}
                 className={`flex flex-1 flex-col gap-1.5 border p-5 text-left ${
                   path === "junior" ? "border-[1.5px] border-or bg-indigo" : "border-ombre"
@@ -269,27 +275,39 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
               </label>
             </div>
 
-            <label className="flex min-w-0 flex-col gap-2">
-              <span className="text-xs font-medium uppercase tracking-wide text-gris">
+            <fieldset className="min-w-0">
+              <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-gris">
                 {path === "junior" ? dict.childBirthDateLabel : dict.birthDateLabel}
-              </span>
-              <input
-                type="date"
-                name="birthDate"
-                autoComplete={path === "junior" ? "off" : "bday"}
-                value={birthDate}
-                onChange={(event) => {
-                  setBirthDate(event.target.value);
-                  if (errorField === "birthDate") { setError(null); setErrorField(null); }
-                }}
-                min="0001-01-01"
-                max={new Date().toISOString().slice(0, 10)}
-                required
-                aria-invalid={errorField === "birthDate" && !!error || undefined}
-                aria-describedby={errorField === "birthDate" && error ? "signup-error" : undefined}
-                className="w-full min-w-0 border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire"
-              />
-            </label>
+              </legend>
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-3">
+                <select name="birthDay" aria-label={dict.birthDayLabel}
+                  autoComplete={path === "junior" ? "off" : "bday-day"}
+                  value={birthDay} required onChange={event => {
+                    setBirthDay(event.target.value);
+                    if (errorField === "birthDate") { setError(null); setErrorField(null); }
+                  }} aria-invalid={errorField === "birthDate" && !!error || undefined}
+                  aria-describedby={errorField === "birthDate" && error ? "signup-error" : undefined}
+                  className="w-full min-w-0 border border-ombre bg-indigo px-3 py-3.5 text-sm text-ivoire">
+                  <option value="">{dict.birthDayLabel}</option>
+                  {Array.from({ length: birthDays }, (_, index) => <option key={index + 1}
+                    value={String(index + 1).padStart(2, "0")}>{index + 1}</option>)}
+                </select>
+                <select name="birthMonth" aria-label={dict.birthMonthLabel}
+                  autoComplete={path === "junior" ? "off" : "bday-month"}
+                  value={birthMonth} required onChange={event => {
+                    const month = event.target.value;
+                    setBirthMonth(month);
+                    if (Number(birthDay) > (BIRTH_MONTH_DAYS[Number(month) - 1] ?? 31)) setBirthDay("");
+                    if (errorField === "birthDate") { setError(null); setErrorField(null); }
+                  }} aria-invalid={errorField === "birthDate" && !!error || undefined}
+                  aria-describedby={errorField === "birthDate" && error ? "signup-error" : undefined}
+                  className="w-full min-w-0 border border-ombre bg-indigo px-3 py-3.5 text-sm text-ivoire">
+                  <option value="">{dict.birthMonthLabel}</option>
+                  {Array.from({ length: 12 }, (_, index) => <option key={index + 1}
+                    value={String(index + 1).padStart(2, "0")}>{monthFormatter.format(new Date(Date.UTC(2000, index, 1)))}</option>)}
+                </select>
+              </div>
+            </fieldset>
 
             <fieldset className="flex min-w-0 flex-col gap-2">
               <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-gris">
