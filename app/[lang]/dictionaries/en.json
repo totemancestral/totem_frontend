@@ -627,16 +627,20 @@
   },
   "espaceOeuvres": {
     "eyebrow": "Your space",
-    "title": "Your works",
+    "title": "Your work, always yours.",
     "recitLabel": "Ancestral Story",
     "imageLabel": "Totem",
     "audioLabel": "The Ancestor’s Voice",
-    "emptyText": "You don't have any delivered work yet."
+    "emptyText": "You don't have any delivered work yet.",
+    "intro": "Your totem and your ancestral story, together.",
+    "cardLabel": "Ancestral Card",
+    "certificateLabel": "Certificate",
+    "openButton": "Open my work"
   },
   "commandes": {
     "resumeQuestionnaire": "Complete questionnaire",
     "eyebrow": "Your space",
-    "title": "Your orders",
+    "title": "Your orders, at a glance.",
     "dateLabel": "Date",
     "offerLabel": "Offer",
     "priceLabel": "Amount",
@@ -645,14 +649,17 @@
     "statusGenerating": "In progress",
     "statusError": "Error",
     "statusRefunded": "Refunded",
-    "emptyText": "You don't have any orders yet."
+    "emptyText": "You don't have any orders yet.",
+    "intro": "All the details of your creation in one place.",
+    "viewWork": "View my work",
+    "detailsTitle": "Order details"
   },
   "profil": {
     "eyebrow": "Your space",
-    "title": "Your profile",
+    "title": "Your information, made simple.",
     "genderMale": "A man",
     "genderFemale": "A woman",
-    "firstNameLabel": "First name",
+    "firstNameLabel": "First name or nickname",
     "lastNameLabel": "Last name",
     "emailLabel": "Email",
     "newEmailLabel": "New email",
@@ -672,7 +679,12 @@
     "deleteConfirmWord": "DELETE",
     "deleteConfirmButton": "Permanently delete",
     "deleteCancelButton": "Cancel",
-    "deleteError": "Deletion failed for now."
+    "deleteError": "Deletion failed for now.",
+    "intro": "Keep your contact details up to date.",
+    "informationTitle": "My information",
+    "securityTitle": "Security",
+    "securityText": "Your account stays personal.",
+    "securityButton": "Change my password"
   },
   "oeuvre": {
     "eyebrow": "Your work",
@@ -734,7 +746,10 @@
     "imageLabel": "Totem",
     "audioLabel": "The Ancestor’s Voice",
     "emptyText": "Your works will appear here once your first Totem is composed.",
-    "resumeButton": "Resume my journey"
+    "resumeButton": "Resume my journey",
+    "cardLabel": "Ancestral Card",
+    "certificateLabel": "Certificate",
+    "openButton": "Open my work"
   },
   "cauris": {
     "thisWeek": "This week",
@@ -768,8 +783,8 @@
   },
   "consultations": {
     "eyebrow": "Your space",
-    "title": "The thread of your weeks",
-    "intro": "Every week, a question, a cowrie casting, a reading. Your past answers remain here for you to revisit.",
+    "title": "A moment with your totem.",
+    "intro": "Your weekly consultation and your past readings.",
     "statusLabel": "This week",
     "statusText": "Your consultation is available.",
     "discoverButton": "Discover my reading",

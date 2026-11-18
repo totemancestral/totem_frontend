@@ -29,7 +29,9 @@ export async function GET(request: Request) {
 
   return NextResponse.json(commands.map(({ reponses_parcours, ...command }) => {
     const links = command.stripe_session_id ? assets.get(command.stripe_session_id) : null;
-    const refresh = <T extends { image_url: string | null }>(oeuvre: T) => ({ ...oeuvre, image_url: links?.image_url ?? null });
+    const refresh = <T extends { image_url: string | null }>(oeuvre: T) => ({ ...oeuvre,
+      image_url: links?.image_url ?? null, pdf_url: links?.pdf_url ?? null,
+      audio_url: links?.audio_url ?? null, certificate_url: links?.certificate_url ?? null });
     return {
       ...command,
       oeuvres: Array.isArray(command.oeuvres) ? command.oeuvres.map(refresh) : command.oeuvres ? refresh(command.oeuvres) : null,

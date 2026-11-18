@@ -627,16 +627,20 @@
   },
   "espaceOeuvres": {
     "eyebrow": "Votre espace",
-    "title": "Vos œuvres",
+    "title": "Votre œuvre, toujours à vous.",
     "recitLabel": "Histoire ancestrale",
     "imageLabel": "Totem",
     "audioLabel": "La voix de l’ancêtre",
-    "emptyText": "Vous n'avez pas encore d'œuvre livrée."
+    "emptyText": "Vous n'avez pas encore d'œuvre livrée.",
+    "intro": "Votre totem et votre histoire ancestrale, réunis.",
+    "cardLabel": "Carte ancestrale",
+    "certificateLabel": "Certificat",
+    "openButton": "Ouvrir mon œuvre"
   },
   "commandes": {
     "resumeQuestionnaire": "Terminer le questionnaire",
     "eyebrow": "Votre espace",
-    "title": "Vos commandes",
+    "title": "Vos commandes, en toute clarté.",
     "dateLabel": "Date",
     "offerLabel": "Offre",
     "priceLabel": "Montant",
@@ -645,14 +649,17 @@
     "statusGenerating": "En composition",
     "statusError": "Erreur",
     "statusRefunded": "Remboursée",
-    "emptyText": "Vous n'avez pas encore de commande."
+    "emptyText": "Vous n'avez pas encore de commande.",
+    "intro": "Tous les détails de votre création au même endroit.",
+    "viewWork": "Voir mon œuvre",
+    "detailsTitle": "Détails de la commande"
   },
   "profil": {
     "eyebrow": "Votre espace",
-    "title": "Votre profil",
+    "title": "Vos informations, tout simplement.",
     "genderMale": "Un homme",
     "genderFemale": "Une femme",
-    "firstNameLabel": "Prénom",
+    "firstNameLabel": "Prénom ou surnom",
     "lastNameLabel": "Nom",
     "emailLabel": "Email",
     "newEmailLabel": "Nouvel email",
@@ -672,7 +679,12 @@
     "deleteConfirmWord": "SUPPRIMER",
     "deleteConfirmButton": "Supprimer définitivement",
     "deleteCancelButton": "Annuler",
-    "deleteError": "Suppression impossible pour le moment."
+    "deleteError": "Suppression impossible pour le moment.",
+    "intro": "Gardez vos coordonnées à jour.",
+    "informationTitle": "Mes informations",
+    "securityTitle": "Sécurité",
+    "securityText": "Votre compte reste personnel.",
+    "securityButton": "Modifier mon mot de passe"
   },
   "oeuvre": {
     "eyebrow": "Votre œuvre",
@@ -734,7 +746,10 @@
     "imageLabel": "Totem",
     "audioLabel": "La voix de l’ancêtre",
     "emptyText": "Vos œuvres apparaîtront ici une fois votre premier Totem composé.",
-    "resumeButton": "Reprendre mon parcours"
+    "resumeButton": "Reprendre mon parcours",
+    "cardLabel": "Carte ancestrale",
+    "certificateLabel": "Certificat",
+    "openButton": "Ouvrir mon œuvre"
   },
   "cauris": {
     "thisWeek": "Cette semaine",
@@ -768,8 +783,8 @@
   },
   "consultations": {
     "eyebrow": "Votre espace",
-    "title": "Le fil de vos semaines",
-    "intro": "Chaque semaine, une question, un tirage de cauris, une lecture. Vos réponses passées restent consultables ici.",
+    "title": "Un rendez-vous avec votre totem.",
+    "intro": "Votre consultation de la semaine et vos lectures passées.",
     "statusLabel": "Cette semaine",
     "statusText": "Votre consultation est disponible.",
     "discoverButton": "Découvrir ma lecture",

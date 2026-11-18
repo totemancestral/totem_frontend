@@ -6,6 +6,9 @@ import { retryNotice } from "@/lib/retry-after";
 export type CommandeOeuvre = {
   nom_totem: string | null;
   image_url: string | null;
+  pdf_url?: string | null;
+  audio_url?: string | null;
+  certificate_url?: string | null;
   numero_serie: string | null;
   statut: string;
 };

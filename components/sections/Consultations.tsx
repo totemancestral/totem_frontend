@@ -7,6 +7,7 @@ import { CaurisReading } from "@/components/ui/CaurisReading";
 import { retryErrorNotice } from "@/lib/retry-after";
 import { formatInterface, interfaceCopy } from "@/lib/interface-copy";
 import { CAURIS_MOODS, caurisDate, caurisRequest, type CaurisReading as Reading } from "@/lib/cauris";
+import styles from "@/components/ui/Account.module.css";
 
 export default function Consultations({ dict, copy, lang }: { dict: Dictionary["consultations"]; copy: Dictionary["cauris"]; lang: Locale }) {
   const [readings, setReadings] = useState<Reading[] | null>(null);
@@ -43,11 +44,11 @@ export default function Consultations({ dict, copy, lang }: { dict: Dictionary["
     } catch (error) { setDelayNotice(retryErrorNotice(error, lang)); setError(true); } finally { setLoadingMore(false); }
   }
   return (
-    <div className="account-container account-section [overflow-wrap:anywhere]">
+    <div className={styles.page}>
       <div className="flex flex-col gap-2.5">
-        <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
-        <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>
-        <p className="mt-1 max-w-lg text-sm text-grisclair">{dict.intro}</p>
+        <p className={styles.eyebrow}>{dict.eyebrow}</p>
+        <h1 className={styles.title}>{dict.title}</h1>
+        <p className={styles.intro}>{dict.intro}</p>
       </div>
 
       {/* carte de statut : toujours visible — si le Totem n'est pas encore
@@ -61,20 +62,20 @@ export default function Consultations({ dict, copy, lang }: { dict: Dictionary["
         <p role="status" className="sr-only">{loadingMore ? copy.loading : readings ? formatInterface(interfaceCopy(lang).orders.displayedReadings, { count: readings.length }) : ""}</p>
 
         {!readings && !error && <p role="status" className="text-grisclair">{copy.loading}</p>}
-        {error && <div className="flex flex-wrap items-center gap-4"><p ref={errorRef} tabIndex={-1} role="alert" className="text-grisclair focus:outline-2 focus:outline-offset-4 focus:outline-or">{delayNotice ?? copy.loadError}</p><Button onClick={() => { if (readings && cursor) void loadMore(); else setRevision((r) => r + 1); }}>{copy.retry}</Button></div>}
-        {readings?.length === 0 && <p className="text-sm text-grisclair">{copy.emptyHistory}</p>}
-        <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
+        {error && <div className={`${styles.card} ${styles.pad} flex flex-wrap items-center gap-4`}><p ref={errorRef} tabIndex={-1} role="alert" className="text-grisclair focus:outline-2 focus:outline-offset-4 focus:outline-or">{delayNotice ?? copy.loadError}</p><Button variant="accountOutline" className={`${styles.action} ${styles.outline}`} onClick={() => { if (readings && cursor) void loadMore(); else setRevision((r) => r + 1); }}>{copy.retry}</Button></div>}
+        {readings?.length === 0 && <p className={`${styles.card} ${styles.pad} ${styles.muted}`}>{copy.emptyHistory}</p>}
+        <div className={styles.grid}>
           {readings?.map((item) => (
-            <div key={item.id} className="flex flex-col gap-5 border border-ombre bg-indigo p-6">
+            <article key={item.id} className={`${styles.card} ${styles.pad} flex flex-col gap-5`}>
               <div className="flex flex-col gap-1">
-                <span className="font-display text-xl italic text-orpale">{item.mood ? copy.moods[CAURIS_MOODS.indexOf(item.mood)] : copy.readingTitle}</span>
+                <h3 className={styles.cardTitle}>{item.mood ? copy.moods[CAURIS_MOODS.indexOf(item.mood)] : copy.readingTitle}</h3>
                 <time dateTime={item.createdAt} className="text-xs text-grisclair">{caurisDate(item.createdAt, lang)}</time>
               </div>
               <CaurisReading reading={item} copy={copy} lang={lang} />
-            </div>
+            </article>
           ))}
         </div>
-        {cursor && <Button disabled={loadingMore} onClick={loadMore}>{loadingMore ? copy.loading : copy.loadMore}</Button>}
+        {cursor && <Button variant="accountOutline" className={`${styles.action} ${styles.outline}`} disabled={loadingMore} onClick={loadMore}>{loadingMore ? copy.loading : copy.loadMore}</Button>}
       </div>
     </div>
   );

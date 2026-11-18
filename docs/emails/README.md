@@ -2,6 +2,17 @@
 
 Deux familles d'emails :
 
+Le design validé utilise désormais un fond ivoire, une carte blanc chaud, du
+texte anthracite, des accents dorés discrets et un bouton anthracite. Les
+livraisons adulte et Junior ainsi que l'autorisation parentale utilisent les
+composants de `totem_backend/src/totem/email-design.ts` et `customer-emails.ts`.
+Leurs sujets localisés restent configurables dans `email_templates`, mais
+l'ancien HTML de livraison ne remplace plus la mise en page validée.
+
+Les quatre modèles d'authentification locaux ci-dessous reprennent cette
+palette. Ils doivent toujours être installés séparément dans Supabase ;
+modifier ces fichiers ne change pas les e-mails actuellement envoyés par Auth.
+
 | Type | Envoyé par | Où le configurer |
 |------|-----------|------------------|
 | **Confirmation de compte, réinitialisation, lien magique, changement d'email** | Supabase Auth | Dashboard Supabase (templates ci-dessous) |

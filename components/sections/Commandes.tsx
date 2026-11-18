@@ -1,8 +1,9 @@
 "use client";
-import Link from "next/link";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { useCommandes } from "@/lib/hooks/useCommandes";
 import { interfaceCopy } from "@/lib/interface-copy";
+import { Button } from "@/components/ui/Button";
+import styles from "@/components/ui/Account.module.css";
 import { formatEuro, offreLabel, type OffreType } from "@/lib/offers";
 
 const STATUS_KEY = {
@@ -31,48 +32,44 @@ export default function Commandes({ dict, lang }: { dict: Dictionary["commandes"
   const { commandes, error, delayNotice } = useCommandes(lang);
 
   return (
-    <div className="account-container account-section">
-      <div className="flex flex-col gap-2.5">
-        <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
-        <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>
-      </div>
-
-      {!commandes && !error && <p role="status" className="mt-9 text-sm text-grisclair">{ui.status.loading}</p>}
-      {error && <p role="alert" className="mt-9 text-sm text-grisclair">{delayNotice ?? dict.emptyText}</p>}
-      {commandes && commandes.length === 0 && <p className="mt-9 text-sm text-grisclair">{dict.emptyText}</p>}
-
-      {commandes && commandes.length > 0 && (
-        <div className="mt-9 flex flex-col border border-ombre">
-          {/* en-tête, réservé au bureau */}
-          <div className="hidden border-b border-ombre bg-indigo px-6 py-4 text-xs uppercase tracking-wide text-grisclair lg:grid lg:grid-cols-[1fr_1fr_1fr_auto_auto]">
-            <span>{ui.orders.number}</span>
-            <span>{dict.dateLabel}</span>
-            <span>{dict.offerLabel}</span>
-            <span className="text-right">{dict.priceLabel}</span>
-            <span className="w-24 text-right">&nbsp;</span>
-          </div>
-
-          {commandes.map((commande) => {
-            const statusKey = STATUS_KEY[commande.statut as keyof typeof STATUS_KEY] ?? "statusPending";
-            return (
-              <div
-                key={commande.id}
-                className="flex flex-col gap-2 border-b border-ombre bg-indigo px-6 py-5 last:border-b-0 lg:grid lg:grid-cols-[1fr_1fr_1fr_auto_auto] lg:items-center lg:gap-0"
-              >
-                <span className="text-sm text-ivoire">{commande.id.slice(0, 8).toUpperCase()}</span>
-                <span className="text-sm text-grisclair">{formatDate(commande.created_at, lang)}</span>
-                <span className="font-display text-base italic text-orpale">{offreLabel(commande.offre as OffreType, lang)}</span>
-                <span className="text-sm text-ivoire lg:text-right">{formatEuro(commande.montant_cents, lang)}</span>
-                <span className="w-fit border border-ombre px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-grisclair lg:ml-auto">
-                  {commande.requiresQuestionnaire && commande.stripe_session_id ? (
-                    <Link href={`/${lang}/parcours?session_id=${encodeURIComponent(commande.stripe_session_id)}`}>{dict.resumeQuestionnaire}</Link>
-                  ) : dict[statusKey]}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+    <div className={styles.page}>
+      <header>
+        <p className={styles.eyebrow}>{dict.eyebrow}</p>
+        <h1 className={styles.title}>{dict.title}</h1>
+        <p className={styles.intro}>{dict.intro}</p>
+      </header>
+      {!commandes && !error && <p role="status" className={`${styles.content} ${styles.muted}`}>{ui.status.loading}</p>}
+      {error && <p role="alert" className={`${styles.card} ${styles.pad} ${styles.content} ${styles.muted}`}>{delayNotice ?? ui.errors.orderUnavailable}</p>}
+      {commandes?.length === 0 && <p className={`${styles.card} ${styles.pad} ${styles.content} ${styles.muted}`}>{dict.emptyText}</p>}
+      {commandes && commandes.length > 0 && <div className={`${styles.grid} ${styles.orderGrid} ${styles.content}`}>
+        {commandes.map(commande => {
+          const statusKey = STATUS_KEY[commande.statut as keyof typeof STATUS_KEY] ?? "statusPending";
+          const resume = commande.requiresQuestionnaire && commande.stripe_session_id;
+          const statusStyle = commande.statut === "livree" ? styles.delivered : commande.statut === "erreur" ? styles.error : "";
+          return <article key={commande.id} className={`${styles.card} ${styles.pad}`} aria-label={`${dict.detailsTitle} ${commande.id.slice(0, 8).toUpperCase()}`}>
+            <div className={styles.row}>
+              <span className={styles.reference}>{ui.orders.number} {commande.id.slice(0, 8).toUpperCase()}</span>
+              <span className={`${styles.status} ${statusStyle}`}>{dict[statusKey]}</span>
+            </div>
+            <div className={`${styles.row} ${styles.orderHeading}`}>
+              <h2 className={styles.cardTitle}>{offreLabel(commande.offre as OffreType, lang)}</h2>
+              <span className={styles.price}>{formatEuro(commande.montant_cents, lang)}</span>
+            </div>
+            <div className={styles.divider} />
+            <dl className={styles.details}>
+              <div><dt className={styles.label}>{dict.dateLabel}</dt><dd><time dateTime={commande.created_at}>{formatDate(commande.created_at, lang)}</time></dd></div>
+              <div><dt className={styles.label}>{dict.offerLabel}</dt><dd>{offreLabel(commande.offre as OffreType, lang)}</dd></div>
+            </dl>
+            {(resume || commande.oeuvre) && <div className="mt-6">
+              {resume ? <Button variant="account" className={styles.action} href={`/${lang}/parcours?session_id=${encodeURIComponent(commande.stripe_session_id!)}`}>
+                {dict.resumeQuestionnaire}<span aria-hidden="true" className={styles.arrow}>→</span>
+              </Button> : <Button variant="accountOutline" className={`${styles.action} ${styles.outline}`} href={`/${lang}/oeuvre?commande=${commande.id}`}>
+                {dict.viewWork}<span aria-hidden="true" className={styles.arrow}>→</span>
+              </Button>}
+            </div>}
+          </article>;
+        })}
+      </div>}
     </div>
   );
 }

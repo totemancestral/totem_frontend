@@ -3,6 +3,7 @@ import { interfaceCopy, authErrorMessage, InterfaceError } from "@/lib/interface
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import styles from "@/components/ui/Account.module.css";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 import { PasswordField } from "@/components/ui/PasswordField";
@@ -37,9 +38,16 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
   const editButtonContainerRef = useRef<HTMLDivElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
   const wasEditing = useRef(false);
+  const editTargetRef = useRef<"profile" | "security">("profile");
+  const securityButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    if (isEditing) firstNameRef.current?.focus();
-    else if (wasEditing.current) editButtonContainerRef.current?.querySelector("button")?.focus();
+    if (isEditing) {
+      if (editTargetRef.current === "security") document.getElementById("profile-password")?.focus();
+      else firstNameRef.current?.focus();
+    } else if (wasEditing.current) {
+      if (editTargetRef.current === "security") securityButtonRef.current?.focus();
+      else editButtonContainerRef.current?.querySelector("button")?.focus();
+    }
     wasEditing.current = isEditing;
   }, [isEditing]);
   useEffect(() => {
@@ -152,33 +160,25 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
     profile?.sexe === "homme" ? dict.genderMale : profile?.sexe === "femme" ? dict.genderFemale : "—";
   const languageDisplay = profile?.langue === "en" ? "English" : "Français";
 
-  if (loading || loadError) return <div className="account-container account-section text-ivoire">
-    <h1 className="font-display text-3xl">{dict.title}</h1>
+  if (loading || loadError) return <div className={styles.page}>
+    <h1 className={styles.title}>{dict.title}</h1>
     {loading ? <p className="mt-5" role="status">{ui.status.loadingProfile}</p> : <>
       <p className="mt-5" role="alert">{ui.errors.profileLoadFailed}</p>
-      <Button className="mt-5" onClick={() => { setLoading(true); setLoadError(false); setRetry(value => value + 1); }}>{ui.status.retry}</Button>
+      <Button variant="accountOutline" className={`${styles.action} ${styles.outline} mt-5`} onClick={() => { setLoading(true); setLoadError(false); setRetry(value => value + 1); }}>{ui.status.retry}</Button>
     </>}
   </div>;
 
   return (
-    <div className="account-container account-section [--color-gris:#A8A8A8] [--color-ombre:#757585] [overflow-wrap:anywhere]">
+    <div className={styles.page}>
       <div className="flex flex-col gap-2.5">
-        <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>
-        <h1 className="font-display text-3xl text-ivoire lg:text-4xl">{dict.title}</h1>
+        <p className={styles.eyebrow}>{dict.eyebrow}</p>
+        <h1 className={styles.title}>{dict.title}</h1>
+        <p className={styles.intro}>{dict.intro}</p>
       </div>
 
-      {/* informations non modifiables : toujours affichées, jamais dans le formulaire d'édition */}
-      <div className="mt-9 flex max-w-lg flex-col gap-4 sm:flex-row">
-        <div className="flex flex-1 flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.genderLabel}</span>
-          <p className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-grisclair">{genderDisplay}</p>
-        </div>
-        <div className="flex flex-1 flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.languageLabel}</span>
-          <p className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-grisclair">{languageDisplay}</p>
-        </div>
-      </div>
-
+      <div className={styles.profileGrid}>
+      <section className={`${styles.card} ${styles.pad}`} aria-labelledby="profile-information-title">
+      <h2 id="profile-information-title" className={styles.cardTitle}>{dict.informationTitle}</h2>
       {notice && (
         <p className="mt-4 text-sm text-orpale" role="status">
           {notice}
@@ -192,7 +192,7 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
       <p role="status" className="sr-only">{saving ? (ui.status.savingProfile) : ""}</p>
 
       {isEditing ? (
-        <form onSubmit={onSubmit} aria-busy={saving} className="mt-5 flex min-w-0 max-w-lg flex-col gap-5">
+        <form onSubmit={onSubmit} aria-busy={saving} className={`${styles.profileFields} mt-6`}>
           <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
             <label className="flex min-w-0 flex-1 flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.firstNameLabel}</span>
@@ -205,7 +205,7 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 maxLength={80}
-                className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire"
+                className={`${styles.field} text-sm text-ivoire`}
               />
             </label>
             <label className="flex min-w-0 flex-1 flex-col gap-2">
@@ -217,14 +217,14 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 maxLength={80}
-                className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire"
+                className={`${styles.field} text-sm text-ivoire`}
               />
             </label>
           </div>
 
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.emailLabel}</span>
-            <p className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-grisclair">{profile?.email}</p>
+            <p className={`${styles.field} text-sm text-grisclair`}>{profile?.email}</p>
           </div>
 
           <label className="flex flex-col gap-2">
@@ -237,7 +237,7 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
               onChange={(e) => setNewEmail(e.target.value)}
               placeholder={dict.newEmailPlaceholder}
               maxLength={255}
-              className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire"
+              className={`${styles.field} text-sm text-ivoire`}
             />
           </label>
 
@@ -250,7 +250,7 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
           </div>
 
           <div className="mt-2 flex flex-wrap items-center gap-6">
-            <Button type="submit" disabled={saving}>
+            <Button variant="account" className={styles.action} type="submit" disabled={saving}>
               {saving ? (ui.status.savingProfile) : dict.saveButton}
             </Button>
             <button
@@ -264,36 +264,60 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
           </div>
         </form>
       ) : (
-        <div ref={editButtonContainerRef} className="mt-5 flex max-w-lg flex-col gap-5">
+        <div ref={editButtonContainerRef} className="mt-6 flex min-w-0 flex-col gap-5">
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex flex-1 flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.firstNameLabel}</span>
-              <p className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire">{profile?.prenom || "—"}</p>
+              <p className={`${styles.field} text-sm text-ivoire`}>{profile?.prenom || "—"}</p>
             </div>
             <div className="flex flex-1 flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.lastNameLabel}</span>
-              <p className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire">{profile?.nom || "—"}</p>
+              <p className={`${styles.field} text-sm text-ivoire`}>{profile?.nom || "—"}</p>
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.emailLabel}</span>
-            <p className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire">{profile?.email || "—"}</p>
+            <p className={`${styles.field} text-sm text-ivoire`}>{profile?.email || "—"}</p>
           </div>
 
-          <Button className="mt-2 w-fit" onClick={() => setIsEditing(true)}>
+          <Button variant="account" className={`${styles.action} mt-2`} onClick={() => { editTargetRef.current = "profile"; setIsEditing(true); }}>
             {dict.editButton}
           </Button>
         </div>
       )}
 
+      {/* informations non modifiables : toujours affichées, jamais dans le formulaire d'édition */}
+      <div className={`${styles.details} mt-6`}>
+        <div className="flex flex-1 flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.genderLabel}</span>
+          <p className={`${styles.field} text-sm text-grisclair`}>{genderDisplay}</p>
+        </div>
+        <div className="flex flex-1 flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.languageLabel}</span>
+          <p className={`${styles.field} text-sm text-grisclair`}>{languageDisplay}</p>
+        </div>
+      </div>
+
+      </section>
+      <aside className={styles.profileStack}>
+        <section className={`${styles.card} ${styles.pad}`} aria-labelledby="profile-security-title">
+          <h2 id="profile-security-title" className={styles.cardTitle}>{dict.securityTitle}</h2>
+          <p className={`${styles.muted} mt-3`}>{dict.securityText}</p>
+          <div className={styles.divider} />
+          <Button ref={securityButtonRef} variant="accountOutline" className={`${styles.action} ${styles.outline}`} onClick={() => {
+            editTargetRef.current = "security";
+            if (isEditing) document.getElementById("profile-password")?.focus();
+            else setIsEditing(true);
+          }}>{dict.securityButton}<span aria-hidden="true" className={styles.arrow}>→</span></Button>
+        </section>
       {/* zone sensible */}
-      <div className="mt-14 flex max-w-lg flex-col items-start gap-3 border border-ombre p-6">
-        <p className="text-sm font-medium text-ivoire">{dict.dangerTitle}</p>
+      <div className={`${styles.card} ${styles.pad} ${styles.sensitive} flex flex-col items-start gap-3`}>
+        <h2 className={styles.cardTitle}>{dict.dangerTitle}</h2>
         <p className="text-sm text-grisclair">{dict.dangerText}</p>
 
         {!confirmingDelete ? (
-          <Button variant="outline" className="mt-2" onClick={() => setConfirmingDelete(true)}>
+          <Button variant="accountOutline" className={`${styles.action} mt-2`} onClick={() => setConfirmingDelete(true)}>
             {dict.deleteButton}
           </Button>
         ) : (
@@ -305,22 +329,22 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
                 value={deleteInput}
                 onChange={(e) => setDeleteInput(e.target.value)}
                 placeholder={dict.deleteConfirmWord}
-                className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire"
+                className={`${styles.field} text-sm text-ivoire`}
               />
             </label>
 
             {deleteError && (
-              <p className="text-sm" style={{ color: "#B0473E" }} role="alert">
+              <p className="text-sm" style={{ color: "#EF9388" }} role="alert">
                 {deleteError}
               </p>
             )}
 
             <div className="flex flex-wrap items-center gap-6">
               <Button
-                variant="outline"
+                variant="accountOutline"
                 disabled={deleteInput !== dict.deleteConfirmWord || deleting}
                 onClick={deleteAccount}
-                className="disabled:cursor-not-allowed disabled:opacity-40"
+                className={`${styles.action} disabled:cursor-not-allowed disabled:opacity-40`}
               >
                 {deleting ? "…" : dict.deleteConfirmButton}
               </Button>
@@ -338,6 +362,8 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
             </div>
           </div>
         )}
+      </div>
+      </aside>
       </div>
     </div>
   );

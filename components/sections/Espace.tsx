@@ -4,6 +4,8 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { useCanComposeTotem } from "@/lib/hooks/useCanComposeTotem";
 import { useTotemJourney } from "@/lib/hooks/useTotemJourney";
 import styles from "./Espace.module.css";
+import { AccountWorkCard } from "@/components/ui/AccountWorkCard";
+import accountStyles from "@/components/ui/Account.module.css";
 import { useCommandes } from "@/lib/hooks/useCommandes";
 import { interfaceCopy } from "@/lib/interface-copy";
 import { ConsultationStatus } from "@/components/sections/ConsultationStatus";
@@ -89,34 +91,9 @@ export default function Espace({ dict, caurisCopy, lang }: Props) {
         {error && !delayNotice && <p role="alert" className="text-sm text-grisclair">{ui.errors.orderUnavailable}</p>}
 
         {works.length > 0 && (
-          <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={accountStyles.grid}>
             {works.map((commande) => (
-              <Link
-                key={commande.id}
-                href={`/${lang}/oeuvre?commande=${commande.id}`}
-                className={styles.work}
-              >
-                <div className={styles.workImage}>
-                  {commande.oeuvre?.image_url && (
-                    // eslint-disable-next-line @next/next/no-img-element -- image générée dynamiquement, domaine backend non préconfiguré
-                    <img
-                      src={commande.oeuvre.image_url}
-                      alt=""
-                    />
-                  )}
-                </div>
-                <div className="flex flex-col gap-3.5 p-5.5">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-display text-xl italic text-ivoire">{commande.oeuvre?.nom_totem}</span>
-                    <span className="text-xs text-grisclair">{ui.orders.serial} {commande.oeuvre?.numero_serie}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="border border-ombre px-4 py-2 text-xs font-medium text-ivoire">{dict.recitLabel}</span>
-                    <span className="border border-ombre px-4 py-2 text-xs font-medium text-ivoire">{dict.imageLabel}</span>
-                    <span className="border border-ombre px-4 py-2 text-xs font-medium text-ivoire">{dict.audioLabel}</span>
-                  </div>
-                </div>
-              </Link>
+              <AccountWorkCard key={commande.id} commande={commande} lang={lang} headingLevel={3} labels={{ ...dict, serial: ui.orders.serial }} />
             ))}
           </div>
         )}

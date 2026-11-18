@@ -76,7 +76,10 @@ describe("owned artwork link renewal", () => {
   });
   it("renews thumbnails in the command list in one batch", async () => {
     const response = await commands(request());
-    expect((await response.json())[0].oeuvres[0].image_url).toBe(links.image_url);
+    expect((await response.json())[0].oeuvres[0]).toMatchObject({
+      image_url: links.image_url, pdf_url: links.pdf_url,
+      audio_url: links.audio_url, certificate_url: links.certificate_url,
+    });
     expect(response.headers.get("cache-control")).toBe("private, no-store");
     expect(mocks.eq).toHaveBeenCalledWith("user_id", "owner");
     expect(fetchMock).toHaveBeenCalledOnce();

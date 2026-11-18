@@ -142,13 +142,6 @@
   padding: clamp(1.25rem, 3vw, 2rem);
   border-radius: 0.75rem;
 }
-.consultation > a, .consultation > button {
-  max-width: 100%;
-  padding: 0.7rem 1.5rem;
-  border-radius: 0.5rem;
-  color: var(--color-or);
-  text-align: center;
-}
 
 .works { margin-top: 2rem; }
 .worksTitle {
