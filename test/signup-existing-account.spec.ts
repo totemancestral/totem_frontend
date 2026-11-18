@@ -11,7 +11,7 @@ vi.mock("../lib/env", () => ({ getServerEnv: () => ({ NEXT_PUBLIC_SITE_URL: "htt
 
 const request = (locale = "fr") => new Request("http://localhost/api/auth/signup", {
   method: "POST", headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email: "  Test@Example.com  ", password: "StrongPassword1", date_naissance: "05-21", naissance_concerne: "titulaire", locale }),
+  body: JSON.stringify({ email: "  Test@Example.com  ", password: "StrongPassword1", prenom: "Nadia", parcours: "adulte", majorite_confirmee: true, date_naissance: "05-21", locale }),
 });
 
 beforeEach(() => {
@@ -87,18 +87,21 @@ describe("birth date at signup", () => {
     expect(mocks.signUp).not.toHaveBeenCalled();
   });
 
-  it("persists only the child's day and month, including February 29", async () => {
+  it("persists the Junior age group without a birthday or surname", async () => {
     const body = await request().json();
     const response = await POST(new Request("http://localhost/api/auth/signup", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, date_naissance: "02-29", naissance_concerne: "enfant" }),
+      body: JSON.stringify({ ...body, parcours: "junior", tranche_age: "11-14", nom: "Ignored", date_naissance: "02-29" }),
     }));
     expect(response.status).toBe(200);
     expect(mocks.signUp).toHaveBeenCalledWith(expect.objectContaining({
       options: expect.objectContaining({ data: expect.objectContaining({
-        date_naissance: "02-29", naissance_concerne: "enfant",
+        parcours: "junior", tranche_age: "11-14", nom: "", naissance_concerne: "enfant",
       }) }),
     }));
+    const metadata = mocks.signUp.mock.calls[0]?.[0].options.data;
+    expect(metadata).not.toHaveProperty("date_naissance");
+    expect(metadata).not.toHaveProperty("majorite_confirmee");
   });
   it("discards the year from an already-open legacy signup form", async () => {
     const body = await request().json();
@@ -108,5 +111,42 @@ describe("birth date at signup", () => {
     }));
     expect(response.status).toBe(200);
     expect(mocks.signUp.mock.calls[0]?.[0].options.data.date_naissance).toBe("05-21");
+  });
+});
+
+describe("signup age rules", () => {
+  it.each([false, undefined, "true"])("rejects an adult declaration %s before sending an email", async majorite_confirmee => {
+    const body = await request().json();
+    const response = await POST(new Request("http://localhost/api/auth/signup", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, majorite_confirmee }),
+    }));
+    expect(response.status).toBe(422);
+    expect((await response.json()).code).toBe("invalid_age");
+    expect(mocks.signUp).not.toHaveBeenCalled();
+  });
+
+  it.each(["moins-11", undefined, "18-25"])("rejects an unsupported Junior age group %s", async tranche_age => {
+    const body = await request().json();
+    const response = await POST(new Request("http://localhost/api/auth/signup", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, parcours: "junior", tranche_age }),
+    }));
+    expect(response.status).toBe(422);
+    expect((await response.json()).code).toBe("invalid_age");
+    expect(mocks.signUp).not.toHaveBeenCalled();
+  });
+
+  it.each(["11-14", "15-17"])("accepts Junior group %s without a birthday and routes to the Junior questionnaire", async tranche_age => {
+    const body = await request().json();
+    delete body.date_naissance;
+    const response = await POST(new Request("http://localhost/api/auth/signup", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, parcours: "junior", tranche_age, redirectPath: "/fr/parcours" }),
+    }));
+    expect(response.status).toBe(200);
+    const options = mocks.signUp.mock.calls[0]?.[0].options;
+    expect(options.data.tranche_age).toBe(tranche_age);
+    expect(options.emailRedirectTo).toContain(encodeURIComponent("/fr/parcours-junior"));
   });
 });

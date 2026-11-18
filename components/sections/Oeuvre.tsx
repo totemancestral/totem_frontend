@@ -7,6 +7,8 @@ import { Logo } from "@/components/ui/Logo";
 import { Brand } from "@/components/ui/Brand";
 import { AudioSeekBar } from "@/components/ui/AudioSeekBar";
 import { ShareTotem } from "@/components/ui/ShareTotem";
+import { AdultIdentityFields } from "@/components/ui/AdultIdentityFields";
+import type { AdultIdentityData } from "@/lib/adult-identity";
 import { parchmentParagraphs } from "@/lib/parchment-text";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
@@ -16,6 +18,7 @@ import { REQUEST_TIMING, requestSignal } from "@/lib/request-timing";
 type Phase = "loading" | "closed" | "open";
 
 type OeuvreData = {
+  adult_identity?: AdultIdentityData | null;
   nom_totem: string | null;
   recit: string | null;
   image_url: string | null;
@@ -303,6 +306,7 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
                       </div>}
                       {archetypeName && <h1 className="font-display text-2xl font-bold uppercase sm:text-4xl">{archetypeName}</h1>}
                     </header>
+                    {data?.adult_identity && <AdultIdentityFields identity={data.adult_identity} lang={lang} />}
                     <p className="mb-6 text-center text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "#8B6F2E" }}>
                       {dict.historyTitle}
                     </p>

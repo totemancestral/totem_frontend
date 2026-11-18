@@ -32,7 +32,7 @@ export default function OffreJunior({ dict, lang }: { dict: Dictionary["offreJun
           ))}
         </div>
 
-        <Button className="mt-2 w-full" href={`/${lang}/inscription`}>{dict.button}</Button>
+        <Button className="mt-2 w-full" href={`/${lang}/inscription?offre=junior`}>{dict.button}</Button>
       </div>
     </section>
   );

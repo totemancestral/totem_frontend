@@ -33,6 +33,9 @@ export async function GET(request: Request) {
     ...(data ?? { prenom: null, nom: null, sexe: null, langue: "fr", email: auth.email }),
     date_naissance: normalizeBirthDate(metadata?.date_naissance),
     naissance_concerne: metadata?.naissance_concerne ?? null,
+    parcours: metadata?.parcours ?? null,
+    tranche_age: metadata?.tranche_age ?? null,
+    majorite_confirmee: metadata?.majorite_confirmee === true,
   });
 }
 

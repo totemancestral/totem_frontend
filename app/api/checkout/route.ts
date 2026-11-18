@@ -1,10 +1,11 @@
+import { reservePendingCommande } from "@/lib/server/pending-commande";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
 import { authenticateRequest, createServiceClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { forwardRetryResponse } from "@/lib/server/response-limits";
-import { ADULT_OFFERS, JUNIOR_AMOUNT_CENTS, JUNIOR_COMMANDE_OFFRE, toCommandeOffre } from "@/lib/offers";
+import { ADULT_OFFERS, toCommandeOffre } from "@/lib/offers";
 import type { Json } from "@/lib/supabase/types";
 import { adultIndicators, toAdultBackendAnswers } from "@/lib/adult-answers";
 import { internalError } from "@/lib/api-error";
@@ -16,15 +17,6 @@ const checkoutSchema = z.object({
   answers: z.unknown(),
   locale: z.enum(["fr", "en"]),
   parcoursId: z.uuid().optional(),
-});
-
-const juniorAnswerSchema = z.object({ choice: z.enum(["A", "B", "C", "D"]) });
-const juniorAnswersSchema = z.object({
-  "1": juniorAnswerSchema,
-  "2": juniorAnswerSchema,
-  "3": juniorAnswerSchema,
-  "4": juniorAnswerSchema,
-  "5": juniorAnswerSchema,
 });
 
 // Même limite que le backend (4000 caractères/réponse) : appliquée ici aussi
@@ -46,11 +38,7 @@ export async function POST(request: Request) {
     }
 
     if (parsed.data.offre === "junior") {
-      const answers = juniorAnswersSchema.safeParse(parsed.data.answers);
-      if (!answers.success) {
-        return NextResponse.json({ error: "Réponses invalides" }, { status: 422 });
-      }
-      return await handleJuniorCheckout(request, { answers: answers.data, locale: parsed.data.locale }, auth);
+      return NextResponse.json({ code: "parent_confirmation_required" }, { status: 403 });
     }
 
     const answers = adultAnswersSchema.safeParse(parsed.data.answers);
@@ -149,56 +137,6 @@ async function handleCheckout(
   }, commande.id);
 }
 
-async function handleJuniorCheckout(
-  request: Request,
-  data: { answers: z.infer<typeof juniorAnswersSchema>; locale: "fr" | "en" },
-  auth: { userId: string; email: string },
-) {
-  const env = getServerEnv();
-  const origin = (env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
-  const supabase = createServiceClient();
-
-  const profileResult = await supabase
-    .from("profiles")
-    .select("prenom")
-    .eq("id", auth.userId)
-    .maybeSingle();
-  const firstName = (profileResult.data as { prenom?: string } | null)?.prenom ?? "";
-
-  // Pas de parcours adulte associé : la commande Junior n'a pas de réponses
-  // stockées dans reponses_parcours (les réponses voyagent directement vers
-  // le backend, qui les mirrore dans oeuvres.metadata une fois révélées).
-  const reserved = await reservePendingCommande(supabase, {
-    userId: auth.userId,
-    reponsesId: null,
-    offre: JUNIOR_COMMANDE_OFFRE,
-    amountCents: JUNIOR_AMOUNT_CENTS,
-    locale: data.locale,
-  });
-
-  if ("error" in reserved) {
-    return internalError("checkout.reservePendingCommande", reserved.error);
-  }
-  const commande = reserved.commande;
-
-  if (!env.TOTEM_BACKEND_URL) {
-    return NextResponse.json(
-      { error: "Le moteur de paiement n'est pas disponible. Réessaie dans un instant." },
-      { status: 503 },
-    );
-  }
-
-  return callBackendCheckout(request, env.TOTEM_BACKEND_URL, {
-    offer: "junior",
-    externalCommandId: commande.id,
-    firstName: firstName || undefined,
-    answers: data.answers,
-    locale: data.locale,
-    successUrl: `${origin}/${data.locale}/confirmation-junior?session_id={CHECKOUT_SESSION_ID}`,
-    cancelUrl: `${origin}/${data.locale}/paiement-junior?checkout=cancelled`,
-  }, commande.id);
-}
-
 async function callBackendCheckout(
   request: Request,
   backendUrlRaw: string,
@@ -262,53 +200,6 @@ async function callBackendCheckout(
  * Reprend une commande non payée de la même offre et du même parcours.
  * Une autre création, ou une commande Junior, garde ses propres réponses.
  */
-async function reservePendingCommande(
-  supabase: ReturnType<typeof createServiceClient>,
-  input: {
-    userId: string;
-    reponsesId: string | null;
-    offre: ReturnType<typeof toCommandeOffre> | typeof JUNIOR_COMMANDE_OFFRE;
-    amountCents: number;
-    locale: "fr" | "en";
-  },
-): Promise<{ commande: { id: string } } | { error: string }> {
-  const fields = {
-    reponses_id: input.reponsesId,
-    offre: input.offre,
-    montant_cents: input.amountCents,
-    devise: "EUR",
-    langue: input.locale,
-  };
-
-  let pendingQuery = supabase
-    .from("commandes")
-    .select("id")
-    .eq("user_id", input.userId)
-    .eq("statut", "en_attente_paiement")
-    .eq("offre", input.offre);
-  pendingQuery = input.reponsesId === null ? pendingQuery.is("reponses_id", null) : pendingQuery.eq("reponses_id", input.reponsesId);
-  const { data: existing, error: pendingError } = await pendingQuery.order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (pendingError) return { error: pendingError.message };
-
-  if (existing?.id) {
-    const { error } = await supabase.from("commandes").update(fields).eq("id", existing.id);
-    if (error) return { error: error.message };
-    return { commande: { id: existing.id } };
-  }
-
-  const { data: created, error } = await supabase
-    .from("commandes")
-    .insert({ user_id: input.userId, statut: "en_attente_paiement", ...fields })
-    .select("id")
-    .single();
-
-  if (error || !created) return { error: error?.message ?? "commande_creation_failed" };
-  return { commande: { id: created.id } };
-}
-
 /** Le sexe déclaré voyage comme réponse dédiée : le backend le lit sous
  *  l'identifiant « sexe » et n'en tient pas compte dans le scoring. */
 function withGender(

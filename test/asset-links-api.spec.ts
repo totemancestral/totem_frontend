@@ -35,6 +35,13 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("owned artwork link renewal", () => {
+  it("relays the adult identity alongside the complete existing story", async () => {
+    const identity = { animal: "Aigle", quality: "Vision", identityPhrase: "Une phrase identitaire.", secondaryAttributes: ["Vision", "Élévation", "Messager", "Liberté"] };
+    mocks.single.mockResolvedValue({ data: { id: "owned", offre: "ancestral", statut: "livree", stripe_session_id: "cs_owned", oeuvres: [{ ...oldWork, recit: "Histoire complète." }] }, error: null });
+    fetchMock.mockResolvedValue(Response.json([{ ...links, adult_identity: identity }]));
+    const response = await artwork(request(), params);
+    expect((await response.json()).oeuvre).toMatchObject({ adult_identity: identity, recit: "Histoire complète." });
+  });
   it("returns fresh links for all files without persisting them", async () => {
     const response = await artwork(request(), params);
     const payload = await response.json();

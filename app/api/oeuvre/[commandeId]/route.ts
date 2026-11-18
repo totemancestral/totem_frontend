@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { authenticateRequest, createServiceClient } from "@/lib/supabase/server";
 import { internalError } from "@/lib/api-error";
 import { readAssetLinks } from "@/lib/server/asset-links";
+import type { AdultIdentityData } from "@/lib/adult-identity";
 
 /**
  * L'œuvre finale (texte, image, audio, PDF) est mirrorée par totem_backend
@@ -31,14 +32,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ comm
 
   const oeuvre = Array.isArray(commande.oeuvres) ? commande.oeuvres[0] : commande.oeuvres;
   // Le certificat vient du backend, même si le miroir historique n'a pas cette colonne.
-  let renewed = oeuvre ? { ...oeuvre, certificate_url: null as string | null } : null;
+  let renewed = oeuvre ? { ...oeuvre, certificate_url: null as string | null, adult_identity: null as AdultIdentityData | null } : null;
   if (oeuvre) {
     const assets = await readAssetLinks(request, commande.stripe_session_id ? [commande.stripe_session_id] : []);
     if (assets instanceof NextResponse) return assets;
     const links = commande.stripe_session_id ? assets.get(commande.stripe_session_id) : null;
     if (!links) return NextResponse.json({ error: "artwork_assets_unavailable" }, { status: 503 });
     renewed = { ...oeuvre, image_url: links.image_url, audio_url: links.audio_url,
-      pdf_url: links.pdf_url, certificate_url: links.certificate_url };
+      pdf_url: links.pdf_url, certificate_url: links.certificate_url, adult_identity: links.adult_identity ?? null };
   }
 
   return NextResponse.json({

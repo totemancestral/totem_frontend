@@ -38,7 +38,8 @@ export function useTotemJourney(lang: Locale, enabled: boolean) {
       if (progress.parcoursId) {
         setJourney({ href: `/${lang}/parcours?parcours=${encodeURIComponent(progress.parcoursId)}`, resuming: true });
       } else {
-        const junior = data.session.user.user_metadata.naissance_concerne === "enfant";
+        const metadata = data.session.user.user_metadata;
+        const junior = metadata.parcours === "junior" || (!metadata.parcours && metadata.naissance_concerne === "enfant");
         let juniorReadyForPayment = false;
         if (junior) {
           try {

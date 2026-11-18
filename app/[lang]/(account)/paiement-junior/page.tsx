@@ -1,5 +1,4 @@
-import { Suspense } from "react";
-import Paiement from "@/components/sections/Paiement";
+import { JuniorParentRequest } from "@/components/sections/JuniorParentRequest";
 import { getDictionary, type Locale } from "../../dictionaries";
 
 export default async function PaiementJuniorPage({
@@ -10,9 +9,5 @@ export default async function PaiementJuniorPage({
   const { lang } = await params;
   const dict = await getDictionary(lang);
 
-  return (
-    <Suspense fallback={null}>
-      <Paiement dict={dict.paiement} offresDict={dict.offres} lang={lang} variant="junior" />
-    </Suspense>
-  );
+  return <JuniorParentRequest copy={dict.parental} lang={lang} />;
 }

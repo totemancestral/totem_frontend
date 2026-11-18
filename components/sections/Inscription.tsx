@@ -40,10 +40,12 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
   const requestedOffer = searchParams.get("offre");
   const offre = isAdultOffer(requestedOffer) ? requestedOffer : null;
 
-  const [path, setPath] = useState<"adulte" | "junior">("adulte");
+  const [path, setPath] = useState<"adulte" | "junior">(requestedOffer === "junior" ? "junior" : "adulte");
+  const [adultAge, setAdultAge] = useState<"yes" | "no" | "">("");
+  const [juniorAge, setJuniorAge] = useState<"moins-11" | "11-14" | "15-17" | "">("");
+  const eligible = path === "adulte" ? adultAge === "yes" : juniorAge === "11-14" || juniorAge === "15-17";
   const [gender, setGender] = useState<"homme" | "femme">("homme");
   const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [birthDay, setBirthDay] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
   const birthDate = birthMonth && birthDay ? `${birthMonth}-${birthDay}` : "";
@@ -89,7 +91,11 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
     setErrorField(null);
     setExistingAccount(false);
 
-    if (!isValidBirthDate(birthDate)) {
+    if (!eligible) {
+      setError(dict.ageError);
+      return;
+    }
+    if (path === "adulte" && !isValidBirthDate(birthDate)) {
       setErrorField("birthDate");
       setError(dict.birthDateError);
       return;
@@ -116,10 +122,11 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
           email,
           password,
           prenom: firstName,
-          nom: lastName,
           sexe: gender,
-          date_naissance: birthDate,
-          naissance_concerne: path === "junior" ? "enfant" : "titulaire",
+          parcours: path,
+          ...(path === "adulte"
+            ? { majorite_confirmee: adultAge === "yes", date_naissance: birthDate }
+            : { tranche_age: juniorAge }),
           locale: lang,
           redirectPath: nextPath,
         }),
@@ -136,7 +143,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
         const alreadyExists = payload?.code === "email_exists";
         setExistingAccount(alreadyExists);
         setErrorField(alreadyExists ? "email" : payload?.code === "invalid_birth_date" ? "birthDate" : null);
-        setError(retryNotice(response, lang) ?? (alreadyExists ? dict.emailExists : payload?.code === "invalid_birth_date" ? dict.birthDateError : ui.errors.signupFailed));
+        setError(retryNotice(response, lang) ?? (alreadyExists ? dict.emailExists : payload?.code === "invalid_birth_date" ? dict.birthDateError : payload?.code === "invalid_age" ? dict.ageError : ui.errors.signupFailed));
         return;
       }
 
@@ -215,7 +222,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
             <div className="flex gap-4">
               <RadioCard
                 name="path" value="adulte"
-                onChange={() => { setPath("adulte"); setBirthDay(""); setBirthMonth(""); }}
+                onChange={() => { setPath("adulte"); setAdultAge(""); setBirthDay(""); setBirthMonth(""); setError(null); }}
                 checked={path === "adulte"}
                 className={`flex flex-1 flex-col gap-1.5 border p-5 text-left ${
                   path === "adulte" ? "border-[1.5px] border-or bg-indigo" : "border-ombre"
@@ -226,7 +233,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
               </RadioCard>
               <RadioCard
                 name="path" value="junior"
-                onChange={() => { setPath("junior"); setBirthDay(""); setBirthMonth(""); }}
+                onChange={() => { setPath("junior"); setJuniorAge(""); setBirthDay(""); setBirthMonth(""); setError(null); }}
                 checked={path === "junior"}
                 className={`flex flex-1 flex-col gap-1.5 border p-5 text-left ${
                   path === "junior" ? "border-[1.5px] border-or bg-indigo" : "border-ombre"
@@ -240,10 +247,9 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
 
           {/* formulaire */}
           <div className="flex flex-col gap-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="flex min-w-0 flex-col gap-2">
                 <span className="text-xs font-medium uppercase tracking-wide text-gris">
-                  {dict.firstNameLabel}
+                  {path === "junior" ? dict.juniorFirstNameLabel : dict.firstNameLabel}
                 </span>
                 <input
                   type="text"
@@ -251,37 +257,53 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
                   autoComplete="given-name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder={dict.firstNamePlaceholder}
+                  placeholder={path === "junior" ? dict.juniorFirstNamePlaceholder : dict.firstNamePlaceholder}
                   required
                   maxLength={80}
                   className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire placeholder:text-grisclair"
                 />
               </label>
-              <label className="flex min-w-0 flex-col gap-2">
-                <span className="text-xs font-medium uppercase tracking-wide text-gris">
-                  {dict.lastNameLabel}
-                </span>
-                <input
-                  type="text"
-                  name="lastName"
-                  autoComplete="family-name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder={dict.lastNamePlaceholder}
-                  required
-                  maxLength={80}
-                  className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire placeholder:text-grisclair"
-                />
-              </label>
-            </div>
+            {path === "adulte" ? <fieldset className="min-w-0">
+              <legend className="mb-3 text-sm font-medium text-ivoire">{dict.adultAgeQuestion}</legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <RadioCard name="adultAge" value="yes" checked={adultAge === "yes"}
+                  onChange={() => { setAdultAge("yes"); setError(null); }}
+                  className={`border p-3 text-sm ${adultAge === "yes" ? "border-or text-or" : "border-ombre text-grisclair"}`}>
+                  {dict.adultAgeYes}
+                </RadioCard>
+                <RadioCard name="adultAge" value="no" checked={adultAge === "no"}
+                  onChange={() => { setAdultAge("no"); setError(null); }}
+                  className={`border p-3 text-sm ${adultAge === "no" ? "border-or text-or" : "border-ombre text-grisclair"}`}>
+                  {dict.adultAgeNo}
+                </RadioCard>
+              </div>
+              {adultAge === "no" && <div className="mt-3 space-y-3" role="status">
+                <p className="text-sm leading-relaxed text-grisclair">{dict.adultOnlyMessage}</p>
+                <button type="button" className="min-h-11 text-sm text-or underline underline-offset-4"
+                  onClick={() => { setPath("junior"); setJuniorAge(""); setBirthDay(""); setBirthMonth(""); setError(null); }}>
+                  {dict.seeJunior}
+                </button>
+              </div>}
+            </fieldset> : <fieldset className="min-w-0">
+              <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-gris">{dict.juniorAgeLabel}</legend>
+              <select name="juniorAge" aria-label={dict.juniorAgeLabel} value={juniorAge} required
+                onChange={event => { setJuniorAge(event.target.value as typeof juniorAge); setError(null); }}
+                className="w-full min-w-0 border border-ombre bg-indigo px-3 py-3.5 text-sm text-ivoire">
+                <option value="">{dict.juniorAgePlaceholder}</option>
+                <option value="moins-11">{dict.juniorAgeUnder11}</option>
+                <option value="11-14">{dict.juniorAge11to14}</option>
+                <option value="15-17">{dict.juniorAge15to17}</option>
+              </select>
+              {juniorAge === "moins-11" && <p role="status" className="mt-3 text-sm leading-relaxed text-grisclair">{dict.under11Message}</p>}
+            </fieldset>}
 
-            <fieldset className="min-w-0">
+            {path === "adulte" && <fieldset className="min-w-0" disabled={adultAge === "no"}>
               <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-gris">
-                {path === "junior" ? dict.childBirthDateLabel : dict.birthDateLabel}
+                {dict.birthDateLabel}
               </legend>
               <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-3">
                 <select name="birthDay" aria-label={dict.birthDayLabel}
-                  autoComplete={path === "junior" ? "off" : "bday-day"}
+                  autoComplete="bday-day"
                   value={birthDay} required onChange={event => {
                     setBirthDay(event.target.value);
                     if (errorField === "birthDate") { setError(null); setErrorField(null); }
@@ -293,7 +315,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
                     value={String(index + 1).padStart(2, "0")}>{index + 1}</option>)}
                 </select>
                 <select name="birthMonth" aria-label={dict.birthMonthLabel}
-                  autoComplete={path === "junior" ? "off" : "bday-month"}
+                  autoComplete="bday-month"
                   value={birthMonth} required onChange={event => {
                     const month = event.target.value;
                     setBirthMonth(month);
@@ -307,7 +329,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
                     value={String(index + 1).padStart(2, "0")}>{monthFormatter.format(new Date(Date.UTC(2000, index, 1)))}</option>)}
                 </select>
               </div>
-            </fieldset>
+            </fieldset>}
 
             <fieldset className="flex min-w-0 flex-col gap-2">
               <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-gris">
@@ -322,7 +344,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
                     gender === "homme" ? "border-[1.5px] border-or text-ivoire" : "border-ombre text-grisclair"
                   }`}
                 >
-                  {dict.genderMale}
+                  {path === "junior" ? dict.juniorGenderMale : dict.genderMale}
                 </RadioCard>
                 <RadioCard
                   name="gender" value="femme"
@@ -332,7 +354,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
                     gender === "femme" ? "border-[1.5px] border-or text-ivoire" : "border-ombre text-grisclair"
                   }`}
                 >
-                  {dict.genderFemale}
+                  {path === "junior" ? dict.juniorGenderFemale : dict.genderFemale}
                 </RadioCard>
               </div>
             </fieldset>
@@ -346,7 +368,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
                 aria-describedby={errorField === "email" && error ? "signup-error" : undefined}
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); if (errorField === "email") { setError(null); setErrorField(null); setExistingAccount(false); } }}
-                placeholder={dict.emailPlaceholder}
+                placeholder={path === "junior" ? dict.juniorEmailPlaceholder : dict.emailPlaceholder}
                 autoComplete="email"
                 required
                 maxLength={255}
@@ -383,8 +405,8 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
           )}
 
           <div className="mt-2 flex flex-wrap items-center gap-6">
-            <Button type="submit" disabled={loading} className="hover:text-[#FEFCF0]! disabled:cursor-wait disabled:opacity-60">
-              {loading ? (ui.status.creatingAccount) : dict.submit}
+            <Button type="submit" disabled={loading || !eligible} className="hover:text-[#FEFCF0]! disabled:cursor-not-allowed disabled:opacity-60">
+              {loading ? (ui.status.creatingAccount) : path === "junior" ? dict.juniorSubmit : dict.submit}
             </Button>
           </div>
 

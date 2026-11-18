@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
 import { forwardRetryResponse } from "@/lib/server/response-limits";
+import { adultIdentitySchema } from "@/lib/adult-identity";
 
 const linksSchema = z.object({
   sessionId: z.string(),
   image_url: z.string().url().nullable(), audio_url: z.string().url().nullable(),
   pdf_url: z.string().url().nullable(), certificate_url: z.string().url().nullable(),
+  adult_identity: adultIdentitySchema.nullable().optional(),
 });
 export type AssetLinks = z.infer<typeof linksSchema>;
 

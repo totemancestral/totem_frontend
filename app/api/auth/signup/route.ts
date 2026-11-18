@@ -18,13 +18,25 @@ const signupSchema = z.object({
     .refine(isStrongPassword, {
       message: "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.",
     }),
-  prenom: z.string().trim().max(80).optional(),
-  nom: z.string().trim().max(80).optional(),
+  prenom: z.string().trim().min(1).max(80),
   sexe: z.enum(["homme", "femme"]).optional(),
-  date_naissance: z.string().transform(normalizeBirthDate).pipe(z.string()),
-  naissance_concerne: z.enum(["titulaire", "enfant"]),
+  parcours: z.enum(["adulte", "junior"]),
+  majorite_confirmee: z.boolean().optional(),
+  tranche_age: z.enum(["moins-11", "11-14", "15-17"]).optional(),
+  date_naissance: z.string().optional(),
   locale: z.enum(["fr", "en"]).optional(),
   redirectPath: z.string().max(300).optional(),
+}).superRefine((data, context) => {
+  if (data.parcours === "adulte") {
+    if (data.majorite_confirmee !== true) {
+      context.addIssue({ code: "custom", path: ["majorite_confirmee"], message: "Adult confirmation required" });
+    }
+    if (!normalizeBirthDate(data.date_naissance)) {
+      context.addIssue({ code: "custom", path: ["date_naissance"], message: "Invalid birthday" });
+    }
+  } else if (!data.tranche_age || data.tranche_age === "moins-11") {
+    context.addIssue({ code: "custom", path: ["tranche_age"], message: "Junior age must be between 11 and 17" });
+  }
 });
 
 export async function POST(request: Request) {
@@ -34,7 +46,8 @@ export async function POST(request: Request) {
   const parsed = signupSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     const invalidBirthDate = parsed.error.issues.some((issue) => issue.path[0] === "date_naissance");
-    return NextResponse.json({ code: invalidBirthDate ? "invalid_birth_date" : "invalid_form", error: "Formulaire invalide" }, { status: 422 });
+    const invalidAge = parsed.error.issues.some((issue) => ["majorite_confirmee", "tranche_age", "parcours"].includes(String(issue.path[0])));
+    return NextResponse.json({ code: invalidAge ? "invalid_age" : invalidBirthDate ? "invalid_birth_date" : "invalid_form", error: "Formulaire invalide" }, { status: 422 });
   }
   const payload = parsed.data;
   const email = payload.email;
@@ -42,15 +55,18 @@ export async function POST(request: Request) {
   const locale = payload.locale ?? "fr";
 
   const metadata = {
-    prenom: payload.prenom || email.split("@")[0],
-    nom: payload.nom ?? "",
+    prenom: payload.prenom,
+    nom: "",
     sexe: payload.sexe ?? "",
     langue: locale,
-    date_naissance: payload.date_naissance,
-    naissance_concerne: payload.naissance_concerne,
+    parcours: payload.parcours,
+    naissance_concerne: payload.parcours === "junior" ? "enfant" : "titulaire",
+    ...(payload.parcours === "adulte"
+      ? { majorite_confirmee: true, date_naissance: normalizeBirthDate(payload.date_naissance) }
+      : { tranche_age: payload.tranche_age }),
   };
 
-  const nextPath = safeRedirectPath(payload.redirectPath, locale);
+  const nextPath = payload.parcours === "junior" ? `/${locale}/parcours-junior` : safeRedirectPath(payload.redirectPath, locale);
   const redirectTo = `${getRequestOrigin()}/${locale}/verification?next=${encodeURIComponent(nextPath)}`;
 
   try {
