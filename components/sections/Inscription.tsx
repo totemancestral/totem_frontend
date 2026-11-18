@@ -173,7 +173,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
   return (
     <div className="flex min-h-screen">
       {/* panneau photo : réservé au bureau */}
-      <div className="relative hidden h-screen w-[42%] shrink-0 overflow-hidden bg-nuit lg:block [perspective:1200px]">
+      <div className="relative hidden h-dvh w-[42%] shrink-0 overflow-hidden bg-nuit lg:sticky lg:top-0 lg:block lg:self-start [perspective:1200px]">
       <div className="absolute inset-0 animate-totem-3d [transform-style:preserve-3d]">
         <Image
           src="/images/logo_totem_1.svg"
