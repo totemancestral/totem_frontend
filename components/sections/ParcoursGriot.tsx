@@ -14,6 +14,7 @@ import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 import type { AdultAnswerState } from "@/lib/adult-answers";
 import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
+import { AdultSaveQueue, adultLocalKey, localAdultDraftSchema } from "@/lib/adult-save-queue";
 import { isAdultOffer } from "@/lib/offers";
 import { adultDraftSchema, adultResumeStep, hasAdultAnswersThrough, PAYMENT_AFTER_QUESTION, ADULT_QUESTION_COUNT } from "@/lib/adult-flow";
 
@@ -53,9 +54,27 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [bootError, setBootError] = useState(false);
   const [bootRetryNotice, setBootRetryNotice] = useState<string | null>(null);
-  const [parcoursId, setParcoursId] = useState<string | null>(null);
   const [paymentSession, setPaymentSession] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "pending">("idle");
+  const saveQueue = useRef<AdultSaveQueue<Record<string, AdultAnswerState>, string> | null>(null);
+  const localContext = useRef<{ key: string; parcoursId: string | null; sessionId: string | null } | null>(null);
+  const latestAnswers = useRef(answers);
+
+  useEffect(() => {
+    latestAnswers.current = answers;
+    const context = localContext.current;
+    if (variant !== "adulte" || checkingAuth || !context || !Object.keys(answers).length) return;
+    try {
+      localStorage.setItem(context.key, JSON.stringify({ ...context, answers, updatedAt: Date.now() }));
+    } catch { /* Server saves remain available if browser storage is disabled. */ }
+  }, [answers, checkingAuth, variant]);
+
+  useEffect(() => {
+    const retry = () => { if (saveQueue.current) void saveQueue.current.save(latestAnswers.current).catch(() => undefined); };
+    window.addEventListener("online", retry);
+    return () => window.removeEventListener("online", retry);
+  }, []);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const questionTitleRef = useRef<HTMLHeadingElement | null>(null);
   const errorRef = useRef<HTMLParagraphElement | null>(null);
@@ -92,7 +111,10 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
       const permission = await eligibility.json();
       if (!alive) return;
       if (!eligibility.ok || typeof permission.allowed !== "boolean") throw new Error("eligibility_unavailable");
-      if (!permission.allowed) { setExistingTotem(true); setCheckingAuth(false); return; }
+      if (!permission.allowed) {
+        try { localStorage.removeItem(adultLocalKey(data.session.user.id)); } catch { /* optional storage */ }
+        setExistingTotem(true); setCheckingAuth(false); return;
+      }
       if (variant === "adulte") {
         const query = new URLSearchParams({ ...(requestedSession ? { session_id: requestedSession } : {}), ...(requestedParcours ? { parcoursId: requestedParcours } : {}) });
         const response = await fetch(`/api/parcours?${query}`, { headers: { Authorization: `Bearer ${data.session.access_token}` }, cache: "no-store" });
@@ -101,18 +123,57 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
         const progress = await response.json();
         if (!alive) return;
         if (progress.completed && progress.sessionId) {
+          try { localStorage.removeItem(adultLocalKey(data.session.user.id)); } catch { /* optional storage */ }
           router.replace(`/${lang}/confirmation?session_id=${encodeURIComponent(progress.sessionId)}`);
           return;
         }
         const restored = adultDraftSchema.safeParse(progress.answers);
         if (!restored.success) throw new Error("invalid_draft");
-        const restoredAnswers = progress.paid ? restored.data : Object.fromEntries(Object.entries(restored.data).filter(([key]) => Number(key) <= PAYMENT_AFTER_QUESTION));
+        const context = { key: adultLocalKey(data.session.user.id), parcoursId: progress.parcoursId ?? null, sessionId: progress.sessionId ?? null };
+        let recovered = restored.data;
+        let hasLocal = false;
+        try {
+          const cached = localAdultDraftSchema.safeParse(JSON.parse(localStorage.getItem(context.key) ?? "null"));
+          if (cached.success && Date.now() - cached.data.updatedAt >= 7 * 86400_000) localStorage.removeItem(context.key);
+          if (cached.success && Date.now() - cached.data.updatedAt < 7 * 86400_000
+            && cached.data.parcoursId === context.parcoursId
+            && (!cached.data.sessionId || cached.data.sessionId === context.sessionId)) {
+            recovered = { ...restored.data, ...cached.data.answers };
+            hasLocal = true;
+          }
+        } catch { /* Invalid local drafts never replace the server draft. */ }
+        localContext.current = context;
+        saveQueue.current = new AdultSaveQueue(async snapshot => {
+          const { data: auth } = await supabase.auth.getSession();
+          if (!auth.session || auth.session.user.id !== data.session!.user.id) throw new Error("session_expired");
+          const saved = await fetch("/api/parcours", {
+            method: "POST", signal: AbortSignal.timeout(15000),
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.session.access_token}` },
+            body: JSON.stringify({ parcoursId: context.parcoursId ?? undefined, sessionId: context.sessionId ?? undefined, answers: snapshot, locale: lang }),
+          });
+          if (retryNotice(saved, lang)) throw new RetryAfterError(saved);
+          if (!saved.ok) throw new Error("save_failed");
+          const result = await saved.json();
+          if (typeof result.parcoursId !== "string") throw new Error("invalid_save");
+          context.parcoursId = result.parcoursId;
+          try {
+            const local = localAdultDraftSchema.safeParse(JSON.parse(localStorage.getItem(context.key) ?? "null"));
+            if (local.success) {
+              if (JSON.stringify(local.data.answers) === JSON.stringify(snapshot)) localStorage.removeItem(context.key);
+              else localStorage.setItem(context.key, JSON.stringify({ ...local.data, parcoursId: result.parcoursId, sessionId: context.sessionId }));
+            }
+          } catch { /* Saving on the server does not depend on local storage. */ }
+          return result.parcoursId as string;
+        }, status => {
+          if (alive) setSaveStatus(status);
+        });
+        if (hasLocal) setSaveStatus("pending");
+        const restoredAnswers = progress.paid ? recovered : Object.fromEntries(Object.entries(recovered).filter(([key]) => Number(key) <= PAYMENT_AFTER_QUESTION));
         setAnswers(restoredAnswers);
-        setParcoursId(progress.parcoursId);
         setPaymentSession(progress.sessionId ?? null);
         setPaid(progress.paid === true);
         setStep(adultResumeStep(restoredAnswers, progress.paid === true));
-        if (progress.parcoursId) setPhase("question");
+        if (progress.parcoursId || hasLocal) setPhase("question");
       }
       if (alive) setCheckingAuth(false);
     }
@@ -202,6 +263,12 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
     if (submitting) return;
     stopAudio();
     setError(null);
+    if (variant === "adulte" && !isLast && (paid || step + 1 < PAYMENT_AFTER_QUESTION)) {
+      if (!saveQueue.current) { setError(dict.saveError); return; }
+      void saveQueue.current.save(answers).catch(() => undefined);
+      setStep(step + 1);
+      return;
+    }
     setSubmitting(true);
     try {
       if (variant === "junior") {
@@ -213,18 +280,12 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
         const { data } = await supabase.auth.getSession();
         if (!data.session) throw new Error("session_expired");
         const headers = { "Content-Type": "application/json", Authorization: `Bearer ${data.session.access_token}` };
-        const saved = await fetch("/api/parcours", {
-          method: "POST", headers,
-          body: JSON.stringify({ parcoursId: parcoursId ?? undefined, sessionId: paymentSession ?? undefined, answers, locale: lang }),
-        });
-        if (retryNotice(saved, lang)) throw new RetryAfterError(saved);
-        if (!saved.ok) throw new Error("save_failed");
-        const progress = await saved.json();
-        setParcoursId(progress.parcoursId);
+        if (!saveQueue.current) throw new Error("save_unavailable");
+        const savedParcoursId = await saveQueue.current.save(answers);
 
         if (!paid && step + 1 >= PAYMENT_AFTER_QUESTION) {
           if (!hasAdultAnswersThrough(answers, PAYMENT_AFTER_QUESTION)) { setError(dict.incompleteError); return; }
-          const query = new URLSearchParams({ parcours: progress.parcoursId, ...(offre ? { offre } : {}) });
+          const query = new URLSearchParams({ parcours: savedParcoursId, ...(offre ? { offre } : {}) });
           router.push(`/${lang}/${offre ? "paiement" : "choisir-offre"}?${query}`);
           return;
         }
@@ -232,10 +293,11 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
         if (!hasAdultAnswersThrough(answers, ADULT_QUESTION_COUNT)) { setError(dict.incompleteError); return; }
         const completed = await fetch("/api/orders/complete", {
           method: "POST", headers,
-          body: JSON.stringify({ parcoursId: progress.parcoursId, sessionId: paymentSession, answers, locale: lang }),
+          body: JSON.stringify({ parcoursId: savedParcoursId, sessionId: paymentSession, answers, locale: lang }),
         });
         if (retryNotice(completed, lang)) throw new RetryAfterError(completed);
         if (!completed.ok) throw new Error("completion_failed");
+        try { if (localContext.current) localStorage.removeItem(localContext.current.key); } catch { /* optional storage */ }
         router.push(`/${lang}/confirmation?session_id=${encodeURIComponent(paymentSession!)}`);
       }
     } catch (error) {
@@ -460,6 +522,14 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
             )}
           </div>
 
+          {variant === "adulte" && saveStatus !== "idle" && <div className="px-6 text-sm text-grisclair lg:px-14" role="status" aria-live="polite">
+            {saveStatus === "pending" ? <>
+              <span>{lang === "fr" ? "Sauvegarde en attente. Vos réponses restent dans ce navigateur si le stockage est disponible." : "Save pending. Your answers stay in this browser if storage is available."}</span>{" "}
+              <button type="button" className="text-or underline" disabled={submitting} onClick={() => { void saveQueue.current?.save(answers).catch(() => undefined); }}>
+                {lang === "fr" ? "Réessayer" : "Retry"}
+              </button>
+            </> : saveStatus === "saving" ? (lang === "fr" ? "Sauvegarde en cours…" : "Saving…") : (lang === "fr" ? "Réponses enregistrées" : "Answers saved")}
+          </div>}
           {/* navigation basse */}
           <p role="status" className="sr-only">{submitting ? (ui.status.savingAnswers) : ""}</p>
           <div className="relative z-10 flex flex-wrap items-center justify-between gap-5 px-6 py-8 lg:px-14">
