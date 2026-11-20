@@ -47,7 +47,7 @@ export function MediaExperience({ children, copy, homePath }: {
     if (!music) return;
     const voicePlaying = Array.from(document.querySelectorAll<HTMLMediaElement>("audio, video"))
       .some((media) => !music.owns(media) && !media.paused && !media.ended && !media.muted && media.volume > 0 && !media.error);
-    music.setVolume(voicePlaying ? MUSIC_VOLUME * 0.5 : MUSIC_VOLUME, voicePlaying ? 150 : 800);
+    music.setVolume(voicePlaying ? MUSIC_VOLUME * 0.2 : MUSIC_VOLUME, voicePlaying ? 150 : 800);
   }, []);
 
   const startMusic = useCallback(() => {

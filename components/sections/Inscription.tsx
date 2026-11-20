@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Brand } from "@/components/ui/Brand";
 import { PasswordField } from "@/components/ui/PasswordField";
+import choices from "./InscriptionChoices.module.css";
 import { RadioCard } from "@/components/ui/RadioCard";
 import { supabase } from "@/lib/supabase/client";
 import { BIRTH_MONTH_DAYS, isValidBirthDate } from "@/lib/birth-date";
@@ -197,7 +198,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
       >
         <Brand lang={lang} className="absolute left-6 top-7 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or lg:hidden" />
         <p role="status" className="sr-only">{loading ? (ui.status.creatingAccount) : ""}</p>
-        <form method="post" ref={formRef} onSubmit={onSubmit} aria-busy={loading} className="m-auto flex w-full min-w-0 max-w-lg flex-col gap-7 [overflow-wrap:anywhere]">
+        <form method="post" ref={formRef} onSubmit={onSubmit} aria-busy={loading} className={`${choices.choices} m-auto flex w-full min-w-0 max-w-lg flex-col gap-7 [overflow-wrap:anywhere]`}>
 
           <div className="flex flex-col gap-7">
             <p className="text-xs uppercase tracking-[0.2em] text-or">{dict.eyebrow}</p>

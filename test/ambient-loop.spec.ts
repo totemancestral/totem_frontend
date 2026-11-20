@@ -62,9 +62,9 @@ describe("ambient music overlap", () => {
     vi.useFakeTimers();
     const { loop, params } = fixture();
     await loop.play();
-    loop.setVolume(0.25, 150);
+    loop.setVolume(0.1, 150);
     expect(params[0].setValueAtTime).toHaveBeenCalledWith(0.5, 100);
-    expect(params[0].linearRampToValueAtTime).toHaveBeenCalledWith(0.25, 100.15);
+    expect(params[0].linearRampToValueAtTime).toHaveBeenCalledWith(0.1, 100.15);
     expect(params[1].cancelScheduledValues).not.toHaveBeenCalled();
     loop.dispose();
   });
@@ -73,10 +73,10 @@ describe("ambient music overlap", () => {
     vi.useFakeTimers();
     const { loop, params, context } = fixture();
     await loop.play();
-    loop.setVolume(0.25, 150);
+    loop.setVolume(0.1, 150);
     context.currentTime = 100.075;
     loop.setVolume(0.5, 800);
-    expect(params[0].setValueAtTime.mock.calls.at(-1)?.[0]).toBeCloseTo(0.375);
+    expect(params[0].setValueAtTime.mock.calls.at(-1)?.[0]).toBeCloseTo(0.3);
     expect(params[0].linearRampToValueAtTime).toHaveBeenLastCalledWith(0.5, 100.875);
     loop.setVolume(0.5, 800);
     expect(params[0].linearRampToValueAtTime).toHaveBeenCalledTimes(2);
@@ -88,7 +88,7 @@ describe("ambient music overlap", () => {
     const { loop, tracks } = fixture();
     await loop.play();
     loop.pause();
-    loop.setVolume(0.25, 150);
+    loop.setVolume(0.1, 150);
     loop.setVolume(0.5, 800);
     expect(loop.paused).toBe(true);
     expect(tracks[0].play).toHaveBeenCalledOnce();

@@ -13,6 +13,7 @@ import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { supabase } from "@/lib/supabase/client";
 import type { AdultAnswerState } from "@/lib/adult-answers";
+import { QuestionAudioCache } from "@/lib/question-audio-cache";
 import { questionAudioFallbackSrc, questionAudioSrc } from "@/lib/question-audio";
 import { AdultSaveQueue, adultLocalKey, localAdultDraftSchema } from "@/lib/adult-save-queue";
 import { isAdultOffer } from "@/lib/offers";
@@ -78,7 +79,8 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const questionTitleRef = useRef<HTMLHeadingElement | null>(null);
   const errorRef = useRef<HTMLParagraphElement | null>(null);
-  const [audioSrc, setAudioSrc] = useState("");
+  const audioCache = useRef<QuestionAudioCache | null>(null);
+  const [audioLoading, setAudioLoading] = useState(false);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
   useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
@@ -190,24 +192,57 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   };
   const isLast = step === questions.length - 1;
 
-  // Voix pré-enregistrée du griot pour chaque question (fichiers réels dans
-  // public/assets/{adulte|junior}/qN.mp3). Se recharge et tente l'autoplay à
-  // chaque changement de question — l'autoplay avec son ne fonctionne qu'après
-  // un premier geste utilisateur (déjà obtenu via "Je commence mon voyage"),
-  // sinon le bouton play sert de secours.
   useEffect(() => {
-    if (phase !== "question" || checkingAuth || bootError || existingTotem) return;
+    const cache = new QuestionAudioCache();
+    audioCache.current = cache;
+    return () => { cache.dispose(); audioCache.current = null; };
+  }, []);
+
+  useEffect(() => {
+    const media = audioRef.current;
+    return () => { media?.pause(); };
+  }, [checkingAuth, bootError, existingTotem]);
+
+  // Keep the same media element and call play synchronously inside navigation
+  // gestures. The effect only starts restored questions, never reloads a tap.
+  function playQuestion(index: number) {
     const el = audioRef.current;
     if (!el) return;
-    const src = questionAudioSrc(variant, step + 1, lang);
-    setAudioSrc(src);
-    setAudioProgress(0);
-    el.src = src;
-    el.load();
-    let alive = true;
-    void el.play().catch(() => { if (alive) setAudioPlaying(false); });
-    return () => { alive = false; el.pause(); };
-  }, [phase, step, variant, lang, checkingAuth, bootError, existingTotem]);
+    const source = questionAudioSrc(variant, index + 1, lang);
+    if (el.dataset.question !== source) {
+      el.pause();
+      el.dataset.question = source;
+      el.src = audioCache.current?.source(source) ?? source;
+      el.load();
+      setAudioProgress(0);
+    }
+    setAudioLoading(true);
+    void el.play().catch(() => { setAudioPlaying(false); setAudioLoading(false); });
+  }
+
+  useEffect(() => {
+    if (checkingAuth || bootError || existingTotem) return;
+    const source = questionAudioSrc(variant, step + 1, lang);
+    const next = step + 1 < questions.length ? questionAudioSrc(variant, step + 2, lang) : null;
+    if (phase === "intro") audioCache.current?.prepare([source]);
+    else {
+      if (audioRef.current?.dataset.question !== source) {
+        const el = audioRef.current;
+        if (el) {
+          el.dataset.question = source;
+          el.src = audioCache.current?.source(source) ?? source;
+          el.load();
+          void el.play().catch(() => { setAudioPlaying(false); setAudioLoading(false); });
+        }
+      }
+      audioCache.current?.prepare(next ? [source, next] : [source], next ? [next] : []);
+    }
+  }, [phase, step, variant, lang, checkingAuth, bootError, existingTotem, questions.length]);
+
+  function advanceQuestion(index: number) {
+    playQuestion(index);
+    setStep(index);
+  }
 
   function toggleAudio() {
     const el = audioRef.current;
@@ -256,7 +291,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   function goBack() {
     stopAudio();
     setError(null);
-    if (step > 0) setStep(step - 1);
+    if (step > 0) advanceQuestion(step - 1);
   }
 
   async function goNext() {
@@ -266,13 +301,13 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
     if (variant === "adulte" && !isLast && (paid || step + 1 < PAYMENT_AFTER_QUESTION)) {
       if (!saveQueue.current) { setError(dict.saveError); return; }
       void saveQueue.current.save(answers).catch(() => undefined);
-      setStep(step + 1);
+      advanceQuestion(step + 1);
       return;
     }
     setSubmitting(true);
     try {
       if (variant === "junior") {
-        if (!isLast) { setStep(step + 1); return; }
+        if (!isLast) { advanceQuestion(step + 1); return; }
         if (Object.keys(answers).length < questions.length) { setError(dict.incompleteError); return; }
         sessionStorage.setItem(JUNIOR_DRAFT_KEY, JSON.stringify(answers));
         router.push(`/${lang}/paiement-junior`);
@@ -289,7 +324,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
           router.push(`/${lang}/${offre ? "paiement" : "choisir-offre"}?${query}`);
           return;
         }
-        if (!isLast) { setStep(step + 1); return; }
+        if (!isLast) { advanceQuestion(step + 1); return; }
         if (!hasAdultAnswersThrough(answers, ADULT_QUESTION_COUNT)) { setError(dict.incompleteError); return; }
         const completed = await fetch("/api/orders/complete", {
           method: "POST", headers,
@@ -329,6 +364,22 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-nuit">
+      <audio ref={audioRef} preload="auto"
+        onTimeUpdate={e => { const el = e.currentTarget; if (el.duration) setAudioProgress(Math.min(100, Math.round(el.currentTime / el.duration * 100))); }}
+        onPlay={() => setAudioLoading(true)}
+        onPlaying={() => { setAudioPlaying(true); setAudioLoading(false); }}
+        onWaiting={() => setAudioLoading(true)}
+        onPause={() => { setAudioPlaying(false); setAudioLoading(false); }}
+        onEnded={() => { setAudioPlaying(false); setAudioLoading(false); setAudioProgress(100); }}
+        onError={e => {
+          const el = e.currentTarget;
+          const fallback = questionAudioFallbackSrc(variant, step + 1);
+          if (el.dataset.fallback === el.dataset.question || lang !== "en") { setAudioLoading(false); setAudioPlaying(false); return; }
+          el.dataset.fallback = el.dataset.question;
+          el.src = fallback;
+          el.load();
+          void el.play().catch(() => { setAudioPlaying(false); setAudioLoading(false); });
+        }} />
       {/* motif tournant en arrière-plan */}
       <svg
         className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 animate-[spin-slow_120s_linear_infinite] opacity-35"
@@ -393,7 +444,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
             <p className="text-sm leading-relaxed text-grisclair lg:text-base">{dict.introParagraph2}</p>
             <p className="text-sm leading-relaxed text-grisclair lg:text-base">{dict.introParagraph3}</p>
           </div>
-          <Button onClick={() => setPhase("question")}>{dict.introCta}</Button>
+          <Button onClick={() => { playQuestion(step); setPhase("question"); }}>{dict.introCta}</Button>
         </div>
       ) : (
         <>
@@ -414,31 +465,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
             </h1>
 
             {/* contrôle audio : la voix du griot lit la question */}
-            <audio
-              ref={audioRef}
-              src={audioSrc || undefined}
-              autoPlay
-              preload="auto"
-              onTimeUpdate={(e) => {
-                const el = e.currentTarget;
-                if (el.duration) setAudioProgress(Math.min(100, Math.round((el.currentTime / el.duration) * 100)));
-              }}
-              onPlay={() => setAudioPlaying(true)}
-              onPause={() => setAudioPlaying(false)}
-              onEnded={() => {
-                setAudioPlaying(false);
-                setAudioProgress(100);
-              }}
-              onError={(e) => {
-                const fallback = questionAudioFallbackSrc(variant, step + 1);
-                if (audioSrc === fallback) return;
-                setAudioSrc(fallback);
-                const el = e.currentTarget;
-                el.src = fallback;
-                el.load();
-                el.play().catch(() => undefined);
-              }}
-            />
+            {audioLoading && <p className="text-sm text-grisclair" role="status">{lang === "fr" ? "Chargement de l'audio\u2026" : "Loading audio\u2026"}</p>}
             <div className="-mt-3 flex w-full max-w-xl flex-wrap items-center justify-center gap-3">
               <button type="button"
                 onClick={restartAudio}
@@ -532,7 +559,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
           </div>}
           {/* navigation basse */}
           <p role="status" className="sr-only">{submitting ? (ui.status.savingAnswers) : ""}</p>
-          <div className="relative z-10 flex flex-wrap items-center justify-between gap-5 px-6 py-8 lg:px-14">
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-5 px-6 pt-8 pb-24 lg:px-14 lg:pb-8">
             <button type="button"
               onClick={goBack}
               disabled={step === 0 || submitting}
