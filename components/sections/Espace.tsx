@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import Link from "next/link";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { useCanComposeTotem } from "@/lib/hooks/useCanComposeTotem";
@@ -86,7 +87,7 @@ export default function Espace({ dict, caurisCopy, lang }: Props) {
       <div className={`${styles.works} flex flex-col gap-5`}>
         {works.length > 0 && <h2 className={styles.worksTitle}>{dict.totemTitle}</h2>}
 
-        {commandes === null && !error && <p role="status" className="text-sm text-grisclair">{ui.status.loading}</p>}
+        {commandes === null && !error && <MaskLoader label={ui.status.loading} />}
         {delayNotice && <p role="alert" className="text-sm text-grisclair">{delayNotice}</p>}
         {error && !delayNotice && <p role="alert" className="text-sm text-grisclair">{ui.errors.orderUnavailable}</p>}
 

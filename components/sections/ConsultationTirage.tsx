@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -154,7 +155,7 @@ export default function ConsultationTirage({ dict, copy, lang }: { dict: Diction
           ))}
         </div>
 
-        {!state && !loadError && <p role="status" className="text-grisclair">{copy.loading}</p>}
+        {!state && !loadError && <MaskLoader label={copy.loading} />}
         {loadError && <div className="flex flex-col items-center gap-4"><p role="alert" className="text-grisclair">{delayNotice ?? copy.loadError}</p><Button onClick={retry}>{copy.retry}</Button></div>}
         {state?.reason === "serie_indisponible" && !displayedReading && <p className="text-grisclair">{copy.seriesUnavailable}</p>}
         {canCast && <Button onClick={cast}>{drawError ? copy.retry : copy.draw}</Button>}

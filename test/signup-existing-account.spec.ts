@@ -11,7 +11,7 @@ vi.mock("../lib/env", () => ({ getServerEnv: () => ({ NEXT_PUBLIC_SITE_URL: "htt
 
 const request = (locale = "fr") => new Request("http://localhost/api/auth/signup", {
   method: "POST", headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email: "  Test@Example.com  ", password: "StrongPassword1", prenom: "Nadia", parcours: "adulte", majorite_confirmee: true, date_naissance: "05-21", locale }),
+  body: JSON.stringify({ email: "  Test@Example.com  ", password: "StrongPassword1", prenom: "Nadia", nom: "Diop", parcours: "adulte", majorite_confirmee: true, date_naissance: "05-21", locale }),
 });
 
 beforeEach(() => {
@@ -22,6 +22,19 @@ beforeEach(() => {
 });
 
 describe("existing account at signup", () => {
+  it("persists the adult surname and given name in signup metadata", async () => {
+    const response = await POST(request());
+    expect(response.status).toBe(200);
+    expect(mocks.signUp.mock.calls[0]?.[0].options.data).toMatchObject({ nom: "Diop", prenom: "Nadia" });
+  });
+  it.each([undefined, "", "   ", "x".repeat(81)])("rejects an adult surname that is missing or invalid", async nom => {
+    const body = await request().json();
+    const response = await POST(new Request("http://localhost/api/auth/signup", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...body, nom }),
+    }));
+    expect(response.status).toBe(422);
+    expect(mocks.signUp).not.toHaveBeenCalled();
+  });
   it("does not expose an unknown Auth provider error", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     mocks.signUp.mockResolvedValueOnce({ data: {}, error: { status: 400, message: "private database schema diagnostic" } });

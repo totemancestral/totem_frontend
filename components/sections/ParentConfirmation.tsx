@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -69,7 +70,7 @@ export function ParentConfirmation({ copy, lang }: { copy: Dictionary["parental"
     <Brand lang={lang} />
     <div className="mx-auto my-10 w-full max-w-xl space-y-5 border border-or bg-indigo p-5 sm:p-8">
       <h1 className="font-display text-3xl">{status?.paid ? copy.paidTitle : copy.confirmTitle}</h1>
-      {loading ? <p role="status">{copy.loading}</p> : expired ? <p role="alert">{copy.expired}</p> : status && <>
+      {loading ? <MaskLoader label={copy.loading} /> : expired ? <p role="alert">{copy.expired}</p> : status && <>
         {status.paid ? <p role="status" className="leading-relaxed">{copy.paid}</p> : <>
           <p className="text-sm leading-relaxed">{copy.confirmIntro} <strong>{status.firstName}</strong>.</p>
           <p className="break-all text-sm text-or">{status.parentEmail}</p>

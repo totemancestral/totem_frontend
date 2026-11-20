@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Image from "next/image";
@@ -67,7 +68,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
   }
 
   if (checkingAuth) {
-    return <div className="flex min-h-screen items-center justify-center bg-nuit px-6 text-ivoire"><p role="status">{ui.status.checkingSession}</p></div>;
+    return <div className="flex min-h-screen items-center justify-center bg-nuit px-6 text-ivoire"><MaskLoader size="page" label={ui.status.checkingSession} /></div>;
   }
 
   const tabs = [

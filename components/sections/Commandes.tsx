@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { useCommandes } from "@/lib/hooks/useCommandes";
 import { interfaceCopy } from "@/lib/interface-copy";
@@ -38,7 +39,7 @@ export default function Commandes({ dict, lang }: { dict: Dictionary["commandes"
         <h1 className={styles.title}>{dict.title}</h1>
         <p className={styles.intro}>{dict.intro}</p>
       </header>
-      {!commandes && !error && <p role="status" className={`${styles.content} ${styles.muted}`}>{ui.status.loading}</p>}
+      {!commandes && !error && <MaskLoader label={ui.status.loading} />}
       {error && <p role="alert" className={`${styles.card} ${styles.pad} ${styles.content} ${styles.muted}`}>{delayNotice ?? ui.errors.orderUnavailable}</p>}
       {commandes?.length === 0 && <p className={`${styles.card} ${styles.pad} ${styles.content} ${styles.muted}`}>{dict.emptyText}</p>}
       {commandes && commandes.length > 0 && <div className={`${styles.grid} ${styles.orderGrid} ${styles.content}`}>

@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import { useAdminLocale } from "@/lib/hooks/useAdminLocale";
 import { adminStatus } from "@/lib/admin-copy";
 import type { ReactNode } from "react";
@@ -143,7 +144,7 @@ export function EmptyState({ text }: { text: string }) {
 
 export function LoadingState() {
   const { t } = useAdminLocale();
-  return <p role="status" className="py-10 text-center text-sm text-grisclair">{t("Chargement…")}</p>;
+  return <MaskLoader label={t("Chargement…")} />;
 }
 
 export function ErrorState({ text }: { text: string }) {

@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
@@ -61,7 +62,7 @@ export default function Consultations({ dict, copy, lang }: { dict: Dictionary["
         <h2 ref={historyTitleRef} tabIndex={-1} className="text-xs uppercase tracking-[0.2em] text-or focus:outline-2 focus:outline-offset-4 focus:outline-or">{dict.historyLabel}</h2>
         <p role="status" className="sr-only">{loadingMore ? copy.loading : readings ? formatInterface(interfaceCopy(lang).orders.displayedReadings, { count: readings.length }) : ""}</p>
 
-        {!readings && !error && <p role="status" className="text-grisclair">{copy.loading}</p>}
+        {!readings && !error && <MaskLoader label={copy.loading} />}
         {error && <div className={`${styles.card} ${styles.pad} flex flex-wrap items-center gap-4`}><p ref={errorRef} tabIndex={-1} role="alert" className="text-grisclair focus:outline-2 focus:outline-offset-4 focus:outline-or">{delayNotice ?? copy.loadError}</p><Button variant="accountOutline" className={`${styles.action} ${styles.outline}`} onClick={() => { if (readings && cursor) void loadMore(); else setRevision((r) => r + 1); }}>{copy.retry}</Button></div>}
         {readings?.length === 0 && <p className={`${styles.card} ${styles.pad} ${styles.muted}`}>{copy.emptyHistory}</p>}
         <div className={styles.grid}>

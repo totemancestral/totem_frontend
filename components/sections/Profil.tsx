@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import { interfaceCopy, authErrorMessage, InterfaceError } from "@/lib/interface-copy";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -162,7 +163,7 @@ export default function Profil({ dict, lang }: { dict: Dictionary["profil"]; lan
 
   if (loading || loadError) return <div className={styles.page}>
     <h1 className={styles.title}>{dict.title}</h1>
-    {loading ? <p className="mt-5" role="status">{ui.status.loadingProfile}</p> : <>
+    {loading ? <MaskLoader label={ui.status.loadingProfile} className="mt-5" /> : <>
       <p className="mt-5" role="alert">{ui.errors.profileLoadFailed}</p>
       <Button variant="accountOutline" className={`${styles.action} ${styles.outline} mt-5`} onClick={() => { setLoading(true); setLoadError(false); setRetry(value => value + 1); }}>{ui.status.retry}</Button>
     </>}

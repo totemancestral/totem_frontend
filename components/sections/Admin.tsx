@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import { useAdminLocale } from "@/lib/hooks/useAdminLocale";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -92,7 +93,7 @@ export default function Admin({ lang }: { lang: string }) {
   }
 
   if (guard === "checking") {
-    return <div lang={lang} className="flex min-h-screen items-center justify-center bg-nuit text-ivoire"><p role="status">{t("Vérification de l’accès à l’administration…")}</p></div>;
+    return <div lang={lang} className="flex min-h-screen items-center justify-center bg-nuit text-ivoire"><MaskLoader size="page" label={t("Vérification de l’accès à l’administration…")} /></div>;
   }
 
   if (guard === "denied") {

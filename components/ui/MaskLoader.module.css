@@ -1,0 +1,14 @@
+.loader { display: grid; place-items: center; width: 100%; }
+.page { min-height: 16rem; }
+.section { min-height: 11rem; }
+.stage { position: relative; width: 200px; height: 220px; display: grid; place-items: center; }
+.section .stage { transform: scale(.58); height: 170px; }
+.halo { position: absolute; width: 166px; height: 166px; border-radius: 50%; background: radial-gradient(circle, rgb(201 168 76 / 22%), rgb(201 168 76 / 5%) 42%, transparent 70%); filter: blur(11px); animation: glow 3.6s ease-in-out infinite; }
+.ring { position: absolute; width: 142px; height: 142px; border: 1px solid rgb(201 168 76 / 12%); border-radius: 50%; animation: glow 3.6s ease-in-out infinite; }
+.mask { position: relative; object-fit: contain; width: 126px; height: 150px; animation: breathe 3.6s ease-in-out infinite; }
+@keyframes breathe {
+  0%,100% { transform: translateY(2px) scale(.97); opacity: .72; filter: brightness(.86) drop-shadow(0 4px 12px rgb(201 168 76 / 10%)); }
+  50% { transform: translateY(-3px) scale(1.035); opacity: 1; filter: brightness(1.09) drop-shadow(0 4px 22px rgb(201 168 76 / 30%)); }
+}
+@keyframes glow { 0%,100% { transform: scale(.9); opacity: .35; } 50% { transform: scale(1.12); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .mask,.halo,.ring { animation: none; } }

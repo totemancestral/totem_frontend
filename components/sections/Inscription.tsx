@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import { interfaceCopy } from "@/lib/interface-copy";
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Image from "next/image";
@@ -47,6 +48,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
   const eligible = path === "adulte" ? adultAge === "yes" : juniorAge === "11-14" || juniorAge === "15-17";
   const [gender, setGender] = useState<"homme" | "femme">("homme");
   const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [birthDay, setBirthDay] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
   const birthDate = birthMonth && birthDay ? `${birthMonth}-${birthDay}` : "";
@@ -126,7 +128,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
           sexe: gender,
           parcours: path,
           ...(path === "adulte"
-            ? { majorite_confirmee: adultAge === "yes", date_naissance: birthDate }
+            ? { nom: lastName, majorite_confirmee: adultAge === "yes", date_naissance: birthDate }
             : { tranche_age: juniorAge }),
           locale: lang,
           redirectPath: nextPath,
@@ -168,7 +170,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
   }
 
   if (checkingAuth) {
-    return <div className="flex min-h-screen items-center justify-center bg-nuit px-6 text-ivoire"><p role="status">{ui.status.checkingSession}</p></div>;
+    return <div className="flex min-h-screen items-center justify-center bg-nuit px-6 text-ivoire"><MaskLoader size="page" label={ui.status.checkingSession} /></div>;
   }
 
   return (
@@ -264,6 +266,12 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
                   className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire placeholder:text-grisclair"
                 />
               </label>
+            {path === "adulte" && <label className="flex min-w-0 flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-gris">{dict.lastNameLabel}</span>
+              <input type="text" name="lastName" autoComplete="family-name" value={lastName}
+                onChange={event => setLastName(event.target.value)} placeholder={dict.lastNamePlaceholder}
+                required maxLength={80} className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire placeholder:text-grisclair" />
+            </label>}
             {path === "adulte" ? <fieldset className="min-w-0">
               <legend className="mb-3 text-sm font-medium text-ivoire">{dict.adultAgeQuestion}</legend>
               <div className="grid gap-3 sm:grid-cols-2">

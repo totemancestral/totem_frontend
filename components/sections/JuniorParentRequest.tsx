@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -99,7 +100,7 @@ export function JuniorParentRequest({ copy, lang }: { copy: Dictionary["parental
     <Brand lang={lang} />
     <div className="mx-auto my-10 w-full max-w-xl space-y-6 border border-ombre bg-indigo p-5 sm:p-8">
       <h1 className="font-display text-3xl">{request?.paid ? copy.paidTitle : copy.title}</h1>
-      {loading ? <p role="status">{copy.loading}</p> : loginRequired ? <Link className="text-or underline" href={`/${lang}/connexion?next=${encodeURIComponent(`/${lang}/paiement-junior`)}`}>{copy.login}</Link>
+      {loading ? <MaskLoader label={copy.loading} /> : loginRequired ? <Link className="text-or underline" href={`/${lang}/connexion?next=${encodeURIComponent(`/${lang}/paiement-junior`)}`}>{copy.login}</Link>
         : request?.paid ? <p role="status">{copy.paid}</p>
         : request ? <div className="space-y-4">
           <p className="text-sm leading-relaxed">{copy.sent} <strong className="break-all">{request.parentEmail}</strong>.</p>

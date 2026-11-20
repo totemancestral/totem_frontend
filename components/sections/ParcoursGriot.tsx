@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import { interfaceCopy } from "@/lib/interface-copy";
 import { totemConflictMessage } from "@/lib/totem-eligibility";
 import { useEffect, useRef, useState } from "react";
@@ -347,7 +348,7 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
   else if (audioProgress > 0 && audioProgress < 100) audioLabel = dict.audioPaused;
 
   if (checkingAuth) {
-    return <div className="flex min-h-screen items-center justify-center bg-nuit px-6 text-ivoire"><p role="status">{ui.status.loadingQuestionnaire}</p></div>;
+    return <div className="flex min-h-screen items-center justify-center bg-nuit px-6 text-ivoire"><MaskLoader size="page" label={ui.status.loadingQuestionnaire} /></div>;
   }
   if (existingTotem) {
     return <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-nuit px-6 text-center text-ivoire">

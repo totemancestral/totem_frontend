@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { useCommandes } from "@/lib/hooks/useCommandes";
 import { interfaceCopy } from "@/lib/interface-copy";
@@ -18,7 +19,7 @@ export default function EspaceOeuvres({ dict, lang }: { dict: Dictionary["espace
         <p className={styles.intro}>{dict.intro}</p>
       </div>
 
-      {!commandes && !error && <p role="status" className="mt-9 text-sm text-grisclair">{ui.status.loading}</p>}
+      {!commandes && !error && <MaskLoader label={ui.status.loading} className="mt-9" />}
       {delayNotice && <p role="alert" className="mt-9 text-sm text-grisclair">{delayNotice}</p>}
       {!delayNotice && (error || (commandes && works.length === 0)) && (
         <p role={error ? "alert" : undefined} className={`${styles.card} ${styles.pad} ${styles.content} ${styles.muted}`}>{error ? ui.errors.orderUnavailable : dict.emptyText}</p>

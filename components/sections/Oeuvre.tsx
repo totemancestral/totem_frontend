@@ -1,4 +1,5 @@
 "use client";
+import { MaskLoader } from "@/components/ui/MaskLoader";
 import { interfaceCopy, formatInterface } from "@/lib/interface-copy";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -257,9 +258,7 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
             className="absolute inset-0 flex items-center justify-center px-8 text-center transition-opacity duration-500"
             style={{ opacity: phase === "loading" ? 1 : 0, pointerEvents: "none" }}
           >
-            <p role="status" className="font-display animate-[instr-pulse_2.4s_ease-in-out_infinite] text-xl italic text-orpale">
-              {fetchStatus === "pending" ? dict.loadingText : dict.loadingText}
-            </p>
+            <MaskLoader label={dict.loadingText} />
           </div>}
 
           {/* rouleau */}

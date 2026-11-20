@@ -19,6 +19,7 @@ const signupSchema = z.object({
       message: "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.",
     }),
   prenom: z.string().trim().min(1).max(80),
+  nom: z.string().trim().max(80).optional(),
   sexe: z.enum(["homme", "femme"]).optional(),
   parcours: z.enum(["adulte", "junior"]),
   majorite_confirmee: z.boolean().optional(),
@@ -28,6 +29,7 @@ const signupSchema = z.object({
   redirectPath: z.string().max(300).optional(),
 }).superRefine((data, context) => {
   if (data.parcours === "adulte") {
+    if (!data.nom) context.addIssue({ code: "custom", path: ["nom"], message: "Surname required" });
     if (data.majorite_confirmee !== true) {
       context.addIssue({ code: "custom", path: ["majorite_confirmee"], message: "Adult confirmation required" });
     }
@@ -56,7 +58,7 @@ export async function POST(request: Request) {
 
   const metadata = {
     prenom: payload.prenom,
-    nom: "",
+    nom: payload.parcours === "adulte" ? payload.nom! : "",
     sexe: payload.sexe ?? "",
     langue: locale,
     parcours: payload.parcours,
