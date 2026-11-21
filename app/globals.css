@@ -1,6 +1,33 @@
 @import "tailwindcss";
 @import "./responsive.css";
 
+/* Native controls do not consistently advertise clickability across browsers.
+   Keep these defaults in the base layer so intentional component cursors win. */
+@layer base {
+  :where(a[href], button, summary, select,
+    input[type="button"], input[type="submit"], input[type="reset"],
+    input[type="checkbox"], input[type="radio"], input[type="range"], input[type="file"],
+    [role="button"], [role="link"], [role="tab"], [role="switch"]):not(:disabled):not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  :where(input:not([type]), input[type="text"], input[type="email"],
+    input[type="password"], input[type="search"], input[type="tel"],
+    input[type="url"], input[type="number"], textarea, [contenteditable="true"]):not(:disabled):not([aria-disabled="true"]) {
+    cursor: text;
+  }
+
+  label:has(:where(input[type="checkbox"], input[type="radio"]):not(:disabled)) {
+    cursor: pointer;
+  }
+
+  :where(button, input, select, textarea):disabled,
+  :where(a, button, input, select, textarea, [role="button"], [role="link"], [role="tab"], [role="switch"])[aria-disabled="true"],
+  label:has(:where(input[type="checkbox"], input[type="radio"]):disabled) {
+    cursor: not-allowed;
+  }
+}
+
 /* Shared public-page rhythm: fluid gutters and spacing, bounded reading widths. */
 .site-section, .site-gutters {
   padding-inline: max(var(--site-gutter), calc((100% - var(--site-width)) / 2));
