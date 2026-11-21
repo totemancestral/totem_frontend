@@ -44,6 +44,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
 
   const [path, setPath] = useState<"adulte" | "junior">(requestedOffer === "junior" ? "junior" : "adulte");
   const [adultAge, setAdultAge] = useState<"yes" | "no" | "">("");
+  const adultUnder18 = path === "adulte" && adultAge === "no";
   const [juniorAge, setJuniorAge] = useState<"moins-11" | "11-14" | "15-17" | "">("");
   const eligible = path === "adulte" ? adultAge === "yes" : juniorAge === "11-14" || juniorAge === "15-17";
   const [gender, setGender] = useState<"homme" | "femme">("homme");
@@ -250,6 +251,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
 
           {/* formulaire */}
           <div className="flex flex-col gap-5">
+            {!adultUnder18 && <>
               <label className="flex min-w-0 flex-col gap-2">
                 <span className="text-xs font-medium uppercase tracking-wide text-gris">
                   {path === "junior" ? dict.juniorFirstNameLabel : dict.firstNameLabel}
@@ -272,6 +274,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
                 onChange={event => setLastName(event.target.value)} placeholder={dict.lastNamePlaceholder}
                 required maxLength={80} className="border border-ombre bg-indigo px-4 py-3.5 text-sm text-ivoire placeholder:text-grisclair" />
             </label>}
+            </>}
             {path === "adulte" ? <fieldset className="min-w-0">
               <legend className="mb-3 text-sm font-medium text-ivoire">{dict.adultAgeQuestion}</legend>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -306,7 +309,8 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
               {juniorAge === "moins-11" && <p role="status" className="mt-3 text-sm leading-relaxed text-grisclair">{dict.under11Message}</p>}
             </fieldset>}
 
-            {path === "adulte" && <fieldset className="min-w-0" disabled={adultAge === "no"}>
+            {!adultUnder18 && <>
+            {path === "adulte" && <fieldset className="min-w-0">
               <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-gris">
                 {dict.birthDateLabel}
               </legend>
@@ -399,6 +403,7 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
               required
               showRequirements
             />
+            </>}
           </div>
 
           {error && (
@@ -406,18 +411,18 @@ export default function Inscription({ dict, lang }: { dict: Dictionary["inscript
               {error}
             </p>
           )}
-          {existingAccount && (
+          {!adultUnder18 && existingAccount && (
             <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm">
               <Link href={`/${lang}/connexion`} className="text-or underline underline-offset-4">{dict.existingSignIn}</Link>
               <Link href={`/${lang}/mot-de-passe-oublie`} className="text-or underline underline-offset-4">{dict.existingResetPassword}</Link>
             </div>
           )}
 
-          <div className="mt-2 flex flex-wrap items-center gap-6">
+          {!adultUnder18 && <div className="mt-2 flex flex-wrap items-center gap-6">
             <Button type="submit" disabled={loading || !eligible} className="hover:text-[#FEFCF0]! disabled:cursor-not-allowed disabled:opacity-60">
               {loading ? (ui.status.creatingAccount) : path === "junior" ? dict.juniorSubmit : dict.submit}
             </Button>
-          </div>
+          </div>}
 
           <p className="text-sm text-grisclair">
             {dict.signupLine}{" "}

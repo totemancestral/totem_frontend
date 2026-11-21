@@ -7,6 +7,7 @@ import styles from "@/components/ui/Account.module.css";
 
 export function ConsultationStatus({ copy, lang, className = "", showComposeAction = true }: { copy: Dictionary["cauris"]; lang: Locale; className?: string; showComposeAction?: boolean }) {
   const { state, error, retry, delayNotice } = useCaurisState();
+  if (state?.reason === "junior_forbidden") return <div className={`${styles.card} ${styles.pad} ${styles.consultation} ${className}`}><p className={styles.consultationTitle} role="status">{copy.juniorUnavailable}</p></div>;
   return <div className={`${styles.card} ${styles.pad} ${styles.consultation} ${styles.consultationBody} ${className}`}>
     <div className="flex min-w-0 flex-col gap-2" aria-live="polite">
       <span className="text-xs uppercase tracking-wide text-or">{copy.thisWeek}</span>

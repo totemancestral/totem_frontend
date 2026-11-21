@@ -26,6 +26,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [canCompose, setCanCompose] = useState<boolean | null>(null);
+  const [showConsultations, setShowConsultations] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -41,6 +42,14 @@ export default function EspaceNav({ lang, dict, children }: Props) {
         return;
       }
       setCheckingAuth(false);
+      setShowConsultations(false);
+      void fetch("/api/consultations/etat", {
+        headers: { Authorization: `Bearer ${data.session.access_token}` },
+        cache: "no-store", signal: AbortSignal.timeout(10000),
+      }).then(async response => {
+        const state = await response.json();
+        if (alive) setShowConsultations(response.ok && typeof state.accessible === "boolean" && state.reason !== "junior_forbidden");
+      }).catch(() => { if (alive) setShowConsultations(false); });
       try {
         const response = await fetch("/api/totem/eligibility", {
           headers: { Authorization: `Bearer ${data.session.access_token}` },
@@ -200,7 +209,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
         <div className="hidden shrink-0 border-t border-ombre bg-indigo xl:flex">
           <div className="account-container flex items-center justify-between gap-4 py-4">
             <div className="flex flex-wrap items-center gap-1">
-              {tabs.map((tab) => (
+              {tabs.filter(tab => showConsultations || tab.href !== `/${lang}/consultations`).map((tab) => (
                 <Link
                   key={tab.label}
                   href={tab.href}
@@ -225,7 +234,7 @@ export default function EspaceNav({ lang, dict, children }: Props) {
         {menuOpen && (
           <div ref={menuRef} id="espace-mobile-menu" role="navigation" aria-label={ui.navigation.personal} className="fixed inset-0 top-[100px] z-40 flex flex-col justify-between gap-6 overflow-y-auto bg-nuit p-8 xl:hidden">
             <div className="flex flex-col gap-1">
-              {tabs.map((tab) => (
+              {tabs.filter(tab => showConsultations || tab.href !== `/${lang}/consultations`).map((tab) => (
                 <Link
                   key={tab.label}
                   href={tab.href}

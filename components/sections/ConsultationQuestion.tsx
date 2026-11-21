@@ -6,10 +6,15 @@ import { RadioCard } from "@/components/ui/RadioCard";
 import { Brand } from "@/components/ui/Brand";
 import type { Dictionary, Locale } from "@/app/[lang]/dictionaries";
 import { CAURIS_MOODS } from "@/lib/cauris";
+import { useCaurisState } from "@/lib/hooks/useCaurisState";
+import { MaskLoader } from "@/components/ui/MaskLoader";
+import { interfaceCopy } from "@/lib/interface-copy";
 
 export default function ConsultationQuestion({ dict, lang }: { dict: Dictionary["consultationQuestion"]; lang: Locale }) {
   const [selected, setSelected] = useState<number | null>(null);
   const hasSelection = selected !== null;
+  const { state, error, retry } = useCaurisState();
+  if (!state?.accessible) return <div className="flex min-h-screen items-center justify-center bg-nuit text-ivoire">{error ? <button onClick={retry}>{interfaceCopy(lang).status.loading}</button> : <MaskLoader label={interfaceCopy(lang).status.loading} size="page" />}</div>;
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-nuit">

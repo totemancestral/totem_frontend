@@ -28,7 +28,7 @@ export async function relayConsultation(request: Request, path: string, body?: u
     const payload = await response.json().catch(() => null);
     if (!response.ok || !payload) {
       const code = typeof payload?.message === "string" ? payload.message : payload?.code;
-      return NextResponse.json({ error: ["oeuvre_required", "serie_indisponible"].includes(code) ? code : "consultation_unavailable" }, { status: response.ok ? 502 : response.status });
+      return NextResponse.json({ error: ["oeuvre_required", "serie_indisponible", "junior_forbidden"].includes(code) ? code : "consultation_unavailable" }, { status: response.ok ? 502 : response.status });
     }
     return NextResponse.json(payload, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) { return internalError("consultations.relay", error, 502); }

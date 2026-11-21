@@ -88,6 +88,8 @@ export default function ConsultationTirage({ dict, copy, lang }: { dict: Diction
   const isRevealed = Boolean(displayedReading);
   const canCast = Boolean(state?.accessible && state.availableNow && !displayedReading && phase === "floating" && !loadError);
 
+  if (state?.reason === "junior_forbidden") return <div className="flex min-h-screen items-center justify-center bg-nuit px-6 text-ivoire"><p role="status">{copy.juniorUnavailable}</p></div>;
+
   async function cast() {
     if (!canCast || inFlight.current) return;
     inFlight.current = true;

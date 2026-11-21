@@ -15,6 +15,12 @@ export function useCaurisState() {
   useEffect(() => {
     const controller = new AbortController();
     void caurisRequest<CaurisState>("etat", undefined, controller.signal, pathname.split("/")[1] === "en" ? "en" : "fr").then((value) => {
+      if (!controller.signal.aborted && value.reason === "junior_forbidden" && !pathname.endsWith("/espace")) {
+        router.replace(`/${pathname.split("/")[1] === "en" ? "en" : "fr"}/espace`);
+      }
+      if (!controller.signal.aborted && !value.accessible && value.reason !== "junior_forbidden" && pathname.endsWith("/consultation-question")) {
+        router.replace(`/${pathname.split("/")[1] === "en" ? "en" : "fr"}/consultations`);
+      }
       if (!controller.signal.aborted) setState(value);
     }).catch((failure) => {
       if (controller.signal.aborted) return;

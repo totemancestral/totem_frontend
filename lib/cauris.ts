@@ -9,7 +9,7 @@ export type CaurisReading = {
   mood: CaurisMood | null; language: "fr" | "en"; image: string | null; parole: string | null; geste: string | null;
 };
 export type CaurisState = {
-  accessible: boolean; reason?: "oeuvre_required" | "serie_indisponible";
+  accessible: boolean; reason?: "oeuvre_required" | "serie_indisponible" | "junior_forbidden";
   availableNow?: boolean; nextAvailableAt?: string | null; currentReading: CaurisReading | null;
 };
 
