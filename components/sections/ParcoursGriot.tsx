@@ -525,18 +525,27 @@ export default function ParcoursGriot({ dict, lang, variant }: Props) {
             </fieldset>
 
             {variant === "adulte" && (
-              <div className="flex w-full max-w-3xl flex-col gap-2">
-                <label htmlFor="question-detail" className="text-left text-xs text-grisclair">{current.fieldLabel ?? dict.wordMorePlaceholder}</label>
+              <div className="flex w-full min-w-0 max-w-3xl flex-col gap-5 rounded-xl border border-or bg-indigo p-5 text-left sm:p-7">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" className="shrink-0 text-or">
+                    <path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6Z" />
+                  </svg>
+                  <label htmlFor="question-detail" className="font-display text-2xl leading-tight text-ivoire sm:text-3xl">{dict.personalizationTitle}</label>
+                  <span className="rounded-full bg-or px-3 py-1 text-xs font-semibold uppercase tracking-wide text-nuit">{dict.personalizationOptional}</span>
+                </div>
+                <p id="question-detail-description" className="text-base leading-relaxed text-ivoire">{dict.personalizationDescription}</p>
                 <textarea
                   id="question-detail"
-                  rows={1}
+                  aria-describedby="question-detail-description question-detail-help"
+                  rows={5}
                   disabled={submitting}
                   value={currentAnswer?.field ?? ""}
                   onChange={(e) => setFreeText(e.target.value)}
                   placeholder={current.fieldPlaceholder ?? dict.wordMorePlaceholder}
                   maxLength={3996}
-                  className="w-full resize-none border border-ombre bg-indigo px-4 py-4 text-sm text-grisclair placeholder:text-grisclair"
+                  className="min-h-40 w-full min-w-0 resize-y rounded-lg border border-orpale bg-ivoire/5 px-4 py-4 text-base leading-relaxed text-ivoire placeholder:text-grisclair focus:border-or focus:outline-2 focus:outline-offset-2 focus:outline-or disabled:opacity-60"
                 />
+                <p id="question-detail-help" className="text-sm leading-relaxed text-ivoire">{dict.personalizationHelp}</p>
               </div>
             )}
 

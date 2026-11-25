@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/sections/LegalPage";
 import { getDictionary, type Locale } from "../../dictionaries";
-import { pageAlternates } from "@/lib/seo";
+import { baseOpenGraph, baseTwitter, pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -15,6 +15,8 @@ export async function generateMetadata({
     title: dict.cgv.title,
     description: dict.cgv.subtitle,
     alternates: pageAlternates(lang, "/cgv"),
+    openGraph: { ...baseOpenGraph(lang, dict.seo.siteName), title: dict.cgv.title, description: dict.cgv.subtitle, url: `/${lang}/cgv` },
+    twitter: { ...baseTwitter(lang), title: dict.cgv.title, description: dict.cgv.subtitle },
   };
 }
 

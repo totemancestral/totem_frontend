@@ -2,7 +2,24 @@ import { getServerEnv } from "@/lib/env";
 import type { Locale } from "@/app/[lang]/dictionaries";
 
 export function siteUrl(): string {
-  return (getServerEnv().NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+  const configured = getServerEnv().NEXT_PUBLIC_SITE_URL;
+  const url = new URL(configured || (process.env.NODE_ENV === "production" ? "https://www.totem-ancestral.com" : "http://localhost:3000"));
+  // Both production hosts resolve to www. Never publish the redirecting host
+  // in canonical URLs, hreflang, social cards or the sitemap.
+  if (["totem-ancestral.com", "www.totem-ancestral.com"].includes(url.hostname)) {
+    url.protocol = "https:";
+    url.hostname = "www.totem-ancestral.com";
+    url.port = "";
+  }
+  return url.origin;
+}
+
+export function socialImages(locale: Locale) {
+  return [{ url: `${siteUrl()}/${locale}/opengraph-image`, width: 1200, height: 630, alt: "Totem Ancestral" }];
+}
+
+export function baseTwitter(locale: Locale) {
+  return { card: "summary_large_image" as const, images: socialImages(locale) };
 }
 
 /**
@@ -16,6 +33,7 @@ export function baseOpenGraph(locale: Locale, siteName: string) {
     type: "website" as const,
     siteName,
     locale: locale === "en" ? "en_US" : "fr_FR",
+    images: socialImages(locale),
   };
 }
 

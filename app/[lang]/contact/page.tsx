@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Contact from "@/components/sections/Contact";
 import { getDictionary, type Locale } from "../dictionaries";
-import { baseOpenGraph, pageAlternates } from "@/lib/seo";
+import { baseOpenGraph, baseTwitter, pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -17,7 +17,7 @@ export async function generateMetadata({
     description,
     alternates: pageAlternates(lang, "/contact"),
     openGraph: { ...baseOpenGraph(lang, dict.seo.siteName), title, description, url: `/${lang}/contact` },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { ...baseTwitter(lang), title, description },
   };
 }
 

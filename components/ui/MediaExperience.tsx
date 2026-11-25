@@ -6,6 +6,7 @@ import type { Dictionary } from "@/app/[lang]/dictionaries";
 import { MusicButton, SoundIcon } from "@/components/ui/MusicButton";
 import { AmbientMusicContext } from "@/lib/hooks/useAmbientMusic";
 import { AmbientLoop } from "@/lib/ambient-loop";
+import styles from "./MediaExperience.module.css";
 
 const MUSIC_KEY = "totem_ambient_enabled";
 const INTRO_KEY = "totem_intro_seen";
@@ -25,7 +26,8 @@ export function MediaExperience({ children, copy, homePath }: {
   const enabledRef = useRef(false);
   const backgroundPausedRef = useRef(false);
   const [playing, setPlaying] = useState(false);
-  const [introMuted, setIntroMuted] = useState(true);
+  const [introMuted, setIntroMuted] = useState(false);
+  const [introSoundBlocked, setIntroSoundBlocked] = useState(false);
   const [error, setError] = useState(false);
   const [heroControls, setHeroControls] = useState<HTMLDivElement | null>(null);
   const [heroVisible, setHeroVisible] = useState(true);
@@ -52,7 +54,7 @@ export function MediaExperience({ children, copy, homePath }: {
 
   const startMusic = useCallback(() => {
     const music = musicRef.current;
-    if (!music || document.hidden || dialogRef.current?.open || backgroundPausedRef.current) return;
+    if (!music || !enabledRef.current || document.hidden || dialogRef.current?.open || backgroundPausedRef.current) return;
     syncMusicVolume();
     void music.play().then(() => setError(false)).catch(() => setPlaying(false));
   }, [syncMusicVolume]);
@@ -81,7 +83,7 @@ export function MediaExperience({ children, copy, homePath }: {
       new Audio("/assets/totem-music.mp3?v=20261025-continu1"),
       new Audio("/assets/totem-music.mp3?v=20261025-continu1"),
     ];
-    tracks.forEach(track => { track.preload = "none"; });
+    tracks.forEach(track => { track.preload = "auto"; });
     const music = new AmbientLoop(tracks, setPlaying);
     musicRef.current = music;
     const onError = () => { music.pause(); setError(true); };
@@ -109,7 +111,10 @@ export function MediaExperience({ children, copy, homePath }: {
       syncMusicVolume();
     };
     const resume = (event: Event) => {
-      if (event.target instanceof Element && event.target.closest("button, a, input, select, textarea")) return;
+      // The dedicated sound button handles its own click, including keyboard clicks.
+      if (event.target instanceof Element && event.target.closest("[data-music-toggle], dialog")) return;
+      if (document.hidden) return;
+      backgroundPausedRef.current = false;
       if (enabledRef.current && music.paused) startMusic();
     };
     for (const type of MEDIA_EVENTS) document.addEventListener(type, updateVolume, true);
@@ -119,7 +124,7 @@ export function MediaExperience({ children, copy, homePath }: {
     });
     document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("pagehide", pauseForBackground);
-    document.addEventListener("pointerdown", resume);
+    document.addEventListener("click", resume);
     document.addEventListener("keydown", resume);
     onVisibilityChange();
     return () => {
@@ -130,7 +135,7 @@ export function MediaExperience({ children, copy, homePath }: {
       });
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("pagehide", pauseForBackground);
-      document.removeEventListener("pointerdown", resume);
+      document.removeEventListener("click", resume);
       document.removeEventListener("keydown", resume);
       tracks.forEach(track => track.removeEventListener("error", onError));
       music.dispose();
@@ -145,10 +150,13 @@ export function MediaExperience({ children, copy, homePath }: {
   useEffect(() => {
     const dialog = dialogRef.current;
     const video = introRef.current;
-    if (!dialog || !video || pathname !== homePath) return;
+    if (!dialog || !video) return;
     let seen = false;
     try { seen = sessionStorage.getItem(INTRO_KEY) === "true"; } catch { /* Storage is optional. */ }
-    if (seen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (pathname !== homePath || seen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      startMusic();
+      return;
+    }
     dialog.showModal();
     // Garder le focus dans l'introduction sans sélectionner un bouton à l'ouverture.
     dialog.focus({ preventScroll: true });
@@ -157,14 +165,24 @@ export function MediaExperience({ children, copy, homePath }: {
     document.body.style.overflow = "hidden";
     const restoreScroll = () => { document.body.style.overflow = overflow; };
     dialog.addEventListener("close", restoreScroll);
-    void video.play().catch(() => {});
+    let cancelled = false;
+    video.muted = false;
+    void video.play().catch(async (error: unknown) => {
+      if (cancelled || !dialog.open || !(error instanceof DOMException) || error.name !== "NotAllowedError") return;
+      // Only a browser permission refusal triggers the muted fallback and invitation.
+      video.muted = true;
+      setIntroMuted(true);
+      setIntroSoundBlocked(true);
+      try { await video.play(); } catch { /* The sound button also retries playback. */ }
+    });
     return () => {
+      cancelled = true;
       video.pause();
       dialog.close();
       restoreScroll();
       dialog.removeEventListener("close", restoreScroll);
     };
-  }, [homePath, pathname]);
+  }, [homePath, pathname, startMusic]);
 
   return (
     <AmbientMusicContext.Provider value={{ playing, toggle, setHeroControls }}>
@@ -177,19 +195,26 @@ export function MediaExperience({ children, copy, homePath }: {
         onCancel={(event) => { event.preventDefault(); finishIntro(); }}
         className="totem-intro m-0 h-dvh max-h-none w-screen max-w-none bg-nuit p-0 text-ivoire outline-none backdrop:bg-nuit">
         <h2 id="totem-intro-title" className="sr-only">{copy.introTitle}</h2>
-        <video ref={introRef} src={introSource} muted={introMuted} playsInline preload="none"
+        <video ref={introRef} src={introSource} muted={introMuted} playsInline preload="metadata"
           onEnded={finishIntro} onError={finishIntro} className="h-full w-full object-contain" />
-        <div data-intro-controls className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] flex items-center gap-3 sm:bottom-6 sm:right-6">
+        <div data-intro-controls className={`${styles.controls} ${introSoundBlocked ? styles.invitation : ""}`}>
           <button type="button" aria-label={introMuted ? copy.soundOn : copy.soundOff}
+            aria-describedby={introSoundBlocked ? "intro-sound-hint" : undefined}
             title={introMuted ? copy.soundOn : copy.soundOff} aria-pressed={!introMuted} onClick={() => {
             const video = introRef.current;
             if (!video) return;
             video.muted = !video.muted;
             setIntroMuted(video.muted);
-            if (video.paused) void video.play().catch(() => {});
-          }} className="flex h-11 w-11 items-center justify-center border-0 bg-transparent text-ivoire transition-colors hover:text-orpale focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or">
+            if (!video.muted) {
+              void video.play().then(() => setIntroSoundBlocked(false)).catch(() => {
+                video.muted = true;
+                setIntroMuted(true);
+              });
+            } else setIntroSoundBlocked(false);
+          }} className={`${styles.soundButton} ${introSoundBlocked ? styles.pulse : ""} flex h-11 w-11 shrink-0 items-center justify-center text-ivoire focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or`}>
             <SoundIcon muted={introMuted} />
           </button>
+          {introSoundBlocked && <p id="intro-sound-hint" role="status" className={styles.hint}>{copy.enableSoundHint}</p>}
           <button type="button" onClick={finishIntro} className="min-h-11 border-0 bg-transparent px-5 py-2 text-sm text-ivoire transition-colors hover:text-orpale focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or">{copy.skipIntro}</button>
         </div>
       </dialog>

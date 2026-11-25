@@ -4,7 +4,7 @@ import OffreJunior from "@/components/sections/OffreJunior";
 import CeQueVousRecevez from "@/components/sections/CeQueVousRecevez";
 import OffresComparatif from "@/components/sections/OffresComparatif";
 import { getDictionary, type Locale } from "../../dictionaries";
-import { baseOpenGraph, pageAlternates } from "@/lib/seo";
+import { baseOpenGraph, baseTwitter, pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -20,7 +20,7 @@ export async function generateMetadata({
     description,
     alternates: pageAlternates(lang, "/offres"),
     openGraph: { ...baseOpenGraph(lang, dict.seo.siteName), title, description, url: `/${lang}/offres` },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { ...baseTwitter(lang), title, description },
   };
 }
 

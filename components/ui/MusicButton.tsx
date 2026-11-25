@@ -7,7 +7,7 @@ export function MusicButton({ copy, className = "" }: { copy: Dictionary["media"
   const { playing, toggle } = useAmbientMusic();
   const label = playing ? copy.musicOff : copy.musicOn;
   return (
-    <button type="button" onClick={toggle} aria-label={label} title={label} aria-pressed={playing}
+    <button type="button" data-music-toggle onClick={toggle} aria-label={label} title={label} aria-pressed={playing}
       className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-nuit/70 text-ivoire transition-colors hover:bg-nuit/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-or ${className}`}>
       <SoundIcon muted={!playing} />
     </button>

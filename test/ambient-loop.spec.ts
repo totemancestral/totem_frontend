@@ -4,7 +4,7 @@ import { AmbientLoop } from "@/lib/ambient-loop";
 function fixture() {
   const params: { value: number; cancelScheduledValues: ReturnType<typeof vi.fn>; setValueAtTime: ReturnType<typeof vi.fn>; linearRampToValueAtTime: ReturnType<typeof vi.fn>; setTargetAtTime: ReturnType<typeof vi.fn> }[] = [];
   const context = {
-    currentTime: 100, destination: {}, resume: vi.fn().mockResolvedValue(undefined), close: vi.fn().mockResolvedValue(undefined),
+    state: "running", currentTime: 100, destination: {}, resume: vi.fn().mockResolvedValue(undefined), close: vi.fn().mockResolvedValue(undefined),
     createMediaElementSource: vi.fn(() => ({ connect: vi.fn(), disconnect: vi.fn() })),
     createGain: vi.fn(() => {
       const gain = { value: 0, cancelScheduledValues: vi.fn(), setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn(), setTargetAtTime: vi.fn() };
@@ -23,6 +23,36 @@ function fixture() {
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe("ambient music overlap", () => {
+  it("retries from a gesture even when the initial context resume is still pending", async () => {
+    vi.useFakeTimers();
+    const { loop, context, tracks, playing } = fixture();
+    context.state = "suspended";
+    let release!: () => void;
+    context.resume.mockImplementationOnce(() => new Promise<void>(resolve => { release = resolve; }));
+    const initial = loop.play();
+    expect(loop.paused).toBe(true);
+    expect(tracks[0].play).toHaveBeenCalledOnce();
+    context.state = "running";
+    await loop.play();
+    release();
+    await initial;
+    expect(playing.mock.calls.filter(([value]) => value === true)).toHaveLength(1);
+    expect(tracks[0].play).toHaveBeenCalledTimes(2);
+    loop.dispose();
+  });
+
+  it("can retry a rejected autoplay attempt without recreating audio sources", async () => {
+    vi.useFakeTimers();
+    const { loop, context, tracks } = fixture();
+    tracks[0].play.mockRejectedValueOnce(new DOMException("Blocked", "NotAllowedError"));
+    await expect(loop.play()).rejects.toMatchObject({ name: "NotAllowedError" });
+    expect(loop.paused).toBe(true);
+    await loop.play();
+    expect(loop.paused).toBe(false);
+    expect(context.createMediaElementSource).toHaveBeenCalledTimes(2);
+    loop.dispose();
+  });
+
   it("starts the incoming track before the end and schedules complementary fades", async () => {
     vi.useFakeTimers();
     const { loop, tracks, params } = fixture();

@@ -8,6 +8,7 @@ import { Logo } from "@/components/ui/Logo";
 import { Brand } from "@/components/ui/Brand";
 import { AudioSeekBar } from "@/components/ui/AudioSeekBar";
 import { ShareTotem } from "@/components/ui/ShareTotem";
+import { DownloadTotem } from "@/components/ui/DownloadTotem";
 import { AdultIdentityFields } from "@/components/ui/AdultIdentityFields";
 import type { AdultIdentityData } from "@/lib/adult-identity";
 import { parchmentParagraphs } from "@/lib/parchment-text";
@@ -408,6 +409,7 @@ export default function Oeuvre({ dict, lang }: { dict: Dictionary["oeuvre"]; lan
             )}
 
             <div className="mt-7 flex flex-wrap justify-center gap-3.5">
+              {commandeId && data.image_url && data.nom_totem && <DownloadTotem commandeId={commandeId} lang={lang} />}
               {data.pdf_url && (
                 <a
                   href={data.pdf_url}

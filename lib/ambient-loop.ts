@@ -22,7 +22,7 @@ export class AmbientLoop {
   }
 
   owns(media: HTMLMediaElement) { return this.tracks.includes(media as HTMLAudioElement); }
-  get paused() { return !this.enabled; }
+  get paused() { return !this.enabled || this.context?.state === "suspended"; }
 
   setVolume(volume: number, durationMs = 150) {
     if (volume === this.volume) return;
@@ -61,9 +61,9 @@ export class AmbientLoop {
     }
     this.enabled = true;
     try {
-      await this.context.resume();
-      if (generation !== this.generation) return;
-      await this.tracks[this.active].play();
+      // Invoke both APIs inside the gesture. A suspended context's resume promise
+      // may stay pending until another gesture; that must not prevent a retry.
+      await Promise.all([this.context.resume(), this.tracks[this.active].play()]);
       if (generation !== this.generation) { if (!this.enabled) this.tracks.forEach(track => track.pause()); return; }
       this.onPlaying(true);
       if (!this.timer) this.timer = setInterval(() => { void this.tick(); }, 100);

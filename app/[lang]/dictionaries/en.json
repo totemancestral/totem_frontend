@@ -7,6 +7,7 @@
     "skipIntro": "Skip",
     "soundOn": "Enable sound",
     "soundOff": "Mute sound",
+    "enableSoundHint": "Turn on sound to enjoy the experience",
     "pauseVideo": "Pause",
     "playVideo": "Play video"
   },
@@ -484,6 +485,10 @@
     "audioPlayAction": "Play the Ancestor’s Voice",
     "audioPauseAction": "Pause the Ancestor’s Voice",
     "wordMorePlaceholder": "One more word? (optional)",
+    "personalizationTitle": "Your answer, in your own words",
+    "personalizationOptional": "Optional",
+    "personalizationDescription": "Add a nuance or tell us what feels true to you. Your words will enrich your creation.",
+    "personalizationHelp": "Your text will be sent along with your answer when you continue.",
     "introTitle": "The griot speaks.",
     "introParagraph1": "There are no right or wrong answers here. There is your truth, and the truth you allow yourself to see.",
     "introParagraph2": "Answer with what you feel. Not with what you think you should say.",

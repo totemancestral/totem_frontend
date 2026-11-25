@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getServerEnv } from "@/lib/env";
+import { siteUrl } from "@/lib/seo";
 
 // Tout ce qui exige une session (parcours d'achat, espace personnel, admin)
 // n'a aucune valeur pour un moteur de recherche et ne doit jamais apparaître
@@ -28,7 +28,6 @@ const PRIVATE_PATHS = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = (getServerEnv().NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
 
   return {
     rules: {
@@ -36,6 +35,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: PRIVATE_PATHS,
     },
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: `${siteUrl()}/sitemap.xml`,
   };
 }

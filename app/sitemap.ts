@@ -1,23 +1,22 @@
 import type { MetadataRoute } from "next";
-import { getServerEnv } from "@/lib/env";
+import { siteUrl } from "@/lib/seo";
 
 // Seules les pages marketing publiques (sans authentification, sans contenu
 // personnel) ont leur place dans un sitemap.
 const PUBLIC_PATHS = ["", "/offres", "/la-maison", "/faq", "/contact", "/cgv", "/confidentialite", "/mentions"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = (getServerEnv().NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+  const base = siteUrl();
 
-  return PUBLIC_PATHS.map((path) => ({
-    url: `${siteUrl}/fr${path}`,
-    lastModified: new Date(),
-    changeFrequency: path === "" ? "weekly" : "monthly",
+  return PUBLIC_PATHS.flatMap((path) => (["fr", "en"] as const).map(lang => ({
+    url: `${base}/${lang}${path}`,
+    changeFrequency: path === "" ? "weekly" as const : "monthly" as const,
     priority: path === "" ? 1 : 0.6,
     alternates: {
       languages: {
-        fr: `${siteUrl}/fr${path}`,
-        en: `${siteUrl}/en${path}`,
+        fr: `${base}/fr${path}`,
+        en: `${base}/en${path}`,
       },
     },
-  }));
+  })));
 }

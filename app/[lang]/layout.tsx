@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { getDictionary, hasLocale, locales } from "./dictionaries";
-import { getServerEnv } from "@/lib/env";
+import { siteUrl, baseOpenGraph, baseTwitter } from "@/lib/seo";
 import "../globals.css";
 import "../patterns.css";
 import "../typography.css";
@@ -29,26 +29,22 @@ export async function generateMetadata({
   const { lang } = await params;
   const locale = hasLocale(lang) ? lang : "fr";
   const dict = await getDictionary(locale);
-  const siteUrl = (getServerEnv().NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
-  const ogLocale = locale === "en" ? "en_US" : "fr_FR";
 
   return {
-    metadataBase: new URL(siteUrl),
+    metadataBase: new URL(siteUrl()),
     title: {
       default: dict.seo.defaultTitle,
       template: `%s | ${dict.seo.siteName}`,
     },
     description: dict.seo.defaultDescription,
     openGraph: {
-      type: "website",
-      siteName: dict.seo.siteName,
+      ...baseOpenGraph(locale, dict.seo.siteName),
       title: dict.seo.defaultTitle,
       description: dict.seo.ogDescription,
-      locale: ogLocale,
       url: `/${locale}`,
     },
     twitter: {
-      card: "summary_large_image",
+      ...baseTwitter(locale),
       title: dict.seo.defaultTitle,
       description: dict.seo.ogDescription,
     },

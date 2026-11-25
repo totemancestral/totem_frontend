@@ -7,6 +7,7 @@
     "skipIntro": "Passer",
     "soundOn": "Activer le son",
     "soundOff": "Couper le son",
+    "enableSoundHint": "Activez le son pour vivre l’expérience",
     "pauseVideo": "Mettre en pause",
     "playVideo": "Lire la vidéo"
   },
@@ -484,6 +485,10 @@
     "audioPlayAction": "Écouter la voix de l’ancêtre",
     "audioPauseAction": "Mettre la voix de l’ancêtre en pause",
     "wordMorePlaceholder": "Un mot de plus ? (optionnel)",
+    "personalizationTitle": "Votre réponse, avec vos mots",
+    "personalizationOptional": "Facultatif",
+    "personalizationDescription": "Ajoutez une nuance ou racontez ce qui vous ressemble. Vos mots enrichiront votre création.",
+    "personalizationHelp": "Votre texte sera envoyé avec votre réponse en continuant.",
     "introTitle": "Le griot parle.",
     "introParagraph1": "Il n'y a pas de bonnes ou de mauvaises réponses ici. Il y a ta vérité, et celle que tu t'autorises à voir.",
     "introParagraph2": "Réponds avec ce que tu ressens. Pas avec ce que tu crois devoir répondre.",

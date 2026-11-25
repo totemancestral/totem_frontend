@@ -3,6 +3,7 @@ import type { CommandeRow } from "@/lib/hooks/useCommandes";
 import { offreLabel, type OffreType } from "@/lib/offers";
 import type { Locale } from "@/app/[lang]/dictionaries";
 import styles from "./Account.module.css";
+import { DownloadTotem } from "./DownloadTotem";
 
 export function AccountWorkCard({ commande, lang, labels, headingLevel = 2 }: {
   commande: CommandeRow; lang: Locale; headingLevel?: 2 | 3;
@@ -28,6 +29,7 @@ export function AccountWorkCard({ commande, lang, labels, headingLevel = 2 }: {
         {work.audio_url && !["origine", "essentiel", "junior"].includes(commande.offre) && <a href={work.audio_url} target="_blank" rel="noopener noreferrer" className={styles.tag}>{labels.audioLabel}</a>}
         {work.certificate_url && <a href={work.certificate_url} target="_blank" rel="noopener noreferrer" className={styles.tag}>{labels.certificateLabel}</a>}
       </div>
+      {work.image_url && work.nom_totem && <DownloadTotem commandeId={commande.id} lang={lang} className={`${styles.action} ${styles.outline}`} />}
       <Link href={oeuvreHref} className={styles.action}>{labels.openButton}<span aria-hidden="true" className={styles.arrow}>→</span></Link>
     </div>
   </article>;
