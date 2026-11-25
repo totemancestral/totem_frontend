@@ -29,6 +29,7 @@ type PasswordFieldProps = {
   minLength?: number;
   maxLength?: number;
   required?: boolean;
+  requiredIndicator?: boolean;
   showRequirements?: boolean;
   className?: string;
   invalid?: boolean;
@@ -50,6 +51,7 @@ export function PasswordField({
   minLength,
   maxLength,
   required,
+  requiredIndicator = false,
   showRequirements = false,
   className = "",
   invalid,
@@ -64,7 +66,7 @@ export function PasswordField({
 
   return (
     <div className="flex flex-col gap-2">
-      {label && <label htmlFor={inputId} className="text-xs font-medium uppercase tracking-wide text-gris">{label}</label>}
+      {label && <label htmlFor={inputId} className="text-xs font-medium uppercase tracking-wide text-gris">{label}{requiredIndicator && <span aria-hidden="true" className="text-or"> *</span>}</label>}
       <div className="relative">
         <input
           id={inputId}

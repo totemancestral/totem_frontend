@@ -24,7 +24,7 @@
     "ogDescription": "Qui étiez-vous, avant d'être qui vous êtes ? Une œuvre unique, tissée dans la langue des origines, nourrie des cosmogonies africaines, qui révèle l'ancêtre qui sommeille en vous.",
     "offres": {
       "title": "Nos offres",
-      "description": "Origine à 29 € ou Révélation à 49 € avec la voix de l’ancêtre : découvrez les deux manières de concevoir votre œuvre Totem Ancestral."
+      "description": "Origine à 29,72 € ou Révélation à 38,40 € avec la voix de l’ancêtre : découvrez les deux manières de concevoir votre œuvre Totem Ancestral."
     },
     "laMaison": {
       "title": "La Maison",
@@ -146,7 +146,7 @@
         "tag": "Porte d'entrée",
         "title": "Origine",
         "lead": "La création dans sa plénitude : l’histoire ancestrale et le totem.",
-        "price": "29 €",
+        "price": "29,72 €",
         "priceCaption": "",
         "features": [
           {
@@ -174,7 +174,7 @@
         "tag": "Le plus choisi",
         "title": "Révélation",
         "lead": "La création dans sa plénitude : l’histoire ancestrale, le totem et la voix de l’ancêtre.",
-        "price": "49 €",
+        "price": "38,40 €",
         "priceCaption": "",
         "features": [
           {
@@ -212,12 +212,12 @@
     "columns": [
       {
         "name": "Origine",
-        "price": "29 €",
+        "price": "29,72 €",
         "featured": false
       },
       {
         "name": "Révélation",
-        "price": "49 €",
+        "price": "38,40 €",
         "featured": true
       }
     ],
@@ -296,6 +296,9 @@
     ]
   },
   "inscription": {
+    "requiredFieldsHint": "Les champs marqués d’un astérisque (*) sont obligatoires.",
+    "requiredFieldError": "Veuillez renseigner le champ « {field} ».",
+    "invalidEmailError": "Veuillez saisir une adresse e-mail valide.",
     "emailExists": "Un compte existe déjà avec cet email. Connecte-toi ou réinitialise ton mot de passe.",
     "existingSignIn": "Se connecter",
     "existingResetPassword": "Mot de passe oublié",
@@ -449,7 +452,7 @@
     "adulte": {
       "offerName": "Offre Révélation",
       "offerDesc": "La création dans sa plénitude : l’histoire ancestrale, le totem et la voix de l’ancêtre.",
-      "price": "49 €",
+      "price": "38,40 €",
       "priceCaption": "",
       "consent1Before": "J'ai lu et j'accepte les ",
       "consent1Middle": " et la ",

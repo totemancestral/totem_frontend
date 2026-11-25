@@ -11,7 +11,7 @@ vi.mock("../lib/env", () => ({ getServerEnv: () => ({ NEXT_PUBLIC_SITE_URL: "htt
 
 const request = (locale = "fr") => new Request("http://localhost/api/auth/signup", {
   method: "POST", headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email: "  Test@Example.com  ", password: "StrongPassword1", prenom: "Nadia", nom: "Diop", parcours: "adulte", majorite_confirmee: true, date_naissance: "05-21", locale }),
+  body: JSON.stringify({ email: "  Test@Example.com  ", password: "StrongPassword1", prenom: "Nadia", nom: "Diop", sexe: "femme", parcours: "adulte", majorite_confirmee: true, date_naissance: "05-21", locale }),
 });
 
 beforeEach(() => {
@@ -22,6 +22,24 @@ beforeEach(() => {
 });
 
 describe("existing account at signup", () => {
+  it.each(["email", "password", "prenom", "nom", "sexe", "majorite_confirmee", "date_naissance"])("rejects missing required adult field: %s", async field => {
+    const body = await request().json();
+    delete body[field];
+    const response = await POST(new Request("http://localhost/api/auth/signup", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    }));
+    expect(response.status).toBe(422);
+    expect(mocks.signUp).not.toHaveBeenCalled();
+  });
+  it.each(["email", "password", "prenom", "sexe", "tranche_age"])("rejects missing required Junior field: %s", async field => {
+    const body = { ...await request().json(), parcours: "junior", tranche_age: "11-14" };
+    delete body[field];
+    const response = await POST(new Request("http://localhost/api/auth/signup", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    }));
+    expect(response.status).toBe(422);
+    expect(mocks.signUp).not.toHaveBeenCalled();
+  });
   it("persists the adult surname and given name in signup metadata", async () => {
     const response = await POST(request());
     expect(response.status).toBe(200);

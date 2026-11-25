@@ -20,7 +20,7 @@ const signupSchema = z.object({
     }),
   prenom: z.string().trim().min(1).max(80),
   nom: z.string().trim().max(80).optional(),
-  sexe: z.enum(["homme", "femme"]).optional(),
+  sexe: z.enum(["homme", "femme"]),
   parcours: z.enum(["adulte", "junior"]),
   majorite_confirmee: z.boolean().optional(),
   tranche_age: z.enum(["moins-11", "11-14", "15-17"]).optional(),

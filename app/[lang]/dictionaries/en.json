@@ -24,7 +24,7 @@
     "ogDescription": "Who were you, before being who you are? A unique work, woven in the language of origins, nourished by African cosmogonies, that reveals the ancestor asleep within you.",
     "offres": {
       "title": "Our Offerings",
-      "description": "Origin at €29 or Revelation at €49 with the Ancestor’s Voice: discover two ways to create your Totem Ancestral artwork."
+      "description": "Origin at €29.72 or Revelation at €38.40 with the Ancestor’s Voice: discover two ways to create your Totem Ancestral artwork."
     },
     "laMaison": {
       "title": "The House",
@@ -146,7 +146,7 @@
         "tag": "Entry point",
         "title": "Origin",
         "lead": "The complete creation: the Ancestral Story and the Totem.",
-        "price": "€29",
+        "price": "€29.72",
         "priceCaption": "",
         "features": [
           {
@@ -174,7 +174,7 @@
         "tag": "Most chosen",
         "title": "Revelation",
         "lead": "The complete creation: the Ancestral Story, the Totem and the Ancestor’s Voice.",
-        "price": "€49",
+        "price": "€38.40",
         "priceCaption": "",
         "features": [
           {
@@ -212,12 +212,12 @@
     "columns": [
       {
         "name": "Origin",
-        "price": "€29",
+        "price": "€29.72",
         "featured": false
       },
       {
         "name": "Revelation",
-        "price": "€49",
+        "price": "€38.40",
         "featured": true
       }
     ],
@@ -296,6 +296,9 @@
     ]
   },
   "inscription": {
+    "requiredFieldsHint": "Fields marked with an asterisk (*) are required.",
+    "requiredFieldError": "Please complete the “{field}” field.",
+    "invalidEmailError": "Please enter a valid email address.",
     "emailExists": "An account already exists with this email. Sign in or reset your password.",
     "existingSignIn": "Sign in",
     "existingResetPassword": "Forgot password",
@@ -449,7 +452,7 @@
     "adulte": {
       "offerName": "Revelation Offer",
       "offerDesc": "The Ancestral Story, the Totem and the Ancestor’s Voice, brought together in your creation.",
-      "price": "€49",
+        "price": "€38.40",
       "priceCaption": "",
       "consent1Before": "I have read and accept the ",
       "consent1Middle": " and the ",

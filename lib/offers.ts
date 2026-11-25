@@ -7,7 +7,7 @@ import { interfaceCopy } from "@/lib/interface-copy";
  *  - Catalogue actif : origine | ancestral | junior
  *  - Colonne `commandes.offre` (ENUM `offre_type`) : essentiel | signature | heritage
  *
- * Grille : Origine 29 €, Révélation/Ancestral 49 €, Junior 9,99 €.
+ * Grille : Origine 29,72 €, Révélation/Ancestral 38,40 €, Junior 9,99 €.
  * Doit rester identique à `totem_backend/src/totem/prices.ts`.
  */
 
@@ -32,12 +32,12 @@ type AdultOfferConfig = {
 
 export const ADULT_OFFERS: Record<AdultOffer, AdultOfferConfig> = {
   origine: {
-    amountCents: 2900,
+    amountCents: 2972,
     commandeOffre: "essentiel",
     label: "TOTEM ANCESTRAL - Origine",
   },
   ancestral: {
-    amountCents: 4900,
+    amountCents: 3840,
     commandeOffre: "signature",
     label: "TOTEM ANCESTRAL - Revelation",
   },
